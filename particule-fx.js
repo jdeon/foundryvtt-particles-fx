@@ -1,41 +1,17 @@
+let spawnedEnable = true;
+
 /* ------------------------------------ */
 /* When ready							*/
 /* ------------------------------------ */
 Hooks.once('ready', function () {
     console.log('particule-fx | ready to particule-fx'); 
-    debugger;
-    //this.app;
-    /*let shadow = new PIXI.Container();
-        canvas.tiles.addChild(shadow);*/
 
-        const trailTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
-        const historyX = [];
-        const historyY = [];
-        // historySize determines how long the trail will be.
-        const historySize = 20;
-        // ropeSize determines how smooth the trail will be.
-        const ropeSize = 100;
-        const points = [];
-        
-        // Create history array.
-        for (let i = 0; i < historySize; i++) {
-            historyX.push(0);
-            historyY.push(0);
-        }
-        // Create rope points.
-        for (let i = 0; i < ropeSize; i++) {
-            points.push(new PIXI.Point(0, 0));
-        }
-        
-        // Create the rope
-        const rope = new PIXI.SimpleRope(trailTexture, points);
-        
-        // Set the blendmode
-        rope.blendmode = PIXI.BLEND_MODES.ADD;
-        
-        canvas.app.stage.addChild(rope);
-        
-        console.log('HELLO!');
+        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+        const particuleLifetime = 2;
+        const particuleFrequence = .5;
+        const particuleSize = 100;
+
+        const particules = [];
         
         let mouseposition = null;
         canvas.app.stage.interactive = true;
@@ -48,27 +24,68 @@ Hooks.once('ready', function () {
         
         // Listen for animate update
         canvas.app.ticker.add(() => {
-            if (!mouseposition) return;
-        
-            // Update the mouse values to history
-            historyX.pop();
-            historyX.unshift(mouseposition.x);
-            historyY.pop();
-            historyY.unshift(mouseposition.y);
-            // Update the points to correspond with history.
-            for (let i = 0; i < ropeSize; i++) {
-                const p = points[i];
-        
-                // Smooth the curve with cubic interpolation to prevent sharp edges.
-                const ix = cubicInterpolation(historyX, i / ropeSize * historySize);
-                const iy = cubicInterpolation(historyY, i / ropeSize * historySize);
-        
-                p.x = ix;
-                p.y = iy;
+            const indexParticuleToDelete = []
+
+            for (let i = 0; i < particules.length; i++) {
+                const particule = particules[i]
+                //particules.sprite.alpha = (particuleLifetime - particules.lifetime) / particuleLifetime;
+                particule.sprite.width = particuleSize * (particuleLifetime - particule.lifetime) / particuleLifetime;;
+                particule.sprite.height = particuleSize * (particuleLifetime - particule.lifetime) / particuleLifetime;;
+                particule.lifetime += .1;
+
+                /*if((particuleLifetime - particule.lifetime) < 0){
+                    particule.sprite.destroy()
+                    indexParticuleToDelete.push(i)
+                }*/
+            }
+
+            for (let i = 0; i < indexParticuleToDelete.length; i++) {
+                particules.splice(indexParticuleToDelete[i] - i, 1)
+            }
+
+            if (mouseposition && spawnedEnable){
+                let sprite = new PIXI.Sprite(particuleTexture)
+                sprite.x = mouseposition.x;
+                sprite.y = mouseposition.y;
+                sprite.width = particuleSize;
+                sprite.height = particuleSize;
+
+                canvas.app.stage.addChild(sprite);
+                
+                particules.push({sprite:sprite, lifetime : particuleLifetime})
+
+                spawnedEnable = false;
+
+                setTimeout(enableSpawning, particuleFrequence)
             }
         });
     
 });
+
+function enableSpawning() {
+    spawnedEnable = true;
+}
+  
+
+/*
+    for (i = 0; i < 26; i++) {
+        const texture = PIXI.Texture.from(`Explosion_Sequence_A ${i + 1}.png`);
+        explosionTextures.push(texture);
+    }
+
+    for (i = 0; i < 50; i++) {
+        // create an explosion AnimatedSprite
+        const explosion = new PIXI.AnimatedSprite(explosionTextures);
+
+        explosion.x = Math.random() * app.screen.width;
+        explosion.y = Math.random() * app.screen.height;
+        explosion.anchor.set(0.5);
+        explosion.rotation = Math.random() * Math.PI;
+        explosion.scale.set(0.75 + Math.random() * 0.5);
+        explosion.gotoAndPlay(Math.random() * 26 | 0);
+        app.stage.addChild(explosion);
+    }
+    */
 
 /*
 const app = new PIXI.Application({ background: '#1099bb' });
