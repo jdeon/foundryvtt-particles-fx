@@ -1,1 +1,3 @@
-# foundryvtt-particule-fx
+# foundryVTT-particule FX
+
+Generate particule by script
