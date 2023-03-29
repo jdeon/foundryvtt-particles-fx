@@ -10,8 +10,9 @@ export class Particule {
 
 export class ParticuleTemplate { 
 
-    constructor(positionSpawning, particuleSize, particuleLifetime, particuleTexture){
+    constructor(positionSpawning, velocity, particuleSize, particuleLifetime, particuleTexture){
         this.positionSpawning = positionSpawning;
+        this.velocity = velocity;
         this.particuleSize = particuleSize;
         this.particuleLifetime = particuleLifetime;
         this.particuleTexture = particuleTexture;
