@@ -1,10 +1,15 @@
 import {Particule, ParticuleTemplate} from "./model.js"
+import {Vector3} from "./utils.js"
 
 export default class ParticuleEmitter { 
     
     static emitParticules(maxParticules, positionSpawning, particuleVelocity, particuleSize, particuleLifetime, particuleFrequence){
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
-        const particuleTemplate = new ParticuleTemplate(positionSpawning, particuleVelocity, particuleSize, particuleLifetime, particuleTexture);
+
+        const position = new Vector3(positionSpawning.x, positionSpawning.y, 0)
+        const velocity = new Vector3(particuleVelocity.x, particuleVelocity.y, 0)
+
+        const particuleTemplate = new ParticuleTemplate(position, velocity, new Vector3(0, -200, 0), particuleSize, -50, particuleLifetime, particuleTexture, new Color(250, 0, 0));
         const particuleEmitter = new ParticuleEmitter(particuleTemplate, particuleFrequence, maxParticules);
 
         // Listen for animate update
@@ -26,13 +31,15 @@ export default class ParticuleEmitter {
             const dt = canvas.app.ticker.elapsedMS;//85 in average
 
             //Particule move
-            particule.sprite.x += this.particuleTemplate.velocity.x * dt /1000;
-            particule.sprite.y += this.particuleTemplate.velocity.y * dt /1000;
+            const updatedVelocity = this.particuleTemplate.velocityStart.minus(this.particuleTemplate.velocityEnd).multiply(particule.remainingTime).divide(this.particuleTemplate.particuleLifetime).add(this.particuleTemplate.velocityEnd)
+            particule.sprite.x += updatedVelocity.x * dt /1000;
+            particule.sprite.y += updatedVelocity.y * dt /1000;
 
             //Particule fade during lifetime
             particule.sprite.alpha = particule.remainingTime / this.particuleLifetime;
-            particule.sprite.width = this.particuleTemplate.particuleSize * particule.remainingTime / this.particuleTemplate.particuleLifetime;
-            particule.sprite.height = this.particuleTemplate.particuleSize * particule.remainingTime / this.particuleTemplate.particuleLifetime;
+            const updatedSize = ((this.particuleTemplate.sizeStart - this.particuleTemplate.sizeEnd) * particule.remainingTime / this.particuleTemplate.particuleLifetime) + this.particuleTemplate.sizeEnd;
+            particule.sprite.width = updatedSize
+            particule.sprite.height = updatedSize
 
             particule.remainingTime -= dt;
 
@@ -49,8 +56,9 @@ export default class ParticuleEmitter {
             sprite.x = this.particuleTemplate.positionSpawning.x;
             sprite.y = this.particuleTemplate.positionSpawning.y;
             sprite.anchor.set(0.5);
-            sprite.width = this.particuleTemplate.particuleSize;
-            sprite.height = this.particuleTemplate.particuleSize;
+            sprite.width = this.particuleTemplate.sizeStart;
+            sprite.height = this.particuleTemplate.sizeStart;
+            sprite.tint = this.particuleTemplate.color;
 
             canvas.app.stage.addChild(sprite);
             
