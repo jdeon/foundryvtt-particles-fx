@@ -28,6 +28,6 @@ for (let target of canvas.tokens.controlled) {
   debugger
 //const position = {x:target.position.x, y:target.position.y }
 const position = {x:target.x + target.w /2, y:target.position.y + target.h /2}
-  particuleEmitter.emitParticules(position, 100, 2000, 1000) 
+  particuleEmitter.emitParticules(2, position, {x:200,y:200},100, 2000, 500) 
 }
  */
