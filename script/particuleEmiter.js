@@ -9,7 +9,7 @@ export default class ParticuleEmitter {
         const position = new Vector3(positionSpawning.x, positionSpawning.y, 0)
         const velocity = new Vector3(particuleVelocity.x, particuleVelocity.y, 0)
 
-        const particuleTemplate = new ParticuleTemplate(position, velocity, new Vector3(0, -200, 0), particuleSize, -50, particuleLifetime, particuleTexture);
+        const particuleTemplate = new ParticuleTemplate(position, velocity, new Vector3(0, -200, 0), particuleSize, -50, particuleLifetime, particuleTexture, new Color(250, 0, 0));
         const particuleEmitter = new ParticuleEmitter(particuleTemplate, particuleFrequence, maxParticules);
 
         // Listen for animate update
@@ -58,6 +58,7 @@ export default class ParticuleEmitter {
             sprite.anchor.set(0.5);
             sprite.width = this.particuleTemplate.sizeStart;
             sprite.height = this.particuleTemplate.sizeStart;
+            sprite.tint = this.particuleTemplate.color;
 
             canvas.app.stage.addChild(sprite);
             
