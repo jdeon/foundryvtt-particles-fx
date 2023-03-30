@@ -1,5 +1,5 @@
 import {Particule, ParticuleTemplate} from "./model.js"
-import {Vector3} from "./utils.js"
+import {Vector3, Utils} from "./utils.js"
 
 export default class ParticuleEmitter { 
     
@@ -8,11 +8,11 @@ export default class ParticuleEmitter {
 
         const position = new Vector3(positionSpawning.x, positionSpawning.y, 0)
 
-        const particuleTemplate = new ParticuleTemplate(position, particuleVelocity, 50, 0, 90, particuleSize, -50, particuleLifetime, particuleTexture, new Color(250, 0, 0));
+        const particuleTemplate = new ParticuleTemplate(position, particuleVelocity, 50, 0, [-45,45], [10,particuleSize], [15,10], [1000,particuleLifetime], particuleTexture, new Color(250, 0, 0));
         const particuleEmitter = new ParticuleEmitter(particuleTemplate, particuleFrequence, maxParticules);
 
         // Listen for animate update
-        canvas.app.ticker.add(particuleEmitter.manageSpawning.bind(particuleEmitter))
+        canvas.app.ticker.add(particuleEmitter.manageParticules.bind(particuleEmitter))
     }
 
 
@@ -24,21 +24,21 @@ export default class ParticuleEmitter {
         this.maxParticules = maxParticules
     }
 
-    manageSpawning(){
+    manageParticules(){
         for (let i = 0; i < this.particules.length; i++) {
             const particule = this.particules[i]
             const dt = canvas.app.ticker.elapsedMS;//85 in average
 
             //Particule move
-            const updatedVelocity = ((this.particuleTemplate.velocityStart - this.particuleTemplate.velocityEnd) * particule.remainingTime / this.particuleTemplate.particuleLifetime) + this.particuleTemplate.velocityEnd;
-            const angleRadiant = (Math.PI / 180) * ((this.particuleTemplate.angleStart - this.particuleTemplate.angleEnd) * particule.remainingTime / this.particuleTemplate.particuleLifetime) + this.particuleTemplate.angleEnd;
+            const updatedVelocity = ((particule.velocityStart - particule.velocityEnd) * particule.remainingTime / particule.particuleLifetime) + particule.velocityEnd;
+            const angleRadiant = (Math.PI / 180) * ((particule.angleStart - particule.angleEnd) * particule.remainingTime / particule.particuleLifetime) + particule.angleEnd;
             
             particule.sprite.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
             particule.sprite.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
 
             //Particule fade during lifetime
-            particule.sprite.alpha = particule.remainingTime / this.particuleLifetime;
-            const updatedSize = ((this.particuleTemplate.sizeStart - this.particuleTemplate.sizeEnd) * particule.remainingTime / this.particuleTemplate.particuleLifetime) + this.particuleTemplate.sizeEnd;
+            particule.sprite.alpha = particule.remainingTime / particule.particuleLifetime;
+            const updatedSize = ((particule.sizeStart - particule.sizeEnd) * particule.remainingTime / particule.particuleLifetime) + particule.sizeEnd;
             particule.sprite.width = updatedSize
             particule.sprite.height = updatedSize
 
@@ -53,23 +53,39 @@ export default class ParticuleEmitter {
         }
 
         if (this.spawnedEnable && this.particules.length < this.maxParticules){
-            let sprite = new PIXI.Sprite(this.particuleTemplate.particuleTexture)
-            sprite.x = this.particuleTemplate.positionSpawning.x;
-            sprite.y = this.particuleTemplate.positionSpawning.y;
-            sprite.anchor.set(0.5);
-            sprite.width = this.particuleTemplate.sizeStart;
-            sprite.height = this.particuleTemplate.sizeStart;
-            sprite.tint = this.particuleTemplate.color;
+            const particule = this._generateParticules(this.particuleTemplate);
 
-            canvas.app.stage.addChild(sprite);
-            
-            
-            this.particules.push(new Particule(sprite, this.particuleTemplate.particuleLifetime))
+            canvas.app.stage.addChild(particule.sprite);
+            this.particules.push(particule)
 
             this.spawnedEnable = false;
 
             setTimeout(this.enableSpawning.bind(this), this.particuleFrequence)
         }
+    }
+
+    _generateParticules(particuleTemplate){
+        let sprite = new PIXI.Sprite(particuleTemplate.particuleTexture)
+        sprite.x = Utils.getRandomValueFrom(particuleTemplate.positionSpawning.x);
+        sprite.y = Utils.getRandomValueFrom(particuleTemplate.positionSpawning.y);
+        sprite.anchor.set(0.5);
+
+        let startSize = Utils.getRandomValueFrom(particuleTemplate.sizeStart)
+        sprite.width = startSize;
+        sprite.height = startSize;
+        sprite.tint = particuleTemplate.color;
+
+        //constructor(sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, sizeStart, sizeEnd){
+        return new Particule(
+            sprite,
+            Utils.getRandomValueFrom(particuleTemplate.particuleLifetime),
+            Utils.getRandomValueFrom(particuleTemplate.velocityStart),
+            Utils.getRandomValueFrom(particuleTemplate.velocityEnd),
+            Utils.getRandomValueFrom(particuleTemplate.angleStart),
+            Utils.getRandomValueFrom(particuleTemplate.angleEnd),
+            Utils.getRandomValueFrom(particuleTemplate.sizeStart),
+            Utils.getRandomValueFrom(particuleTemplate.sizeEnd)
+        )
     }
 
 

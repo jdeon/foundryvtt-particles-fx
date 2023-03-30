@@ -41,5 +41,18 @@ export class Vector3 {
             return new Vector3(x, y, z)
         }
     }
-
 } 
+
+export class Utils {
+
+    static getRandomValueFrom(inValue){
+        if(!isNaN(inValue)){
+            return inValue;
+        } else if (Array.isArray(inValue) && inValue.length > 0 && !isNaN(inValue[0])) {
+            const indexToRetrieve =  Math.floor(Math.random() * inValue.length);
+            return inValue[indexToRetrieve];
+        }
+
+    }
+
+}
