@@ -8,7 +8,7 @@ export default class ParticuleEmitter {
 
         const position = new Vector3(positionSpawning.x, positionSpawning.y, 0)
 
-        const particuleTemplate = new ParticuleTemplate(position, particuleVelocity, 50, 0, [-45,45], [10,particuleSize], [15,10], [1000,particuleLifetime], particuleTexture, new Color(250, 0, 0));
+        const particuleTemplate = new ParticuleTemplate(position, particuleVelocity, 50, 0, ['-45_45'], [10,particuleSize], [15,10], [1000,particuleLifetime], particuleTexture, new Color(250, 0, 0));
         const particuleEmitter = new ParticuleEmitter(particuleTemplate, particuleFrequence, maxParticules);
 
         // Listen for animate update
@@ -31,7 +31,7 @@ export default class ParticuleEmitter {
 
             //Particule move
             const updatedVelocity = ((particule.velocityStart - particule.velocityEnd) * particule.remainingTime / particule.particuleLifetime) + particule.velocityEnd;
-            const angleRadiant = (Math.PI / 180) * ((particule.angleStart - particule.angleEnd) * particule.remainingTime / particule.particuleLifetime) + particule.angleEnd;
+            const angleRadiant = (Math.PI / 180) * (((particule.angleStart - particule.angleEnd) * particule.remainingTime / particule.particuleLifetime) + particule.angleEnd);
             
             particule.sprite.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
             particule.sprite.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;

@@ -48,11 +48,30 @@ export class Utils {
     static getRandomValueFrom(inValue){
         if(!isNaN(inValue)){
             return inValue;
-        } else if (Array.isArray(inValue) && inValue.length > 0 && !isNaN(inValue[0])) {
+        } else if (typeof inValue === 'string') {
+            const valueBoundary = inValue.split('_')
+            if(valueBoundary.length === 1){
+                returnNumber(valueBoundary[0]);
+            } else if (valueBoundary.length === 2){
+                let minValue = Number(valueBoundary[0])
+                let maxValue = Number(valueBoundary[1])
+
+                return minValue + (maxValue - minValue) * Utils.includingRandom() ;
+            }
+
+        } else if (Array.isArray(inValue) && inValue.length > 0) {
             const indexToRetrieve =  Math.floor(Math.random() * inValue.length);
-            return inValue[indexToRetrieve];
+            return Utils.getRandomValueFrom(inValue[indexToRetrieve]);
         }
 
+    }
+
+    static includingRandom(){
+        if(Math.random() == 0){
+            return 1;
+        } else {
+            return Math.random();
+        }
     }
 
 }
