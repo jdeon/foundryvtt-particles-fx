@@ -25,9 +25,10 @@ export default class ParticuleEmitter {
     }
 
     manageParticules(){
+        const dt = canvas.app.ticker.elapsedMS;//85 in average
+
         for (let i = 0; i < this.particules.length; i++) {
             const particule = this.particules[i]
-            const dt = canvas.app.ticker.elapsedMS;//85 in average
 
             //Particule move
             const updatedVelocity = ((particule.velocityStart - particule.velocityEnd) * particule.remainingTime / particule.particuleLifetime) + particule.velocityEnd;
@@ -53,14 +54,19 @@ export default class ParticuleEmitter {
         }
 
         if (this.spawnedEnable && this.particules.length < this.maxParticules){
-            const particule = this._generateParticules(this.particuleTemplate);
+            const numberNewParticules = 1 + Math.floor(dt/this.particuleFrequence)
+            const increaseTime = dt%this.particuleFrequence
 
-            canvas.app.stage.addChild(particule.sprite);
-            this.particules.push(particule)
+            for(let i = 0; i < numberNewParticules; i++){
+                const particule = this._generateParticules(this.particuleTemplate);
 
-            this.spawnedEnable = false;
+                canvas.app.stage.addChild(particule.sprite);
+                this.particules.push(particule)
 
-            setTimeout(this.enableSpawning.bind(this), this.particuleFrequence)
+                this.spawnedEnable = false;
+
+                setTimeout(this.enableSpawning.bind(this), this.particuleFrequence + increaseTime)
+            }
         }
     }
 
