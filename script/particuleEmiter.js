@@ -7,9 +7,8 @@ export default class ParticuleEmitter {
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
         const position = new Vector3(positionSpawning.x, positionSpawning.y, 0)
-        const velocity = new Vector3(particuleVelocity.x, particuleVelocity.y, 0)
 
-        const particuleTemplate = new ParticuleTemplate(position, velocity, new Vector3(0, -200, 0), particuleSize, -50, particuleLifetime, particuleTexture, new Color(250, 0, 0));
+        const particuleTemplate = new ParticuleTemplate(position, particuleVelocity, 50, 0, 90, particuleSize, -50, particuleLifetime, particuleTexture, new Color(250, 0, 0));
         const particuleEmitter = new ParticuleEmitter(particuleTemplate, particuleFrequence, maxParticules);
 
         // Listen for animate update
@@ -31,9 +30,11 @@ export default class ParticuleEmitter {
             const dt = canvas.app.ticker.elapsedMS;//85 in average
 
             //Particule move
-            const updatedVelocity = this.particuleTemplate.velocityStart.minus(this.particuleTemplate.velocityEnd).multiply(particule.remainingTime).divide(this.particuleTemplate.particuleLifetime).add(this.particuleTemplate.velocityEnd)
-            particule.sprite.x += updatedVelocity.x * dt /1000;
-            particule.sprite.y += updatedVelocity.y * dt /1000;
+            const updatedVelocity = ((this.particuleTemplate.velocityStart - this.particuleTemplate.velocityEnd) * particule.remainingTime / this.particuleTemplate.particuleLifetime) + this.particuleTemplate.velocityEnd;
+            const angleRadiant = (Math.PI / 180) * ((this.particuleTemplate.angleStart - this.particuleTemplate.angleEnd) * particule.remainingTime / this.particuleTemplate.particuleLifetime) + this.particuleTemplate.angleEnd;
+            
+            particule.sprite.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
+            particule.sprite.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
 
             //Particule fade during lifetime
             particule.sprite.alpha = particule.remainingTime / this.particuleLifetime;

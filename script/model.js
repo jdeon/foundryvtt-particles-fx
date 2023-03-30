@@ -10,14 +10,16 @@ export class Particule {
 
 export class ParticuleTemplate { 
 
-    constructor(positionSpawning, velocityStart, velocityEnd, sizeStart, sizeEnd, particuleLifetime, particuleTexture, color){
-        this.positionSpawning = positionSpawning;
-        this.velocityStart = velocityStart;
-        this.velocityEnd = velocityEnd;
-        this.sizeStart = sizeStart;
-        this.sizeEnd = sizeEnd;
-        this.particuleLifetime = particuleLifetime;
-        this.particuleTexture = particuleTexture;
-        this.color = color;
+    constructor(positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, sizeStart, sizeEnd, particuleLifetime, particuleTexture, color){
+        this.positionSpawning = positionSpawning;   //Vector 3
+        this.velocityStart = velocityStart;         //Number      
+        this.velocityEnd = velocityEnd;             //Number
+        this.angleStart = angleStart;               //Number      
+        this.angleEnd = angleEnd;                   //Number
+        this.sizeStart = sizeStart;                 //Number
+        this.sizeEnd = sizeEnd;                     //Number
+        this.particuleLifetime = particuleLifetime; //Number
+        this.particuleTexture = particuleTexture;   //PIXI.Texture
+        this.color = color;                         //Color
     }
 }
