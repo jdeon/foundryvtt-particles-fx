@@ -15,5 +15,16 @@
 	],
 	"esmodules": [
 		"./particule-fx.js"
-	]
+	],
+	"packs": [
+		{
+		  "name": "particule-fx-macros",
+		  "label": "Particule FX Macros",
+		  "path": "packs/particule-fx-macros.db",
+		  "type": "Macro"
+		}
+	],
+	"url": "https://github.com/jdeon/foundryvtt-particule-fx",
+	"manifest": "https://github.com/jdeon/foundryvtt-particule-fx/releases/latest/download/module.json",
+	"download": "https://github.com/jdeon/foundryvtt-particule-fx/archive/refs/tags/VERSION_PATHHOLDER.zip"
 }
