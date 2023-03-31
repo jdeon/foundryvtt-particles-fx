@@ -3,13 +3,53 @@ import {Vector3, Utils} from "./utils.js"
 
 export default class ParticuleEmitter { 
     
-    static emitParticules(maxParticules, positionSpawning, particuleVelocity, particuleSize, particuleLifetime, particuleFrequence){
+    static defaultInput = {
+        spawningFrequence: 3, 
+        maxParticules: 100,
+        positionSpawning: {x:0,y:0},
+        particuleVelocityStart: 200,
+        particuleVelocityEnd: 50,
+        particuleAngleStart: '0_360',
+        particuleAngleEnd: undefined,
+        particuleSizeStart: 10,
+        particuleSizeEnd: '10_25',
+        particuleLifetime: [1000,1500],
+        particuleColorStart:new Vector3(250, 250, 50),
+        particuleColorEnd:new Vector3(250, '50_100', 0),
+        alphaStart:1,
+        alphaEnd:0
+    }
+
+    static emitParticules(inputObject){
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
-        const position = new Vector3(positionSpawning.x, positionSpawning.y, 0)
+        const position = new Vector3(
+            inputObject.positionSpawning.x || ParticuleEmitter.defaultInput.positionSpawning.x, 
+            inputObject.positionSpawning.y || ParticuleEmitter.defaultInput.positionSpawning.y, 
+            0
+            )
 
-        const particuleTemplate = new ParticuleTemplate(position, particuleVelocity, 50, 0, ['-45_45'], [10,particuleSize], [15,10], [1000,particuleLifetime], particuleTexture, new Vector3(250, 0, 0), new Vector3(0, [0,250], [0,250]),0.5, 0);
-        const particuleEmitter = new ParticuleEmitter(particuleTemplate, particuleFrequence, maxParticules);
+        const particuleTemplate = new ParticuleTemplate(
+            position, 
+            inputObject.particuleVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityStart, 
+            inputObject.particuleVelocityEnd || ParticuleEmitter.defaultInput.particuleVelocityEnd, 
+            inputObject.particuleAngleStart || ParticuleEmitter.defaultInput.particuleAngleStart, 
+            inputObject.particuleAngleEnd || ParticuleEmitter.defaultInput.particuleAngleEnd, 
+            inputObject.particuleSizeStart || ParticuleEmitter.defaultInput.particuleSizeStart,
+            inputObject.particuleSizeEnd || ParticuleEmitter.defaultInput.particuleSizeEnd, 
+            inputObject.particuleLifetime || ParticuleEmitter.defaultInput.particuleLifetime, 
+            particuleTexture, 
+            inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorStart, 
+            inputObject.particuleColorEnd || ParticuleEmitter.defaultInput.particuleColorEnd,
+            inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaStart, 
+            inputObject.alphaEnd || ParticuleEmitter.defaultInput.alphaEnd
+            );
+
+        const particuleEmitter = new ParticuleEmitter(
+            particuleTemplate, 
+            inputObject.spawningFrequence || ParticuleEmitter.defaultInput.spawningFrequence, 
+            inputObject.maxParticules || ParticuleEmitter.defaultInput.maxParticules
+            );
 
         // Listen for animate update
         canvas.app.ticker.add(particuleEmitter.manageParticules.bind(particuleEmitter))
@@ -33,22 +73,24 @@ export default class ParticuleEmitter {
             let lifetimeProportion = particule.remainingTime / particule.particuleLifetime
 
             //Particule move
-            const updatedVelocity = ((particule.velocityStart - particule.velocityEnd) * lifetimeProportion) + particule.velocityEnd;
-            const angleRadiant = (Math.PI / 180) * (((particule.angleStart - particule.angleEnd) * lifetimeProportion) + particule.angleEnd);
-            
+
+            const updatedVelocity = particule.velocityEnd? ((particule.velocityStart - particule.velocityEnd) * lifetimeProportion) + particule.velocityEnd : particule.velocityStart;
+            let angleRadiant = particule.angleEnd ? (((particule.angleStart - particule.angleEnd) * lifetimeProportion) + particule.angleEnd) : particule.angleStart;
+            angleRadiant *= (Math.PI / 180);
+
             particule.sprite.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
             particule.sprite.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
 
             //Particule change size
-            const updatedSize = ((particule.sizeStart - particule.sizeEnd) * lifetimeProportion) + particule.sizeEnd;
+            const updatedSize = particule.sizeEnd ? ((particule.sizeStart - particule.sizeEnd) * lifetimeProportion) + particule.sizeEnd : particule.sizeStart;
             particule.sprite.width = updatedSize
             particule.sprite.height = updatedSize
 
             //Particule change color
-            particule.sprite.alpha = ((particule.alphaStart - particule.alphaEnd) * lifetimeProportion) + particule.alphaEnd;
+            particule.sprite.alpha = particule.alphaEnd ? ((particule.alphaStart - particule.alphaEnd) * lifetimeProportion) + particule.alphaEnd : particule.alphaStart;
  
-            const actualColorVector = particule.colorStart.minus(particule.colorEnd).multiply(lifetimeProportion).add(particule.colorEnd)
-            particule.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x),Math.floor(actualColorVector.y), Math.floor(actualColorVector.z)])
+            const actualColorVector = particule.colorEnd ? particule.colorStart.minus(particule.colorEnd).multiply(lifetimeProportion).add(particule.colorEnd) : particule.colorStart
+            particule.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x)/255,Math.floor(actualColorVector.y)/255, Math.floor(actualColorVector.z)/255])
             particule.remainingTime -= dt;
 
             if(particule.remainingTime < 0){
@@ -87,7 +129,7 @@ export default class ParticuleEmitter {
         sprite.height = startSize;
 
         let colorStart = Utils.getRandomValueFrom(particuleTemplate.colorStart)
-        sprite.tint = Color.fromRGB([Math.floor(colorStart.x),Math.floor(colorStart.y), Math.floor(colorStart.z)])
+        sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
 
         //constructor(sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, sizeStart, sizeEnd){
         return new Particule(

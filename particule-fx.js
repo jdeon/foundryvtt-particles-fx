@@ -17,17 +17,12 @@ Hooks.once('ready', function () {
 /*
 MACRO TO USE
 
-//position, particuleSize, particuleLifetime, particuleFrequence
-
 if (canvas.tokens.controlled.length === 0){
   return ui.notifications.error("Please select a token first");
 }
 
 for (let target of canvas.tokens.controlled) {
-  console.log(target)
-  debugger
-//const position = {x:target.position.x, y:target.position.y }
 const position = {x:target.x + target.w /2, y:target.position.y + target.h /2}
-  particuleEmitter.emitParticules(1000, position, 300,5, 2000, 1) 
+	particuleEmitter.emitParticules({positionSpawning:position})
 }
  */
