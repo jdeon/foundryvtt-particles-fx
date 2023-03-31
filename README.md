@@ -10,7 +10,6 @@ This is all the input possible to use. If they are not provide a default value i
 
 | Parameter name  | accepted value          | Default value |
 | :--------------- |:---------------:| -----:|
-
 |        spawningFrequence         |             Default pattern of number                                                              |    3        |
 |        maxParticules             |             Default pattern of number                                                              |   100         |
 |        positionSpawning          |             Object with x and y attributes with default pattern of number inside                   |   {x:0,y:0}   |
