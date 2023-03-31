@@ -8,7 +8,7 @@ export default class ParticuleEmitter {
 
         const position = new Vector3(positionSpawning.x, positionSpawning.y, 0)
 
-        const particuleTemplate = new ParticuleTemplate(position, particuleVelocity, 50, 0, ['-45_45'], [10,particuleSize], [15,10], [1000,particuleLifetime], particuleTexture, new Vector3(250, 0, 0), new Vector3(0, [0,250], [0,250]));
+        const particuleTemplate = new ParticuleTemplate(position, particuleVelocity, 50, 0, ['-45_45'], [10,particuleSize], [15,10], [1000,particuleLifetime], particuleTexture, new Vector3(250, 0, 0), new Vector3(0, [0,250], [0,250]),0.5, 0);
         const particuleEmitter = new ParticuleEmitter(particuleTemplate, particuleFrequence, maxParticules);
 
         // Listen for animate update
@@ -39,12 +39,13 @@ export default class ParticuleEmitter {
             particule.sprite.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
             particule.sprite.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
 
+            //Particule change size
             const updatedSize = ((particule.sizeStart - particule.sizeEnd) * lifetimeProportion) + particule.sizeEnd;
             particule.sprite.width = updatedSize
             particule.sprite.height = updatedSize
 
-            //Particule fade during lifetime
-            particule.sprite.alpha = lifetimeProportion;
+            //Particule change color
+            particule.sprite.alpha = ((particule.alphaStart - particule.alphaEnd) * lifetimeProportion) + particule.alphaEnd;
  
             const actualColorVector = particule.colorStart.minus(particule.colorEnd).multiply(lifetimeProportion).add(particule.colorEnd)
             particule.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x),Math.floor(actualColorVector.y), Math.floor(actualColorVector.z)])
@@ -99,7 +100,9 @@ export default class ParticuleEmitter {
             startSize,
             Utils.getRandomValueFrom(particuleTemplate.sizeEnd),
             colorStart,
-            Utils.getRandomValueFrom(particuleTemplate.colorEnd)
+            Utils.getRandomValueFrom(particuleTemplate.colorEnd),
+            Utils.getRandomValueFrom(particuleTemplate.alphaStart),
+            Utils.getRandomValueFrom(particuleTemplate.alphaEnd)
         )
     }
 
