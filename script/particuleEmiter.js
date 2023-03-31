@@ -8,7 +8,7 @@ export default class ParticuleEmitter {
 
         const position = new Vector3(positionSpawning.x, positionSpawning.y, 0)
 
-        const particuleTemplate = new ParticuleTemplate(position, particuleVelocity, 50, 0, ['-45_45'], [10,particuleSize], [15,10], [1000,particuleLifetime], particuleTexture, new Color(250, 0, 0));
+        const particuleTemplate = new ParticuleTemplate(position, particuleVelocity, 50, 0, ['-45_45'], [10,particuleSize], [15,10], [1000,particuleLifetime], particuleTexture, new Vector3(250, 0, 0), new Vector3(0, [0,250], [0,250]));
         const particuleEmitter = new ParticuleEmitter(particuleTemplate, particuleFrequence, maxParticules);
 
         // Listen for animate update
@@ -30,19 +30,24 @@ export default class ParticuleEmitter {
         for (let i = 0; i < this.particules.length; i++) {
             const particule = this.particules[i]
 
+            let lifetimeProportion = particule.remainingTime / particule.particuleLifetime
+
             //Particule move
-            const updatedVelocity = ((particule.velocityStart - particule.velocityEnd) * particule.remainingTime / particule.particuleLifetime) + particule.velocityEnd;
-            const angleRadiant = (Math.PI / 180) * (((particule.angleStart - particule.angleEnd) * particule.remainingTime / particule.particuleLifetime) + particule.angleEnd);
+            const updatedVelocity = ((particule.velocityStart - particule.velocityEnd) * lifetimeProportion) + particule.velocityEnd;
+            const angleRadiant = (Math.PI / 180) * (((particule.angleStart - particule.angleEnd) * lifetimeProportion) + particule.angleEnd);
             
             particule.sprite.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
             particule.sprite.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
 
-            //Particule fade during lifetime
-            particule.sprite.alpha = particule.remainingTime / particule.particuleLifetime;
-            const updatedSize = ((particule.sizeStart - particule.sizeEnd) * particule.remainingTime / particule.particuleLifetime) + particule.sizeEnd;
+            const updatedSize = ((particule.sizeStart - particule.sizeEnd) * lifetimeProportion) + particule.sizeEnd;
             particule.sprite.width = updatedSize
             particule.sprite.height = updatedSize
 
+            //Particule fade during lifetime
+            particule.sprite.alpha = lifetimeProportion;
+ 
+            const actualColorVector = particule.colorStart.minus(particule.colorEnd).multiply(lifetimeProportion).add(particule.colorEnd)
+            particule.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x),Math.floor(actualColorVector.y), Math.floor(actualColorVector.z)])
             particule.remainingTime -= dt;
 
             if(particule.remainingTime < 0){
@@ -79,7 +84,9 @@ export default class ParticuleEmitter {
         let startSize = Utils.getRandomValueFrom(particuleTemplate.sizeStart)
         sprite.width = startSize;
         sprite.height = startSize;
-        sprite.tint = particuleTemplate.color;
+
+        let colorStart = Utils.getRandomValueFrom(particuleTemplate.colorStart)
+        sprite.tint = Color.fromRGB([Math.floor(colorStart.x),Math.floor(colorStart.y), Math.floor(colorStart.z)])
 
         //constructor(sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, sizeStart, sizeEnd){
         return new Particule(
@@ -89,8 +96,10 @@ export default class ParticuleEmitter {
             Utils.getRandomValueFrom(particuleTemplate.velocityEnd),
             Utils.getRandomValueFrom(particuleTemplate.angleStart),
             Utils.getRandomValueFrom(particuleTemplate.angleEnd),
-            Utils.getRandomValueFrom(particuleTemplate.sizeStart),
-            Utils.getRandomValueFrom(particuleTemplate.sizeEnd)
+            startSize,
+            Utils.getRandomValueFrom(particuleTemplate.sizeEnd),
+            colorStart,
+            Utils.getRandomValueFrom(particuleTemplate.colorEnd)
         )
     }
 

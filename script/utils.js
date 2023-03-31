@@ -59,6 +59,13 @@ export class Utils {
                 return minValue + (maxValue - minValue) * Utils.includingRandom() ;
             }
 
+        } else if (inValue instanceof Vector3) {
+            let x = Utils.getRandomValueFrom(inValue.x)
+            let y = Utils.getRandomValueFrom(inValue.y)
+            let z = Utils.getRandomValueFrom(inValue.z)
+
+            return new Vector3(x,y,z);
+        
         } else if (Array.isArray(inValue) && inValue.length > 0) {
             const indexToRetrieve =  Math.floor(Math.random() * inValue.length);
             return Utils.getRandomValueFrom(inValue[indexToRetrieve]);
