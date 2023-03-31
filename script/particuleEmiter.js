@@ -32,17 +32,17 @@ export default class ParticuleEmitter {
         const particuleTemplate = new ParticuleTemplate(
             position, 
             inputObject.particuleVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityStart, 
-            inputObject.particuleVelocityEnd || ParticuleEmitter.defaultInput.particuleVelocityEnd, 
+            inputObject.particuleVelocityEnd || inputObject.particuleVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityEnd, 
             inputObject.particuleAngleStart || ParticuleEmitter.defaultInput.particuleAngleStart, 
-            inputObject.particuleAngleEnd || ParticuleEmitter.defaultInput.particuleAngleEnd, 
+            inputObject.particuleAngleEnd || inputObject.particuleAngleStart || ParticuleEmitter.defaultInput.particuleAngleEnd, 
             inputObject.particuleSizeStart || ParticuleEmitter.defaultInput.particuleSizeStart,
-            inputObject.particuleSizeEnd || ParticuleEmitter.defaultInput.particuleSizeEnd, 
+            inputObject.particuleSizeEnd || inputObject.particuleSizeStart || ParticuleEmitter.defaultInput.particuleSizeEnd, 
             inputObject.particuleLifetime || ParticuleEmitter.defaultInput.particuleLifetime, 
             particuleTexture, 
             inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorStart, 
-            inputObject.particuleColorEnd || ParticuleEmitter.defaultInput.particuleColorEnd,
+            inputObject.particuleColorEnd || inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorEnd,
             inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaStart, 
-            inputObject.alphaEnd || ParticuleEmitter.defaultInput.alphaEnd
+            inputObject.alphaEnd || inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaEnd
             );
 
         const particuleEmitter = new ParticuleEmitter(
