@@ -6,6 +6,7 @@ export default class ParticuleEmitter {
     static defaultInput = {
         spawningFrequence: 3, 
         maxParticules: 100,
+        emissionDuration: 10000,
         positionSpawning: {x:0,y:0},
         particuleVelocityStart: 200,
         particuleVelocityEnd: 50,
@@ -48,20 +49,23 @@ export default class ParticuleEmitter {
         const particuleEmitter = new ParticuleEmitter(
             particuleTemplate, 
             inputObject.spawningFrequence || ParticuleEmitter.defaultInput.spawningFrequence, 
-            inputObject.maxParticules || ParticuleEmitter.defaultInput.maxParticules
+            inputObject.maxParticules || ParticuleEmitter.defaultInput.maxParticules,
+            inputObject.emissionDuration
             );
 
         // Listen for animate update
-        canvas.app.ticker.add(particuleEmitter.manageParticules.bind(particuleEmitter))
+        particuleEmitter.callback = particuleEmitter.manageParticules.bind(particuleEmitter)
+        canvas.app.ticker.add(particuleEmitter.callback)
     }
 
 
-    constructor(particuleTemplate, particuleFrequence, maxParticules){
+    constructor(particuleTemplate, particuleFrequence, maxParticules, emissionDuration){
         this.spawnedEnable = true;
         this.particules = [];
         this.particuleTemplate = particuleTemplate;
         this.particuleFrequence = particuleFrequence;
         this.maxParticules = maxParticules
+        this.remainingTime = emissionDuration
     }
 
     manageParticules(){
@@ -101,7 +105,13 @@ export default class ParticuleEmitter {
             }
         }
 
-        if (this.spawnedEnable && this.particules.length < this.maxParticules){
+        //Decrease remainingTime of emmission if it has one
+        if(this.remainingTime !== undefined){
+            this.remainingTime -= dt;
+        }
+
+        if (this.spawnedEnable && this.particules.length < this.maxParticules && (this.remainingTime === undefined || this.remainingTime > 0)){
+            //Spawned new particules
             const numberNewParticules = 1 + Math.floor(dt/this.particuleFrequence)
             const increaseTime = dt%this.particuleFrequence
 
@@ -115,6 +125,9 @@ export default class ParticuleEmitter {
 
                 setTimeout(this.enableSpawning.bind(this), this.particuleFrequence + increaseTime)
             }
+        }  if (this.remainingTime !== undefined && this.remainingTime <= 0 && this.particules.length === 0){
+            //delete emission
+            canvas.app.ticker.remove(this.callback);
         }
     }
 

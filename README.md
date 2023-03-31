@@ -10,8 +10,9 @@ This is all the input possible to use. If they are not provide a default value i
 
 | Parameter name  | accepted value          | Default value |
 | :--------------- |:---------------:| -----:|
-|        spawningFrequence         |             Default pattern of number                                                              |    3        |
-|        maxParticules             |             Default pattern of number                                                              |   100         |
+|        spawningFrequence         |             Number                                                                                 |    3          |
+|        maxParticules             |             Number                                                                                 |   100         |
+|        emissionDuration          |             Number                                                                                 |   loop infinitely if undefined       |
 |        positionSpawning          |             Object with x and y attributes with default pattern of number inside                   |   {x:0,y:0}   |
 |        particuleVelocityStart    |             Default pattern of number                                                              |   200         |
 |       particuleVelocityEnd       |             Default pattern of number                                                              |   50          |
