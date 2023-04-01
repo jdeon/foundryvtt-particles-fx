@@ -21,6 +21,8 @@ export default class ParticuleEmitter {
         alphaEnd:0
     }
 
+    static emitters = []
+
     static emitParticules(inputObject){
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
@@ -56,6 +58,14 @@ export default class ParticuleEmitter {
         // Listen for animate update
         particuleEmitter.callback = particuleEmitter.manageParticules.bind(particuleEmitter)
         canvas.app.ticker.add(particuleEmitter.callback)
+
+        ParticuleEmitter.emitters.push(particuleEmitter)
+    }
+
+    static stopAllEmission(){
+        ParticuleEmitter.emitters.forEach(emitter => {
+            emitter.remainingTime = 0
+        });
     }
 
 
