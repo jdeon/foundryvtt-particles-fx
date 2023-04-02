@@ -37,7 +37,7 @@ For the majority of the parameter with can use multiple pattern
 
 
 ## Stop all emission
-To stop all emission, you need to use a macro to call the function ```particuleEmitter.stopAllEmission``` with no parameter.
+To stop all emission, you need to use a macro to call the function ```particuleEmitter.stopAllEmission``` with a boolean parameter for immediate deletion.
 
 
 ## Stop a specific emission
@@ -48,3 +48,5 @@ To stop all emission, you need to use a macro to call the function ```particuleE
 * id of the emission
 * 'l' or 'last' for newest emission
 * 'f' or 'first' for oldest emission
+
+An other boolean parameter for immediate deletion

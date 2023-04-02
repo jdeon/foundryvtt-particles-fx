@@ -65,13 +65,21 @@ export default class ParticuleEmitter {
         ParticuleEmitter.emitters.push(particuleEmitter)
     }
 
-    static stopAllEmission(){
-        ParticuleEmitter.emitters.forEach(emitter => {
-            emitter.remainingTime = 0
-        });
+    static stopAllEmission(immediate){
+        if(immediate){
+            while(ParticuleEmitter.emitters.length > 0){
+                ParticuleEmitter.emitters[0]._immediatelyStopEmission()
+            }
+        } else {
+            ParticuleEmitter.emitters.forEach(emitter => {
+                emitter._immediatelyStopEmission()
+            })
+        } 
+
+
     }
 
-    static stopEmissionById(emitterId){
+    static stopEmissionById(emitterId, immediate){
         let emitter
         if(emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))){
             //Find last emitter
@@ -84,7 +92,11 @@ export default class ParticuleEmitter {
         }
 
         if(emitter){
-            emitter.remainingTime = 0
+            if(immediate){
+                emitter._immediatelyStopEmission()
+            } else {
+                emitter.remainingTime = 0
+            }
         }
     }
 
@@ -193,6 +205,19 @@ export default class ParticuleEmitter {
         )
     }
 
+    //Delete immediatly emission without waiting for each particule's end
+    _immediatelyStopEmission(){
+        while(this.particules.length > 0){
+            let particule = this.particules[0]
+            particule.sprite.destroy()
+            this.particules.splice(0, 1)
+        }
+
+        canvas.app.ticker.remove(this.callback);
+        const emitterIndex =  ParticuleEmitter.emitters.findIndex((emitter) => emitter.id === this.id)
+        ParticuleEmitter.emitters.splice(emitterIndex, 1)
+    }
+
 
     enableSpawning() {
         this.spawnedEnable = true;
@@ -203,5 +228,4 @@ export default class ParticuleEmitter {
 }
 /*TODO
 sprite.rotation 
-sprite.scale
 */
