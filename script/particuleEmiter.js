@@ -58,25 +58,33 @@ export default class ParticuleEmitter {
 
         // Listen for animate update
         particuleEmitter.callback = particuleEmitter.manageParticules.bind(particuleEmitter)
+        particuleEmitter.originalQuery = inputObject
         particuleEmitter.id = ParticuleEmitter.maxId ++
 
         canvas.app.ticker.add(particuleEmitter.callback)
 
         ParticuleEmitter.emitters.push(particuleEmitter)
+
+        return particuleEmitter.id
     }
 
     static stopAllEmission(immediate){
+        let deletedIds = []
+
         if(immediate){
             while(ParticuleEmitter.emitters.length > 0){
-                ParticuleEmitter.emitters[0]._immediatelyStopEmission()
+                let emitter = ParticuleEmitter.emitters[0]
+                emitter._immediatelyStopEmission()
+                deletedIds.push(emitter.id)
             }
         } else {
             ParticuleEmitter.emitters.forEach(emitter => {
                 emitter._immediatelyStopEmission()
+                deletedIds.push(emitter.id)
             })
-        } 
+        }
 
-
+        return deletedIds
     }
 
     static stopEmissionById(emitterId, immediate){
@@ -97,9 +105,10 @@ export default class ParticuleEmitter {
             } else {
                 emitter.remainingTime = 0
             }
+
+            return emitter.id
         }
     }
-
 
     constructor(particuleTemplate, particuleFrequence, maxParticules, emissionDuration){
         this.spawnedEnable = true;
