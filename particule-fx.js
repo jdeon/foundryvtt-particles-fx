@@ -10,7 +10,8 @@ Hooks.once('ready', function () {
     window.particuleEmitter = {
         ...window.emitParticules, 
         emitParticules: ParticuleEmitter.emitParticules,
-        stopAllEmission: ParticuleEmitter.stopAllEmission
+        stopAllEmission: ParticuleEmitter.stopAllEmission,
+        stopEmissionById: ParticuleEmitter.stopEmissionById
 	}
 });
 

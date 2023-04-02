@@ -6,7 +6,6 @@ export default class ParticuleEmitter {
     static defaultInput = {
         spawningFrequence: 3, 
         maxParticules: 100,
-        emissionDuration: 10000,
         positionSpawning: {x:0,y:0},
         particuleVelocityStart: 200,
         particuleVelocityEnd: 50,
@@ -20,6 +19,8 @@ export default class ParticuleEmitter {
         alphaStart:1,
         alphaEnd:0
     }
+
+    static maxId = 0
 
     static emitters = []
 
@@ -57,6 +58,8 @@ export default class ParticuleEmitter {
 
         // Listen for animate update
         particuleEmitter.callback = particuleEmitter.manageParticules.bind(particuleEmitter)
+        particuleEmitter.id = ParticuleEmitter.maxId ++
+
         canvas.app.ticker.add(particuleEmitter.callback)
 
         ParticuleEmitter.emitters.push(particuleEmitter)
@@ -66,6 +69,23 @@ export default class ParticuleEmitter {
         ParticuleEmitter.emitters.forEach(emitter => {
             emitter.remainingTime = 0
         });
+    }
+
+    static stopEmissionById(emitterId){
+        let emitter
+        if(emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))){
+            //Find last emitter
+            emitter = ParticuleEmitter.emitters[ParticuleEmitter.emitters.length - 1]
+        } else if (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'f' || emitterId.toLowerCase() === 'first')){
+            //Find last emitter
+            emitter = ParticuleEmitter.emitters[0]
+        } else if(typeof emitterId === 'number'){
+            emitter = ParticuleEmitter.emitters.find(emitter => emitter.id === emitterId);
+        }
+
+        if(emitter){
+            emitter.remainingTime = 0
+        }
     }
 
 
@@ -138,6 +158,8 @@ export default class ParticuleEmitter {
         }  if (this.remainingTime !== undefined && this.remainingTime <= 0 && this.particules.length === 0){
             //delete emission
             canvas.app.ticker.remove(this.callback);
+            const emitterIndex =  ParticuleEmitter.emitters.findIndex((emitter) => emitter.id === this.id)
+            ParticuleEmitter.emitters.splice(emitterIndex, 1)
         }
     }
 
