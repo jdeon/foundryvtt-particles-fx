@@ -1,0 +1,13 @@
+<h2>Particule Emission</h2>
+You have created this emittor : {{emittorId}}
+
+<div class="card-buttons rsr-save-buttons">
+    <button type="button" name="button.delete-emitter" data-action="delete" data-emittor="{{emittorId}}">Delete it</button>
+</div>
+
+
+{{#if originalQuery}}
+<blockquote style="border-left:3px solid var(--color-border-light-tertiary)">
+    <p>{{originalQuery}}</p>
+</blockquote>
+{{/if}}

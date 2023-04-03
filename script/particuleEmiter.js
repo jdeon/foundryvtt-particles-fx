@@ -20,7 +20,7 @@ export default class ParticuleEmitter {
         alphaEnd:0
     }
 
-    static maxId = 0
+    static maxId = 1
 
     static emitters = []
 
@@ -108,6 +108,25 @@ export default class ParticuleEmitter {
 
             return emitter.id
         }
+    }
+
+    
+    static async writeMessageForEmissionById(emitterId, verbal){
+        let emitter = ParticuleEmitter.emitters.find(emitter => emitter.id === emitterId);
+
+        if(emitter === undefined){
+            return 'No emitter found for id : ' + emitterId
+        }
+
+        //show originalQuery if verbal
+        const dataExport = {
+            emittorId: emitterId,
+            originalQuery : verbal ? JSON.stringify(emitter.originalQuery) : undefined
+        }
+
+        let htmlMessage = await renderTemplate("modules/particule-fx/template/message-particule_state.hbs", dataExport)
+
+        return htmlMessage
     }
 
     constructor(particuleTemplate, particuleFrequence, maxParticules, emissionDuration){
