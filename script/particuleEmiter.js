@@ -161,8 +161,14 @@ export default class ParticuleEmitter {
 
         if (this.spawnedEnable && this.particules.length < this.maxParticules && (this.remainingTime === undefined || this.remainingTime > 0)){
             //Spawned new particules
-            const numberNewParticules = 1 + Math.floor(dt/this.particuleFrequence)
-            const increaseTime = dt%this.particuleFrequence
+            let numberNewParticules = 1 + Math.floor(dt/this.particuleFrequence)
+            let increaseTime = dt%this.particuleFrequence
+
+            //Don t overload the server during low framerate
+            if(numberNewParticules * 10 > this.maxParticules){
+                numberNewParticules = Math.floor(this.maxParticules / 10) + 1
+                increaseTime = 0;
+            }
 
             for(let i = 0; i < numberNewParticules; i++){
                 const particule = this._generateParticules(this.particuleTemplate);
@@ -174,6 +180,7 @@ export default class ParticuleEmitter {
 
                 setTimeout(this.enableSpawning.bind(this), this.particuleFrequence + increaseTime)
             }
+
         }  if (this.remainingTime !== undefined && this.remainingTime <= 0 && this.particules.length === 0){
             //delete emission
             canvas.app.ticker.remove(this.callback);
