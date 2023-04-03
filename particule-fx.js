@@ -10,7 +10,69 @@ Hooks.once('ready', function () {
     window.particuleEmitter = {
         ...window.emitParticules, 
         emitParticules: ParticuleEmitter.emitParticules,
+        stopAllEmission: ParticuleEmitter.stopAllEmission,
+        stopEmissionById: ParticuleEmitter.stopEmissionById,
+        writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById
 	}
+});
+
+Hooks.on("chatMessage", function(chatlog, message, chatData){
+  if(message.startsWith('/pfx')){
+    let messageArgs = message.split(' ')
+
+    //No function
+    if(messageArgs.length <= 1){
+      return
+    }
+
+    let functionName = messageArgs[1]
+    let functionParam
+    let isImmediate = false
+
+    for(let i = 2; i < messageArgs.length; i++){
+      if(functionParam === undefined && !isNaN(messageArgs[i])){
+        functionParam = messageArgs[i];
+      } else if (!isImmediate && messageArgs[i] === '--instant'){
+        isImmediate = true
+      }
+    }
+    
+    let resumeMessage
+    let response
+
+    switch (functionName){
+      case 'stopAll':
+        response = ParticuleEmitter.stopAllEmission(isImmediate)
+        resumeMessage = 'Stop all emissions ' + JSON.stringify(response)
+        break
+      case 'stopById' :
+        response = ParticuleEmitter.stopEmissionById(functionParam, isImmediate)
+        resumeMessage = 'Stop emission ' + JSON.stringify(response)
+        break
+    }
+
+    if(resumeMessage){
+      ui.chat.processMessage("/w gm " + resumeMessage )
+    }
+
+  }
+})
+
+Hooks.on("renderChatMessage", function (chatlog, html, data) {
+  console.log('particule-fx | renderChatMessage with particule-fx'); 
+
+  const buttons = html.find('button[name="button.delete-emitter"]');
+
+  if(buttons === undefined || buttons.length === 0){
+    return
+  }
+
+  buttons.on("click", (event) => {
+    let button = event.currentTarget
+    if(button.dataset.action === "delete"){
+        ParticuleEmitter.stopEmissionById(button.dataset.emitterId);
+    }
+  })
 });
 
 
@@ -23,6 +85,10 @@ if (canvas.tokens.controlled.length === 0){
 
 for (let target of canvas.tokens.controlled) {
 const position = {x:target.x + target.w /2, y:target.position.y + target.h /2}
-	particuleEmitter.emitParticules({positionSpawning:position})
+	let idEmitter = particuleEmitter.emitParticules({positionSpawning:position, particuleVelocityStart : 300})
+
+let message = await particuleEmitter.writeMessageForEmissionById(idEmitter, true)
+
+ui.chat.processMessage("/w gm " + message );
 }
  */
