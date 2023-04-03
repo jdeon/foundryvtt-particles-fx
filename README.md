@@ -51,7 +51,7 @@ To stop all emission, you need to use a macro to call the function ```particuleE
 
 An other boolean parameter for immediate deletion
 
-##Call by chat
+## Call by chat
 You can stop emmission by chat with command "/pfx" (for now, it work but foundry show an error for command unvalid)
 It's result on a message response in the chat
 
@@ -59,4 +59,4 @@ Two command :
 * /pfx stopAll
 * /pfx stopById *id* 
 
-We can add the param *--immediate* to not wait the end of the particules lifetime
+We can add the param *--instant* to not wait the end of the particules lifetime

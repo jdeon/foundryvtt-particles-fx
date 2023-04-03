@@ -32,7 +32,7 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
     for(let i = 2; i < messageArgs.length; i++){
       if(functionParam === undefined && !isNaN(messageArgs[i])){
         functionParam = messageArgs[i];
-      } else if (!isImmediate && messageArgs[i] === '--immediate'){
+      } else if (!isImmediate && messageArgs[i] === '--instant'){
         isImmediate = true
       }
     }
