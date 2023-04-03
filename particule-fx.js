@@ -16,6 +16,48 @@ Hooks.once('ready', function () {
 	}
 });
 
+Hooks.on("chatMessage", function(chatlog, message, chatData){
+  if(message.startsWith('/pfx')){
+    let messageArgs = message.split(' ')
+
+    //No function
+    if(messageArgs.length <= 1){
+      return
+    }
+
+    let functionName = messageArgs[1]
+    let functionParam
+    let isImmediate = false
+
+    for(let i = 2; i < messageArgs.length; i++){
+      if(functionParam === undefined && !isNaN(messageArgs[i])){
+        functionParam = messageArgs[i];
+      } else if (!isImmediate && messageArgs[i] === '--immediate'){
+        isImmediate = true
+      }
+    }
+    
+    let resumeMessage
+    let response
+
+    switch (functionName){
+      case 'stopAll':
+        response = ParticuleEmitter.stopAllEmission(isImmediate)
+        resumeMessage = 'Stop all emissions ' + JSON.stringify(response)
+        break
+      case 'stopById' :
+        response = ParticuleEmitter.stopEmissionById(functionParam, isImmediate)
+        resumeMessage = 'Stop emission ' + JSON.stringify(response)
+        break
+    }
+
+    if(resumeMessage){
+      ui.chat.processMessage("/w gm " + resumeMessage )
+    }
+
+  }
+})
+
 Hooks.on("renderChatMessage", function (chatlog, html, data) {
   console.log('particule-fx | renderChatMessage with particule-fx'); 
 

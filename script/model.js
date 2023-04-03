@@ -39,7 +39,6 @@ export class Particule {
         this.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x)/255,Math.floor(actualColorVector.y)/255, Math.floor(actualColorVector.z)/255])
         this.remainingTime -= dt;
     }
-
 }
 
 

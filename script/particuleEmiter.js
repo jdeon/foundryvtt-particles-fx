@@ -79,7 +79,7 @@ export default class ParticuleEmitter {
             }
         } else {
             ParticuleEmitter.emitters.forEach(emitter => {
-                emitter._immediatelyStopEmission()
+                emitter.remainingTime = 0
                 deletedIds.push(emitter.id)
             })
         }
@@ -97,6 +97,8 @@ export default class ParticuleEmitter {
             emitter = ParticuleEmitter.emitters[0]
         } else if(typeof emitterId === 'number'){
             emitter = ParticuleEmitter.emitters.find(emitter => emitter.id === emitterId);
+        } else if(!isNaN(emitterId)){
+            emitter = ParticuleEmitter.emitters.find(emitter => emitter.id === Number(emitterId));
         }
 
         if(emitter){
