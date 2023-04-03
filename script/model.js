@@ -16,6 +16,30 @@ export class Particule {
         this.alphaEnd = alphaEnd;                   //Number
     }
 
+    manageLifetime(dt){
+        let lifetimeProportion = this.remainingTime / this.particuleLifetime
+
+        //Particule move
+        const updatedVelocity = this.velocityEnd? ((this.velocityStart - this.velocityEnd) * lifetimeProportion) + this.velocityEnd : this.velocityStart;
+        let angleRadiant = this.angleEnd ? (((this.angleStart - this.angleEnd) * lifetimeProportion) + this.angleEnd) : this.angleStart;
+        angleRadiant *= (Math.PI / 180);
+
+        this.sprite.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
+        this.sprite.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
+
+        //Particule change size
+        const updatedSize = this.sizeEnd ? ((this.sizeStart - this.sizeEnd) * lifetimeProportion) + this.sizeEnd : this.sizeStart;
+        this.sprite.width = updatedSize
+        this.sprite.height = updatedSize
+
+        //Particule change color
+        this.sprite.alpha = this.alphaEnd ? ((this.alphaStart - this.alphaEnd) * lifetimeProportion) + this.alphaEnd : this.alphaStart;
+
+        const actualColorVector = this.colorEnd ? this.colorStart.minus(this.colorEnd).multiply(lifetimeProportion).add(this.colorEnd) : this.colorStart
+        this.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x)/255,Math.floor(actualColorVector.y)/255, Math.floor(actualColorVector.z)/255])
+        this.remainingTime -= dt;
+    }
+
 }
 
 

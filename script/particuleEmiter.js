@@ -144,28 +144,7 @@ export default class ParticuleEmitter {
         for (let i = 0; i < this.particules.length; i++) {
             const particule = this.particules[i]
 
-            let lifetimeProportion = particule.remainingTime / particule.particuleLifetime
-
-            //Particule move
-
-            const updatedVelocity = particule.velocityEnd? ((particule.velocityStart - particule.velocityEnd) * lifetimeProportion) + particule.velocityEnd : particule.velocityStart;
-            let angleRadiant = particule.angleEnd ? (((particule.angleStart - particule.angleEnd) * lifetimeProportion) + particule.angleEnd) : particule.angleStart;
-            angleRadiant *= (Math.PI / 180);
-
-            particule.sprite.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
-            particule.sprite.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
-
-            //Particule change size
-            const updatedSize = particule.sizeEnd ? ((particule.sizeStart - particule.sizeEnd) * lifetimeProportion) + particule.sizeEnd : particule.sizeStart;
-            particule.sprite.width = updatedSize
-            particule.sprite.height = updatedSize
-
-            //Particule change color
-            particule.sprite.alpha = particule.alphaEnd ? ((particule.alphaStart - particule.alphaEnd) * lifetimeProportion) + particule.alphaEnd : particule.alphaStart;
- 
-            const actualColorVector = particule.colorEnd ? particule.colorStart.minus(particule.colorEnd).multiply(lifetimeProportion).add(particule.colorEnd) : particule.colorStart
-            particule.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x)/255,Math.floor(actualColorVector.y)/255, Math.floor(actualColorVector.z)/255])
-            particule.remainingTime -= dt;
+            particule.manageLifetime(dt)
 
             if(particule.remainingTime < 0){
                 particule.sprite.destroy()
