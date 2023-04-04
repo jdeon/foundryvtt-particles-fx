@@ -16,6 +16,15 @@ Hooks.once('ready', function () {
 	}
 });
 
+Hooks.on("init", () => {
+  ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
+
+  //pfx is added after invalid
+  let invalid = ChatLog.MESSAGE_PATTERNS["invalid"]
+  delete ChatLog.MESSAGE_PATTERNS["invalid"]
+  ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
+});
+
 Hooks.on("chatMessage", function(chatlog, message, chatData){
   if(message.startsWith('/pfx')){
     let messageArgs = message.split(' ')
