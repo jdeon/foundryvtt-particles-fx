@@ -60,10 +60,10 @@ export class SprayingParticule  extends Particule {
 
 export class GravitingParticule  extends Particule { 
 
-    constructor(sprite, particuleLifetime, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd){
+    constructor(sprite, source, particuleLifetime, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd){
         super(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd)
 
-        this.source = {x: sprite.x, y: sprite.y};
+        this.source = {x: source.x, y: source.y};
         this.angle = angleStart                             //Number 
         this.angularVelocityStart = angularVelocityStart;  //Number      
         this.angularVelocityEnd = angularVelocityEnd;      //Number
@@ -81,8 +81,8 @@ export class GravitingParticule  extends Particule {
         
         const updatedRadius = this.radiusEnd ? (((this.radiusStart - this.radiusEnd) * lifetimeProportion) + this.radiusEnd) : this.radiusStart;
 
-        this.sprite.x = Math.cos(angleRadiant) * updatedRadius;
-        this.sprite.y = Math.sin(angleRadiant) * updatedRadius;
+        this.sprite.x = this.source.x + Math.cos(angleRadiant) * updatedRadius;
+        this.sprite.y = this.source.y + Math.sin(angleRadiant) * updatedRadius;
 
         super.manageLifetime(dt)
     }
@@ -184,10 +184,18 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
     }
 
     generateParticules(){
+        let source = {
+            x : Utils.getRandomValueFrom(this.positionSpawning.x),
+            y : Utils.getRandomValueFrom(this.positionSpawning.y)
+        }
+
+        let angleStart = Utils.getRandomValueFrom(this.angleStart)
+        let radiusStart = Utils.getRandomValueFrom(this.radiusStart)
+        
         let sprite = new PIXI.Sprite(this.particuleTexture)
-        sprite.x = Utils.getRandomValueFrom(this.positionSpawning.x);
-        sprite.y = Utils.getRandomValueFrom(this.positionSpawning.y);
         sprite.anchor.set(0.5);
+        sprite.x = source.x + Math.cos(angleStart * (Math.PI / 180)) * radiusStart;
+        sprite.y = source.y + Math.sin(angleStart * (Math.PI / 180)) * radiusStart;
 
         let startSize = Utils.getRandomValueFrom(this.sizeStart)
         sprite.width = startSize;
@@ -198,11 +206,12 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
 
         return new GravitingParticule(
             sprite,
+            source,
             Utils.getRandomValueFrom(this.particuleLifetime),
-            Utils.getRandomValueFrom(this.angleStart),
+            angleStart,
             Utils.getRandomValueFrom(this.angularVelocityStart),
             Utils.getRandomValueFrom(this.angularVelocityEnd),
-            Utils.getRandomValueFrom(this.radiusStart),
+            radiusStart,
             Utils.getRandomValueFrom(this.radiusEnd),
             startSize,
             Utils.getRandomValueFrom(this.sizeEnd),
