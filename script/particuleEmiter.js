@@ -1,4 +1,4 @@
-import { SprayingParticuleTemplate, GravitingParticuleTemplate} from "./model.js"
+import { SprayingParticuleTemplate, GravitingParticuleTemplate} from "./particuleTemplate.js"
 import { Vector3 } from "./utils.js"
 
 export default class ParticuleEmitter { 
