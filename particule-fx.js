@@ -8,8 +8,9 @@ Hooks.once('ready', function () {
     if(getProperty(window,'particuleEmitter.emmitParticules')) return;
 			
     window.particuleEmitter = {
-        ...window.emitParticules, 
-        emitParticules: ParticuleEmitter.emitParticules,
+        ...window.particuleEmitter, 
+        sprayParticules: ParticuleEmitter.sprayParticules,
+        gravitateParticules: ParticuleEmitter.gravitateParticules,
         stopAllEmission: ParticuleEmitter.stopAllEmission,
         stopEmissionById: ParticuleEmitter.stopEmissionById,
         writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById
