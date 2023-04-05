@@ -8,12 +8,22 @@ Hooks.once('ready', function () {
     if(getProperty(window,'particuleEmitter.emmitParticules')) return;
 			
     window.particuleEmitter = {
-        ...window.emitParticules, 
-        emitParticules: ParticuleEmitter.emitParticules,
+        ...window.particuleEmitter, 
+        sprayParticules: ParticuleEmitter.sprayParticules,
+        gravitateParticules: ParticuleEmitter.gravitateParticules,
         stopAllEmission: ParticuleEmitter.stopAllEmission,
         stopEmissionById: ParticuleEmitter.stopEmissionById,
         writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById
 	}
+});
+
+Hooks.on("init", () => {
+  ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
+
+  //pfx is added after invalid
+  let invalid = ChatLog.MESSAGE_PATTERNS["invalid"]
+  delete ChatLog.MESSAGE_PATTERNS["invalid"]
+  ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
 });
 
 Hooks.on("chatMessage", function(chatlog, message, chatData){

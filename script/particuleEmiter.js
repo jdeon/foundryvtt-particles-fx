@@ -1,5 +1,5 @@
-import {Particule, ParticuleTemplate} from "./model.js"
-import {Vector3, Utils} from "./utils.js"
+import { SprayingParticuleTemplate, GravitingParticuleTemplate} from "./particuleTemplate.js"
+import { Vector3 } from "./utils.js"
 
 export default class ParticuleEmitter { 
     
@@ -7,24 +7,30 @@ export default class ParticuleEmitter {
         spawningFrequence: 3, 
         maxParticules: 100,
         positionSpawning: {x:0,y:0},
+        particuleLifetime: [1000,1500],
         particuleVelocityStart: 200,
         particuleVelocityEnd: 50,
         particuleAngleStart: '0_360',
-        particuleAngleEnd: undefined,
+        particuleAngleEnd: 0,
+        particuleRadiusStart: 100,
+        particuleRadiusEnd: 50,
         particuleSizeStart: 10,
         particuleSizeEnd: '10_25',
-        particuleLifetime: [1000,1500],
         particuleColorStart:new Vector3(250, 250, 50),
         particuleColorEnd:new Vector3(250, '50_100', 0),
         alphaStart:1,
-        alphaEnd:0
+        alphaEnd:0,
+        vibrationAmplitudeStart: 0,
+        vibrationAmplitudeEnd: 0,
+        vibrationFrequencyStart: 0,
+        vibrationFrequencyEnd: 0,
     }
 
     static maxId = 1
 
     static emitters = []
 
-    static emitParticules(inputObject){
+    static sprayParticules(inputObject){
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
         const position = new Vector3(
@@ -33,7 +39,7 @@ export default class ParticuleEmitter {
             0
             )
 
-        const particuleTemplate = new ParticuleTemplate(
+        const particuleTemplate = new SprayingParticuleTemplate(
             position, 
             inputObject.particuleVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityStart, 
             inputObject.particuleVelocityEnd || inputObject.particuleVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityEnd, 
@@ -46,26 +52,47 @@ export default class ParticuleEmitter {
             inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorStart, 
             inputObject.particuleColorEnd || inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorEnd,
             inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaStart, 
-            inputObject.alphaEnd || inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaEnd
+            inputObject.alphaEnd || inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaEnd,
+            inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeStart, 
+            inputObject.vibrationAmplitudeEnd || inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeEnd,
+            inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyStart, 
+            inputObject.vibrationFrequencyEnd || inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyEnd,
             );
 
-        const particuleEmitter = new ParticuleEmitter(
-            particuleTemplate, 
-            inputObject.spawningFrequence || ParticuleEmitter.defaultInput.spawningFrequence, 
-            inputObject.maxParticules || ParticuleEmitter.defaultInput.maxParticules,
-            inputObject.emissionDuration
+        return ParticuleEmitter._abstractInitParticules(inputObject, particuleTemplate)
+    }
+
+    static gravitateParticules(inputObject){
+        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+
+        const position = new Vector3(
+            inputObject.positionSpawning.x || ParticuleEmitter.defaultInput.positionSpawning.x, 
+            inputObject.positionSpawning.y || ParticuleEmitter.defaultInput.positionSpawning.y, 
+            0
+            )
+
+        const particuleTemplate = new GravitingParticuleTemplate(
+            position, 
+            inputObject.particuleAngleStart || ParticuleEmitter.defaultInput.particuleAngleStart, 
+            inputObject.angularVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityStart, 
+            inputObject.angularVelocityEnd || inputObject.angularVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityEnd, 
+            inputObject.particuleRadiusStart || ParticuleEmitter.defaultInput.particuleRadiusStart, 
+            inputObject.particuleRadiusEnd || inputObject.particuleRadiusStart || ParticuleEmitter.defaultInput.particuleRadiusEnd, 
+            inputObject.particuleSizeStart || ParticuleEmitter.defaultInput.particuleSizeStart,
+            inputObject.particuleSizeEnd || inputObject.particuleSizeStart || ParticuleEmitter.defaultInput.particuleSizeEnd, 
+            inputObject.particuleLifetime || ParticuleEmitter.defaultInput.particuleLifetime, 
+            particuleTexture, 
+            inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorStart, 
+            inputObject.particuleColorEnd || inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorEnd,
+            inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaStart, 
+            inputObject.alphaEnd || inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaEnd,
+            inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeStart, 
+            inputObject.vibrationAmplitudeEnd || inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeEnd,
+            inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyStart, 
+            inputObject.vibrationFrequencyEnd || inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyEnd,
             );
 
-        // Listen for animate update
-        particuleEmitter.callback = particuleEmitter.manageParticules.bind(particuleEmitter)
-        particuleEmitter.originalQuery = inputObject
-        particuleEmitter.id = ParticuleEmitter.maxId ++
-
-        canvas.app.ticker.add(particuleEmitter.callback)
-
-        ParticuleEmitter.emitters.push(particuleEmitter)
-
-        return particuleEmitter.id
+        return ParticuleEmitter._abstractInitParticules(inputObject, particuleTemplate)
     }
 
     static stopAllEmission(immediate){
@@ -112,7 +139,7 @@ export default class ParticuleEmitter {
         }
     }
 
-    
+
     static async writeMessageForEmissionById(emitterId, verbal){
         let emitter = ParticuleEmitter.emitters.find(emitter => emitter.id === emitterId);
 
@@ -131,13 +158,36 @@ export default class ParticuleEmitter {
         return htmlMessage
     }
 
-    constructor(particuleTemplate, particuleFrequence, maxParticules, emissionDuration){
+
+    static _abstractInitParticules(inputObject, particuleTemplate){
+        const particuleEmitter = new ParticuleEmitter(
+            particuleTemplate, 
+            inputObject.spawningFrequence || ParticuleEmitter.defaultInput.spawningFrequence, 
+            inputObject.maxParticules || ParticuleEmitter.defaultInput.maxParticules,
+            inputObject.emissionDuration
+            );
+
+        // Listen for animate update
+        particuleEmitter.callback = particuleEmitter.manageParticules.bind(particuleEmitter)
+        particuleEmitter.originalQuery = inputObject
+        particuleEmitter.id = ParticuleEmitter.maxId ++
+
+        canvas.app.ticker.add(particuleEmitter.callback)
+
+        ParticuleEmitter.emitters.push(particuleEmitter)
+
+        return particuleEmitter.id
+    }
+
+
+    constructor(particuleTemplate, particuleFrequence, maxParticules, emissionDuration, isGravitate){
         this.spawnedEnable = true;
         this.particules = [];
         this.particuleTemplate = particuleTemplate;
         this.particuleFrequence = particuleFrequence;
         this.maxParticules = maxParticules
         this.remainingTime = emissionDuration
+        this.isGravitate = isGravitate
     }
 
     manageParticules(){
@@ -173,7 +223,7 @@ export default class ParticuleEmitter {
             }
 
             for(let i = 0; i < numberNewParticules; i++){
-                const particule = this._generateParticules(this.particuleTemplate);
+                const particule = this.particuleTemplate.generateParticules(this.particuleTemplate);
 
                 canvas.app.stage.addChild(particule.sprite);
                 this.particules.push(particule)
@@ -189,36 +239,6 @@ export default class ParticuleEmitter {
             const emitterIndex =  ParticuleEmitter.emitters.findIndex((emitter) => emitter.id === this.id)
             ParticuleEmitter.emitters.splice(emitterIndex, 1)
         }
-    }
-
-    _generateParticules(particuleTemplate){
-        let sprite = new PIXI.Sprite(particuleTemplate.particuleTexture)
-        sprite.x = Utils.getRandomValueFrom(particuleTemplate.positionSpawning.x);
-        sprite.y = Utils.getRandomValueFrom(particuleTemplate.positionSpawning.y);
-        sprite.anchor.set(0.5);
-
-        let startSize = Utils.getRandomValueFrom(particuleTemplate.sizeStart)
-        sprite.width = startSize;
-        sprite.height = startSize;
-
-        let colorStart = Utils.getRandomValueFrom(particuleTemplate.colorStart)
-        sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
-
-        //constructor(sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, sizeStart, sizeEnd){
-        return new Particule(
-            sprite,
-            Utils.getRandomValueFrom(particuleTemplate.particuleLifetime),
-            Utils.getRandomValueFrom(particuleTemplate.velocityStart),
-            Utils.getRandomValueFrom(particuleTemplate.velocityEnd),
-            Utils.getRandomValueFrom(particuleTemplate.angleStart),
-            Utils.getRandomValueFrom(particuleTemplate.angleEnd),
-            startSize,
-            Utils.getRandomValueFrom(particuleTemplate.sizeEnd),
-            colorStart,
-            Utils.getRandomValueFrom(particuleTemplate.colorEnd),
-            Utils.getRandomValueFrom(particuleTemplate.alphaStart),
-            Utils.getRandomValueFrom(particuleTemplate.alphaEnd)
-        )
     }
 
     //Delete immediatly emission without waiting for each particule's end
@@ -238,10 +258,4 @@ export default class ParticuleEmitter {
     enableSpawning() {
         this.spawnedEnable = true;
     }
-
-
-
 }
-/*TODO
-sprite.rotation 
-*/
