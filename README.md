@@ -11,9 +11,9 @@ This is all the input possible to use. If they are not provide a default value i
 
 | Parameter name  | accepted value          | Default value |
 | :--------------- |:---------------:| -----:|
-|        spawningFrequence         |             Number                                                                                 |    3          |
-|        maxParticules             |             Number                                                                                 |   100         |
-|        emissionDuration          |             Number                                                                                 |   loop infinitely if undefined       |
+|        spawningFrequence         |             Number                                                                       |    3          |
+|        maxParticules             |             Number                                                                       |   100         |
+|        emissionDuration          |             Number                                                                       |   loop infinitely if undefined       |
 |        positionSpawning          |             Object with x and y attributes with default pattern inside                   |   {x:0,y:0}   |
 |        particuleVelocityStart    |             Default pattern                                                              |   200         |
 |       particuleVelocityEnd       |             Default pattern                                                              |   50          |
@@ -26,7 +26,10 @@ This is all the input possible to use. If they are not provide a default value i
 |        particuleColorEnd         |             Object with x, y and z attributes with default pattern between 0 and 255     |   {x:250,y:'50_100', z: 0}    |
 |        alphaStart                |             Default pattern between 0 and 1                                              |   1           |
 |        alphaEnd                  |             Default pattern between 0 and 1                                              |   0           |
-
+|        vibrationAmplitudeStart   |             Default pattern between 0 and 1                                              |   1           |
+|        vibrationAmplitudeEnd     |             Default pattern between 0 and 1                                              |   0           |
+|        vibrationFrequencyStart   |             Default pattern between 0 and 1                                              |   1           |
+|        vibrationFrequencyEnd     |             Default pattern between 0 and 1                                              |   0           |
 
 ### Default pattern
 For the majority of the parameter with can use multiple pattern

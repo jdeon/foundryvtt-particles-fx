@@ -7,19 +7,23 @@ export default class ParticuleEmitter {
         spawningFrequence: 3, 
         maxParticules: 100,
         positionSpawning: {x:0,y:0},
+        particuleLifetime: [1000,1500],
         particuleVelocityStart: 200,
         particuleVelocityEnd: 50,
         particuleAngleStart: '0_360',
-        particuleAngleEnd: undefined,
+        particuleAngleEnd: 0,
         particuleRadiusStart: 100,
         particuleRadiusEnd: 50,
         particuleSizeStart: 10,
         particuleSizeEnd: '10_25',
-        particuleLifetime: [1000,1500],
         particuleColorStart:new Vector3(250, 250, 50),
         particuleColorEnd:new Vector3(250, '50_100', 0),
         alphaStart:1,
-        alphaEnd:0
+        alphaEnd:0,
+        vibrationAmplitudeStart: 0,
+        vibrationAmplitudeEnd: 0,
+        vibrationFrequencyStart: 0,
+        vibrationFrequencyEnd: 0,
     }
 
     static maxId = 1
@@ -48,7 +52,11 @@ export default class ParticuleEmitter {
             inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorStart, 
             inputObject.particuleColorEnd || inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorEnd,
             inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaStart, 
-            inputObject.alphaEnd || inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaEnd
+            inputObject.alphaEnd || inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaEnd,
+            inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeStart, 
+            inputObject.vibrationAmplitudeEnd || inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeEnd,
+            inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyStart, 
+            inputObject.vibrationFrequencyEnd || inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyEnd,
             );
 
         return ParticuleEmitter._abstractInitParticules(inputObject, particuleTemplate)
@@ -77,7 +85,11 @@ export default class ParticuleEmitter {
             inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorStart, 
             inputObject.particuleColorEnd || inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorEnd,
             inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaStart, 
-            inputObject.alphaEnd || inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaEnd
+            inputObject.alphaEnd || inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaEnd,
+            inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeStart, 
+            inputObject.vibrationAmplitudeEnd || inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeEnd,
+            inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyStart, 
+            inputObject.vibrationFrequencyEnd || inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyEnd,
             );
 
         return ParticuleEmitter._abstractInitParticules(inputObject, particuleTemplate)

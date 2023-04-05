@@ -4,7 +4,9 @@ import { Utils } from "./utils.js"
 
 export class ParticuleTemplate { 
 
-    constructor(positionSpawning, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd){
+    constructor(positionSpawning, sizeStart, sizeEnd, particuleLifetime, particuleTexture, 
+        colorStart, colorEnd, alphaStart, alphaEnd, 
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
         this.positionSpawning = positionSpawning;   //Vector 3 of Array
         this.sizeStart = sizeStart;                 //Array of Number
         this.sizeEnd = sizeEnd;                     //Array of Number
@@ -14,6 +16,10 @@ export class ParticuleTemplate {
         this.colorEnd = colorEnd;                   //Vector3 with array
         this.alphaStart = alphaStart;               //Array of Number
         this.alphaEnd = alphaEnd;                   //Array of Number
+        this.vibrationAmplitudeStart = vibrationAmplitudeStart
+        this.vibrationAmplitudeEnd = vibrationAmplitudeEnd
+        this.vibrationFrequencyStart = vibrationFrequencyStart
+        this.vibrationFrequencyEnd = vibrationFrequencyEnd
     }
 
     generateParticules(){
@@ -37,15 +43,21 @@ export class ParticuleTemplate {
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),
-            Utils.getRandomValueFrom(this.alphaEnd)
+            Utils.getRandomValueFrom(this.alphaEnd),
+            Utils.getRandomValueFrom(this.vibrationAmplitudeStart),
+            Utils.getRandomValueFrom(this.vibrationAmplitudeEnd),
+            Utils.getRandomValueFrom(this.vibrationFrequencyStart),
+            Utils.getRandomValueFrom(this.vibrationFrequencyEnd)
         )
     }
 }
 
 export class SprayingParticuleTemplate extends ParticuleTemplate{ 
 
-    constructor(positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd){
-        super(positionSpawning, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd)
+    constructor(positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
+        sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
+        super(positionSpawning, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
         
         this.velocityStart = velocityStart;         //Array of Number      
         this.velocityEnd = velocityEnd;             //Array of Number
@@ -79,15 +91,21 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),
-            Utils.getRandomValueFrom(this.alphaEnd)
+            Utils.getRandomValueFrom(this.alphaEnd),
+            Utils.getRandomValueFrom(this.vibrationAmplitudeStart),
+            Utils.getRandomValueFrom(this.vibrationAmplitudeEnd),
+            Utils.getRandomValueFrom(this.vibrationFrequencyStart),
+            Utils.getRandomValueFrom(this.vibrationFrequencyEnd)
         )
     }
 }
 
 export class GravitingParticuleTemplate extends ParticuleTemplate { 
 
-    constructor(positionSpawning, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd){
-        super(positionSpawning, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd)
+    constructor(positionSpawning, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, 
+        sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
+        super(positionSpawning, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
         
         this.angleStart = angleStart;                        //Array of Number
         this.angularVelocityStart = angularVelocityStart;  //Number      
@@ -131,7 +149,11 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),
-            Utils.getRandomValueFrom(this.alphaEnd)
+            Utils.getRandomValueFrom(this.alphaEnd),
+            Utils.getRandomValueFrom(this.vibrationAmplitudeStart),
+            Utils.getRandomValueFrom(this.vibrationAmplitudeEnd),
+            Utils.getRandomValueFrom(this.vibrationFrequencyStart),
+            Utils.getRandomValueFrom(this.vibrationFrequencyEnd)
         )
     }
 }

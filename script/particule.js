@@ -1,7 +1,9 @@
 export class Particule { 
 
-    constructor(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd){
+    constructor(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd,
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
         this.sprite = sprite;                       //PIXI.Sprite
+        this.positionVibrationLess = {x : sprite.x, y : sprite.y};  
         this.remainingTime = particuleLifetime;     //Number
         this.particuleLifetime = particuleLifetime; //Number
         this.sizeStart = sizeStart;                 //Number
@@ -10,6 +12,10 @@ export class Particule {
         this.colorEnd = colorEnd;                   //Vector3
         this.alphaStart = alphaStart;               //Number
         this.alphaEnd = alphaEnd;                   //Number
+        this.vibrationAmplitudeStart = vibrationAmplitudeStart
+        this.vibrationAmplitudeEnd = vibrationAmplitudeEnd
+        this.vibrationFrequencyStart = vibrationFrequencyStart
+        this.vibrationFrequencyEnd = vibrationFrequencyEnd
     }
 
     manageLifetime(dt){
@@ -25,14 +31,24 @@ export class Particule {
 
         const actualColorVector = this.colorEnd ? this.colorStart.minus(this.colorEnd).multiply(lifetimeProportion).add(this.colorEnd) : this.colorStart
         this.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x)/255,Math.floor(actualColorVector.y)/255, Math.floor(actualColorVector.z)/255])
+
+        let vibrationAmplitudeCurrent = this.vibrationAmplitudeEnd ? ((this.vibrationAmplitudeStart - this.vibrationAmplitudeEnd) * lifetimeProportion) + this.vibrationAmplitudeEnd : this.vibrationAmplitudeStart;
+        let vibrationFrequencyCurrent = this.vibrationFrequencyEnd ? ((this.vibrationFrequencyStart - this.vibrationFrequencyEnd) * lifetimeProportion) + this.vibrationFrequencyEnd : this.vibrationFrequencyStart;
+        if(vibrationAmplitudeCurrent && vibrationFrequencyCurrent){
+            let timeFromStart = (this.particuleLifetime - this.remainingTime)
+            this.vibrationCurrent = vibrationAmplitudeCurrent * Math.sin(2*Math.PI*(timeFromStart/vibrationFrequencyCurrent))
+        }
+
         this.remainingTime -= dt;
     }
 }
 
 export class SprayingParticule  extends Particule { 
 
-    constructor(sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd){
-        super(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd)
+    constructor(sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, 
+        sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd,
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
+        super(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd,vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
         this.velocityStart = velocityStart;         //Number      
         this.velocityEnd = velocityEnd;             //Number
@@ -48,18 +64,28 @@ export class SprayingParticule  extends Particule {
         let angleRadiant = this.angleEnd ? (((this.angleStart - this.angleEnd) * lifetimeProportion) + this.angleEnd) : this.angleStart;
         angleRadiant *= (Math.PI / 180);
 
-        this.sprite.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
-        this.sprite.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
+        this.positionVibrationLess.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
+        this.positionVibrationLess.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
 
         super.manageLifetime(dt)
+
+        if(this.vibrationCurrent) {
+            this.sprite.x = this.positionVibrationLess.x + this.vibrationCurrent * Math.cos(angleRadiant - (Math.PI/2))
+            this.sprite.y = this.positionVibrationLess.y + this.vibrationCurrent * Math.sin(angleRadiant - (Math.PI/2))
+        } else {
+            this.sprite.x = this.positionVibrationLess.x
+            this.sprite.y = this.positionVibrationLess.y
+        }
     }
 }
 
 
 export class GravitingParticule  extends Particule { 
 
-    constructor(sprite, source, particuleLifetime, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd){
-        super(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd)
+    constructor(sprite, source, particuleLifetime, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, 
+        sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd,
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
+        super(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
         this.source = {x: source.x, y: source.y};
         this.angle = angleStart                             //Number 
@@ -79,9 +105,17 @@ export class GravitingParticule  extends Particule {
         
         const updatedRadius = this.radiusEnd ? (((this.radiusStart - this.radiusEnd) * lifetimeProportion) + this.radiusEnd) : this.radiusStart;
 
-        this.sprite.x = this.source.x + Math.cos(angleRadiant) * updatedRadius;
-        this.sprite.y = this.source.y + Math.sin(angleRadiant) * updatedRadius;
+        this.positionVibrationLess.x = this.source.x + Math.cos(angleRadiant) * updatedRadius;
+        this.positionVibrationLess.y = this.source.y + Math.sin(angleRadiant) * updatedRadius;
 
         super.manageLifetime(dt)
+
+        if(this.vibrationCurrent) {
+            this.sprite.x = this.positionVibrationLess.x + this.vibrationCurrent* Math.cos(angleRadiant)
+            this.sprite.y = this.positionVibrationLess.y + this.vibrationCurrent* Math.sin(angleRadiant)
+        } else {
+            this.sprite.x = this.positionVibrationLess.x
+            this.sprite.y = this.positionVibrationLess.y
+        }
     }
 }
