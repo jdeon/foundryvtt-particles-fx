@@ -135,9 +135,9 @@ function listen()
          switch (data.type)
          {
             case s_MESSAGE_TYPES.sprayParticules: ParticuleEmitter.sprayParticules(data.payload); break;
-            case s_MESSAGE_TYPES.gravitateParticules: ParticuterleEmit.gravitateParticules(data.payload); break;
-            case s_MESSAGE_TYPES.stopEmissionById: ParticuterleEmit.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
-            case s_MESSAGE_TYPES.stopAllEmission: ParticuterleEmit.stopAllEmission(data.payload); break;
+            case s_MESSAGE_TYPES.gravitateParticules: ParticuleEmitter.gravitateParticules(data.payload); break;
+            case s_MESSAGE_TYPES.stopEmissionById: ParticuleEmitter.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
+            case s_MESSAGE_TYPES.stopAllEmission: ParticuleEmitter.stopAllEmission(data.payload); break;
          }
       }
       catch (err)
