@@ -1,20 +1,38 @@
 import ParticuleEmitter from "./script/particuleEmiter.js"
-/* ------------------------------------ */
-/* When ready							*/
-/* ------------------------------------ */
+
+/**
+ * Defines the event name to send all messages to over  `game.socket`.
+ *
+ * @type {string}
+ */
+const s_EVENT_NAME = 'module.particule-fx';
+
+/**
+ * Defines the different message types that FQL sends over `game.socket`.
+ */
+const s_MESSAGE_TYPES = {
+  sprayParticules: 'sprayParticules',
+  gravitateParticules: 'gravitateParticules',
+  stopAllEmission: 'stopAllEmission',
+  stopEmissionById: 'stopEmissionById'
+};
+
 Hooks.once('ready', function () {
     console.log('particule-fx | ready to particule-fx'); 
 
     if(getProperty(window,'particuleEmitter.emmitParticules')) return;
-			
+		
+    //On call, we call method localy and share data with other client
     window.particuleEmitter = {
         ...window.particuleEmitter, 
-        sprayParticules: ParticuleEmitter.sprayParticules,
-        gravitateParticules: ParticuleEmitter.gravitateParticules,
-        stopAllEmission: ParticuleEmitter.stopAllEmission,
-        stopEmissionById: ParticuleEmitter.stopEmissionById,
-        writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById
+        sprayParticules: (query) => {emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, query); return ParticuleEmitter.sprayParticules(query)},
+        gravitateParticules: (query) => {emitForOtherClient(s_MESSAGE_TYPES.gravitateParticules, query); return ParticuleEmitter.gravitateParticules(query)},
+        stopAllEmission:  (immediate) => {emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); return ParticuleEmitter.stopAllEmission(immediate)},
+        stopEmissionById: (emitterId, immediate) => {emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); return ParticuleEmitter.stopEmissionById(emitterId, immediate)},
+        writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById   //No need to emit to other client
 	}
+
+  listen()
 });
 
 Hooks.on("init", () => {
@@ -84,6 +102,59 @@ Hooks.on("renderChatMessage", function (chatlog, html, data) {
     }
   })
 });
+
+function emitForOtherClient(type, payload){
+  game.socket.emit(s_EVENT_NAME, {
+    type: type,
+    payload: payload
+ });
+}
+
+/*
+No aknowledge needed 
+new Promise(resolve => {
+  socket.emit(eventName, request, response => {
+    doSomethingWithResponse(response); // This is the acknowledgement function
+    resolve(response); // We can resolve the entire operation once acknowledged
+  });
+});
+*/
+
+/**
+    * Provides the main incoming message registration and distribution of socket messages on the receiving side.
+    */
+function listen()
+{
+   game.socket.on(s_EVENT_NAME, (data) =>
+   {
+      if (typeof data !== 'object') { return; }
+
+      try
+      {
+         // Dispatch the incoming message data by the message type.
+         switch (data.type)
+         {
+            case s_MESSAGE_TYPES.sprayParticules: ParticuleEmitter.sprayParticules(data.payload); break;
+            case s_MESSAGE_TYPES.gravitateParticules: ParticuleEmitter.gravitateParticules(data.payload); break;
+            case s_MESSAGE_TYPES.stopEmissionById: ParticuleEmitter.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
+            case s_MESSAGE_TYPES.stopAllEmission: ParticuleEmitter.stopAllEmission(data.payload); break;
+         }
+      }
+      catch (err)
+      {
+         console.error(err);
+      }
+   });
+}
+
+/*
+Hooks.callAll(`particulefx-sprayParticules`, query)
+
+Hooks.on("particulefx-sprayParticules", function (query) {
+  ParticuleEmitter.sprayParticules(query);
+});
+*/
+
 
 
 /*
