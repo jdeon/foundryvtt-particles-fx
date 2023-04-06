@@ -1,7 +1,23 @@
 import ParticuleEmitter from "./script/particuleEmiter.js"
-/* ------------------------------------ */
-/* When ready							*/
-/* ------------------------------------ */
+
+/**
+ * Defines the event name to send all messages to over  `game.socket`.
+ *
+ * @type {string}
+ */
+const s_EVENT_NAME = 'module.particule-fx';
+
+/**
+ * Defines the different message types that FQL sends over `game.socket`.
+ */
+const s_MESSAGE_TYPES = {
+  sprayParticules: 'sprayParticules',
+  gravitateParticules: 'gravitateParticules',
+  stopAllEmission: 'stopAllEmission',
+  stopEmissionById: 'stopEmissionById',
+  writeMessageForEmissionById: 'writeMessageForEmissionById'
+};
+
 Hooks.once('ready', function () {
     console.log('particule-fx | ready to particule-fx'); 
 
@@ -9,12 +25,14 @@ Hooks.once('ready', function () {
 			
     window.particuleEmitter = {
         ...window.particuleEmitter, 
-        sprayParticules: ParticuleEmitter.sprayParticules,
+        sprayParticules: (query) => emitForClient(s_MESSAGE_TYPES.sprayParticules, query),
         gravitateParticules: ParticuleEmitter.gravitateParticules,
         stopAllEmission: ParticuleEmitter.stopAllEmission,
         stopEmissionById: ParticuleEmitter.stopEmissionById,
         writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById
 	}
+
+  listen()
 });
 
 Hooks.on("init", () => {
@@ -84,6 +102,50 @@ Hooks.on("renderChatMessage", function (chatlog, html, data) {
     }
   })
 });
+
+function emitForClient(type, payload){
+  game.socket.emit(s_EVENT_NAME, {
+    type: type,
+    payload: payload
+ });
+}
+
+/**
+    * Provides the main incoming message registration and distribution of socket messages on the receiving side.
+    */
+function listen()
+{
+   game.socket.on(s_EVENT_NAME, (data) =>
+   {
+      if (typeof data !== 'object') { return; }
+
+      try
+      {
+         // Dispatch the incoming message data by the message type.
+         switch (data.type)
+         {
+            case s_MESSAGE_TYPES.sprayParticules: ParticuleEmitter.sprayParticules(data.payload); break;
+            case s_MESSAGE_TYPES.gravitateParticules: ParticuterleEmit.gravitateParticules(data.payload); break;
+            case s_MESSAGE_TYPES.stopEmissionById: ParticuterleEmit.stopEmissionById(data.payload); break;
+            case s_MESSAGE_TYPES.stopAllEmission: ParticuterleEmit.stopAllEmission(data.payload); break;
+            case s_MESSAGE_TYPES.writeMessageForEmissionById: ParticuterleEmit.writeMessageForEmissionById(data.payload); break;
+         }
+      }
+      catch (err)
+      {
+         console.error(err);
+      }
+   });
+}
+
+/*
+Hooks.callAll(`particulefx-sprayParticules`, query)
+
+Hooks.on("particulefx-sprayParticules", function (query) {
+  ParticuleEmitter.sprayParticules(query);
+});
+*/
+
 
 
 /*
