@@ -81,4 +81,38 @@ export class Utils {
         }
     }
 
+    static mergeInputTemplate(prioritizeInput, defaultInput){
+        
+        if(!defaultInput){
+            return prioritizeInput
+        } else if (!prioritizeInput){
+            return defaultInput
+        }
+
+        let result = {...prioritizeInput}
+
+        let defaultPropertyKey = Object.keys(defaultInput)
+
+        for (const key of defaultPropertyKey) {
+
+            if(!prioritizeInput[key]){
+                //for end suffix value override by start value before default one
+                if (key instanceof String && key.endsWith('end')){
+                    //removve end from key and add start
+                    let startSuffixKey = key.substring(0,key.length - 3) + 'start'
+                    result[key] = prioritizeInput[startSuffixKey] || defaultInput[key]
+                } else {
+                    result[key] = defaultInput[key]
+                }
+            } else if(prioritizeInput[key] instanceof Object){
+                result[key] = Utils.mergeInputTemplate(prioritizeInput[key], defaultInput[key])
+            } else {
+                result[key] = prioritizeInput[key]
+            }
+
+        }
+
+        return result;
+    }
+
 }

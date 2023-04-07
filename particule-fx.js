@@ -25,8 +25,8 @@ Hooks.once('ready', function () {
     //On call, we call method localy and share data with other client
     window.particuleEmitter = {
         ...window.particuleEmitter, 
-        sprayParticules: (query) => {emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, query); return ParticuleEmitter.sprayParticules(query)},
-        gravitateParticules: (query) => {emitForOtherClient(s_MESSAGE_TYPES.gravitateParticules, query); return ParticuleEmitter.gravitateParticules(query)},
+        sprayParticules: (...args) => {emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, args); return ParticuleEmitter.sprayParticules(...args)},
+        gravitateParticules: (...args) => {emitForOtherClient(s_MESSAGE_TYPES.gravitateParticules, args); return ParticuleEmitter.gravitateParticules(...args)},
         stopAllEmission:  (immediate) => {emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); return ParticuleEmitter.stopAllEmission(immediate)},
         stopEmissionById: (emitterId, immediate) => {emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); return ParticuleEmitter.stopEmissionById(emitterId, immediate)},
         writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById   //No need to emit to other client
@@ -122,19 +122,9 @@ function emitForOtherClient(type, payload){
  });
 }
 
-/*
-No aknowledge needed 
-new Promise(resolve => {
-  socket.emit(eventName, request, response => {
-    doSomethingWithResponse(response); // This is the acknowledgement function
-    resolve(response); // We can resolve the entire operation once acknowledged
-  });
-});
-*/
-
 /**
-    * Provides the main incoming message registration and distribution of socket messages on the receiving side.
-    */
+* Provides the main incoming message registration and distribution of socket messages on the receiving side.
+*/
 function listen()
 {
    game.socket.on(s_EVENT_NAME, (data) =>
@@ -148,8 +138,8 @@ function listen()
          // Dispatch the incoming message data by the message type.
          switch (data.type)
          {
-            case s_MESSAGE_TYPES.sprayParticules: ParticuleEmitter.sprayParticules(data.payload); break;
-            case s_MESSAGE_TYPES.gravitateParticules: ParticuleEmitter.gravitateParticules(data.payload); break;
+            case s_MESSAGE_TYPES.sprayParticules: ParticuleEmitter.sprayParticules(...data.payload); break;
+            case s_MESSAGE_TYPES.gravitateParticules: ParticuleEmitter.gravitateParticules(...data.payload); break;
             case s_MESSAGE_TYPES.stopEmissionById: ParticuleEmitter.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
             case s_MESSAGE_TYPES.stopAllEmission: ParticuleEmitter.stopAllEmission(data.payload); break;
          }
