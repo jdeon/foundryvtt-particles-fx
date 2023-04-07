@@ -33,6 +33,15 @@ Hooks.once('ready', function () {
 	}
 
   listen()
+
+  game.settings.register("particule-fx", "avoidParticule", {
+		name: "Avoid particule emission",
+		hint: "Don't show particule from other client (useful for lower config)",
+		scope: "client",
+        config: true,
+        type: Boolean,
+        default: false
+	});
 });
 
 Hooks.on("init", () => {
@@ -131,6 +140,8 @@ function listen()
    game.socket.on(s_EVENT_NAME, (data) =>
    {
       if (typeof data !== 'object') { return; }
+
+      if(game.settings.get("particule-fx", "avoidParticule")){ return; }
 
       try
       {
