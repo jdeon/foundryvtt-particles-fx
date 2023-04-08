@@ -110,9 +110,9 @@ export class Utils {
 
             if(prioritizeProperty === undefined){
                 //for end suffix value override by start value before default one
-                if (key instanceof String && key.endsWith('end')){
+                if (typeof key === 'string' && key.endsWith('End')){
                     //removve end from key and add start
-                    let startSuffixKey = key.substring(0,key.length - 3) + 'start'
+                    let startSuffixKey = key.substring(0,key.length - 3) + 'Start'
                     result[key] = prioritizeInput[startSuffixKey] || defaultInput[key]
                 } else {
                     result[key] = defaultInput[key]
