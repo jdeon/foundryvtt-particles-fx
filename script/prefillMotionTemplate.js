@@ -55,7 +55,23 @@ export const breathMotionTemplate = {
     alphaEnd:0
 }
 
+export const rayMotionTemplate = {
+    emissionDuration : 3000,
+    spawningFrequence: 1, 
+    maxParticules: 10000,
+    particuleLifetime: 2000,
+    particuleVelocityStart: 200,
+    particuleAngleStart: 0,
+    particuleSizeStart: 20,
+    particuleColorStart:new Vector3(250, 250, 50),
+    particuleColorEnd:new Vector3(250, '50_100', 0),
+    alphaStart:.1,
+    vibrationAmplitudeStart: '0_10',
+    vibrationFrequencyStart: '0_100'
+}
+
 export const motionTemplateDictionnary = {
     explosion : explosionMotionTemplate,
-    breath: breathMotionTemplate
+    breath: breathMotionTemplate,
+    ray: rayMotionTemplate
 }
