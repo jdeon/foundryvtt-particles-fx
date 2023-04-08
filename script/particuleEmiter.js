@@ -20,7 +20,7 @@ export default class ParticuleEmitter {
             }
         }
 
-        ParticuleEmitter._sprayParticules(motionTemplate, inputObject)
+        return ParticuleEmitter._sprayParticules(motionTemplate, inputObject)
     }
 
     static _sprayParticules(motionTemplate, inputObject){
@@ -64,7 +64,7 @@ export default class ParticuleEmitter {
             }
         }
 
-        ParticuleEmitter._gravitateParticules(motionTemplate, inputObject)
+        return ParticuleEmitter._gravitateParticules(motionTemplate, inputObject)
     }
 
     static _gravitateParticules(motionTemplate, inputObject){
