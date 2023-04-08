@@ -29,10 +29,8 @@ export default class ParticuleEmitter {
         const inputMergeTemplate = Utils.mergeInputTemplate(inputObject , motionTemplate)
         const finalInput = Utils.mergeInputTemplate(inputMergeTemplate , defaultMotionTemplate)
 
-        const position = new Vector3(finalInput.positionSpawning.x, finalInput.positionSpawning.y, 0)
-
         const particuleTemplate = new SprayingParticuleTemplate(
-            position, 
+            Vector3.build(finalInput.positionSpawning), 
             finalInput.particuleVelocityStart, 
             finalInput.particuleVelocityEnd, 
             finalInput.particuleAngleStart, 
@@ -41,8 +39,8 @@ export default class ParticuleEmitter {
             finalInput.particuleSizeEnd, 
             finalInput.particuleLifetime, 
             particuleTexture, 
-            finalInput.particuleColorStart, 
-            finalInput.particuleColorEnd,
+            Vector3.build(finalInput.particuleColorStart), 
+            Vector3.build(finalInput.particuleColorEnd),
             finalInput.alphaStart, 
             finalInput.alphaEnd,
             finalInput.vibrationAmplitudeStart, 
@@ -75,10 +73,8 @@ export default class ParticuleEmitter {
         const inputMergeTemplate = Utils.mergeInputTemplate(inputObject , motionTemplate)
         const finalInput = Utils.mergeInputTemplate(inputMergeTemplate , defaultMotionTemplate)
 
-        const position = new Vector3(finalInput.positionSpawning.x, finalInput.positionSpawning.y, 0)
-
         const particuleTemplate = new GravitingParticuleTemplate(
-            position, 
+            Vector3.build(finalInput.positionSpawning), 
             finalInput.particuleAngleStart, 
             finalInput.particuleVelocityStart, 
             finalInput.particuleVelocityEnd, 
@@ -88,8 +84,8 @@ export default class ParticuleEmitter {
             finalInput.particuleSizeEnd, 
             finalInput.particuleLifetime, 
             particuleTexture, 
-            finalInput.particuleColorStart, 
-            finalInput.particuleColorEnd,
+            Vector3.build(finalInput.particuleColorStart), 
+            Vector3.build(finalInput.particuleColorEnd),
             finalInput.alphaStart, 
             finalInput.alphaEnd,
             finalInput.vibrationAmplitudeStart, 
