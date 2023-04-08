@@ -63,6 +63,20 @@ To stop all emission, you need to use a macro to call the function ```particuleE
 
 An other boolean parameter for immediate deletion
 
+
+## Prefill template
+The methods emitting particules can be call with an prefill template. If you do so, your input are going to override the attribute of the prefill template but the prefill template will give the default value.
+The order of the paramater is not important, ```emit('prefillTemplate', {position: {x:100, y:'50_100'}})``` is the same as ```emit({position: {x:100, y:'50_100'}}, 'prefillTemplate')```
+
+Existing template :
+* explosion
+* breath
+* ray
+* vortex
+* aura
+* satellite
+
+
 ## Call by chat
 You can stop emmission by chat with command "/pfx" (for now, it work but foundry show an error for command unvalid)
 It's result on a message response in the chat
