@@ -23,7 +23,7 @@ export const defaultMotionTemplate = {
     vibrationFrequencyEnd: 0,
 }
 
-export const explosionMotionTemplate = {
+const explosionMotionTemplate = {
     emissionDuration : 250,
     spawningFrequence: .5, 
     maxParticules: 10000,
@@ -39,7 +39,7 @@ export const explosionMotionTemplate = {
     alphaEnd:.75
 }
 
-export const breathMotionTemplate = {
+const breathMotionTemplate = {
     emissionDuration : 1000,
     spawningFrequence: 2, 
     maxParticules: 1000,
@@ -55,7 +55,7 @@ export const breathMotionTemplate = {
     alphaEnd:0
 }
 
-export const rayMotionTemplate = {
+const rayMotionTemplate = {
     emissionDuration : 3000,
     spawningFrequence: 1, 
     maxParticules: 10000,
@@ -70,8 +70,58 @@ export const rayMotionTemplate = {
     vibrationFrequencyStart: '0_100'
 }
 
+const vortexMotionTemplate = {
+    spawningFrequence: 3, 
+    maxParticules: 1000,
+    particuleLifetime: [1000,1500],
+    particuleVelocityStart: 200,
+    particuleVelocityEnd: 50,
+    particuleAngleStart: '0_360',
+    particuleRadiusStart: 100,
+    particuleRadiusEnd: 25,
+    particuleSizeStart: 10,
+    particuleSizeEnd: '1_10',
+    particuleColorStart:new Vector3('150_240', 250, '150_230'),
+    particuleColorEnd:new Vector3(150, '35_150', 250),
+    alphaStart:1,
+    alphaEnd:0
+}
+
+const auraMotionTemplate = {
+    spawningFrequence: 2, 
+    maxParticules: 10000,
+    particuleLifetime: [1000,1500],
+    particuleVelocityStart: '25_50',
+    particuleVelocityEnd: '0_10',
+    particuleAngleStart: '0_360',
+    particuleRadiusStart: 50,
+    particuleRadiusEnd: '75_150',
+    particuleSizeStart: 10,
+    particuleSizeEnd: '20_40',
+    particuleColorStart:new Vector3('150_240', 250, '150_230'),
+    particuleColorEnd:new Vector3(150, '35_150', 250),
+    alphaStart:.5,
+    alphaEnd:['0_.25','.1_.25']
+}
+
+const satelliteMotionTemplate = {
+    spawningFrequence: 1000, 
+    maxParticules: 4,
+    particuleLifetime: 8000,
+    particuleVelocityStart: '90',
+    particuleAngleStart: 0,
+    particuleRadiusStart: 100,
+    particuleSizeStart: 50,
+    particuleColorStart:new Vector3('150_240', 250, '150_230'),
+    particuleColorEnd:new Vector3(150, '35_150', 250),
+    alphaStart:.9,
+}
+
 export const motionTemplateDictionnary = {
     explosion : explosionMotionTemplate,
     breath: breathMotionTemplate,
-    ray: rayMotionTemplate
+    ray: rayMotionTemplate,
+    vortex: vortexMotionTemplate,
+    aura: auraMotionTemplate,
+    satellite: satelliteMotionTemplate
 }
