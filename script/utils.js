@@ -142,4 +142,14 @@ export class Utils {
         return result;
     }
 
+    static getSourcePosition(){
+        if (canvas.tokens.controlled.length === 0){
+            return ui.notifications.error("Please select a token first");
+          }
+          
+          const source = canvas.tokens.controlled[0];
+
+          return {x:source.x + source.w /2, y:source.y + source.h /2}
+    }
+
 }

@@ -1,4 +1,5 @@
 import ParticuleEmitter from "./script/particuleEmiter.js"
+import { Utils } from "./script/utils.js"
 
 /**
  * Defines the event name to send all messages to over  `game.socket`.
@@ -65,17 +66,22 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
     let functionName = messageArgs[1]
     let functionParam
     let isImmediate = false
+    let otherParam = []
 
     for(let i = 2; i < messageArgs.length; i++){
       if(functionParam === undefined && !isNaN(messageArgs[i])){
         functionParam = messageArgs[i];
       } else if (!isImmediate && messageArgs[i] === '--instant'){
         isImmediate = true
+      } else {
+        otherParam.push(messageArgs[i])
       }
     }
     
     let resumeMessage
     let response
+    let sourcePosition
+    let idEmitter
 
     switch (functionName){
       case 'stopAll':
@@ -85,6 +91,16 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
       case 'stopById' :
         response = stopEmissionById(functionParam, isImmediate)
         resumeMessage = 'Stop emission ' + JSON.stringify(response)
+        break
+      case 'spray' : 
+        sourcePosition = Utils.getSourcePosition()
+        idEmitter = sprayParticules({positionSpawning: sourcePosition}, ...otherParam)
+        response = ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        break
+      case 'gravitate' : 
+        sourcePosition = Utils.getSourcePosition()
+        idEmitter = gravitateParticules({positionSpawning: sourcePosition}, ...otherParam)
+        response = ParticuleEmitter.writeMessageForEmissionById(idEmitter)
         break
     }
 
