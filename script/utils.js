@@ -1,5 +1,25 @@
 export class Vector3 { 
 
+    static build(object){
+        if(!object){
+            return undefined
+        }
+
+        if(!isNaN(object)){
+            return new Vector3 (
+                object,
+                object,
+                object,
+            )
+        }
+
+        return new Vector3 (
+            object.x || 0,
+            object.y || 0,
+            object.z || 0,
+        )
+    }
+
     constructor(x, y, z){
         this.x = x;
         this.y = y;
@@ -79,6 +99,57 @@ export class Utils {
         } else {
             return Math.random();
         }
+    }
+
+    static mergeInputTemplate(prioritizeInput, defaultInput){
+        
+        if(!defaultInput){
+            return prioritizeInput
+        } else if (!prioritizeInput){
+            return defaultInput
+        }
+
+        let result = {...prioritizeInput}
+
+        let defaultPropertyKey = Object.keys(defaultInput)
+
+        for (const key of defaultPropertyKey) {
+            let prioritizeProperty = prioritizeInput[key]
+
+            if(prioritizeProperty === undefined){
+                //for end suffix value override by start value before default one
+                if (typeof key === 'string' && key.endsWith('End')){
+                    //removve end from key and add start
+                    let startSuffixKey = key.substring(0,key.length - 3) + 'Start'
+                    result[key] = prioritizeInput[startSuffixKey] || defaultInput[key]
+                } else {
+                    result[key] = defaultInput[key]
+                }
+            } else if(Array.isArray(prioritizeProperty) || prioritizeProperty.length > 0){
+                if(prioritizeProperty.length > 0){
+                    result[key] = prioritizeProperty
+                } else {
+                    result[key] = defaultInput[key]
+                }
+            } else if(prioritizeProperty instanceof Object){
+                result[key] = Utils.mergeInputTemplate(prioritizeProperty, defaultInput[key])
+            } else {
+                result[key] = prioritizeProperty
+            }
+
+        }
+
+        return result;
+    }
+
+    static getSourcePosition(){
+        if (canvas.tokens.controlled.length === 0){
+            return ui.notifications.error("Please select a token first");
+          }
+          
+          const source = canvas.tokens.controlled[0];
+
+          return {x:source.x + source.w /2, y:source.y + source.h /2}
     }
 
 }

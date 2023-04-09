@@ -1,4 +1,5 @@
 import ParticuleEmitter from "./script/particuleEmiter.js"
+import { Utils } from "./script/utils.js"
 
 /**
  * Defines the event name to send all messages to over  `game.socket`.
@@ -25,10 +26,10 @@ Hooks.once('ready', function () {
     //On call, we call method localy and share data with other client
     window.particuleEmitter = {
         ...window.particuleEmitter, 
-        sprayParticules: (query) => {emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, query); return ParticuleEmitter.sprayParticules(query)},
-        gravitateParticules: (query) => {emitForOtherClient(s_MESSAGE_TYPES.gravitateParticules, query); return ParticuleEmitter.gravitateParticules(query)},
-        stopAllEmission:  (immediate) => {emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); return ParticuleEmitter.stopAllEmission(immediate)},
-        stopEmissionById: (emitterId, immediate) => {emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); return ParticuleEmitter.stopEmissionById(emitterId, immediate)},
+        sprayParticules: sprayParticules,
+        gravitateParticules: gravitateParticules,
+        stopAllEmission:  stopAllEmission,
+        stopEmissionById: stopEmissionById,
         writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById   //No need to emit to other client
 	}
 
@@ -65,28 +66,41 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
     let functionName = messageArgs[1]
     let functionParam
     let isImmediate = false
+    let otherParam = []
 
     for(let i = 2; i < messageArgs.length; i++){
       if(functionParam === undefined && !isNaN(messageArgs[i])){
         functionParam = messageArgs[i];
       } else if (!isImmediate && messageArgs[i] === '--instant'){
         isImmediate = true
+      } else {
+        otherParam.push(messageArgs[i])
       }
     }
     
     let resumeMessage
     let response
+    let sourcePosition
+    let idEmitter
 
     switch (functionName){
       case 'stopAll':
-        response = ParticuleEmitter.stopAllEmission(isImmediate)
-        emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate)
+        response = stopAllEmission(isImmediate)
         resumeMessage = 'Stop all emissions ' + JSON.stringify(response)
         break
       case 'stopById' :
-        response = ParticuleEmitter.stopEmissionById(functionParam, isImmediate)
-        emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate})
+        response = stopEmissionById(functionParam, isImmediate)
         resumeMessage = 'Stop emission ' + JSON.stringify(response)
+        break
+      case 'spray' : 
+        sourcePosition = Utils.getSourcePosition()
+        idEmitter = sprayParticules({positionSpawning: sourcePosition}, ...otherParam)
+        response = ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        break
+      case 'gravitate' : 
+        sourcePosition = Utils.getSourcePosition()
+        idEmitter = gravitateParticules({positionSpawning: sourcePosition}, ...otherParam)
+        response = ParticuleEmitter.writeMessageForEmissionById(idEmitter)
         break
     }
 
@@ -109,8 +123,7 @@ Hooks.on("renderChatMessage", function (chatlog, html, data) {
   buttons.on("click", (event) => {
     let button = event.currentTarget
     if(button.dataset.action === "delete"){
-        ParticuleEmitter.stopEmissionById(button.dataset.emitterId);
-        emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate})
+        stopEmissionById(button.dataset.emitterId);
     }
   })
 });
@@ -122,19 +135,9 @@ function emitForOtherClient(type, payload){
  });
 }
 
-/*
-No aknowledge needed 
-new Promise(resolve => {
-  socket.emit(eventName, request, response => {
-    doSomethingWithResponse(response); // This is the acknowledgement function
-    resolve(response); // We can resolve the entire operation once acknowledged
-  });
-});
-*/
-
 /**
-    * Provides the main incoming message registration and distribution of socket messages on the receiving side.
-    */
+* Provides the main incoming message registration and distribution of socket messages on the receiving side.
+*/
 function listen()
 {
    game.socket.on(s_EVENT_NAME, (data) =>
@@ -148,8 +151,8 @@ function listen()
          // Dispatch the incoming message data by the message type.
          switch (data.type)
          {
-            case s_MESSAGE_TYPES.sprayParticules: ParticuleEmitter.sprayParticules(data.payload); break;
-            case s_MESSAGE_TYPES.gravitateParticules: ParticuleEmitter.gravitateParticules(data.payload); break;
+            case s_MESSAGE_TYPES.sprayParticules: ParticuleEmitter.sprayParticules(...data.payload); break;
+            case s_MESSAGE_TYPES.gravitateParticules: ParticuleEmitter.gravitateParticules(...data.payload); break;
             case s_MESSAGE_TYPES.stopEmissionById: ParticuleEmitter.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
             case s_MESSAGE_TYPES.stopAllEmission: ParticuleEmitter.stopAllEmission(data.payload); break;
          }
@@ -160,6 +163,27 @@ function listen()
       }
    });
 }
+
+function sprayParticules(...args){
+  emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, args); 
+  return ParticuleEmitter.sprayParticules(...args)
+}
+
+function gravitateParticules(...args){
+  emitForOtherClient(s_MESSAGE_TYPES.gravitateParticules, args); 
+  return ParticuleEmitter.gravitateParticules(...args)
+}
+
+function stopAllEmission(immediate){
+  emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); 
+  return ParticuleEmitter.stopAllEmission(immediate)
+}
+
+function stopEmissionById(emitterId, immediate){
+  emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); 
+  return ParticuleEmitter.stopEmissionById(emitterId, immediate)
+}
+        
 
 /*
 Hooks.callAll(`particulefx-sprayParticules`, query)

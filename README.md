@@ -63,12 +63,35 @@ To stop all emission, you need to use a macro to call the function ```particuleE
 
 An other boolean parameter for immediate deletion
 
+
+## Prefill template
+The methods emitting particules can be call with prefill template. It exist two kind of template **prefillMotionTemplate** and **prefillColorTemplate** that can be combine. If you do so, your input are going to override the attribute of the prefills templates but the prefills templates will use as defaults values.
+The order of the paramater is not important, ```emit('prefillMotionTemplate', 'prefillColorTemplate', {position: {x:100, y:'50_100'}})``` is the same as ```emit('prefillColorTemplate', {position: {x:100, y:'50_100'}}, 'prefillMotionTemplate')```
+
+### Prefill motion template :
+* explosion
+* breath
+* ray
+* vortex
+* aura
+* satellite
+
+### Existing color template :
+* ice
+* fire
+* light
+* death
+* poison
+
+
 ## Call by chat
-You can stop emmission by chat with command "/pfx" (for now, it work but foundry show an error for command unvalid)
+You can stop emmission by chat with command "/pfx"
 It's result on a message response in the chat
 
-Two command :
+Commands :
 * /pfx stopAll
 * /pfx stopById *id* 
+* /pfx spray *prefillMotionTemplate* *prefillColorTemplate*
+* /pfx gravitate *prefillMotionTemplate* *prefillColorTemplate*
 
 We can add the param *--instant* to not wait the end of the particules lifetime

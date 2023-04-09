@@ -1,98 +1,81 @@
 import { SprayingParticuleTemplate, GravitingParticuleTemplate} from "./particuleTemplate.js"
-import { Vector3 } from "./utils.js"
+import { Vector3, Utils } from "./utils.js"
+import { motionTemplateDictionnary, defaultMotionTemplate } from "./prefillMotionTemplate.js"
+import { colorTemplateDictionnary, defaultColorTemplate } from "./prefillColorTemplate.js"
 
 export default class ParticuleEmitter { 
-    
-    static defaultInput = {
-        spawningFrequence: 3, 
-        maxParticules: 100,
-        positionSpawning: {x:0,y:0},
-        particuleLifetime: [1000,1500],
-        particuleVelocityStart: 200,
-        particuleVelocityEnd: 50,
-        particuleAngleStart: '0_360',
-        particuleAngleEnd: 0,
-        particuleRadiusStart: 100,
-        particuleRadiusEnd: 50,
-        particuleSizeStart: 10,
-        particuleSizeEnd: '10_25',
-        particuleColorStart:new Vector3(250, 250, 50),
-        particuleColorEnd:new Vector3(250, '50_100', 0),
-        alphaStart:1,
-        alphaEnd:0,
-        vibrationAmplitudeStart: 0,
-        vibrationAmplitudeEnd: 0,
-        vibrationFrequencyStart: 0,
-        vibrationFrequencyEnd: 0,
-    }
 
     static maxId = 1
 
     static emitters = []
 
-    static sprayParticules(inputObject){
-        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+    static sprayParticules(...args){
+        const orderInputArg = ParticuleEmitter._orderInputArg(args);
 
-        const position = new Vector3(
-            inputObject.positionSpawning.x || ParticuleEmitter.defaultInput.positionSpawning.x, 
-            inputObject.positionSpawning.y || ParticuleEmitter.defaultInput.positionSpawning.y, 
-            0
-            )
-
-        const particuleTemplate = new SprayingParticuleTemplate(
-            position, 
-            inputObject.particuleVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityStart, 
-            inputObject.particuleVelocityEnd || inputObject.particuleVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityEnd, 
-            inputObject.particuleAngleStart || ParticuleEmitter.defaultInput.particuleAngleStart, 
-            inputObject.particuleAngleEnd || inputObject.particuleAngleStart || ParticuleEmitter.defaultInput.particuleAngleEnd, 
-            inputObject.particuleSizeStart || ParticuleEmitter.defaultInput.particuleSizeStart,
-            inputObject.particuleSizeEnd || inputObject.particuleSizeStart || ParticuleEmitter.defaultInput.particuleSizeEnd, 
-            inputObject.particuleLifetime || ParticuleEmitter.defaultInput.particuleLifetime, 
-            particuleTexture, 
-            inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorStart, 
-            inputObject.particuleColorEnd || inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorEnd,
-            inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaStart, 
-            inputObject.alphaEnd || inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaEnd,
-            inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeStart, 
-            inputObject.vibrationAmplitudeEnd || inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeEnd,
-            inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyStart, 
-            inputObject.vibrationFrequencyEnd || inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyEnd,
-            );
-
-        return ParticuleEmitter._abstractInitParticules(inputObject, particuleTemplate)
+        return ParticuleEmitter._sprayParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject)
     }
 
-    static gravitateParticules(inputObject){
+    static _sprayParticules(colorTemplate, motionTemplate, inputObject){
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
-        const position = new Vector3(
-            inputObject.positionSpawning.x || ParticuleEmitter.defaultInput.positionSpawning.x, 
-            inputObject.positionSpawning.y || ParticuleEmitter.defaultInput.positionSpawning.y, 
-            0
-            )
+        const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
-        const particuleTemplate = new GravitingParticuleTemplate(
-            position, 
-            inputObject.particuleAngleStart || ParticuleEmitter.defaultInput.particuleAngleStart, 
-            inputObject.angularVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityStart, 
-            inputObject.angularVelocityEnd || inputObject.angularVelocityStart || ParticuleEmitter.defaultInput.particuleVelocityEnd, 
-            inputObject.particuleRadiusStart || ParticuleEmitter.defaultInput.particuleRadiusStart, 
-            inputObject.particuleRadiusEnd || inputObject.particuleRadiusStart || ParticuleEmitter.defaultInput.particuleRadiusEnd, 
-            inputObject.particuleSizeStart || ParticuleEmitter.defaultInput.particuleSizeStart,
-            inputObject.particuleSizeEnd || inputObject.particuleSizeStart || ParticuleEmitter.defaultInput.particuleSizeEnd, 
-            inputObject.particuleLifetime || ParticuleEmitter.defaultInput.particuleLifetime, 
+        const particuleTemplate = new SprayingParticuleTemplate(
+            Vector3.build(finalInput.positionSpawning), 
+            finalInput.particuleVelocityStart, 
+            finalInput.particuleVelocityEnd, 
+            finalInput.particuleAngleStart, 
+            finalInput.particuleAngleEnd, 
+            finalInput.particuleSizeStart,
+            finalInput.particuleSizeEnd, 
+            finalInput.particuleLifetime, 
             particuleTexture, 
-            inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorStart, 
-            inputObject.particuleColorEnd || inputObject.particuleColorStart || ParticuleEmitter.defaultInput.particuleColorEnd,
-            inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaStart, 
-            inputObject.alphaEnd || inputObject.alphaStart || ParticuleEmitter.defaultInput.alphaEnd,
-            inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeStart, 
-            inputObject.vibrationAmplitudeEnd || inputObject.vibrationAmplitudeStart || ParticuleEmitter.defaultInput.vibrationAmplitudeEnd,
-            inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyStart, 
-            inputObject.vibrationFrequencyEnd || inputObject.vibrationFrequencyStart || ParticuleEmitter.defaultInput.vibrationFrequencyEnd,
+            Vector3.build(finalInput.particuleColorStart), 
+            Vector3.build(finalInput.particuleColorEnd),
+            finalInput.alphaStart, 
+            finalInput.alphaEnd,
+            finalInput.vibrationAmplitudeStart, 
+            finalInput.vibrationAmplitudeEnd,
+            finalInput.vibrationFrequencyStart, 
+            finalInput.vibrationFrequencyEnd,
             );
 
-        return ParticuleEmitter._abstractInitParticules(inputObject, particuleTemplate)
+        return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate)
+    }
+
+    static gravitateParticules(...args){
+        const orderInputArg = ParticuleEmitter._orderInputArg(args);
+
+        return ParticuleEmitter._gravitateParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject)
+    }
+
+    static _gravitateParticules(colorTemplate, motionTemplate, inputObject){
+        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+
+        const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
+
+        const particuleTemplate = new GravitingParticuleTemplate(
+            Vector3.build(finalInput.positionSpawning), 
+            finalInput.particuleAngleStart, 
+            finalInput.particuleVelocityStart, 
+            finalInput.particuleVelocityEnd, 
+            finalInput.particuleRadiusStart, 
+            finalInput.particuleRadiusEnd, 
+            finalInput.particuleSizeStart,
+            finalInput.particuleSizeEnd, 
+            finalInput.particuleLifetime, 
+            particuleTexture, 
+            Vector3.build(finalInput.particuleColorStart), 
+            Vector3.build(finalInput.particuleColorEnd),
+            finalInput.alphaStart, 
+            finalInput.alphaEnd,
+            finalInput.vibrationAmplitudeStart, 
+            finalInput.vibrationAmplitudeEnd,
+            finalInput.vibrationFrequencyStart, 
+            finalInput.vibrationFrequencyEnd,
+            );
+
+        return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate)
     }
 
     static stopAllEmission(immediate){
@@ -159,17 +142,17 @@ export default class ParticuleEmitter {
     }
 
 
-    static _abstractInitParticules(inputObject, particuleTemplate){
+    static _abstractInitParticules(inputQuery, finalInput, particuleTemplate){
         const particuleEmitter = new ParticuleEmitter(
             particuleTemplate, 
-            inputObject.spawningFrequence || ParticuleEmitter.defaultInput.spawningFrequence, 
-            inputObject.maxParticules || ParticuleEmitter.defaultInput.maxParticules,
-            inputObject.emissionDuration
+            finalInput.spawningFrequence, 
+            finalInput.maxParticules,
+            finalInput.emissionDuration
             );
 
         // Listen for animate update
         particuleEmitter.callback = particuleEmitter.manageParticules.bind(particuleEmitter)
-        particuleEmitter.originalQuery = inputObject
+        particuleEmitter.originalQuery = inputQuery
         particuleEmitter.id = ParticuleEmitter.maxId ++
 
         canvas.app.ticker.add(particuleEmitter.callback)
@@ -177,6 +160,32 @@ export default class ParticuleEmitter {
         ParticuleEmitter.emitters.push(particuleEmitter)
 
         return particuleEmitter.id
+    }
+
+    static _orderInputArg(args){
+        let inputObject
+        let motionTemplate
+        let colorTemplate
+
+        for(let arg of args){
+            if(arg instanceof Object){
+                inputObject = arg
+            } else if(motionTemplateDictionnary[arg]){
+                motionTemplate =  motionTemplateDictionnary[arg]
+            } else if(colorTemplateDictionnary[arg]){
+                colorTemplate =  colorTemplateDictionnary[arg]
+            }
+        }
+
+        return {colorTemplate, motionTemplate, inputObject}
+    }
+
+    static _mergeTemplate(colorTemplate, motionTemplate, inputObject){
+        const inputMergeMotionTemplate = Utils.mergeInputTemplate(inputObject , motionTemplate)
+        const inputMergeColorTemplate = Utils.mergeInputTemplate(inputMergeMotionTemplate , colorTemplate)
+        const finalInput = Utils.mergeInputTemplate(inputMergeColorTemplate , {...defaultMotionTemplate, ...defaultColorTemplate})
+
+        return finalInput;
     }
 
 
