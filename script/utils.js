@@ -5,6 +5,14 @@ export class Vector3 {
             return undefined
         }
 
+        if(!isNaN(object)){
+            return new Vector3 (
+                object,
+                object,
+                object,
+            )
+        }
+
         return new Vector3 (
             object.x || 0,
             object.y || 0,
