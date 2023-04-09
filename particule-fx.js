@@ -25,10 +25,10 @@ Hooks.once('ready', function () {
     //On call, we call method localy and share data with other client
     window.particuleEmitter = {
         ...window.particuleEmitter, 
-        sprayParticules: (...args) => {emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, args); return ParticuleEmitter.sprayParticules(...args)},
-        gravitateParticules: (...args) => {emitForOtherClient(s_MESSAGE_TYPES.gravitateParticules, args); return ParticuleEmitter.gravitateParticules(...args)},
-        stopAllEmission:  (immediate) => {emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); return ParticuleEmitter.stopAllEmission(immediate)},
-        stopEmissionById: (emitterId, immediate) => {emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); return ParticuleEmitter.stopEmissionById(emitterId, immediate)},
+        sprayParticules: sprayParticules,
+        gravitateParticules: gravitateParticules,
+        stopAllEmission:  stopAllEmission,
+        stopEmissionById: stopEmissionById,
         writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById   //No need to emit to other client
 	}
 
@@ -79,13 +79,11 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
 
     switch (functionName){
       case 'stopAll':
-        response = ParticuleEmitter.stopAllEmission(isImmediate)
-        emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate)
+        response = stopAllEmission(isImmediate)
         resumeMessage = 'Stop all emissions ' + JSON.stringify(response)
         break
       case 'stopById' :
-        response = ParticuleEmitter.stopEmissionById(functionParam, isImmediate)
-        emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate})
+        response = stopEmissionById(functionParam, isImmediate)
         resumeMessage = 'Stop emission ' + JSON.stringify(response)
         break
     }
@@ -109,8 +107,7 @@ Hooks.on("renderChatMessage", function (chatlog, html, data) {
   buttons.on("click", (event) => {
     let button = event.currentTarget
     if(button.dataset.action === "delete"){
-        ParticuleEmitter.stopEmissionById(button.dataset.emitterId);
-        emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate})
+        stopEmissionById(button.dataset.emitterId);
     }
   })
 });
@@ -150,6 +147,27 @@ function listen()
       }
    });
 }
+
+function sprayParticules(...args){
+  emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, args); 
+  return ParticuleEmitter.sprayParticules(...args)
+}
+
+function gravitateParticules(...args){
+  emitForOtherClient(s_MESSAGE_TYPES.gravitateParticules, args); 
+  return ParticuleEmitter.gravitateParticules(...args)
+}
+
+function stopAllEmission(immediate){
+  emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); 
+  return ParticuleEmitter.stopAllEmission(immediate)
+}
+
+function stopEmissionById(emitterId, immediate){
+  emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); 
+  return ParticuleEmitter.stopEmissionById(emitterId, immediate)
+}
+        
 
 /*
 Hooks.callAll(`particulefx-sprayParticules`, query)
