@@ -13,8 +13,6 @@ export const defaultMotionTemplate = {
     particuleRadiusEnd: 50,
     particuleSizeStart: 10,
     particuleSizeEnd: '10_25',
-    particuleColorStart:new Vector3('150_240', 250, '150_230'),
-    particuleColorEnd:new Vector3(150, '35_150', 250),
     alphaStart:1,
     alphaEnd:0,
     vibrationAmplitudeStart: 0,
@@ -33,8 +31,6 @@ const explosionMotionTemplate = {
     particuleAngleStart: '0_360',
     particuleSizeStart: 10,
     particuleSizeEnd: '25_50',
-    particuleColorStart:new Vector3(250, 250, 50),
-    particuleColorEnd:new Vector3(250, '50_100', 0),
     alphaStart:1,
     alphaEnd:.75
 }
@@ -49,8 +45,6 @@ const breathMotionTemplate = {
     particuleAngleStart: '-30_30',
     particuleSizeStart: 10,
     particuleSizeEnd: '10_25',
-    particuleColorStart:new Vector3(250, 250, 50),
-    particuleColorEnd:new Vector3(250, '50_100', 0),
     alphaStart:1,
     alphaEnd:0
 }
@@ -63,8 +57,6 @@ const rayMotionTemplate = {
     particuleVelocityStart: 200,
     particuleAngleStart: 0,
     particuleSizeStart: 20,
-    particuleColorStart:new Vector3(250, 250, 50),
-    particuleColorEnd:new Vector3(250, '50_100', 0),
     alphaStart:.1,
     vibrationAmplitudeStart: '0_10',
     vibrationFrequencyStart: '0_100'
@@ -81,8 +73,6 @@ const vortexMotionTemplate = {
     particuleRadiusEnd: 25,
     particuleSizeStart: 10,
     particuleSizeEnd: '1_10',
-    particuleColorStart:new Vector3('150_240', 250, '150_230'),
-    particuleColorEnd:new Vector3(150, '35_150', 250),
     alphaStart:1,
     alphaEnd:0
 }
@@ -98,8 +88,6 @@ const auraMotionTemplate = {
     particuleRadiusEnd: '75_150',
     particuleSizeStart: 10,
     particuleSizeEnd: '20_40',
-    particuleColorStart:new Vector3('150_240', 250, '150_230'),
-    particuleColorEnd:new Vector3(150, '35_150', 250),
     alphaStart:.5,
     alphaEnd:['0_.25','.1_.25']
 }
@@ -112,8 +100,6 @@ const satelliteMotionTemplate = {
     particuleAngleStart: 0,
     particuleRadiusStart: 100,
     particuleSizeStart: 50,
-    particuleColorStart:new Vector3('150_240', 250, '150_230'),
-    particuleColorEnd:new Vector3(150, '35_150', 250),
     alphaStart:.9,
 }
 

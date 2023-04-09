@@ -1,6 +1,7 @@
 import { SprayingParticuleTemplate, GravitingParticuleTemplate} from "./particuleTemplate.js"
 import { Vector3, Utils } from "./utils.js"
 import { motionTemplateDictionnary, defaultMotionTemplate } from "./prefillMotionTemplate.js"
+import { colorTemplateDictionnary, defaultColorTemplate } from "./prefillColorTemplate.js"
 
 export default class ParticuleEmitter { 
 
@@ -9,25 +10,15 @@ export default class ParticuleEmitter {
     static emitters = []
 
     static sprayParticules(...args){
-        let inputObject
-        let motionTemplate
+        const orderInputArg = ParticuleEmitter._orderInputArg(args);
 
-        for(let arg of args){
-            if(arg instanceof Object){
-                inputObject = arg
-            } else if(motionTemplateDictionnary[arg]){
-                motionTemplate =  motionTemplateDictionnary[arg]
-            }
-        }
-
-        return ParticuleEmitter._sprayParticules(motionTemplate, inputObject)
+        return ParticuleEmitter._sprayParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject)
     }
 
-    static _sprayParticules(motionTemplate, inputObject){
+    static _sprayParticules(colorTemplate, motionTemplate, inputObject){
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
-        const inputMergeTemplate = Utils.mergeInputTemplate(inputObject , motionTemplate)
-        const finalInput = Utils.mergeInputTemplate(inputMergeTemplate , defaultMotionTemplate)
+        const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
         const particuleTemplate = new SprayingParticuleTemplate(
             Vector3.build(finalInput.positionSpawning), 
@@ -53,25 +44,15 @@ export default class ParticuleEmitter {
     }
 
     static gravitateParticules(...args){
-        let inputObject
-        let motionTemplate
+        const orderInputArg = ParticuleEmitter._orderInputArg(args);
 
-        for(let arg of args){
-            if(arg instanceof Object){
-                inputObject = arg
-            } else if(motionTemplateDictionnary[arg]){
-                motionTemplate =  motionTemplateDictionnary[arg]
-            }
-        }
-
-        return ParticuleEmitter._gravitateParticules(motionTemplate, inputObject)
+        return ParticuleEmitter._gravitateParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject)
     }
 
-    static _gravitateParticules(motionTemplate, inputObject){
+    static _gravitateParticules(colorTemplate, motionTemplate, inputObject){
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
-        const inputMergeTemplate = Utils.mergeInputTemplate(inputObject , motionTemplate)
-        const finalInput = Utils.mergeInputTemplate(inputMergeTemplate , defaultMotionTemplate)
+        const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
         const particuleTemplate = new GravitingParticuleTemplate(
             Vector3.build(finalInput.positionSpawning), 
@@ -179,6 +160,32 @@ export default class ParticuleEmitter {
         ParticuleEmitter.emitters.push(particuleEmitter)
 
         return particuleEmitter.id
+    }
+
+    static _orderInputArg(args){
+        let inputObject
+        let motionTemplate
+        let colorTemplate
+
+        for(let arg of args){
+            if(arg instanceof Object){
+                inputObject = arg
+            } else if(motionTemplateDictionnary[arg]){
+                motionTemplate =  motionTemplateDictionnary[arg]
+            } else if(colorTemplateDictionnary[arg]){
+                colorTemplate =  colorTemplateDictionnary[arg]
+            }
+        }
+
+        return {colorTemplate, motionTemplate, inputObject}
+    }
+
+    static _mergeTemplate(colorTemplate, motionTemplate, inputObject){
+        const inputMergeMotionTemplate = Utils.mergeInputTemplate(inputObject , motionTemplate)
+        const inputMergeColorTemplate = Utils.mergeInputTemplate(inputMergeMotionTemplate , colorTemplate)
+        const finalInput = Utils.mergeInputTemplate(inputMergeColorTemplate , {...defaultMotionTemplate, ...defaultColorTemplate})
+
+        return finalInput;
     }
 
 
