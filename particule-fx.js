@@ -95,12 +95,12 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
       case 'spray' : 
         sourcePosition = Utils.getSourcePosition()
         idEmitter = sprayParticules({positionSpawning: sourcePosition}, ...otherParam)
-        response = ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        ParticuleEmitter.writeMessageForEmissionById(idEmitter)
         break
       case 'gravitate' : 
         sourcePosition = Utils.getSourcePosition()
         idEmitter = gravitateParticules({positionSpawning: sourcePosition}, ...otherParam)
-        response = ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        ParticuleEmitter.writeMessageForEmissionById(idEmitter)
         break
     }
 
@@ -184,17 +184,6 @@ function stopEmissionById(emitterId, immediate){
   return ParticuleEmitter.stopEmissionById(emitterId, immediate)
 }
         
-
-/*
-Hooks.callAll(`particulefx-sprayParticules`, query)
-
-Hooks.on("particulefx-sprayParticules", function (query) {
-  ParticuleEmitter.sprayParticules(query);
-});
-*/
-
-
-
 /*
 MACRO TO USE
 
@@ -206,8 +195,6 @@ for (let target of canvas.tokens.controlled) {
 const position = {x:target.x + target.w /2, y:target.position.y + target.h /2}
 	let idEmitter = particuleEmitter.emitParticules({positionSpawning:position, particuleVelocityStart : 300})
 
-let message = await particuleEmitter.writeMessageForEmissionById(idEmitter, true)
-
-ui.chat.processMessage("/w gm " + message );
+  await particuleEmitter.writeMessageForEmissionById(idEmitter, true)
 }
  */

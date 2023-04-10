@@ -138,6 +138,8 @@ export default class ParticuleEmitter {
 
         let htmlMessage = await renderTemplate("modules/particule-fx/template/message-particule_state.hbs", dataExport)
 
+        ui.chat.processMessage("/w gm " + htmlMessage );
+
         return htmlMessage
     }
 
