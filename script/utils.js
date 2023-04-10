@@ -152,7 +152,8 @@ export class Utils {
 
     static getSourcePosition(){
         if (canvas.tokens.controlled.length === 0){
-            return ui.notifications.error("Please select a token first");
+            ui.notifications.error(game.i18n.localize("PARTICULE-FX.No-Token-selected"));
+            return 
           }
           
           const source = canvas.tokens.controlled[0];

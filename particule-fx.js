@@ -18,6 +18,14 @@ const s_MESSAGE_TYPES = {
   stopEmissionById: 'stopEmissionById'
 };
 
+const Existing_chat_command = [
+    'stopAll',
+    'stopById',
+    'spray',
+    'gravitate',
+    'help'
+]
+
 Hooks.once('ready', function () {
     console.log('particule-fx | ready to particule-fx'); 
 
@@ -94,16 +102,25 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
         break
       case 'spray' : 
         sourcePosition = Utils.getSourcePosition()
-        idEmitter = sprayParticules({positionSpawning: sourcePosition}, ...otherParam)
-        ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        if(sourcePosition){
+          idEmitter = sprayParticules({positionSpawning: sourcePosition}, ...otherParam)
+          ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        }
         break
       case 'gravitate' : 
         sourcePosition = Utils.getSourcePosition()
-        idEmitter = gravitateParticules({positionSpawning: sourcePosition}, ...otherParam)
-        ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        if(sourcePosition){
+          idEmitter = gravitateParticules({positionSpawning: sourcePosition}, ...otherParam)
+          ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        }
         break
+      case 'help' : 
+        resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Existing_chat_command.join(',');
+        break
+      default :
+        ui.notifications.error(game.i18n.localize("PARTICULE-FX.Chat-Command.Unrecognized"));
     }
-
+//Existing_chat_command
     if(resumeMessage){
       ui.chat.processMessage("/w gm " + resumeMessage )
     }
@@ -193,8 +210,6 @@ if (canvas.tokens.controlled.length === 0){
 
 for (let target of canvas.tokens.controlled) {
 const position = {x:target.x + target.w /2, y:target.position.y + target.h /2}
-	let idEmitter = particuleEmitter.emitParticules({positionSpawning:position, particuleVelocityStart : 300})
-
-  await particuleEmitter.writeMessageForEmissionById(idEmitter, true)
+	particuleEmitter.emitParticules({positionSpawning:position, particuleVelocityStart : 300})
 }
  */

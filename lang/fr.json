@@ -3,8 +3,11 @@
   "PARTICULE-FX.Settings.Avoid.description": "Ne pas afficher les émissions de particules générés par les autres clients (utils pour les petits configuration)",
   "PARTICULE-FX.Chat-Command.Stop-All.return": "Toutes les émissions stopées : ",
   "PARTICULE-FX.Chat-Command.Stop-Id.return": "Emission stopée : ",
+  "PARTICULE-FX.Chat-Command.help.return":"Voici les commandes du chat existantes pour particule FX : ",
+  "PARTICULE-FX.Chat-Command.Unrecognized":"Commande particule du chat  non reconnue,  /pfx help",
   "PARTICULE-FX.Emission.Not-found": "Pas d'émission trouvée pour l'id : ",
   "PARTICULE-FX.Emission.Title": "Particule Emission",
   "PARTICULE-FX.Emission.description": "Vous avez créé l'émetteur : ",
-  "PARTICULE-FX.Emission.delete-button": "Le supprimer"
+  "PARTICULE-FX.Emission.delete-button": "Le supprimer",
+  "PARTICULE-FX.No-Token-selected":"Veuillez sélectionner un token d'abord"
 }
