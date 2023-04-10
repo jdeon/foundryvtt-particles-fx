@@ -21,6 +21,7 @@ export default class ParticuleEmitter {
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
         const particuleTemplate = new SprayingParticuleTemplate(
+            finalInput.source,
             Vector3.build(finalInput.positionSpawning), 
             finalInput.particuleVelocityStart, 
             finalInput.particuleVelocityEnd, 
@@ -55,7 +56,7 @@ export default class ParticuleEmitter {
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
         const particuleTemplate = new GravitingParticuleTemplate(
-            Vector3.build(finalInput.positionSpawning), 
+            finalInput.source,
             finalInput.particuleAngleStart, 
             finalInput.particuleVelocityStart, 
             finalInput.particuleVelocityEnd, 

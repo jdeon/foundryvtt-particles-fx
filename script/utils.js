@@ -79,14 +79,14 @@ export class Utils {
         } else if (typeof inValue === 'string') {
             const valueBoundary = inValue.split('_')
             if(valueBoundary.length === 1){
-                returnNumber(valueBoundary[0]);
+                //Placeable onject value
+                return Utils.getPlaceableObjectById(valueBoundary[0]);
             } else if (valueBoundary.length === 2){
                 let minValue = Number(valueBoundary[0])
                 let maxValue = Number(valueBoundary[1])
 
                 return minValue + (maxValue - minValue) * Utils.includingRandom() ;
             }
-
         } else if (inValue instanceof Vector3) {
             let x = Utils.getRandomValueFrom(inValue.x)
             let y = Utils.getRandomValueFrom(inValue.y)
@@ -97,6 +97,8 @@ export class Utils {
         } else if (Array.isArray(inValue) && inValue.length > 0) {
             const indexToRetrieve =  Math.floor(Math.random() * inValue.length);
             return Utils.getRandomValueFrom(inValue[indexToRetrieve]);
+        } else {
+            return inValue
         }
 
     }
@@ -151,14 +153,49 @@ export class Utils {
     }
 
     static getSourcePosition(){
-        if (canvas.tokens.controlled.length === 0){
+        if (canvas.activeLayer.controlled.length === 0){
             ui.notifications.error(game.i18n.localize("PARTICULE-FX.No-Token-selected"));
             return 
           }
           
-          const source = canvas.tokens.controlled[0];
+          const source = canvas.activeLayer.controlled[0];
 
-          return {x:source.x + source.w /2, y:source.y + source.h /2}
+          return Utils.getSourcePosition(source)
     }
 
+    static getSourcePosition(source){
+
+        if(source.x === undefined || source.y === undefined){
+            return
+        }
+
+        let result = {
+            x : source.x,
+            y : source.y
+        }
+
+        result.x += (source.w || source.width || 0) /2
+        result.y += (source.h || source.height || 0) /2
+
+        return result
+    }
+
+    static getPlaceableObjectById(id){
+        if(!id){
+            return 
+        }
+
+        let result
+        for(let layer of canvas.layers){
+            if(typeof layer.get === "function"){
+                result = layer.get(id)
+            }
+
+            if(result){
+                break
+            }
+        }
+
+        return result
+    }
 }

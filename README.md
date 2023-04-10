@@ -11,6 +11,7 @@ This is all the input possible to use. If they are not provide a default value i
 
 | Parameter name  | accepted value          | Default value |
 | :--------------- |:---------------:| -----:|
+|        source                    |             Placeable object id or an object with x and y attributes with default pattern inside                                                                        |    {x:0,y:0}          |
 |        spawningFrequence         |             Number                                                                       |    3          |
 |        maxParticules             |             Number                                                                       |   100         |
 |        emissionDuration          |             Number                                                                       |   loop infinitely if undefined       |

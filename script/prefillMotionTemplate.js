@@ -3,6 +3,7 @@ import { Vector3 } from "./utils.js"
 export const defaultMotionTemplate = {
     spawningFrequence: 3, 
     maxParticules: 100,
+    source: {x:0,y:0},
     positionSpawning: {x:0,y:0},
     particuleLifetime: [1000,1500],
     particuleVelocityStart: 200,

@@ -1,3 +1,5 @@
+import { Utils } from "./utils.js";
+
 export class Particule { 
 
     constructor(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd,
@@ -87,7 +89,7 @@ export class GravitingParticule  extends Particule {
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
         super(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
-        this.source = {x: source.x, y: source.y};
+        this.source = source
         this.angle = angleStart                             //Number 
         this.angularVelocityStart = angularVelocityStart;  //Number      
         this.angularVelocityEnd = angularVelocityEnd;      //Number
@@ -105,8 +107,10 @@ export class GravitingParticule  extends Particule {
         
         const updatedRadius = this.radiusEnd ? (((this.radiusStart - this.radiusEnd) * lifetimeProportion) + this.radiusEnd) : this.radiusStart;
 
-        this.positionVibrationLess.x = this.source.x + Math.cos(angleRadiant) * updatedRadius;
-        this.positionVibrationLess.y = this.source.y + Math.sin(angleRadiant) * updatedRadius;
+        let source = Utils.getSourcePosition(this.source)
+
+        this.positionVibrationLess.x = source.x + Math.cos(angleRadiant) * updatedRadius;
+        this.positionVibrationLess.y = source.y + Math.sin(angleRadiant) * updatedRadius;
 
         super.manageLifetime(dt)
 

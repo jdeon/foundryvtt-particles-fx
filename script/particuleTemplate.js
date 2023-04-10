@@ -4,18 +4,18 @@ import { Utils } from "./utils.js"
 
 export class ParticuleTemplate { 
 
-    constructor(positionSpawning, sizeStart, sizeEnd, particuleLifetime, particuleTexture, 
+    constructor(source, sizeStart, sizeEnd, particuleLifetime, particuleTexture, 
         colorStart, colorEnd, alphaStart, alphaEnd, 
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        this.positionSpawning = positionSpawning;   //Vector 3 of Array
-        this.sizeStart = sizeStart;                 //Array of Number
-        this.sizeEnd = sizeEnd;                     //Array of Number
-        this.particuleLifetime = particuleLifetime; //Array of Number
-        this.particuleTexture = particuleTexture;   //PIXI.Texture
-        this.colorStart = colorStart;               //Vector3 with array
-        this.colorEnd = colorEnd;                   //Vector3 with array
-        this.alphaStart = alphaStart;               //Array of Number
-        this.alphaEnd = alphaEnd;                   //Array of Number
+        this.source = source                        
+        this.sizeStart = sizeStart;                 
+        this.sizeEnd = sizeEnd;                     
+        this.particuleLifetime = particuleLifetime; 
+        this.particuleTexture = particuleTexture;   
+        this.colorStart = colorStart;               
+        this.colorEnd = colorEnd;                   
+        this.alphaStart = alphaStart;               
+        this.alphaEnd = alphaEnd;                   
         this.vibrationAmplitudeStart = vibrationAmplitudeStart
         this.vibrationAmplitudeEnd = vibrationAmplitudeEnd
         this.vibrationFrequencyStart = vibrationFrequencyStart
@@ -23,9 +23,12 @@ export class ParticuleTemplate {
     }
 
     generateParticules(){
+
+        let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source))
+
         let sprite = new PIXI.Sprite(this.particuleTexture)
-        sprite.x = Utils.getRandomValueFrom(this.positionSpawning.x);
-        sprite.y = Utils.getRandomValueFrom(this.positionSpawning.y);
+        sprite.x = sourcePosition.x;
+        sprite.y = sourcePosition.y;
         sprite.anchor.set(0.5);
 
         let startSize = Utils.getRandomValueFrom(this.sizeStart)
@@ -54,11 +57,11 @@ export class ParticuleTemplate {
 
 export class SprayingParticuleTemplate extends ParticuleTemplate{ 
 
-    constructor(positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
+    constructor(source, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
         sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        super(positionSpawning, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
-        
+        super(source, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        this.positionSpawning = positionSpawning;   
         this.velocityStart = velocityStart;         //Array of Number      
         this.velocityEnd = velocityEnd;             //Array of Number
         this.angleStart = angleStart;               //Array of Number      
@@ -66,9 +69,12 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
     }
 
     generateParticules(){
+        let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source))
+        let positionSpawning = Utils.getRandomValueFrom(this.positionSpawning)
+
         let sprite = new PIXI.Sprite(this.particuleTexture)
-        sprite.x = Utils.getRandomValueFrom(this.positionSpawning.x);
-        sprite.y = Utils.getRandomValueFrom(this.positionSpawning.y);
+        sprite.x = sourcePosition.x + positionSpawning.x;
+        sprite.y = sourcePosition.y + positionSpawning.y;
         sprite.anchor.set(0.5);
 
         let startSize = Utils.getRandomValueFrom(this.sizeStart)
@@ -78,7 +84,6 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
         let colorStart = Utils.getRandomValueFrom(this.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
 
-        //constructor(sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, sizeStart, sizeEnd){
         return new SprayingParticule(
             sprite,
             Utils.getRandomValueFrom(this.particuleLifetime),
@@ -102,10 +107,10 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
 
 export class GravitingParticuleTemplate extends ParticuleTemplate { 
 
-    constructor(positionSpawning, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, 
+    constructor(source, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, 
         sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        super(positionSpawning, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        super(source, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
         
         this.angleStart = angleStart;                        //Array of Number
         this.angularVelocityStart = angularVelocityStart;  //Number      
@@ -115,18 +120,16 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
     }
 
     generateParticules(){
-        let source = {
-            x : Utils.getRandomValueFrom(this.positionSpawning.x),
-            y : Utils.getRandomValueFrom(this.positionSpawning.y)
-        }
+        let source = Utils.getRandomValueFrom(this.source)
+        let sourcePosition = Utils.getSourcePosition(source)
 
         let angleStart = Utils.getRandomValueFrom(this.angleStart)
         let radiusStart = Utils.getRandomValueFrom(this.radiusStart)
         
         let sprite = new PIXI.Sprite(this.particuleTexture)
         sprite.anchor.set(0.5);
-        sprite.x = source.x + Math.cos(angleStart * (Math.PI / 180)) * radiusStart;
-        sprite.y = source.y + Math.sin(angleStart * (Math.PI / 180)) * radiusStart;
+        sprite.x = sourcePosition.x + Math.cos(angleStart * (Math.PI / 180)) * radiusStart;
+        sprite.y = sourcePosition.y + Math.sin(angleStart * (Math.PI / 180)) * radiusStart;
 
         let startSize = Utils.getRandomValueFrom(this.sizeStart)
         sprite.width = startSize;
