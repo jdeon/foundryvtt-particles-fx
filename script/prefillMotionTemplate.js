@@ -52,12 +52,14 @@ const breathMotionTemplate = {
 }
 
 const rayMotionTemplate = {
+    positionSpawning: {x:0,y:'-10_10'},
     emissionDuration : 3000,
     spawningFrequence: 1, 
     maxParticules: 10000,
     particuleLifetime: 2000,
     particuleVelocityStart: 200,
     particuleAngleStart: 0,
+    particuleSizeStart: 15,
     alphaStart:.1,
     vibrationAmplitudeStart: '0_10',
     vibrationFrequencyStart: '0_100'
