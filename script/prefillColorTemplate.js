@@ -30,10 +30,16 @@ const poisonColorTemplate = {
     particuleColorEnd:new Vector3('10_50', '50_100', '10_50'),
 }
 
+const silverColorTemplate = {
+    particuleColorStart:[new Vector3(50,50,50),new Vector3(100,100,100),new Vector3(150,150,150),new Vector3(200,200,200)],
+    particuleColorStart:[new Vector3(100,100,100),new Vector3(150,150,150),new Vector3(200,200,200),new Vector3(250,250,250)]
+}
+
 export const colorTemplateDictionnary = {
     fire : fireColorTemplate,
     ice: iceColorTemplate,
     death: deathColorTemplate,
     light: lightColorTemplate,
-    poison: poisonColorTemplate
+    poison: poisonColorTemplate,
+    silver: silverColorTemplate
 }

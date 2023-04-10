@@ -5,19 +5,27 @@ export class Vector3 {
             return undefined
         }
 
-        if(!isNaN(object)){
-            return new Vector3 (
+        let result
+        if(Array.isArray(object)){
+            result = []
+            for(let item of object){
+                result.push(Vector3.build(item))
+            }
+        } else if(!isNaN(object)){
+            result = new Vector3 (
                 object,
                 object,
                 object,
             )
+        } else {
+            result = new Vector3 (
+                object.x || 0,
+                object.y || 0,
+                object.z || 0,
+            )
         }
 
-        return new Vector3 (
-            object.x || 0,
-            object.y || 0,
-            object.z || 0,
-        )
+        return result
     }
 
     constructor(x, y, z){

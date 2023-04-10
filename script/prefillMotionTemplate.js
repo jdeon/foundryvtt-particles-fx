@@ -103,11 +103,24 @@ const satelliteMotionTemplate = {
     alphaStart:.9,
 }
 
+const slashMotionTemplate = {
+    spawningFrequence: .5, 
+    maxParticules: 500,
+    emissionDuration : 250,
+    particuleLifetime: 500,
+    particuleVelocityStart: 180,
+    particuleAngleStart: -45,
+    particuleRadiusStart: [50, 75, 100],
+    particuleSizeStart: 5,
+    alphaStart:.5
+}
+
 export const motionTemplateDictionnary = {
     explosion : explosionMotionTemplate,
     breath: breathMotionTemplate,
     ray: rayMotionTemplate,
     vortex: vortexMotionTemplate,
     aura: auraMotionTemplate,
-    satellite: satelliteMotionTemplate
+    satellite: satelliteMotionTemplate,
+    slash: slashMotionTemplate
 }
