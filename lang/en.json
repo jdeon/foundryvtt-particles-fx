@@ -1,0 +1,10 @@
+{
+    "PARTICULE-FX.Settings.Avoid.label": "Avoid particule emission",
+    "PARTICULE-FX.Settings.Avoid.description": "Don't show particule from other client (useful for lower config)",
+    "PARTICULE-FX.Chat-Command.Stop-All.return": "Stop all emissions : ",
+    "PARTICULE-FX.Chat-Command.Stop-Id.return": "Stop emission : ",
+    "PARTICULE-FX.Emission.Not-found": "No emitter found for id : ",
+    "PARTICULE-FX.Emission.Title": "Particule Emission",
+    "PARTICULE-FX.Emission.description": "You have created this emittor : ",
+    "PARTICULE-FX.Emission.delete-button": "Delete it"
+  }

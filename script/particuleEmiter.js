@@ -127,7 +127,7 @@ export default class ParticuleEmitter {
         let emitter = ParticuleEmitter.emitters.find(emitter => emitter.id === emitterId);
 
         if(emitter === undefined){
-            return 'No emitter found for id : ' + emitterId
+            return game.i18n.localize("PARTICULE-FX.Emission.Not-found") + emitterId
         }
 
         //show originalQuery if verbal

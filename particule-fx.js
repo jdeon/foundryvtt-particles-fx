@@ -36,8 +36,8 @@ Hooks.once('ready', function () {
   listen()
 
   game.settings.register("particule-fx", "avoidParticule", {
-		name: "Avoid particule emission",
-		hint: "Don't show particule from other client (useful for lower config)",
+		name: game.i18n.localize("PARTICULE-FX.Settings.Avoid.label"),
+		hint: game.i18n.localize("PARTICULE-FX.Settings.Avoid.description"),
 		scope: "client",
         config: true,
         type: Boolean,
@@ -86,11 +86,11 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
     switch (functionName){
       case 'stopAll':
         response = stopAllEmission(isImmediate)
-        resumeMessage = 'Stop all emissions ' + JSON.stringify(response)
+        resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-All.return") + JSON.stringify(response)
         break
       case 'stopById' :
         response = stopEmissionById(functionParam, isImmediate)
-        resumeMessage = 'Stop emission ' + JSON.stringify(response)
+        resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
         break
       case 'spray' : 
         sourcePosition = Utils.getSourcePosition()

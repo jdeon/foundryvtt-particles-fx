@@ -17,6 +17,13 @@
 	"esmodules": [
 		"./particule-fx.js"
 	],
+	"languages": [
+		{
+		  "lang": "en",
+		  "name": "English",
+		  "path": "lang/en.json"
+		}
+	],
 	"packs": [
 		{
 		  "name": "particule-fx-macros",
