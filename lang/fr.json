@@ -1,0 +1,10 @@
+{
+  "PARTICULE-FX.Settings.Avoid.label": "Bloquer les émissions",
+  "PARTICULE-FX.Settings.Avoid.description": "Ne pas afficher les émissions de particules générés par les autres clients (utils pour les petits configuration)",
+  "PARTICULE-FX.Chat-Command.Stop-All.return": "Toutes les émissions stopées : ",
+  "PARTICULE-FX.Chat-Command.Stop-Id.return": "Emission stopée : ",
+  "PARTICULE-FX.Emission.Not-found": "Pas d'émission trouvée pour l'id : ",
+  "PARTICULE-FX.Emission.Title": "Particule Emission",
+  "PARTICULE-FX.Emission.description": "Vous avez créé l'émetteur : ",
+  "PARTICULE-FX.Emission.delete-button": "Le supprimer"
+}
