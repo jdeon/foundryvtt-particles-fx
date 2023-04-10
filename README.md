@@ -47,6 +47,7 @@ To emit graviting particule, you need to use a macro to call the function ```par
 * particuleAngleEnd did not exist
 * particuleRadiusStart is a new parameter exclusive to Graviting particule and accept default pattern. It define the distance between the positionSpawning and the particule at the start
 * particuleRadiusEnd is a new parameter exclusive to Graviting particule and accept default pattern. It define the distance between the positionSpawning and the particule at the end
+* onlyEmitterFollow 
 
 
 ## Stop all emission

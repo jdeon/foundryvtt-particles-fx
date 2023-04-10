@@ -109,7 +109,7 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
 
     constructor(source, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, 
         sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow){
         super(source, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
         
         this.angleStart = angleStart;                        //Array of Number
@@ -117,6 +117,7 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
         this.angularVelocityEnd = angularVelocityEnd;      //Number
         this.radiusStart = radiusStart;                     //Number      
         this.radiusEnd = radiusEnd;                         //Number
+        this.onlyEmitterFollow = onlyEmitterFollow;         //Boolean
     }
 
     generateParticules(){
@@ -140,7 +141,7 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
 
         return new GravitingParticule(
             sprite,
-            source,
+            this.onlyEmitterFollow? sourcePosition : source,
             Utils.getRandomValueFrom(this.particuleLifetime),
             angleStart,
             Utils.getRandomValueFrom(this.angularVelocityStart),

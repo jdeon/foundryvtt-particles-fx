@@ -152,15 +152,13 @@ export class Utils {
         return result;
     }
 
-    static getSourcePosition(){
+    static getSelectedSource(){
         if (canvas.activeLayer.controlled.length === 0){
             ui.notifications.error(game.i18n.localize("PARTICULE-FX.No-Token-selected"));
             return 
           }
           
-          const source = canvas.activeLayer.controlled[0];
-
-          return Utils.getSourcePosition(source)
+          return canvas.activeLayer.controlled[0];
     }
 
     static getSourcePosition(source){

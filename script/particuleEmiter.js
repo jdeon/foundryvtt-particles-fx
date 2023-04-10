@@ -74,6 +74,7 @@ export default class ParticuleEmitter {
             finalInput.vibrationAmplitudeEnd,
             finalInput.vibrationFrequencyStart, 
             finalInput.vibrationFrequencyEnd,
+            finalInput.onlyEmitterFollow
             );
 
         return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate)

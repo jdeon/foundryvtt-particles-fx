@@ -88,7 +88,7 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
     
     let resumeMessage
     let response
-    let sourcePosition
+    let source
     let idEmitter
 
     switch (functionName){
@@ -101,16 +101,16 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
         resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
         break
       case 'spray' : 
-        sourcePosition = Utils.getSourcePosition()
-        if(sourcePosition){
-          idEmitter = sprayParticules({positionSpawning: sourcePosition}, ...otherParam)
+        source = Utils.getSelectedSource()
+        if(source){
+          idEmitter = sprayParticules({source: source.id}, ...otherParam)
           ParticuleEmitter.writeMessageForEmissionById(idEmitter)
         }
         break
       case 'gravitate' : 
-        sourcePosition = Utils.getSourcePosition()
-        if(sourcePosition){
-          idEmitter = gravitateParticules({positionSpawning: sourcePosition}, ...otherParam)
+        source = Utils.getSelectedSource()
+        if(source){
+          idEmitter = gravitateParticules({source: source.id}, ...otherParam)
           ParticuleEmitter.writeMessageForEmissionById(idEmitter)
         }
         break

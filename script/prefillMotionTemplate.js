@@ -20,6 +20,7 @@ export const defaultMotionTemplate = {
     vibrationAmplitudeEnd: 0,
     vibrationFrequencyStart: 0,
     vibrationFrequencyEnd: 0,
+    onlyEmitterFollow: false
 }
 
 const explosionMotionTemplate = {
@@ -57,7 +58,6 @@ const rayMotionTemplate = {
     particuleLifetime: 2000,
     particuleVelocityStart: 200,
     particuleAngleStart: 0,
-    particuleSizeStart: 20,
     alphaStart:.1,
     vibrationAmplitudeStart: '0_10',
     vibrationFrequencyStart: '0_100'
@@ -90,7 +90,8 @@ const auraMotionTemplate = {
     particuleSizeStart: 10,
     particuleSizeEnd: '20_40',
     alphaStart:.5,
-    alphaEnd:['0_.25','.1_.25']
+    alphaEnd:['0_.25','.1_.25'],
+    onlyEmitterFollow: true
 }
 
 const satelliteMotionTemplate = {
