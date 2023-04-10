@@ -69,12 +69,13 @@ The methods emitting particules can be call with prefill template. It exist two 
 The order of the paramater is not important, ```emit('prefillMotionTemplate', 'prefillColorTemplate', {position: {x:100, y:'50_100'}})``` is the same as ```emit('prefillColorTemplate', {position: {x:100, y:'50_100'}}, 'prefillMotionTemplate')```
 
 ### Prefill motion template :
-* explosion
-* breath
-* ray
-* vortex
-* aura
-* satellite
+* explosion (designed for spray)
+* breath (designed for spray)
+* ray (designed for spray)
+* vortex (designed for gravitate)
+* aura (designed for gravitate)
+* satellite (designed for gravitate)
+* slash (designed for gravitate)
 
 ### Existing color template :
 * ice
@@ -82,6 +83,7 @@ The order of the paramater is not important, ```emit('prefillMotionTemplate', 'p
 * light
 * death
 * poison
+* silver
 
 
 ## Call by chat
@@ -93,5 +95,7 @@ Commands :
 * /pfx stopById *id* 
 * /pfx spray *prefillMotionTemplate* *prefillColorTemplate*
 * /pfx gravitate *prefillMotionTemplate* *prefillColorTemplate*
+* /pfx help
+
 
 We can add the param *--instant* to not wait the end of the particules lifetime

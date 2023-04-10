@@ -18,6 +18,14 @@ const s_MESSAGE_TYPES = {
   stopEmissionById: 'stopEmissionById'
 };
 
+const Existing_chat_command = [
+    'stopAll',
+    'stopById',
+    'spray',
+    'gravitate',
+    'help'
+]
+
 Hooks.once('ready', function () {
     console.log('particule-fx | ready to particule-fx'); 
 
@@ -36,8 +44,8 @@ Hooks.once('ready', function () {
   listen()
 
   game.settings.register("particule-fx", "avoidParticule", {
-		name: "Avoid particule emission",
-		hint: "Don't show particule from other client (useful for lower config)",
+		name: game.i18n.localize("PARTICULE-FX.Settings.Avoid.label"),
+		hint: game.i18n.localize("PARTICULE-FX.Settings.Avoid.description"),
 		scope: "client",
         config: true,
         type: Boolean,
@@ -86,24 +94,33 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
     switch (functionName){
       case 'stopAll':
         response = stopAllEmission(isImmediate)
-        resumeMessage = 'Stop all emissions ' + JSON.stringify(response)
+        resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-All.return") + JSON.stringify(response)
         break
       case 'stopById' :
         response = stopEmissionById(functionParam, isImmediate)
-        resumeMessage = 'Stop emission ' + JSON.stringify(response)
+        resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
         break
       case 'spray' : 
         sourcePosition = Utils.getSourcePosition()
-        idEmitter = sprayParticules({positionSpawning: sourcePosition}, ...otherParam)
-        response = ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        if(sourcePosition){
+          idEmitter = sprayParticules({positionSpawning: sourcePosition}, ...otherParam)
+          ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        }
         break
       case 'gravitate' : 
         sourcePosition = Utils.getSourcePosition()
-        idEmitter = gravitateParticules({positionSpawning: sourcePosition}, ...otherParam)
-        response = ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        if(sourcePosition){
+          idEmitter = gravitateParticules({positionSpawning: sourcePosition}, ...otherParam)
+          ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        }
         break
+      case 'help' : 
+        resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Existing_chat_command.join(',');
+        break
+      default :
+        ui.notifications.error(game.i18n.localize("PARTICULE-FX.Chat-Command.Unrecognized"));
     }
-
+//Existing_chat_command
     if(resumeMessage){
       ui.chat.processMessage("/w gm " + resumeMessage )
     }
@@ -184,17 +201,6 @@ function stopEmissionById(emitterId, immediate){
   return ParticuleEmitter.stopEmissionById(emitterId, immediate)
 }
         
-
-/*
-Hooks.callAll(`particulefx-sprayParticules`, query)
-
-Hooks.on("particulefx-sprayParticules", function (query) {
-  ParticuleEmitter.sprayParticules(query);
-});
-*/
-
-
-
 /*
 MACRO TO USE
 
@@ -204,10 +210,6 @@ if (canvas.tokens.controlled.length === 0){
 
 for (let target of canvas.tokens.controlled) {
 const position = {x:target.x + target.w /2, y:target.position.y + target.h /2}
-	let idEmitter = particuleEmitter.emitParticules({positionSpawning:position, particuleVelocityStart : 300})
-
-let message = await particuleEmitter.writeMessageForEmissionById(idEmitter, true)
-
-ui.chat.processMessage("/w gm " + message );
+	particuleEmitter.emitParticules({positionSpawning:position, particuleVelocityStart : 300})
 }
  */
