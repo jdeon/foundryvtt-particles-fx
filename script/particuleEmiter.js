@@ -203,10 +203,13 @@ export default class ParticuleEmitter {
         this.maxParticules = maxParticules
         this.remainingTime = emissionDuration
         this.isGravitate = isGravitate
+        this.lastUpdate = Date.now();
     }
 
     manageParticules(){
-        const dt = canvas.app.ticker.elapsedMS;//85 in average
+        let newDate = Date.now()
+        const dt = newDate - this.lastUpdate
+        this.lastUpdate = newDate
 
         for (let i = 0; i < this.particules.length; i++) {
             const particule = this.particules[i]
