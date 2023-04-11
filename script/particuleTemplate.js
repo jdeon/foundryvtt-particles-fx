@@ -4,10 +4,27 @@ import { Utils } from "./utils.js"
 
 export class ParticuleTemplate { 
 
+    static _translatePlaceableObject(source){
+        let result
+
+        if(Array.isArray(source)){
+            result = []
+            for(item of source){
+                result.push(ParticuleTemplate._translatePlaceableObject(item))
+            }
+        } else if (typeof source === 'string' && isNaN(source) && !source.includes('_')){
+            result = Utils.getPlaceableObjectById(source)
+        } else {
+            result = source
+        }
+
+        return result
+    }
+
     constructor(source, sizeStart, sizeEnd, particuleLifetime, particuleTexture, 
         colorStart, colorEnd, alphaStart, alphaEnd, 
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        this.source = source                        
+        this.source = ParticuleTemplate._translatePlaceableObject(source)                        
         this.sizeStart = sizeStart;                 
         this.sizeEnd = sizeEnd;                     
         this.particuleLifetime = particuleLifetime; 
