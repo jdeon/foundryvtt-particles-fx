@@ -35,11 +35,17 @@ const silverColorTemplate = {
     particuleColorStart:[new Vector3(100,100,100),new Vector3(150,150,150),new Vector3(200,200,200),new Vector3(250,250,250)]
 }
 
+const cyberColorTemplate = {
+    particuleColorStart: new Vector3(0,'200_255',0),
+    particuleColorEnd: new Vector3(0,'175_225',0)
+}
+
 export const colorTemplateDictionnary = {
     fire : fireColorTemplate,
     ice: iceColorTemplate,
     death: deathColorTemplate,
     light: lightColorTemplate,
     poison: poisonColorTemplate,
-    silver: silverColorTemplate
+    silver: silverColorTemplate,
+    cyber: cyberColorTemplate
 }

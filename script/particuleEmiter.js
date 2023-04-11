@@ -150,6 +150,7 @@ export default class ParticuleEmitter {
         const particuleEmitter = new ParticuleEmitter(
             particuleTemplate, 
             finalInput.spawningFrequence, 
+            finalInput.spawningNumber,
             finalInput.maxParticules,
             finalInput.emissionDuration
             );
@@ -193,11 +194,12 @@ export default class ParticuleEmitter {
     }
 
 
-    constructor(particuleTemplate, particuleFrequence, maxParticules, emissionDuration, isGravitate){
+    constructor(particuleTemplate, particuleFrequence, spawningNumber, maxParticules, emissionDuration, isGravitate){
         this.spawnedEnable = true;
         this.particules = [];
         this.particuleTemplate = particuleTemplate;
         this.particuleFrequence = particuleFrequence;
+        this.spawningNumber = spawningNumber;
         this.maxParticules = maxParticules
         this.remainingTime = emissionDuration
         this.isGravitate = isGravitate
@@ -226,8 +228,8 @@ export default class ParticuleEmitter {
 
         if (this.spawnedEnable && this.particules.length < this.maxParticules && (this.remainingTime === undefined || this.remainingTime > 0)){
             //Spawned new particules
-            let numberNewParticules = 1 + Math.floor(dt/this.particuleFrequence)
-            let increaseTime = dt%this.particuleFrequence
+            let numberNewParticules = 1 + Math.floor(this.spawningNumber * dt/this.particuleFrequence)
+            let increaseTime = (this.spawningNumber * dt)%this.particuleFrequence
 
             //Don t overload the server during low framerate
             if(numberNewParticules * 10 > this.maxParticules){
@@ -240,11 +242,11 @@ export default class ParticuleEmitter {
 
                 canvas.app.stage.addChild(particule.sprite);
                 this.particules.push(particule)
-
-                this.spawnedEnable = false;
-
-                setTimeout(this.enableSpawning.bind(this), this.particuleFrequence + increaseTime)
             }
+
+            this.spawnedEnable = false;
+
+            setTimeout(this.enableSpawning.bind(this), this.particuleFrequence + increaseTime)
 
         }  if (this.remainingTime !== undefined && this.remainingTime <= 0 && this.particules.length === 0){
             //delete emission

@@ -2,6 +2,7 @@ import { Vector3 } from "./utils.js"
 
 export const defaultMotionTemplate = {
     spawningFrequence: 3, 
+    spawningNumber: 1, 
     maxParticules: 100,
     source: {x:0,y:0},
     positionSpawning: {x:0,y:0},
@@ -119,6 +120,16 @@ const slashMotionTemplate = {
     alphaStart:.5
 }
 
+const sonarMotionTemplate = {
+    spawningFrequence: 500,
+    spawningNumber: 2000,  
+    maxParticules: 20000,
+    particuleLifetime: 2000,
+    particuleSizeStart: 5,
+    particuleVelocityStart: 100,
+    alphaStart:.5
+}
+
 export const motionTemplateDictionnary = {
     explosion : explosionMotionTemplate,
     breath: breathMotionTemplate,
@@ -126,5 +137,6 @@ export const motionTemplateDictionnary = {
     vortex: vortexMotionTemplate,
     aura: auraMotionTemplate,
     satellite: satelliteMotionTemplate,
-    slash: slashMotionTemplate
+    slash: slashMotionTemplate,
+    sonar: sonarMotionTemplate
 }
