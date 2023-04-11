@@ -74,10 +74,11 @@ export class ParticuleTemplate {
 
 export class SprayingParticuleTemplate extends ParticuleTemplate{ 
 
-    constructor(source, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
+    constructor(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
         sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
         super(source, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        this.target = ParticuleTemplate._translatePlaceableObject(target);   
         this.positionSpawning = positionSpawning;   
         this.velocityStart = velocityStart;         //Array of Number      
         this.velocityEnd = velocityEnd;             //Array of Number
@@ -88,6 +89,15 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
     generateParticules(){
         let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source))
         let positionSpawning = Utils.getRandomValueFrom(this.positionSpawning)
+        let target = Utils.getRandomValueFrom(this.target)
+        let targetAngleDirection
+        if(target && (sourcePosition.x !== target.x || sourcePosition.y !== target.y)){
+            //Target exist and is different than source
+            let targetPosition = Utils.getSourcePosition(target)
+            targetAngleDirection = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x) * 180 / Math.PI
+        } else {
+            targetAngleDirection = 0
+        }
 
         let sprite = new PIXI.Sprite(this.particuleTexture)
         sprite.x = sourcePosition.x + positionSpawning.x;
@@ -106,8 +116,8 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             Utils.getRandomValueFrom(this.particuleLifetime),
             Utils.getRandomValueFrom(this.velocityStart),
             Utils.getRandomValueFrom(this.velocityEnd),
-            Utils.getRandomValueFrom(this.angleStart),
-            Utils.getRandomValueFrom(this.angleEnd),
+            Utils.getRandomValueFrom(this.angleStart) + targetAngleDirection,
+            Utils.getRandomValueFrom(this.angleEnd) + targetAngleDirection,
             startSize,
             Utils.getRandomValueFrom(this.sizeEnd),
             colorStart,

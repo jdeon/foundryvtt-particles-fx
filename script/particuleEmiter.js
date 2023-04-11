@@ -22,6 +22,7 @@ export default class ParticuleEmitter {
 
         const particuleTemplate = new SprayingParticuleTemplate(
             finalInput.source,
+            finalInput.target,
             Vector3.build(finalInput.positionSpawning), 
             finalInput.particuleVelocityStart, 
             finalInput.particuleVelocityEnd, 

@@ -161,6 +161,10 @@ export class Utils {
           return canvas.activeLayer.controlled[0];
     }
 
+    static getTargetId(){
+        return game.user.targets.ids.length > 0 ? game.user.targets.ids[0] : undefined
+    }
+
     static getSourcePosition(source){
 
         if(source.x === undefined || source.y === undefined){

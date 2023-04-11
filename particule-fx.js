@@ -103,7 +103,7 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
       case 'spray' : 
         source = Utils.getSelectedSource()
         if(source){
-          idEmitter = sprayParticules({source: source.id}, ...otherParam)
+          idEmitter = sprayParticules({source: source.id, target: Utils.getTargetId()}, ...otherParam)
           ParticuleEmitter.writeMessageForEmissionById(idEmitter)
         }
         break
