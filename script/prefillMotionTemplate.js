@@ -3,10 +3,10 @@ import { Vector3 } from "./utils.js"
 export const defaultMotionTemplate = {
     spawningFrequence: 3, 
     spawningNumber: 1, 
-    maxParticules: 100,
+    maxParticules: 1000,
     source: {x:0,y:0},
     positionSpawning: {x:0,y:0},
-    particuleLifetime: [1000,1500],
+    particuleLifetime: [3500,4500],
     particuleVelocityStart: 200,
     particuleVelocityEnd: 50,
     particuleAngleStart: '0_360',
@@ -24,11 +24,19 @@ export const defaultMotionTemplate = {
     onlyEmitterFollow: false
 }
 
+
+/**
+ * SPRAY DESIGNED PREFILLED TEMPLATE
+ * 
+ * velocity multiply by particule lifetime must done an average of 500
+ */
+
 const explosionMotionTemplate = {
     emissionDuration : 250,
-    spawningFrequence: .5, 
+    spawningNumber: 10,  
+    spawningFrequence: 1, 
     maxParticules: 10000,
-    particuleLifetime: 500,
+    particuleLifetime: 2000,
     particuleVelocityStart: '400_500',
     particuleVelocityEnd: '0_25',
     particuleAngleStart: '0_360',
@@ -42,7 +50,7 @@ const breathMotionTemplate = {
     emissionDuration : 1000,
     spawningFrequence: 2, 
     maxParticules: 1000,
-    particuleLifetime: 2000,
+    particuleLifetime: 4000,
     particuleVelocityStart: '200_300',
     particuleVelocityEnd: '10_25',
     particuleAngleStart: '-30_30',
@@ -57,8 +65,8 @@ const rayMotionTemplate = {
     emissionDuration : 3000,
     spawningFrequence: 1, 
     maxParticules: 10000,
-    particuleLifetime: 2000,
-    particuleVelocityStart: 200,
+    particuleLifetime: 1000,
+    particuleVelocityStart: '400_500',
     particuleAngleStart: 0,
     particuleSizeStart: 15,
     alphaStart:.1,
@@ -66,6 +74,21 @@ const rayMotionTemplate = {
     vibrationFrequencyStart: '0_100'
 }
 
+const sonarMotionTemplate = {
+    spawningFrequence: 1000,
+    spawningNumber: 2000,  
+    maxParticules: 20000,
+    particuleLifetime: 4000,
+    particuleSizeStart: 5,
+    particuleVelocityStart: 125,
+    alphaStart:.5,
+    onlyEmitterFollow: true
+}
+
+/**
+ * GRAVITATE DESIGNED PREFILLED TEMPLATE
+ * 
+ */
 const vortexMotionTemplate = {
     spawningFrequence: 3, 
     maxParticules: 1000,
@@ -117,16 +140,6 @@ const slashMotionTemplate = {
     particuleAngleStart: -45,
     particuleRadiusStart: [50, 75, 100],
     particuleSizeStart: 5,
-    alphaStart:.5
-}
-
-const sonarMotionTemplate = {
-    spawningFrequence: 500,
-    spawningNumber: 2000,  
-    maxParticules: 20000,
-    particuleLifetime: 2000,
-    particuleSizeStart: 5,
-    particuleVelocityStart: 100,
     alphaStart:.5
 }
 
