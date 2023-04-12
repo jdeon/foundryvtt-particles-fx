@@ -69,7 +69,7 @@ const rayMotionTemplate = {
     particuleVelocityStart: '400_500',
     particuleAngleStart: 0,
     particuleSizeStart: 15,
-    alphaStart:.1,
+    alphaStart:.25,
     vibrationAmplitudeStart: '0_10',
     vibrationFrequencyStart: '0_100'
 }
