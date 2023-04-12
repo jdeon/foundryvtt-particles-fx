@@ -1,5 +1,5 @@
 import { Particule, SprayingParticule, GravitingParticule } from './particule.js'
-import { Utils } from "./utils.js"
+import { Utils, Vector3 } from "./utils.js"
 
 
 export class ParticuleTemplate { 
@@ -48,9 +48,9 @@ export class ParticuleTemplate {
         sprite.y = sourcePosition.y;
         sprite.anchor.set(0.5);
 
-        let startSize = Utils.getRandomValueFrom(this.sizeStart)
-        sprite.width = startSize;
-        sprite.height = startSize;
+        let startSize = Vector3.build(Utils.getRandomValueFrom(this.sizeStart))
+        sprite.width = startSize.x;
+        sprite.height = startSize.y;
 
         let colorStart = Utils.getRandomValueFrom(this.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
@@ -59,7 +59,7 @@ export class ParticuleTemplate {
             sprite,
             Utils.getRandomValueFrom(this.particuleLifetime),
             startSize,
-            Utils.getRandomValueFrom(this.sizeEnd),
+            Vector3.build(Utils.getRandomValueFrom(this.sizeEnd)),
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),
@@ -117,9 +117,9 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
         sprite.y = sourcePosition.y + positionSpawning.y;
         sprite.anchor.set(0.5);
 
-        let startSize = Utils.getRandomValueFrom(this.sizeStart)
-        sprite.width = startSize;
-        sprite.height = startSize;
+        let startSize = Vector3.build(Utils.getRandomValueFrom(this.sizeStart))
+        sprite.width = startSize.x;
+        sprite.height = startSize.y;
 
         let colorStart = Utils.getRandomValueFrom(this.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
@@ -132,7 +132,7 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             Utils.getRandomValueFrom(this.angleStart) + targetAngleDirection * 180 / Math.PI,
             Utils.getRandomValueFrom(this.angleEnd) + targetAngleDirection * 180 / Math.PI,
             startSize,
-            Utils.getRandomValueFrom(this.sizeEnd),
+            Vector3.build(Utils.getRandomValueFrom(this.sizeEnd)),
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),
@@ -172,9 +172,9 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
         sprite.x = sourcePosition.x + Math.cos(angleStart * (Math.PI / 180)) * radiusStart;
         sprite.y = sourcePosition.y + Math.sin(angleStart * (Math.PI / 180)) * radiusStart;
 
-        let startSize = Utils.getRandomValueFrom(this.sizeStart)
-        sprite.width = startSize;
-        sprite.height = startSize;
+        let startSize = Vector3.build(Utils.getRandomValueFrom(this.sizeStart))
+        sprite.width = startSize.x;
+        sprite.height = startSize.y;
 
         let colorStart = Utils.getRandomValueFrom(this.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
@@ -189,7 +189,7 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
             radiusStart,
             Utils.getRandomValueFrom(this.radiusEnd),
             startSize,
-            Utils.getRandomValueFrom(this.sizeEnd),
+            Vector3.build(Utils.getRandomValueFrom(this.sizeEnd)),
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),

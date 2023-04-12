@@ -8,8 +8,8 @@ export class Particule {
         this.positionVibrationLess = {x : sprite.x, y : sprite.y};  
         this.remainingTime = particuleLifetime;     //Number
         this.particuleLifetime = particuleLifetime; //Number
-        this.sizeStart = sizeStart;                 //Number
-        this.sizeEnd = sizeEnd;                     //Number
+        this.sizeStart = sizeStart;                 //Vector3
+        this.sizeEnd = sizeEnd;                     //Vector3
         this.colorStart = colorStart;               //Vector3
         this.colorEnd = colorEnd;                   //Vector3
         this.alphaStart = alphaStart;               //Number
@@ -24,9 +24,9 @@ export class Particule {
         let lifetimeProportion = this.remainingTime / this.particuleLifetime
 
         //Particule change size
-        const updatedSize = this.sizeEnd ? ((this.sizeStart - this.sizeEnd) * lifetimeProportion) + this.sizeEnd : this.sizeStart;
-        this.sprite.width = updatedSize
-        this.sprite.height = updatedSize
+        const updatedSize = this.sizeEnd ? this.sizeStart.minus(this.sizeEnd).multiply(lifetimeProportion).add(this.sizeEnd) : this.sizeStart
+        this.sprite.width = updatedSize.x
+        this.sprite.height = updatedSize.y
 
         //Particule change color
         this.sprite.alpha = this.alphaEnd ? ((this.alphaStart - this.alphaEnd) * lifetimeProportion) + this.alphaEnd : this.alphaStart;

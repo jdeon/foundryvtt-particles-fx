@@ -12,6 +12,7 @@ This is all the input possible to use. If they are not provide a default value i
 | Parameter name  | accepted value          | Default value |
 | :--------------- |:---------------:| -----:|
 |        source                    |             Placeable object id or an object with x and y attributes with default pattern inside                                                                        |    {x:0,y:0}          |
+|        target                    |             Placeable object id or an object with x and y attributes with default pattern inside                                                                        |    undefined         |
 |        spawningFrequence         |             Number                                                                       |    3          |
 |        maxParticules             |             Number                                                                       |   100         |
 |        emissionDuration          |             Number                                                                       |   loop infinitely if undefined       |
@@ -20,8 +21,8 @@ This is all the input possible to use. If they are not provide a default value i
 |       particuleVelocityEnd       |             Default pattern                                                              |   50          |
 |        particuleAngleStart       |             Default pattern                                                              |   '0_360'     |
 |        particuleAngleEnd         |             Default pattern                                                              |   undefined   |
-|        particuleSizeStart        |             Default pattern                                                              |   10          |
-|        particuleSizeEnd          |             Default pattern                                                              |   '10_25'     |
+|        particuleSizeStart        |             Default pattern of number or object with x and y                             |   10          |
+|        particuleSizeEnd          |             Default pattern of number or object with x and y                             |   '10_25'     |
 |        particuleLifetime         |             Default pattern                                                              |    [1000,1500]    |
 |        particuleColorStart       |             Object with x, y and z attributes with default pattern between 0 and 255     |   {x:250,y:250, z: 50}    |
 |        particuleColorEnd         |             Object with x, y and z attributes with default pattern between 0 and 255     |   {x:250,y:'50_100', z: 0}    |

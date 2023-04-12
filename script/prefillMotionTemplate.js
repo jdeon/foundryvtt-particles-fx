@@ -68,7 +68,7 @@ const rayMotionTemplate = {
     particuleLifetime: 1000,
     particuleVelocityStart: '400_500',
     particuleAngleStart: 0,
-    particuleSizeStart: 15,
+    particuleSizeStart: {x:50, y:15},
     alphaStart:.25,
     vibrationAmplitudeStart: '0_10',
     vibrationFrequencyStart: '0_100'
@@ -139,7 +139,7 @@ const slashMotionTemplate = {
     particuleVelocityStart: 180,
     particuleAngleStart: -45,
     particuleRadiusStart: [50, 75, 100],
-    particuleSizeStart: 5,
+    particuleSizeStart: {x:5, y:25},
     alphaStart:.5
 }
 
