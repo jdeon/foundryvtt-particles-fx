@@ -87,6 +87,8 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
     }
 
     generateParticules(){
+        let lifetime = Utils.getRandomValueFrom(this.particuleLifetime)
+
         let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source))
         let positionSpawning = Utils.getRandomValueFrom(this.positionSpawning)
         let target = Utils.getRandomValueFrom(this.target)
@@ -94,7 +96,18 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
         if(target && (sourcePosition.x !== target.x || sourcePosition.y !== target.y)){
             //Target exist and is different than source
             let targetPosition = Utils.getSourcePosition(target)
-            targetAngleDirection = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x) * 180 / Math.PI
+            targetAngleDirection = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x)
+            let oldPositionSpawning = {...positionSpawning}
+            positionSpawning = {
+                x: oldPositionSpawning.x * Math.cos(targetAngleDirection) - oldPositionSpawning.y * Math.sin(targetAngleDirection),
+                y: - oldPositionSpawning.x * Math.sin(targetAngleDirection) + oldPositionSpawning.y * Math.cos(targetAngleDirection)
+            }
+
+            //Upgrade particule lifetime if the target is longer than 500px
+            let targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x,2) + Math.pow(targetPosition.y - sourcePosition.y,2))
+            if(targetDistance > 500){
+                lifetime *= (targetDistance/500)
+            }
         } else {
             targetAngleDirection = 0
         }
@@ -113,11 +126,11 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
 
         return new SprayingParticule(
             sprite,
-            Utils.getRandomValueFrom(this.particuleLifetime),
+            lifetime,
             Utils.getRandomValueFrom(this.velocityStart),
             Utils.getRandomValueFrom(this.velocityEnd),
-            Utils.getRandomValueFrom(this.angleStart) + targetAngleDirection,
-            Utils.getRandomValueFrom(this.angleEnd) + targetAngleDirection,
+            Utils.getRandomValueFrom(this.angleStart) + targetAngleDirection * 180 / Math.PI,
+            Utils.getRandomValueFrom(this.angleEnd) + targetAngleDirection * 180 / Math.PI,
             startSize,
             Utils.getRandomValueFrom(this.sizeEnd),
             colorStart,
