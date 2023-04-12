@@ -23,6 +23,8 @@ This is all the input possible to use. If they are not provide a default value i
 |        particuleAngleEnd         |             Default pattern                                                              |   undefined   |
 |        particuleSizeStart        |             Default pattern of number or object with x and y                             |   10          |
 |        particuleSizeEnd          |             Default pattern of number or object with x and y                             |   '10_25'     |
+|        particuleRotationStart    |             Default pattern                                                              |   0           |
+|        particuleRotationEnd      |             Default pattern                                                              |   0           |
 |        particuleLifetime         |             Default pattern                                                              |    [1000,1500]    |
 |        particuleColorStart       |             Object with x, y and z attributes with default pattern between 0 and 255     |   {x:250,y:250, z: 50}    |
 |        particuleColorEnd         |             Object with x, y and z attributes with default pattern between 0 and 255     |   {x:250,y:'50_100', z: 0}    |

@@ -2,7 +2,7 @@ import { Utils } from "./utils.js";
 
 export class Particule { 
 
-    constructor(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd,
+    constructor(sprite, particuleLifetime, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
         this.sprite = sprite;                       //PIXI.Sprite
         this.positionVibrationLess = {x : sprite.x, y : sprite.y};  
@@ -10,6 +10,8 @@ export class Particule {
         this.particuleLifetime = particuleLifetime; //Number
         this.sizeStart = sizeStart;                 //Vector3
         this.sizeEnd = sizeEnd;                     //Vector3
+        this.particuleRotationStart = particuleRotationStart;                 
+        this.particuleRotationEnd = particuleRotationEnd;     
         this.colorStart = colorStart;               //Vector3
         this.colorEnd = colorEnd;                   //Vector3
         this.alphaStart = alphaStart;               //Number
@@ -27,6 +29,9 @@ export class Particule {
         const updatedSize = this.sizeEnd ? this.sizeStart.minus(this.sizeEnd).multiply(lifetimeProportion).add(this.sizeEnd) : this.sizeStart
         this.sprite.width = updatedSize.x
         this.sprite.height = updatedSize.y
+
+        let particuleRotation = this.particuleRotationEnd ? ((this.particuleRotationStart - this.particuleRotationEnd) * lifetimeProportion) + this.particuleRotationEnd : this.particuleRotationStart;
+        this.sprite.angle = particuleRotation
 
         //Particule change color
         this.sprite.alpha = this.alphaEnd ? ((this.alphaStart - this.alphaEnd) * lifetimeProportion) + this.alphaEnd : this.alphaStart;
@@ -48,9 +53,9 @@ export class Particule {
 export class SprayingParticule  extends Particule { 
 
     constructor(sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, 
-        sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd,
+        sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        super(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd,vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        super(sprite, particuleLifetime, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
         this.velocityStart = velocityStart;         //Number      
         this.velocityEnd = velocityEnd;             //Number
@@ -85,9 +90,9 @@ export class SprayingParticule  extends Particule {
 export class GravitingParticule  extends Particule { 
 
     constructor(sprite, source, particuleLifetime, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, 
-        sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd,
+        sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        super(sprite, particuleLifetime, sizeStart, sizeEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        super(sprite, particuleLifetime, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
         this.source = source
         this.angle = angleStart                             //Number 

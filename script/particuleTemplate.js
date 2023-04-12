@@ -21,12 +21,14 @@ export class ParticuleTemplate {
         return result
     }
 
-    constructor(source, sizeStart, sizeEnd, particuleLifetime, particuleTexture, 
-        colorStart, colorEnd, alphaStart, alphaEnd, 
+    constructor(source, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd,  
+        particuleLifetime, particuleTexture,  colorStart, colorEnd, alphaStart, alphaEnd, 
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
         this.source = ParticuleTemplate._translatePlaceableObject(source)                        
         this.sizeStart = sizeStart;                 
-        this.sizeEnd = sizeEnd;                     
+        this.sizeEnd = sizeEnd;  
+        this.particuleRotationStart = particuleRotationStart;                 
+        this.particuleRotationEnd = particuleRotationEnd;                     
         this.particuleLifetime = particuleLifetime; 
         this.particuleTexture = particuleTexture;   
         this.colorStart = colorStart;               
@@ -52,6 +54,9 @@ export class ParticuleTemplate {
         sprite.width = startSize.x;
         sprite.height = startSize.y;
 
+        let angleStart = Utils.getRandomValueFrom(this.particuleRotationStart)
+        sprite.angle = angleStart
+
         let colorStart = Utils.getRandomValueFrom(this.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
 
@@ -60,6 +65,8 @@ export class ParticuleTemplate {
             Utils.getRandomValueFrom(this.particuleLifetime),
             startSize,
             Vector3.build(Utils.getRandomValueFrom(this.sizeEnd)),
+            angleStart,
+            Utils.getRandomValueFrom(this.particuleRotationEnd),    
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),
@@ -75,9 +82,9 @@ export class ParticuleTemplate {
 export class SprayingParticuleTemplate extends ParticuleTemplate{ 
 
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
-        sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
+        sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        super(source, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        super(source, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
         this.target = ParticuleTemplate._translatePlaceableObject(target);   
         this.positionSpawning = positionSpawning;   
         this.velocityStart = velocityStart;         //Array of Number      
@@ -121,6 +128,9 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
         sprite.width = startSize.x;
         sprite.height = startSize.y;
 
+        let angleStart = Utils.getRandomValueFrom(this.particuleRotationStart)
+        sprite.angle = angleStart
+
         let colorStart = Utils.getRandomValueFrom(this.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
 
@@ -133,6 +143,8 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             Utils.getRandomValueFrom(this.angleEnd) + targetAngleDirection * 180 / Math.PI,
             startSize,
             Vector3.build(Utils.getRandomValueFrom(this.sizeEnd)),
+            angleStart,
+            Utils.getRandomValueFrom(this.particuleRotationEnd),
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),
@@ -148,9 +160,9 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
 export class GravitingParticuleTemplate extends ParticuleTemplate { 
 
     constructor(source, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, 
-        sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
+        sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow){
-        super(source, sizeStart, sizeEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        super(source, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
         
         this.angleStart = angleStart;                        //Array of Number
         this.angularVelocityStart = angularVelocityStart;  //Number      
@@ -176,6 +188,9 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
         sprite.width = startSize.x;
         sprite.height = startSize.y;
 
+        let rotationStart = Utils.getRandomValueFrom(this.particuleRotationStart)
+        sprite.angle = rotationStart
+
         let colorStart = Utils.getRandomValueFrom(this.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
 
@@ -190,6 +205,8 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
             Utils.getRandomValueFrom(this.radiusEnd),
             startSize,
             Vector3.build(Utils.getRandomValueFrom(this.sizeEnd)),
+            rotationStart,
+            Utils.getRandomValueFrom(this.particuleRotationEnd),  
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),

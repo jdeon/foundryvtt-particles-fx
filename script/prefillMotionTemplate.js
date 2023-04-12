@@ -15,6 +15,8 @@ export const defaultMotionTemplate = {
     particuleRadiusEnd: 50,
     particuleSizeStart: 10,
     particuleSizeEnd: '10_25',
+    particuleRotationStart:0,               
+    particuleRotationEnd:0,
     alphaStart:1,
     alphaEnd:0,
     vibrationAmplitudeStart: 0,
@@ -140,6 +142,8 @@ const slashMotionTemplate = {
     particuleAngleStart: -45,
     particuleRadiusStart: [50, 75, 100],
     particuleSizeStart: {x:5, y:25},
+    particuleRotationStart:-45,               
+    particuleRotationEnd:45,
     alphaStart:.5
 }
 
