@@ -117,7 +117,7 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             }
         } else if (this.source instanceof MeasuredTemplate){
             sourcePosition={x:this.source.x, y:this.source.y}//Don t use width and length
-            let measuredOverride = generatePrefillTemplateForMeasured(this.source.document, particuleProperties.velocityStart)
+            let measuredOverride = generatePrefillTemplateForMeasured(this.source.document, particuleProperties.velocityStart, particuleProperties.velocityEnd)
             particuleProperties = {...particuleProperties , ...measuredOverride}
             targetAngleDirection = 0
         } else {

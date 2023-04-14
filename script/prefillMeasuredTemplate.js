@@ -8,19 +8,19 @@ function generateTemplateForCircle(radius, velocity){
         result = {
             positionSpawning: {x:0,y:0},
             particuleLifetime:radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
-            particuleAngleStart: angle,
+            angleStart: angle,
         }
     } else if (velocity<0){
         result = {
             positionSpawning: {
-                x:radius*Math.cos(angle*Math.PI/180),
-                y:radius*Math.sin(angle*Math.PI/180)
+                x:radius*Utils.pixelOfDistanceConvertor()*Math.cos(angle*Math.PI/180),
+                y:radius*Utils.pixelOfDistanceConvertor()*Math.sin(angle*Math.PI/180)
             },
             particuleLifetime:-1*radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
-            particuleAngleStart: angle,
+            angleStart: angle,
         }
     } else {
-        const radiusFinal = Utils.getRandomValueFrom('0_'+radius)
+        const radiusFinal = Utils.getRandomValueFrom('0_'+radius) * Utils.pixelOfDistanceConvertor()
 
         result = {
             positionSpawning: {
@@ -45,7 +45,7 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
         result = {
             positionSpawning: {x:0,y:0},
             particuleLifetime:radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
-            particuleAngleStart: angle,
+            angleStart: angle,
         }
     } else if (velocity<0){
         result = {
@@ -54,7 +54,7 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
                 y:radius*Math.sin(angle*Math.PI/180)
             },
             particuleLifetime:-1*radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
-            particuleAngleStart: angle,
+            angleStart: angle,
         }
     } else {
         let radiusFinal = Utils.getRandomValueFrom('0_'+radius)
@@ -92,8 +92,8 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity){
                 y: rectY/2
             },
             particuleLifetime:diagonalLength*Utils.pixelOfDistanceConvertor()*1000/(2*velocity),
-            particuleVelocityStart:updatedVelocity,
-            particuleAngleStart: angle,
+            velocityStart:updatedVelocity,
+            angleStart: angle,
         }
     } else if (velocity<0){
         const perimeterLength = 2*rectX + 2*rectY
@@ -116,7 +116,7 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity){
                 y: spawnPosition.y
             },
             particuleLifetime: -1 * diagonalLength*Utils.pixelOfDistanceConvertor()*1000/(2*velocity),
-            particuleAngleStart: Math.atan2(spawnPosition.y - rectY/2, spawnPosition.x - rectX/2)
+            angleStart: Math.atan2(spawnPosition.y - rectY/2, spawnPosition.x - rectX/2)
         }
     } else {
         result = {
@@ -143,7 +143,7 @@ function generateTemplateForRay(length, width, directionAngle, velocity){
                 y: widthPosition * Math.cos(directionAngle * Math.PI / 180)
             },
             particuleLifetime:length*Utils.pixelOfDistanceConvertor()*1000/velocity,
-            particuleAngleStart: directionAngle,
+            angleStart: directionAngle,
         }
     } else if (velocity<0){
         const targetX = length * Math.cos(directionAngle * Math.PI / 180)
@@ -155,7 +155,7 @@ function generateTemplateForRay(length, width, directionAngle, velocity){
                 y: targetY + widthPosition * Math.cos(directionAngle * Math.PI / 180)
             },
             particuleLifetime: -1 * length*Utils.pixelOfDistanceConvertor()*1000/velocity,
-            particuleAngleStart: directionAngle
+            angleStart: directionAngle
         }
     } else {
         const lengthPosition = Utils.getRandomValueFrom('0_'+length)
@@ -174,8 +174,10 @@ function generateTemplateForRay(length, width, directionAngle, velocity){
 }
 
 
-export function generatePrefillTemplateForMeasured(measuredTemplate, velocity){
+export function generatePrefillTemplateForMeasured(measuredTemplate, velocityStart, velocityEnd){
     let result
+
+    const velocity = (velocityStart + velocityEnd)/2
 
     if(measuredTemplate.t === "circle"){
         result = generateTemplateForCircle(measuredTemplate.distance, velocity)

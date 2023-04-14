@@ -147,7 +147,7 @@ export class Utils {
                 if (typeof key === 'string' && key.endsWith('End')){
                     //removve end from key and add start
                     let startSuffixKey = key.substring(0,key.length - 3) + 'Start'
-                    result[key] = prioritizeInput[startSuffixKey] || defaultInput[key]
+                    result[key] = prioritizeInput[startSuffixKey] !== undefined ? prioritizeInput[startSuffixKey] : defaultInput[key]
                 } else {
                     result[key] = defaultInput[key]
                 }
