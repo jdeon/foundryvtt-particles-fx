@@ -73,6 +73,10 @@ export class Vector3 {
 
 export class Utils {
 
+    static pixelOfDistanceConvertor(){
+        return canvas.scene.grid.size/canvas.scene.grid.distance
+    }
+
     static getRandomValueFrom(inValue){
         if(!isNaN(inValue)){
             return inValue;
@@ -102,6 +106,18 @@ export class Utils {
         }
 
     }
+
+    static getObjectRandomValueFrom(inValue){
+        let result = {}
+        let inKey = Object.keys(inValue)
+
+        for (const key of inKey) {
+            result[key] = Utils.getRandomValueFrom(inValue[key]);
+        }
+
+        return result
+    }
+
 
     static includingRandom(){
         if(Math.random() == 0){
