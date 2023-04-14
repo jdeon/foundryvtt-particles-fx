@@ -50,8 +50,8 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
     } else if (velocity<0){
         result = {
             positionSpawning: {
-                x:radius*Math.cos(angle*Math.PI/180),
-                y:radius*Math.sin(angle*Math.PI/180)
+                x:radius*Utils.pixelOfDistanceConvertor()*Math.cos(angle*Math.PI/180),
+                y:radius*Utils.pixelOfDistanceConvertor()*Math.sin(angle*Math.PI/180)
             },
             particuleLifetime:-1*radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: angle,
@@ -61,8 +61,8 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
 
         result = {
             positionSpawning: {
-                x:radiusFinal*Math.cos(angle*Math.PI/180),
-                y:radiusFinal*Math.sin(angle*Math.PI/180)
+                x:radiusFinal*Utils.pixelOfDistanceConvertor()*Math.cos(angle*Math.PI/180),
+                y:radiusFinal*Utils.pixelOfDistanceConvertor()*Math.sin(angle*Math.PI/180)
             },
         }
     }
