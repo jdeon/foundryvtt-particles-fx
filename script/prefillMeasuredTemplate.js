@@ -73,8 +73,9 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
 function generateTemplateForRect(diagonalLength, diagonalAngle, velocity){
     let result
 
-    const rectX = diagonalLength*Math.cos(diagonalAngle*Math.PI/180)
-    const rectY = diagonalLength*Math.sin(diagonalAngle*Math.PI/180)
+    const rectX = diagonalLength*Utils.pixelOfDistanceConvertor()*Math.cos(diagonalAngle*Math.PI/180)
+    const rectY = diagonalLength*Utils.pixelOfDistanceConvertor()*Math.sin(diagonalAngle*Math.PI/180)
+    const rectDiagonal =  diagonalLength*Utils.pixelOfDistanceConvertor()
 
     if(velocity>0){
         //Source particule is at the center
@@ -82,17 +83,19 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity){
         //Real velocity on diagonal, slow down the vertical and horisontal
         const teta = angle%180 > 90 ? angle%180 - 2* (angle%180 -90 ) : angle%180
 
-        //Generate a lineare factor to slow down velocity in relation od edge
-        const distanceOfPerimeter = teta < 45 ? rectX + (diagonalLength-rectX) * teta/45 : diagonalLength + (rectY-diagonalLength) *(teta-45)/45
-        const updatedVelocity = velocity * distanceOfPerimeter/diagonalLength
+        //Use trigonometrie, we want to know the hypothenus of the triangle to slow down velocity in relation od edge
+        //TODO 45 is not fix (it s not a square) 45 is tan of rectY/2 and rectX/2
+        const distanceOfPerimeter = teta < (Math.atan2(rectY/2, rectX/2) *180 / Math.PI) ? rectX/2 * (1/Math.cos(teta * Math.PI / 180)) : rectY/2 * (1/Math.cos((90-teta) * Math.PI / 180))
+        const updatedVelocity = velocity * distanceOfPerimeter/(rectDiagonal/2)
 
         result = {
             positionSpawning: {
                 x: rectX/2,
                 y: rectY/2
             },
-            particuleLifetime:diagonalLength*Utils.pixelOfDistanceConvertor()*1000/(2*velocity),
+            particuleLifetime:rectDiagonal*1000/(2*velocity),
             velocityStart:updatedVelocity,
+            velocityEnd:updatedVelocity,//TODO keep the radio between start and end 
             angleStart: angle,
         }
     } else if (velocity<0){
@@ -115,8 +118,9 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity){
                 x: spawnPosition.x,
                 y: spawnPosition.y
             },
-            particuleLifetime: -1 * diagonalLength*Utils.pixelOfDistanceConvertor()*1000/(2*velocity),
-            angleStart: Math.atan2(spawnPosition.y - rectY/2, spawnPosition.x - rectX/2)
+            particuleLifetime: -1 * rectDiagonal*1000/(2*velocity),
+            //velocityStart:updatedVelocity, //TODO
+            angleStart: Math.atan2(spawnPosition.y - rectY/2, spawnPosition.x - rectX/2) *180 / Math.PI
         }
     } else {
         result = {
