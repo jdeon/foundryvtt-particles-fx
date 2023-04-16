@@ -1,5 +1,6 @@
 import { Particule, SprayingParticule, GravitingParticule } from './particule.js'
 import { Utils, Vector3 } from "./utils.js"
+import { generatePrefillTemplateForMeasured } from './prefillMeasuredTemplate.js'
 
 
 export class ParticuleTemplate { 
@@ -94,18 +95,17 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
     }
 
     generateParticules(){
-        let lifetime = Utils.getRandomValueFrom(this.particuleLifetime)
+        let particuleProperties = Utils.getObjectRandomValueFrom(this)
 
-        let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source))
-        let positionSpawning = Utils.getRandomValueFrom(this.positionSpawning)
-        let target = Utils.getRandomValueFrom(this.target)
+        let sourcePosition = Utils.getSourcePosition(particuleProperties.source)
+        let target = particuleProperties.target
         let targetAngleDirection
         if(target && (sourcePosition.x !== target.x || sourcePosition.y !== target.y)){
             //Target exist and is different than source
             let targetPosition = Utils.getSourcePosition(target)
             targetAngleDirection = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x)
-            let oldPositionSpawning = {...positionSpawning}
-            positionSpawning = {
+            let oldPositionSpawning = {...particuleProperties.positionSpawning}
+            particuleProperties.positionSpawning = {
                 x: oldPositionSpawning.x * Math.cos(targetAngleDirection) - oldPositionSpawning.y * Math.sin(targetAngleDirection),
                 y: - oldPositionSpawning.x * Math.sin(targetAngleDirection) + oldPositionSpawning.y * Math.cos(targetAngleDirection)
             }
@@ -113,46 +113,49 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             //Upgrade particule lifetime if the target is longer than 500px
             let targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x,2) + Math.pow(targetPosition.y - sourcePosition.y,2))
             if(targetDistance > 500){
-                lifetime *= (targetDistance/500)
+                particuleProperties.lifetime *= (targetDistance/500)
             }
+        } else if (this.source instanceof MeasuredTemplate){
+            sourcePosition={x:this.source.x, y:this.source.y}//Don t use width and length
+            let measuredOverride = generatePrefillTemplateForMeasured(this.source.document, particuleProperties.velocityStart, particuleProperties.velocityEnd)
+            particuleProperties = {...particuleProperties , ...measuredOverride}
+            targetAngleDirection = 0
         } else {
             targetAngleDirection = 0
         }
 
         let sprite = new PIXI.Sprite(this.particuleTexture)
-        sprite.x = sourcePosition.x + positionSpawning.x;
-        sprite.y = sourcePosition.y + positionSpawning.y;
+        sprite.x = sourcePosition.x + particuleProperties.positionSpawning.x;
+        sprite.y = sourcePosition.y + particuleProperties.positionSpawning.y;
         sprite.anchor.set(0.5);
 
-        let startSize = Vector3.build(Utils.getRandomValueFrom(this.sizeStart))
+        let startSize = Vector3.build(particuleProperties.sizeStart)
         sprite.width = startSize.x;
         sprite.height = startSize.y;
+        sprite.angle = particuleProperties.particuleRotationStart
 
-        let angleStart = Utils.getRandomValueFrom(this.particuleRotationStart)
-        sprite.angle = angleStart
-
-        let colorStart = Utils.getRandomValueFrom(this.colorStart)
+        let colorStart = Vector3.build(particuleProperties.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
 
         return new SprayingParticule(
             sprite,
-            lifetime,
-            Utils.getRandomValueFrom(this.velocityStart),
-            Utils.getRandomValueFrom(this.velocityEnd),
-            Utils.getRandomValueFrom(this.angleStart) + targetAngleDirection * 180 / Math.PI,
-            Utils.getRandomValueFrom(this.angleEnd) + targetAngleDirection * 180 / Math.PI,
+            particuleProperties.particuleLifetime,
+            particuleProperties.velocityStart,
+            particuleProperties.velocityEnd,
+            particuleProperties.angleStart + targetAngleDirection * 180 / Math.PI,
+            particuleProperties.angleEnd + targetAngleDirection * 180 / Math.PI,
             startSize,
-            Vector3.build(Utils.getRandomValueFrom(this.sizeEnd)),
-            angleStart,
-            Utils.getRandomValueFrom(this.particuleRotationEnd),
+            Vector3.build(particuleProperties.sizeEnd),
+            particuleProperties.particuleRotationStart,
+            particuleProperties.particuleRotationEnd,
             colorStart,
-            Utils.getRandomValueFrom(this.colorEnd),
-            Utils.getRandomValueFrom(this.alphaStart),
-            Utils.getRandomValueFrom(this.alphaEnd),
-            Utils.getRandomValueFrom(this.vibrationAmplitudeStart),
-            Utils.getRandomValueFrom(this.vibrationAmplitudeEnd),
-            Utils.getRandomValueFrom(this.vibrationFrequencyStart),
-            Utils.getRandomValueFrom(this.vibrationFrequencyEnd)
+            particuleProperties.colorEnd,
+            particuleProperties.alphaStart,
+            particuleProperties.alphaEnd,
+            particuleProperties.vibrationAmplitudeStart,
+            particuleProperties.vibrationAmplitudeEnd,
+            particuleProperties.vibrationFrequencyStart,
+            particuleProperties.vibrationFrequencyEnd
         )
     }
 }

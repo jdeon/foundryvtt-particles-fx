@@ -104,3 +104,13 @@ Commands :
 
 
 We can add the param *--instant* to not wait the end of the particules lifetime
+
+
+## Measured template source
+If the source is a measured template, it will override some input property (like angle) to match with the measured tools. For each, measured it work differently if the average velocity value
+| Measured template  | Positive velocity | Null velocity | Negative Velocity |
+| :--------------- |:---------------:| :----------:| :------------:|
+| Circle | Emit from the center to the outside of the circle | Emit from the outside to the center of the circle | Appear every where in the circle | 
+| Cone | Emit from the center to the outside of the cone | Emit from the outside to the center of the cone | Appear every where in the cone | 
+| Rectangle | Emit from the center to the outside of the rectangle | Emit from the outside to the center of the rectangle | Appear every where in the rectangle | 
+| Ray | Emit from the source to the opposite of the ray | Emit from the sopposite to the source of the ray | Appear every where in the ray | 
