@@ -9,6 +9,7 @@ function generateTemplateForCircle(radius, velocity){
             positionSpawning: {x:0,y:0},
             particuleLifetime:radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: angle,
+            angleEnd: angle,
         }
     } else if (velocity<0){
         result = {
@@ -18,6 +19,7 @@ function generateTemplateForCircle(radius, velocity){
             },
             particuleLifetime:-1*radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: angle,
+            angleEnd: angle,
         }
     } else {
         const radiusFinal = Utils.getRandomValueFrom('0_'+radius) * Utils.pixelOfDistanceConvertor()
@@ -46,6 +48,7 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
             positionSpawning: {x:0,y:0},
             particuleLifetime:radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: angle,
+            angleEnd: angle,
         }
     } else if (velocity<0){
         result = {
@@ -55,6 +58,7 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
             },
             particuleLifetime:-1*radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: angle,
+            angleEnd: angle,
         }
     } else {
         let radiusFinal = Utils.getRandomValueFrom('0_'+radius)
@@ -96,6 +100,7 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, veloci
             velocityStart: (velocity - velocityGap) * velocityFactor,
             velocityEnd: (velocity + velocityGap) * velocityFactor,
             angleStart: angle,
+            angleEnd: angle,
         }
     } else if (velocity<0){
         const perimeterLength = 2*rectX + 2*rectY
@@ -114,7 +119,7 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, veloci
 
         const distanceOfPerimeter = Math.sqrt(Math.pow(spawnPosition.y - rectY/2,2 ) + Math.pow(spawnPosition.x - rectX/2, 2))
         const velocityFactor = distanceOfPerimeter/(rectDiagonal/2)
-        
+        const angle = Math.atan2(spawnPosition.y - rectY/2, spawnPosition.x - rectX/2) *180 / Math.PI
 
         result = {
             positionSpawning: {
@@ -124,7 +129,8 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, veloci
             particuleLifetime: -1 * rectDiagonal*1000/(2*velocity),
             velocityStart: (velocity - velocityGap) * velocityFactor,
             velocityEnd: (velocity + velocityGap) * velocityFactor,
-            angleStart: Math.atan2(spawnPosition.y - rectY/2, spawnPosition.x - rectX/2) *180 / Math.PI
+            angleStart: angle,
+            angleEnd: angle
         }
     } else {
         result = {
@@ -141,38 +147,40 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, veloci
 function generateTemplateForRay(length, width, directionAngle, velocity){
     let result
 
-    const midWidth = width/2
+    const midWidth = width*Utils.pixelOfDistanceConvertor()/2
     const widthPosition = Utils.getRandomValueFrom('-'+midWidth+'_'+midWidth)
 
     if(velocity>0){
         result = {
             positionSpawning: {
-                x: widthPosition * Math.sin(directionAngle * Math.PI / 180),
+                x: - widthPosition * Math.sin(directionAngle * Math.PI / 180),
                 y: widthPosition * Math.cos(directionAngle * Math.PI / 180)
             },
             particuleLifetime:length*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: directionAngle,
+            angleEnd: directionAngle
         }
     } else if (velocity<0){
-        const targetX = length * Math.cos(directionAngle * Math.PI / 180)
-        const targetY = - length * Math.sin(directionAngle * Math.PI / 180)
+        const targetX = length * Math.cos(directionAngle * Math.PI / 180) * Utils.pixelOfDistanceConvertor()
+        const targetY = length * Math.sin(directionAngle * Math.PI / 180) * Utils.pixelOfDistanceConvertor()
 
         result = {
             positionSpawning: {
-                x: targetX + widthPosition * Math.sin(directionAngle * Math.PI / 180),
+                x: targetX - widthPosition * Math.sin(directionAngle * Math.PI / 180),
                 y: targetY + widthPosition * Math.cos(directionAngle * Math.PI / 180)
             },
             particuleLifetime: -1 * length*Utils.pixelOfDistanceConvertor()*1000/velocity,
-            angleStart: directionAngle
+            angleStart: directionAngle,
+            angleEnd: directionAngle
         }
     } else {
-        const lengthPosition = Utils.getRandomValueFrom('0_'+length)
+        const lengthPosition = Utils.getRandomValueFrom('0_'+length) * Utils.pixelOfDistanceConvertor()
         const targetX = lengthPosition * Math.cos(directionAngle * Math.PI / 180)
-        const targetY = - lengthPosition * Math.sin(directionAngle * Math.PI / 180)
+        const targetY = lengthPosition * Math.sin(directionAngle * Math.PI / 180)
 
         result = {
             positionSpawning: {
-                x: targetX + widthPosition * Math.sin(directionAngle * Math.PI / 180),
+                x: targetX - widthPosition * Math.sin(directionAngle * Math.PI / 180),
                 y: targetY + widthPosition * Math.cos(directionAngle * Math.PI / 180)
             },
         }
