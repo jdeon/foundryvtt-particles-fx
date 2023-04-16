@@ -7,8 +7,8 @@ export const defaultMotionTemplate = {
     source: {x:0,y:0},
     positionSpawning: {x:0,y:0},
     particuleLifetime: [3500,4500],
-    particuleVelocityStart: 200,
-    particuleVelocityEnd: 50,
+    particuleVelocityStart: '200%',
+    particuleVelocityEnd: '50%',
     particuleAngleStart: '0_360',
     particuleAngleEnd: 0,
     particuleRadiusStart: 100,
@@ -30,7 +30,7 @@ export const defaultMotionTemplate = {
 /**
  * SPRAY DESIGNED PREFILLED TEMPLATE
  * 
- * velocity multiply by particule lifetime must done an average of 500
+ * velocity multiply by particule lifetime must done an average of 500% (5 grids)
  */
 
 const explosionMotionTemplate = {
@@ -39,8 +39,8 @@ const explosionMotionTemplate = {
     spawningFrequence: 1, 
     maxParticules: 10000,
     particuleLifetime: 2000,
-    particuleVelocityStart: '400_500',
-    particuleVelocityEnd: '0_25',
+    particuleVelocityStart: '400%_500%',
+    particuleVelocityEnd: '0%_25%',
     particuleAngleStart: '0_360',
     particuleSizeStart: 10,
     particuleSizeEnd: '25_50',
@@ -53,8 +53,8 @@ const breathMotionTemplate = {
     spawningFrequence: 2, 
     maxParticules: 1000,
     particuleLifetime: 4000,
-    particuleVelocityStart: '200_300',
-    particuleVelocityEnd: '10_25',
+    particuleVelocityStart: '200%_300%',
+    particuleVelocityEnd: '10%_25%',
     particuleAngleStart: '-30_30',
     particuleSizeStart: 10,
     particuleSizeEnd: '10_25',
@@ -68,7 +68,7 @@ const rayMotionTemplate = {
     spawningFrequence: 1, 
     maxParticules: 10000,
     particuleLifetime: 1000,
-    particuleVelocityStart: '400_500',
+    particuleVelocityStart: '400%_500%',
     particuleAngleStart: 0,
     particuleSizeStart: {x:50, y:15},
     alphaStart:.25,
@@ -82,7 +82,7 @@ const sonarMotionTemplate = {
     maxParticules: 20000,
     particuleLifetime: 4000,
     particuleSizeStart: 5,
-    particuleVelocityStart: 125,
+    particuleVelocityStart: '125%',
     alphaStart:.5,
     onlyEmitterFollow: true
 }

@@ -82,12 +82,14 @@ export class Utils {
             return inValue;
         } else if (typeof inValue === 'string') {
             const valueBoundary = inValue.split('_')
-            if(valueBoundary.length === 1){
+            if(valueBoundary[0].endsWith('%')){
+                return Utils._managePercent(valueBoundary[0])
+            } else if(valueBoundary.length === 1){
                 //Placeable onject value
                 return Utils.getPlaceableObjectById(valueBoundary[0]);
             } else if (valueBoundary.length === 2){
-                let minValue = Number(valueBoundary[0])
-                let maxValue = Number(valueBoundary[1])
+                let minValue = Utils._managePercent(valueBoundary[0])
+                let maxValue = Utils._managePercent(valueBoundary[1])
 
                 return minValue + (maxValue - minValue) * Utils.includingRandom() ;
             }
@@ -215,5 +217,23 @@ export class Utils {
         }
 
         return result
+    }
+
+    static _managePercent(input){
+        if(input === undefined){
+            return
+        }
+
+        if(! isNaN(input)){
+            return Number(input)
+        }
+
+        if(typeof input === 'string' && input.endsWith('%')){
+            let inputPercent = input.substring(0,input.length - 1)
+            if(! isNaN(inputPercent)){
+                let inputPixel = Number(inputPercent) * canvas.scene.grid.size / 100
+                return inputPixel
+            }
+        }
     }
 }
