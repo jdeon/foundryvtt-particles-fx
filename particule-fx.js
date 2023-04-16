@@ -26,6 +26,7 @@ const Existing_chat_command = [
     'help'
 ]
 
+
 Hooks.once('ready', function () {
     console.log('particule-fx | ready to particule-fx'); 
 
@@ -53,6 +54,7 @@ Hooks.once('ready', function () {
 	});
 });
 
+
 Hooks.on("init", () => {
   ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
 
@@ -61,6 +63,12 @@ Hooks.on("init", () => {
   delete ChatLog.MESSAGE_PATTERNS["invalid"]
   ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
 });
+
+
+Hooks.on("canvasInit", () => {
+  return ParticuleEmitter.stopAllEmission(true)
+});
+
 
 Hooks.on("chatMessage", function(chatlog, message, chatData){
   if(message.startsWith('/pfx')){
@@ -128,6 +136,7 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
   }
 })
 
+
 Hooks.on("renderChatMessage", function (chatlog, html, data) {
   console.log('particule-fx | renderChatMessage with particule-fx'); 
 
@@ -144,6 +153,8 @@ Hooks.on("renderChatMessage", function (chatlog, html, data) {
     }
   })
 });
+
+
 
 function emitForOtherClient(type, payload){
   game.socket.emit(s_EVENT_NAME, {
