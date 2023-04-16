@@ -70,7 +70,7 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
     return result
 }
 
-function generateTemplateForRect(diagonalLength, diagonalAngle, velocity){
+function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, velocityGap){
     let result
 
     const rectX = diagonalLength*Utils.pixelOfDistanceConvertor()*Math.cos(diagonalAngle*Math.PI/180)
@@ -84,9 +84,8 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity){
         const teta = angle%180 > 90 ? angle%180 - 2* (angle%180 -90 ) : angle%180
 
         //Use trigonometrie, we want to know the hypothenus of the triangle to slow down velocity in relation od edge
-        //TODO 45 is not fix (it s not a square) 45 is tan of rectY/2 and rectX/2
         const distanceOfPerimeter = teta < (Math.atan2(rectY/2, rectX/2) *180 / Math.PI) ? rectX/2 * (1/Math.cos(teta * Math.PI / 180)) : rectY/2 * (1/Math.cos((90-teta) * Math.PI / 180))
-        const updatedVelocity = velocity * distanceOfPerimeter/(rectDiagonal/2)
+        const velocityFactor = distanceOfPerimeter/(rectDiagonal/2)
 
         result = {
             positionSpawning: {
@@ -94,8 +93,8 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity){
                 y: rectY/2
             },
             particuleLifetime:rectDiagonal*1000/(2*velocity),
-            velocityStart:updatedVelocity,
-            velocityEnd:updatedVelocity,//TODO keep the radio between start and end 
+            velocityStart: (velocity - velocityGap) * velocityFactor,
+            velocityEnd: (velocity + velocityGap) * velocityFactor,
             angleStart: angle,
         }
     } else if (velocity<0){
@@ -113,13 +112,18 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity){
             spawnPosition = {x:0, y: 2*rectX+2*rectY-perimeterPoint}
         }
 
+        const distanceOfPerimeter = Math.sqrt(Math.pow(spawnPosition.y - rectY/2,2 ) + Math.pow(spawnPosition.x - rectX/2, 2))
+        const velocityFactor = distanceOfPerimeter/(rectDiagonal/2)
+        
+
         result = {
             positionSpawning: {
                 x: spawnPosition.x,
                 y: spawnPosition.y
             },
             particuleLifetime: -1 * rectDiagonal*1000/(2*velocity),
-            //velocityStart:updatedVelocity, //TODO
+            velocityStart: (velocity - velocityGap) * velocityFactor,
+            velocityEnd: (velocity + velocityGap) * velocityFactor,
             angleStart: Math.atan2(spawnPosition.y - rectY/2, spawnPosition.x - rectX/2) *180 / Math.PI
         }
     } else {
@@ -188,7 +192,7 @@ export function generatePrefillTemplateForMeasured(measuredTemplate, velocitySta
     } else if (measuredTemplate.t === "cone") {
         result = generateTemplateForCone(measuredTemplate.distance, measuredTemplate.angle, measuredTemplate.direction, velocity)
     } else if (measuredTemplate.t === "rect") {
-        result = generateTemplateForRect(measuredTemplate.distance, measuredTemplate.direction, velocity)
+        result = generateTemplateForRect(measuredTemplate.distance, measuredTemplate.direction, velocity, (velocityEnd - velocityStart)/2 )
     } else if (measuredTemplate.t === "ray") {
         result = generateTemplateForRay(measuredTemplate.distance, measuredTemplate.width, measuredTemplate.direction, velocity)
     }
