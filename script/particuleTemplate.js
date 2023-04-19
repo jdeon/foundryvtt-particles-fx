@@ -140,10 +140,10 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
                 y: - oldPositionSpawning.x * Math.sin(targetAngleDirection) + oldPositionSpawning.y * Math.cos(targetAngleDirection)
             }
 
-            //Upgrade particule lifetime if the target is longer than 500px
+            //Upgrade particule lifetime if the target is longer than 5 grid
             let targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x,2) + Math.pow(targetPosition.y - sourcePosition.y,2))
-            if(targetDistance > 500){
-                particuleProperties.lifetime *= (targetDistance/500)
+            if(targetDistance > 5 * canvas.scene.grid.size){
+                particuleProperties.particuleLifetime *= (targetDistance/(5 * canvas.scene.grid.size))
             }
         } else if (this.source instanceof MeasuredTemplate){
             sourcePosition={x:this.source.x, y:this.source.y}//Don t use width and length
@@ -169,6 +169,7 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
 
         return new SprayingParticule(
             sprite,
+            target,
             particuleProperties.particuleLifetime,
             particuleProperties.velocityStart,
             particuleProperties.velocityEnd,
@@ -204,7 +205,7 @@ export class MissileParticuleTemplate extends SprayingParticuleTemplate {
             sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
             vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
         
-        this.mainParticule = super.generateParticules()
+        this.mainParticule = this.generateMainParticules()
         this.initGenerate = false
 
         this.subParticuleTemplate = subParticuleTemplate
@@ -213,6 +214,27 @@ export class MissileParticuleTemplate extends SprayingParticuleTemplate {
             this.subParticuleTemplate.source = this.mainParticule.sprite
             this.subParticuleTemplate.target = undefined
         }
+    }
+
+    generateMainParticules(){
+        const mainParticule = super.generateParticules();
+
+        if(mainParticule.target){
+            //The missile must stop at the target
+            const sourcePosition = {x:mainParticule.sprite.x, y:mainParticule.sprite.y}
+            const targetPosition = Utils.getSourcePosition(mainParticule.target)
+            const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x,2) + Math.pow(targetPosition.y - sourcePosition.y,2))
+            const averageVelocity = mainParticule.velocityEnd !== undefined ? (mainParticule.velocityStart + mainParticule.velocityEnd) /2 : mainParticule.velocityStart
+            
+            if(averageVelocity !== 0){
+                const lifetime = 1000 * targetDistance/averageVelocity
+                mainParticule.particuleLifetime = lifetime
+                mainParticule.remainingTime = lifetime
+            }
+        }
+
+
+        return mainParticule;
     }
 
     generateParticules(){

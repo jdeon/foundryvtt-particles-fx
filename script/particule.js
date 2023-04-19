@@ -56,11 +56,12 @@ export class Particule {
 
 export class SprayingParticule  extends Particule { 
 
-    constructor(sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, 
+    constructor(sprite, target, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, 
         sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
         super(sprite, particuleLifetime, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
+        this.target = target;
         this.velocityStart = velocityStart;         //Number      
         this.velocityEnd = velocityEnd;             //Number
         this.angleStart = angleStart;               //Number      

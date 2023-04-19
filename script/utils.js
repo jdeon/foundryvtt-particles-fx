@@ -193,7 +193,7 @@ export class Utils {
             y : source.y
         }
 
-        if(! source instanceof PIXI.Sprite){
+        if(! (source instanceof PIXI.Sprite)){
             //Don t use width and length) for Sprite because of anchor
             result.x += (source.w || source.width || 0) /2
             result.y += (source.h || source.height || 0) /2
