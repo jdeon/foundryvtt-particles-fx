@@ -23,7 +23,7 @@ export class Particule {
     }
 
     manageLifetime(dt){
-        let lifetimeProportion = this.remainingTime / this.particuleLifetime
+        let lifetimeProportion = this.getLifetimeProportion()
 
         //Particule change size
         const updatedSize = this.sizeEnd ? this.sizeStart.minus(this.sizeEnd).multiply(lifetimeProportion).add(this.sizeEnd) : this.sizeStart
@@ -48,6 +48,10 @@ export class Particule {
 
         this.remainingTime -= dt;
     }
+
+    getLifetimeProportion(){
+        return this.remainingTime / this.particuleLifetime
+    }
 }
 
 export class SprayingParticule  extends Particule { 
@@ -64,7 +68,47 @@ export class SprayingParticule  extends Particule {
     }
 
     manageLifetime(dt){
-        let lifetimeProportion = this.remainingTime / this.particuleLifetime
+        let lifetimeProportion = this.getLifetimeProportion()
+
+        //Particule move
+        const updatedVelocity = this.velocityEnd? ((this.velocityStart - this.velocityEnd) * lifetimeProportion) + this.velocityEnd : this.velocityStart;
+        let angleRadiant = this.getDirection() * (Math.PI / 180)
+
+        this.positionVibrationLess.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
+        this.positionVibrationLess.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
+
+        super.manageLifetime(dt)
+
+        if(this.vibrationCurrent) {
+            this.sprite.x = this.positionVibrationLess.x + this.vibrationCurrent * Math.cos(angleRadiant - (Math.PI/2))
+            this.sprite.y = this.positionVibrationLess.y + this.vibrationCurrent * Math.sin(angleRadiant - (Math.PI/2))
+        } else {
+            this.sprite.x = this.positionVibrationLess.x
+            this.sprite.y = this.positionVibrationLess.y
+        }
+    }
+
+    getDirection(){
+        return this.angleEnd ? (((this.angleStart - this.angleEnd) * this.getLifetimeProportion()) + this.angleEnd) : this.angleStart;
+    }
+}
+
+export class MissileParticule  extends Particule { 
+
+    constructor(mainParticule, sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, 
+        sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
+        super(sprite, particuleLifetime, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+
+        this.mainParticule = mainParticule;         //SprayingParticule
+        this.velocityStart = velocityStart;         //Number      
+        this.velocityEnd = velocityEnd;             //Number
+        this.angleStart = angleStart;               //Number      
+        this.angleEnd = angleEnd;                   //Number
+    }
+
+    manageLifetime(dt){
+        let lifetimeProportion = this.getLifetimeProportion()
 
         //Particule move
         const updatedVelocity = this.velocityEnd? ((this.velocityStart - this.velocityEnd) * lifetimeProportion) + this.velocityEnd : this.velocityStart;
@@ -103,7 +147,7 @@ export class GravitingParticule  extends Particule {
     }
 
     manageLifetime(dt){
-        let lifetimeProportion = this.remainingTime / this.particuleLifetime
+        let lifetimeProportion = this.getLifetimeProportion()
 
         //Particule move
         const updatedVelocity = this.angularVelocityEnd? ((this.angularVelocityStart - this.angularVelocityEnd) * lifetimeProportion) + this.angularVelocityEnd : this.angularVelocityStart;

@@ -13,6 +13,7 @@ const s_EVENT_NAME = 'module.particule-fx';
  */
 const s_MESSAGE_TYPES = {
   sprayParticules: 'sprayParticules',
+  missileParticules: 'missileParticules',
   gravitateParticules: 'gravitateParticules',
   stopAllEmission: 'stopAllEmission',
   stopEmissionById: 'stopEmissionById'
@@ -36,6 +37,7 @@ Hooks.once('ready', function () {
     window.particuleEmitter = {
         ...window.particuleEmitter, 
         sprayParticules: sprayParticules,
+        missileParticules: missileParticules,
         gravitateParticules: gravitateParticules,
         stopAllEmission:  stopAllEmission,
         stopEmissionById: stopEmissionById,
@@ -195,6 +197,11 @@ function listen()
 function sprayParticules(...args){
   emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, args); 
   return ParticuleEmitter.sprayParticules(...args)
+}
+
+function missileParticules(...args){
+  emitForOtherClient(s_MESSAGE_TYPES.missileParticules, args); 
+  return ParticuleEmitter.missileParticules(...args)
 }
 
 function gravitateParticules(...args){

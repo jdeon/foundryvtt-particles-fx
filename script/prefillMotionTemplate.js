@@ -23,7 +23,15 @@ export const defaultMotionTemplate = {
     vibrationAmplitudeEnd: 0,
     vibrationFrequencyStart: 0,
     vibrationFrequencyEnd: 0,
-    onlyEmitterFollow: false
+    onlyEmitterFollow: false,
+    subParticuleSizeStart: 5,
+    subParticuleSizeEnd: 2,
+    subParticuleLifetime: 500,
+    subParticulePositionSpawning: {x:0,y:0},
+    subParticuleAngleStart: 0,
+    subParticuleAngleEnd: '-30_30',
+    subParticuleVelocityStart: '50%',
+    subParticuleVelocityEnd: 0,
 }
 
 

@@ -1,4 +1,4 @@
-import { SprayingParticuleTemplate, GravitingParticuleTemplate} from "./particuleTemplate.js"
+import { SprayingParticuleTemplate, GravitingParticuleTemplate, MissileParticuleTemplate} from "./particuleTemplate.js"
 import { Vector3, Utils } from "./utils.js"
 import { motionTemplateDictionnary, defaultMotionTemplate } from "./prefillMotionTemplate.js"
 import { colorTemplateDictionnary, defaultColorTemplate } from "./prefillColorTemplate.js"
@@ -43,6 +43,57 @@ export default class ParticuleEmitter {
             finalInput.vibrationFrequencyStart, 
             finalInput.vibrationFrequencyEnd,
             );
+
+        return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate)
+    }
+
+    static missileParticules(...args){
+        const orderInputArg = ParticuleEmitter._orderInputArg(args);
+
+        return ParticuleEmitter._missileParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject)
+    }
+
+    static _missileParticules(colorTemplate, motionTemplate, inputObject){
+        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+
+        const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
+
+        const particuleTemplate = new MissileParticuleTemplate(
+            finalInput.source,
+            finalInput.target,
+            Vector3.build(finalInput.positionSpawning), 
+            finalInput.particuleVelocityStart, 
+            finalInput.particuleVelocityEnd, 
+            finalInput.particuleAngleStart, 
+            finalInput.particuleAngleEnd, 
+            finalInput.particuleSizeStart,
+            finalInput.particuleSizeEnd,
+            finalInput.particuleRotationStart,
+            finalInput.particuleRotationEnd,  
+            finalInput.particuleLifetime, 
+            particuleTexture, 
+            Vector3.build(finalInput.particuleColorStart), 
+            Vector3.build(finalInput.particuleColorEnd),
+            finalInput.alphaStart, 
+            finalInput.alphaEnd,
+            finalInput.vibrationAmplitudeStart, 
+            finalInput.vibrationAmplitudeEnd,
+            finalInput.vibrationFrequencyStart, 
+            finalInput.vibrationFrequencyEnd,
+            finalInput.subParticuleSizeStart,
+            finalInput.subParticuleSizeEnd,
+            finalInput.subParticuleLifetime,
+            finalInput.subParticuleColorStart,
+            finalInput.subParticuleColorEnd,
+            finalInput.subParticulePositionSpawning,
+            finalInput.subParticuleAngleStart,
+            finalInput.subParticuleAngleEnd,
+            finalInput.subParticuleVelocityStart,
+            finalInput.subParticuleVelocityEnd,
+            );
+
+            //finalInput.emissionDuration must be the same as mainParticule.particuleLifetime
+            finalInput.emissionDuration = particuleTemplate.mainParticule.particuleLifetime
 
         return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate)
     }
@@ -248,6 +299,10 @@ export default class ParticuleEmitter {
             for(let i = 0; i < numberNewParticules; i++){
                 const particule = this.particuleTemplate.generateParticules(this.particuleTemplate);
 
+                if(particule === undefined) {
+                    this.remainingTime = 0
+                    break
+                }
                 canvas.app.stage.addChild(particule.sprite);
                 this.particules.push(particule)
             }
