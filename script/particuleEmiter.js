@@ -35,6 +35,14 @@ export default class ParticuleEmitter {
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
+        
+        if(finalInput.subParticules){
+            if(! finalInput.subParticules.particuleColorStart){
+                finalInput.subParticules.particuleColorStart = finalInput.particuleColorStart
+            } else if (! finalInput.subParticules.particuleColorEnd){
+                finalInput.subParticules.particuleColorEnd = finalInput.subParticules.particuleColorStart
+            }
+        }
 
         let subParticuleTemplate
         if(finalInput.subParticules){

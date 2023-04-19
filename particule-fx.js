@@ -23,6 +23,7 @@ const Existing_chat_command = [
     'stopAll',
     'stopById',
     'spray',
+    'missile',
     'gravitate',
     'help'
 ]
@@ -114,6 +115,13 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
         source = Utils.getSelectedSource()
         if(source){
           idEmitter = sprayParticules({source: source.id, target: Utils.getTargetId()}, ...otherParam)
+          ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+        }
+        break
+      case 'missile' : 
+        source = Utils.getSelectedSource()
+        if(source){
+          idEmitter = missileParticules({source: source.id, target: Utils.getTargetId()}, ...otherParam)
           ParticuleEmitter.writeMessageForEmissionById(idEmitter)
         }
         break

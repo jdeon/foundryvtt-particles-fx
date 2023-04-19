@@ -2,11 +2,7 @@ import { Vector3 } from "./utils.js"
 
 export const defaultColorTemplate = {
     particuleColorStart: new Vector3('150_240', 250, '150_230'),
-    particuleColorEnd: new Vector3(150, '35_150', 250),
-    subParticules : {
-        particuleColorStart: new Vector3('150_240', 250, '150_230'),
-        particuleColorEnd: new Vector3(150, '35_150', 250)
-    }
+    particuleColorEnd: new Vector3(150, '35_150', 250)
 }
 
 const fireColorTemplate = {

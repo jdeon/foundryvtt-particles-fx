@@ -220,9 +220,20 @@ export class MissileParticuleTemplate extends SprayingParticuleTemplate {
         const mainParticule = super.generateParticules();
 
         if(mainParticule.target){
-            //The missile must stop at the target
             const sourcePosition = {x:mainParticule.sprite.x, y:mainParticule.sprite.y}
             const targetPosition = Utils.getSourcePosition(mainParticule.target)
+
+            if((sourcePosition.x === targetPosition.x && sourcePosition.y === targetPosition.y)){
+                //Target and source is at the same place
+                return mainParticule
+            }
+
+            //Missile must go to the target
+            const targetAngleDirection = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x)
+            mainParticule.angleStart = targetAngleDirection * 180 / Math.PI
+            mainParticule.angleEnd = targetAngleDirection * 180 / Math.PI
+
+            //The missile must stop at the target
             const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x,2) + Math.pow(targetPosition.y - sourcePosition.y,2))
             const averageVelocity = mainParticule.velocityEnd !== undefined ? (mainParticule.velocityStart + mainParticule.velocityEnd) /2 : mainParticule.velocityStart
             
