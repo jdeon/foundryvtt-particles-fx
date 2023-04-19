@@ -39,6 +39,7 @@ export default class ParticuleEmitter {
         if(finalInput.subParticules){
             if(! finalInput.subParticules.particuleColorStart){
                 finalInput.subParticules.particuleColorStart = finalInput.particuleColorStart
+                finalInput.subParticules.particuleColorEnd = finalInput.particuleColorEnd
             } else if (! finalInput.subParticules.particuleColorEnd){
                 finalInput.subParticules.particuleColorEnd = finalInput.subParticules.particuleColorStart
             }

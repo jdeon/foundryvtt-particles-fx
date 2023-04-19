@@ -109,6 +109,50 @@ const sonarMotionTemplate = {
 }
 
 /**
+ * MISSILE DESIGNED PREFILLED TEMPLATE
+ * 
+ */
+const trailMissileMotionTemlate = {
+    spawningFrequence: 5, 
+    spawningNumber: 1, 
+    maxParticules: 1000,
+    particuleSizeStart: {x:'50%', y:'15%'},
+    alphaStart:1,
+    subParticules : {
+        type: "Spraying",
+        positionSpawning: {x:0,y:'-5%_5%'},
+        particuleLifetime: 2000,
+        alphaStart:.5,
+        particuleVelocityStart: '0_10%',
+        particuleVelocityEnd: 0,
+        particuleAngleStart: 0,
+        particuleSizeStart: 2,
+	    particuleSizeStart: 5,
+        vibrationAmplitudeStart: '1%',
+        vibrationFrequencyStart: 1000,
+    }
+}
+
+const waveMissileMotionTemlate = {
+    subParticules : {
+        type: "Spraying",
+        particuleLifetime: 2000, 
+        particuleAngleStart: '0_360'
+    }
+}
+
+const growingMissileMotionTemlate = {
+    subParticules : {
+        type: "Graviting",
+        particuleLifetime: 2000, 
+        particuleAngleStart: '0_360',
+        particuleRadiusStart: '10%',
+        particuleRadiusEnd: '50%',
+    }
+}
+
+
+/**
  * GRAVITATE DESIGNED PREFILLED TEMPLATE
  * 
  */
@@ -172,6 +216,9 @@ export const motionTemplateDictionnary = {
     explosion : explosionMotionTemplate,
     breath: breathMotionTemplate,
     ray: rayMotionTemplate,
+    trail: trailMissileMotionTemlate,
+    wave: waveMissileMotionTemlate,
+    grow: growingMissileMotionTemlate,
     vortex: vortexMotionTemplate,
     aura: auraMotionTemplate,
     satellite: satelliteMotionTemplate,

@@ -26,14 +26,14 @@ export class ParticuleTemplate {
         particuleLifetime, particuleTexture,  colorStart, colorEnd, alphaStart, alphaEnd, 
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
         this.source = ParticuleTemplate._translatePlaceableObject(source)                        
-        this.sizeStart = sizeStart;                 
-        this.sizeEnd = sizeEnd;  
+        this.sizeStart = Vector3.build(sizeStart);                 
+        this.sizeEnd = Vector3.build(sizeEnd);  
         this.particuleRotationStart = particuleRotationStart;                 
         this.particuleRotationEnd = particuleRotationEnd;                     
         this.particuleLifetime = particuleLifetime; 
         this.particuleTexture = particuleTexture;   
-        this.colorStart = colorStart;               
-        this.colorEnd = colorEnd;                   
+        this.colorStart = Vector3.build(colorStart);               
+        this.colorEnd = Vector3.build(colorEnd);                   
         this.alphaStart = alphaStart;               
         this.alphaEnd = alphaEnd;                   
         this.vibrationAmplitudeStart = vibrationAmplitudeStart
@@ -90,7 +90,7 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
         return new SprayingParticuleTemplate(
             input.source,
             input.target,
-            Vector3.build(input.positionSpawning), 
+            input.positionSpawning, 
             input.particuleVelocityStart, 
             input.particuleVelocityEnd, 
             input.particuleAngleStart, 
@@ -101,8 +101,8 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             input.particuleRotationEnd,  
             input.particuleLifetime, 
             particuleTexture, 
-            Vector3.build(input.particuleColorStart), 
-            Vector3.build(input.particuleColorEnd),
+            input.particuleColorStart, 
+            input.particuleColorEnd,
             input.alphaStart, 
             input.alphaEnd,
             input.vibrationAmplitudeStart, 
@@ -117,7 +117,7 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
         super(source, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
         this.target = ParticuleTemplate._translatePlaceableObject(target);   
-        this.positionSpawning = positionSpawning;   
+        this.positionSpawning = Vector3.build(positionSpawning);   
         this.velocityStart = velocityStart;         //Array of Number      
         this.velocityEnd = velocityEnd;             //Array of Number
         this.angleStart = angleStart;               //Array of Number      
@@ -159,10 +159,10 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
         sprite.y = sourcePosition.y + particuleProperties.positionSpawning.y;
         sprite.anchor.set(0.5);
 
-        let startSize = Vector3.build(particuleProperties.sizeStart)
+        let startSize = particuleProperties.sizeStart
         sprite.width = startSize.x;
         sprite.height = startSize.y;
-        sprite.angle = particuleProperties.particuleRotationStart
+        sprite.angle = particuleProperties.particuleRotationStart + targetAngleDirection * 180 / Math.PI
 
         let colorStart = Vector3.build(particuleProperties.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
@@ -176,9 +176,9 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             particuleProperties.angleStart + targetAngleDirection * 180 / Math.PI,
             particuleProperties.angleEnd + targetAngleDirection * 180 / Math.PI,
             startSize,
-            Vector3.build(particuleProperties.sizeEnd),
-            particuleProperties.particuleRotationStart,
-            particuleProperties.particuleRotationEnd,
+            particuleProperties.sizeEnd,
+            particuleProperties.particuleRotationStart + targetAngleDirection * 180 / Math.PI,
+            particuleProperties.particuleRotationEnd + targetAngleDirection * 180 / Math.PI,
             colorStart,
             particuleProperties.colorEnd,
             particuleProperties.alphaStart,
@@ -265,9 +265,10 @@ export class MissileParticuleTemplate extends SprayingParticuleTemplate {
             return
         }
 
-        let sourcePosition = new Vector3(this.mainParticule.sprite.x, this.mainParticule.sprite.y, 0)
+        const sourcePosition = new Vector3(this.mainParticule.sprite.x, this.mainParticule.sprite.y, 0)
 
-        let sourceDirection = this.mainParticule.getDirection()
+        const sourceDirection = this.mainParticule.getDirection()
+        const sourceDirectionRadian = sourceDirection * Math.PI / 180
 
         let generatedParticule
 
@@ -276,13 +277,13 @@ export class MissileParticuleTemplate extends SprayingParticuleTemplate {
        
             //The x axis is the backward direction of the main particule
             const dircetionXFactor = {
-                x : - Math.cos(sourceDirection),
-                y : - Math.sin(sourceDirection)
+                x : - Math.cos(sourceDirectionRadian),
+                y : - Math.sin(sourceDirectionRadian)
             }
 
             const dircetionYFactor = {
-                x : - Math.sin(sourceDirection),
-                y : Math.cos(sourceDirection)
+                x : - Math.sin(sourceDirectionRadian),
+                y : Math.cos(sourceDirectionRadian)
             }
 
             //We change the spawning replacing the one without direction inside to a new one
@@ -290,6 +291,7 @@ export class MissileParticuleTemplate extends SprayingParticuleTemplate {
             const oldPositionSpawning = {x: generatedSprite.x - sourcePosition.x, y: generatedSprite.y - sourcePosition.y}
             generatedSprite.x = sourcePosition.x + dircetionXFactor.x * oldPositionSpawning.x + dircetionYFactor.x * oldPositionSpawning.y;
             generatedSprite.y = sourcePosition.y + dircetionXFactor.y * oldPositionSpawning.x + dircetionYFactor.y * oldPositionSpawning.y;
+            generatedParticule.positionVibrationLess = {x : generatedSprite.x, y : generatedSprite.y}; 
 
             //We change the angle to be the trail of the direction by default
             generatedParticule.angleStart += sourceDirection + 180
@@ -323,8 +325,8 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
             input.particuleRotationEnd,   
             input.particuleLifetime, 
             particuleTexture, 
-            Vector3.build(input.particuleColorStart), 
-            Vector3.build(input.particuleColorEnd),
+            input.particuleColorStart, 
+            input.particuleColorEnd,
             input.alphaStart, 
             input.alphaEnd,
             input.vibrationAmplitudeStart, 
@@ -360,7 +362,7 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
         sprite.x = sourcePosition.x + Math.cos(angleStart * (Math.PI / 180)) * radiusStart;
         sprite.y = sourcePosition.y + Math.sin(angleStart * (Math.PI / 180)) * radiusStart;
 
-        let startSize = Vector3.build(Utils.getRandomValueFrom(this.sizeStart))
+        let startSize = Utils.getRandomValueFrom(this.sizeStart)
         sprite.width = startSize.x;
         sprite.height = startSize.y;
 
@@ -380,7 +382,7 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
             radiusStart,
             Utils.getRandomValueFrom(this.radiusEnd),
             startSize,
-            Vector3.build(Utils.getRandomValueFrom(this.sizeEnd)),
+            Utils.getRandomValueFrom(this.sizeEnd),
             rotationStart,
             Utils.getRandomValueFrom(this.particuleRotationEnd),  
             colorStart,

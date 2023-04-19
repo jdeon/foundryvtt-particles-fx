@@ -82,11 +82,13 @@ export class Utils {
             return inValue;
         } else if (typeof inValue === 'string') {
             const valueBoundary = inValue.split('_')
-            if(valueBoundary[0].endsWith('%')){
-                return Utils._managePercent(valueBoundary[0])
-            } else if(valueBoundary.length === 1){
+            if(valueBoundary.length === 1){
+                if(valueBoundary[0].endsWith('%')){
+                    return Utils._managePercent(valueBoundary[0])
+                } else {
                 //Placeable onject value
                 return Utils.getPlaceableObjectById(valueBoundary[0]);
+                }
             } else if (valueBoundary.length === 2){
                 let minValue = Utils._managePercent(valueBoundary[0])
                 let maxValue = Utils._managePercent(valueBoundary[1])
