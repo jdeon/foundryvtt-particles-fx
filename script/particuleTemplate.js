@@ -82,6 +82,36 @@ export class ParticuleTemplate {
 
 export class SprayingParticuleTemplate extends ParticuleTemplate{ 
 
+    static getType(){
+        return "Spraying"
+    }
+
+    static build(input, particuleTexture){
+        return new SprayingParticuleTemplate(
+            input.source,
+            input.target,
+            Vector3.build(input.positionSpawning), 
+            input.particuleVelocityStart, 
+            input.particuleVelocityEnd, 
+            input.particuleAngleStart, 
+            input.particuleAngleEnd, 
+            input.particuleSizeStart,
+            input.particuleSizeEnd,
+            input.particuleRotationStart,
+            input.particuleRotationEnd,  
+            input.particuleLifetime, 
+            particuleTexture, 
+            Vector3.build(input.particuleColorStart), 
+            Vector3.build(input.particuleColorEnd),
+            input.alphaStart, 
+            input.alphaEnd,
+            input.vibrationAmplitudeStart, 
+            input.vibrationAmplitudeEnd,
+            input.vibrationFrequencyStart, 
+            input.vibrationFrequencyEnd,
+            );
+    }
+
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
         sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
@@ -163,11 +193,13 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
 
 export class MissileParticuleTemplate extends SprayingParticuleTemplate { 
 
+    static getType(){
+        return "Missile"
+    }
+
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
         sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd,
-        subParticuleSizeStart, subParticuleSizeEnd, subParticuleLifetime, subParticuleColorStart, subParticuleColorEnd,
-        subParticulePositionSpawning, subParticuleAngleStart, subParticuleAngleEnd, subParticuleVelocityStart, subParticuleVelocityEnd){
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, subParticuleTemplate){
         super(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
             sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
             vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
@@ -175,74 +207,100 @@ export class MissileParticuleTemplate extends SprayingParticuleTemplate {
         this.mainParticule = super.generateParticules()
         this.initGenerate = false
 
-        this.subParticuleTemplate = new SprayingParticuleTemplate(this.mainParticule, undefined, subParticulePositionSpawning, subParticuleVelocityStart, subParticuleVelocityEnd, 
-            subParticuleAngleStart, subParticuleAngleEnd, subParticuleSizeStart, subParticuleSizeEnd, 0, 0,
-            subParticuleLifetime, particuleTexture, subParticuleColorStart, subParticuleColorEnd, 1, 0, 0, 0, 0, 0)
+        this.subParticuleTemplate = subParticuleTemplate
+
+        if(this.subParticuleTemplate){
+            this.subParticuleTemplate.source = this.mainParticule.sprite
+            this.subParticuleTemplate.target = undefined
+        }
     }
 
     generateParticules(){
         if( !this.initGenerate ) {
+            //First init the main particules
             this.initGenerate = true
             return this.mainParticule
         }
 
-        let subParticuleProperties = Utils.getObjectRandomValueFrom(this.subParticuleTemplate)
-
-        if(subParticuleProperties.source === undefined){
+        if(!this.subParticuleTemplate){
+            //No template for sub particules
             return
         }
 
-        let sourcePosition = new Vector3(subParticuleProperties.source.sprite.x, subParticuleProperties.source.sprite.y, 0)
-
-        let sourceDirection = subParticuleProperties.source.getDirection()
-        //The x axis is the backward direction of the main particule
-        const dircetionXFactor = {
-            x : - Math.cos(sourceDirection),
-            y : - Math.sin(sourceDirection)
+        if(this.mainParticule === undefined){
+            //Stop generating if main particule disapeared
+            return
         }
 
-        const dircetionYFactor = {
-            x : - Math.sin(sourceDirection),
-            y : Math.cos(sourceDirection)
+        let sourcePosition = new Vector3(this.mainParticule.sprite.x, this.mainParticule.sprite.y, 0)
+
+        let sourceDirection = this.mainParticule.getDirection()
+
+        let generatedParticule
+
+        if(this.subParticuleTemplate instanceof SprayingParticuleTemplate){
+            generatedParticule = this.subParticuleTemplate.generateParticules()
+       
+            //The x axis is the backward direction of the main particule
+            const dircetionXFactor = {
+                x : - Math.cos(sourceDirection),
+                y : - Math.sin(sourceDirection)
+            }
+
+            const dircetionYFactor = {
+                x : - Math.sin(sourceDirection),
+                y : Math.cos(sourceDirection)
+            }
+
+            //We change the spawning replacing the one without direction inside to a new one
+            const generatedSprite = generatedParticule.sprite
+            const oldPositionSpawning = {x: generatedSprite.x - sourcePosition.x, y: generatedSprite.y - sourcePosition.y}
+            generatedSprite.x = sourcePosition.x + dircetionXFactor.x * oldPositionSpawning.x + dircetionYFactor.x * oldPositionSpawning.y;
+            generatedSprite.y = sourcePosition.y + dircetionXFactor.y * oldPositionSpawning.x + dircetionYFactor.y * oldPositionSpawning.y;
+
+            //We change the angle to be the trail of the direction by default
+            generatedParticule.angleStart += sourceDirection + 180
+            generatedParticule.angleEnd += sourceDirection + 180
+        } else if (this.subParticuleTemplate instanceof GravitingParticuleTemplate){
+            generatedParticule = this.subParticuleTemplate.generateParticules()
+            generatedParticule.angle += sourceDirection + 180
         }
 
-        let sprite = new PIXI.Sprite(this.particuleTexture)
-        sprite.x = sourcePosition.x + dircetionXFactor.x * subParticuleProperties.positionSpawning.x + dircetionYFactor.x * subParticuleProperties.positionSpawning.y;
-        sprite.y = sourcePosition.y + dircetionXFactor.y * subParticuleProperties.positionSpawning.x + dircetionYFactor.y * subParticuleProperties.positionSpawning.y;
-        sprite.anchor.set(0.5);
-
-        let startSize = Vector3.build(subParticuleProperties.sizeStart)
-        sprite.width = startSize.x;
-        sprite.height = startSize.y;
-        sprite.angle = subParticuleProperties.particuleRotationStart
-
-        let colorStart = Vector3.build(subParticuleProperties.colorStart)
-        sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
-
-        return new SprayingParticule(
-            sprite,
-            subParticuleProperties.particuleLifetime,
-            subParticuleProperties.velocityStart,
-            subParticuleProperties.velocityEnd,
-            subParticuleProperties.angleStart + sourceDirection + 180,
-            subParticuleProperties.angleEnd + sourceDirection + 180,
-            startSize,
-            Vector3.build(subParticuleProperties.sizeEnd),
-            subParticuleProperties.particuleRotationStart,
-            subParticuleProperties.particuleRotationEnd,
-            colorStart,
-            subParticuleProperties.colorEnd,
-            subParticuleProperties.alphaStart,
-            subParticuleProperties.alphaEnd,
-            subParticuleProperties.vibrationAmplitudeStart,
-            subParticuleProperties.vibrationAmplitudeEnd,
-            subParticuleProperties.vibrationFrequencyStart,
-            subParticuleProperties.vibrationFrequencyEnd
-        )
+        return generatedParticule
     }
 }
 
 export class GravitingParticuleTemplate extends ParticuleTemplate { 
+
+    static getType(){
+        return "Graviting"
+    }
+
+    static build(input, particuleTexture){
+        return new GravitingParticuleTemplate(
+            input.source,
+            input.particuleAngleStart, 
+            input.particuleVelocityStart, 
+            input.particuleVelocityEnd, 
+            input.particuleRadiusStart, 
+            input.particuleRadiusEnd, 
+            input.particuleSizeStart,
+            input.particuleSizeEnd,
+            input.particuleRotationStart,
+            input.particuleRotationEnd,   
+            input.particuleLifetime, 
+            particuleTexture, 
+            Vector3.build(input.particuleColorStart), 
+            Vector3.build(input.particuleColorEnd),
+            input.alphaStart, 
+            input.alphaEnd,
+            input.vibrationAmplitudeStart, 
+            input.vibrationAmplitudeEnd,
+            input.vibrationFrequencyStart, 
+            input.vibrationFrequencyEnd,
+            input.onlyEmitterFollow
+            );
+    }
 
     constructor(source, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, 
         sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, particuleLifetime, particuleTexture, colorStart, colorEnd, alphaStart, alphaEnd,

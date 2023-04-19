@@ -20,29 +20,7 @@ export default class ParticuleEmitter {
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
-        const particuleTemplate = new SprayingParticuleTemplate(
-            finalInput.source,
-            finalInput.target,
-            Vector3.build(finalInput.positionSpawning), 
-            finalInput.particuleVelocityStart, 
-            finalInput.particuleVelocityEnd, 
-            finalInput.particuleAngleStart, 
-            finalInput.particuleAngleEnd, 
-            finalInput.particuleSizeStart,
-            finalInput.particuleSizeEnd,
-            finalInput.particuleRotationStart,
-            finalInput.particuleRotationEnd,  
-            finalInput.particuleLifetime, 
-            particuleTexture, 
-            Vector3.build(finalInput.particuleColorStart), 
-            Vector3.build(finalInput.particuleColorEnd),
-            finalInput.alphaStart, 
-            finalInput.alphaEnd,
-            finalInput.vibrationAmplitudeStart, 
-            finalInput.vibrationAmplitudeEnd,
-            finalInput.vibrationFrequencyStart, 
-            finalInput.vibrationFrequencyEnd,
-            );
+        const particuleTemplate = SprayingParticuleTemplate.build(finalInput, particuleTexture)
 
         return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate)
     }
@@ -57,6 +35,19 @@ export default class ParticuleEmitter {
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
+
+        let subParticuleTemplate
+        if(finalInput.subParticules){
+            if(finalInput.subParticules.type === SprayingParticuleTemplate.getType()){
+                //this is a spray particule
+                subParticuleTemplate = SprayingParticuleTemplate.build(finalInput.subParticules, particuleTexture)
+                subParticuleTemplate.type = SprayingParticuleTemplate.getType()
+            } else if (finalInput.subParticules.type === GravitingParticuleTemplate.getType()){
+                //this is a graviting particule
+                subParticuleTemplate = GravitingParticuleTemplate.build(finalInput.subParticules, particuleTexture)
+                subParticuleTemplate.type = GravitingParticuleTemplate.getType()
+            }
+        }
 
         const particuleTemplate = new MissileParticuleTemplate(
             finalInput.source,
@@ -80,16 +71,7 @@ export default class ParticuleEmitter {
             finalInput.vibrationAmplitudeEnd,
             finalInput.vibrationFrequencyStart, 
             finalInput.vibrationFrequencyEnd,
-            finalInput.subParticuleSizeStart,
-            finalInput.subParticuleSizeEnd,
-            finalInput.subParticuleLifetime,
-            finalInput.subParticuleColorStart,
-            finalInput.subParticuleColorEnd,
-            finalInput.subParticulePositionSpawning,
-            finalInput.subParticuleAngleStart,
-            finalInput.subParticuleAngleEnd,
-            finalInput.subParticuleVelocityStart,
-            finalInput.subParticuleVelocityEnd,
+            subParticuleTemplate,
             );
 
             //finalInput.emissionDuration must be the same as mainParticule.particuleLifetime
@@ -109,29 +91,7 @@ export default class ParticuleEmitter {
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
-        const particuleTemplate = new GravitingParticuleTemplate(
-            finalInput.source,
-            finalInput.particuleAngleStart, 
-            finalInput.particuleVelocityStart, 
-            finalInput.particuleVelocityEnd, 
-            finalInput.particuleRadiusStart, 
-            finalInput.particuleRadiusEnd, 
-            finalInput.particuleSizeStart,
-            finalInput.particuleSizeEnd,
-            finalInput.particuleRotationStart,
-            finalInput.particuleRotationEnd,   
-            finalInput.particuleLifetime, 
-            particuleTexture, 
-            Vector3.build(finalInput.particuleColorStart), 
-            Vector3.build(finalInput.particuleColorEnd),
-            finalInput.alphaStart, 
-            finalInput.alphaEnd,
-            finalInput.vibrationAmplitudeStart, 
-            finalInput.vibrationAmplitudeEnd,
-            finalInput.vibrationFrequencyStart, 
-            finalInput.vibrationFrequencyEnd,
-            finalInput.onlyEmitterFollow
-            );
+        const particuleTemplate = GravitingParticuleTemplate.build(finalInput, particuleTexture)
 
         return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate)
     }
@@ -244,7 +204,8 @@ export default class ParticuleEmitter {
     static _mergeTemplate(colorTemplate, motionTemplate, inputObject){
         const inputMergeMotionTemplate = Utils.mergeInputTemplate(inputObject , motionTemplate)
         const inputMergeColorTemplate = Utils.mergeInputTemplate(inputMergeMotionTemplate , colorTemplate)
-        const finalInput = Utils.mergeInputTemplate(inputMergeColorTemplate , {...defaultMotionTemplate, ...defaultColorTemplate})
+        const mergeDefaultValue = Utils.mergeInputTemplate(defaultMotionTemplate , defaultColorTemplate)
+        const finalInput = Utils.mergeInputTemplate(inputMergeColorTemplate , mergeDefaultValue)
 
         return finalInput;
     }
@@ -272,7 +233,7 @@ export default class ParticuleEmitter {
 
             particule.manageLifetime(dt)
 
-            if(particule.remainingTime < 0){
+            if(particule.remainingTime <= 0){
                 particule.sprite.destroy()
                 this.particules.splice(i, 1)
                 //Return to last particule

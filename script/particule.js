@@ -93,44 +93,6 @@ export class SprayingParticule  extends Particule {
     }
 }
 
-export class MissileParticule  extends Particule { 
-
-    constructor(mainParticule, sprite, particuleLifetime, velocityStart, velocityEnd, angleStart, angleEnd, 
-        sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        super(sprite, particuleLifetime, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
-
-        this.mainParticule = mainParticule;         //SprayingParticule
-        this.velocityStart = velocityStart;         //Number      
-        this.velocityEnd = velocityEnd;             //Number
-        this.angleStart = angleStart;               //Number      
-        this.angleEnd = angleEnd;                   //Number
-    }
-
-    manageLifetime(dt){
-        let lifetimeProportion = this.getLifetimeProportion()
-
-        //Particule move
-        const updatedVelocity = this.velocityEnd? ((this.velocityStart - this.velocityEnd) * lifetimeProportion) + this.velocityEnd : this.velocityStart;
-        let angleRadiant = this.angleEnd ? (((this.angleStart - this.angleEnd) * lifetimeProportion) + this.angleEnd) : this.angleStart;
-        angleRadiant *= (Math.PI / 180);
-
-        this.positionVibrationLess.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
-        this.positionVibrationLess.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
-
-        super.manageLifetime(dt)
-
-        if(this.vibrationCurrent) {
-            this.sprite.x = this.positionVibrationLess.x + this.vibrationCurrent * Math.cos(angleRadiant - (Math.PI/2))
-            this.sprite.y = this.positionVibrationLess.y + this.vibrationCurrent * Math.sin(angleRadiant - (Math.PI/2))
-        } else {
-            this.sprite.x = this.positionVibrationLess.x
-            this.sprite.y = this.positionVibrationLess.y
-        }
-    }
-}
-
-
 export class GravitingParticule  extends Particule { 
 
     constructor(sprite, source, particuleLifetime, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, 
@@ -149,6 +111,14 @@ export class GravitingParticule  extends Particule {
     manageLifetime(dt){
         let lifetimeProportion = this.getLifetimeProportion()
 
+        let source = Utils.getSourcePosition(this.source)
+
+        if(source === undefined){
+            //If the source have disapeared, the particules do the same
+            this.remainingTime = 0
+            return
+        }
+
         //Particule move
         const updatedVelocity = this.angularVelocityEnd? ((this.angularVelocityStart - this.angularVelocityEnd) * lifetimeProportion) + this.angularVelocityEnd : this.angularVelocityStart;
         this.angle += updatedVelocity * dt /1000
@@ -156,7 +126,7 @@ export class GravitingParticule  extends Particule {
         
         const updatedRadius = this.radiusEnd ? (((this.radiusStart - this.radiusEnd) * lifetimeProportion) + this.radiusEnd) : this.radiusStart;
 
-        let source = Utils.getSourcePosition(this.source)
+        
 
         this.positionVibrationLess.x = source.x + Math.cos(angleRadiant) * updatedRadius;
         this.positionVibrationLess.y = source.y + Math.sin(angleRadiant) * updatedRadius;

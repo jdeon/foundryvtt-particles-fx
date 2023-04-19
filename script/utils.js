@@ -184,8 +184,7 @@ export class Utils {
     }
 
     static getSourcePosition(source){
-
-        if(source.x === undefined || source.y === undefined){
+        if(source === undefined || source === null || source.destroyed || source.x === undefined || source.y === undefined){
             return
         }
 
@@ -194,8 +193,11 @@ export class Utils {
             y : source.y
         }
 
-        result.x += (source.w || source.width || 0) /2
-        result.y += (source.h || source.height || 0) /2
+        if(! source instanceof PIXI.Sprite){
+            //Don t use width and length) for Sprite because of anchor
+            result.x += (source.w || source.width || 0) /2
+            result.y += (source.h || source.height || 0) /2
+        }
 
         return result
     }
