@@ -44,13 +44,19 @@ For the majority of the parameter with can use multiple pattern
 
 
 ## Graviting particule
-To emit graviting particule, you need to use a macro to call the function ```particuleEmitter.gravitateParticules``` with an same input as Spray particule exept :
+To emit graviting particule, you need to use a macro to call the function ```particuleEmitter.gravitateParticules``` with an same input as Spray particule except :
 * particuleVelocityStart and particuleVelocityEnd is interpreted as angular velocity in degree
 * particuleAngleStart define now the position where the particule appear around positionSpawning
 * particuleAngleEnd did not exist
 * particuleRadiusStart is a new parameter exclusive to Graviting particule and accept default pattern. It define the distance between the positionSpawning and the particule at the start
 * particuleRadiusEnd is a new parameter exclusive to Graviting particule and accept default pattern. It define the distance between the positionSpawning and the particule at the end
 * onlyEmitterFollow 
+
+
+## Missile particule
+Missile particule emit a spray particule that is use to emit sub particules
+
+To emit missille particule, you need to use a macro to call the function ```particuleEmitter.missileParticules``` with an same input as Spray particule with ```subParticules``` containing another input (spray or Graviting) and type (equal to "Spraying" or "Graviting")
 
 
 ## Stop all emission
@@ -103,6 +109,7 @@ Commands :
 * /pfx stopById *id* 
 * /pfx spray *prefillMotionTemplate* *prefillColorTemplate*
 * /pfx gravitate *prefillMotionTemplate* *prefillColorTemplate*
+* /pfx missile *prefillMotionTemplate* *prefillColorTemplate*
 * /pfx help
 
 
