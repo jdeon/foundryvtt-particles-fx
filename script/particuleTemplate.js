@@ -137,7 +137,7 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             let oldPositionSpawning = {...particuleProperties.positionSpawning}
             particuleProperties.positionSpawning = {
                 x: oldPositionSpawning.x * Math.cos(targetAngleDirection) - oldPositionSpawning.y * Math.sin(targetAngleDirection),
-                y: - oldPositionSpawning.x * Math.sin(targetAngleDirection) + oldPositionSpawning.y * Math.cos(targetAngleDirection)
+                y: oldPositionSpawning.x * Math.sin(targetAngleDirection) + oldPositionSpawning.y * Math.cos(targetAngleDirection)
             }
 
             //Upgrade particule lifetime if the target is longer than 5 grid
