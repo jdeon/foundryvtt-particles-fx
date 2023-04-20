@@ -24,6 +24,11 @@ To emit spray particules, you need to use a macro to call the method ```particul
 |  particuleAngleStart  |  Default pattern  | Direction of the particule at the spawning (in degree)    |   '0_360'     |
 |  particuleAngleEnd    |  Default pattern  | Direction of the particule at his end (in degree)         |   undefined   |
 
+> **Example**
+> To emit particules from a choosen tile direct to a specific token with a constant velocity of 100 px/s
+> ```particuleEmitter.sprayParticules({source :tile.id, target: token.id , particuleVelocityStart : 100, particuleAngleStart : 0})```
+
+
 
 ### Graviting particule
 The graviting particule turn around the source with a velocity at a distance defined by a radius.
@@ -41,6 +46,9 @@ To emit graviting particules, you need to use a macro to call the method ```part
 |  particuleRadiusEnd   |  Default pattern  | Distance between particule and source at his end (in px)                           |   '50%'       |
 |  onlyEmitterFollow    |  boolean          | If true only new particule is emit from the new position of the source if it move  |   false       |
 
+> **Example**
+> To emit particules graviting around a choosen token and ending at his center. The living particules will not move with the token 
+> ```particuleEmitter.gravitateParticules({source : token.id , particuleRadiusStart : '200%', particuleRadiusEnd : 5, onlyEmitterFollow : true})```
 
 ### Missile particule
 The missile method emits a spray particule that is used to emit sub particules.
@@ -48,6 +56,11 @@ The missile method emits a spray particule that is used to emit sub particules.
 ![](doc/pfx-missile-Animation.gif)
 
 To emit missile particules, you need to use a macro to call the method ```particuleEmitter.missileParticules``` with a same input as Spray particule with a nested object ```subParticules``` containing another input (spray or graviting) and type (equals to "Spraying" or "Graviting").
+
+> **Example**
+> To emit a missile particule with graviting sub particules that forming a trail 
+> ```particuleEmitter.missileParticules({source : {x:200, y:250} , target: token.id, subParticules : { type: "Graviting", particuleLifetime: 1000, onlyEmitterFollow : true, particuleAngleStart: '0_360'}})```
+
 
 ## Input Default Parameters
 The input is a json file with the following paramaters. If the parameter is not define in the input, the script take the default value.
@@ -109,72 +122,94 @@ The order of the paramater is not important, for example ```particuleEmitter.spr
 **explosion (designed for spray)**
 
 ![](doc/pfx-spray-explosion-Animation.gif)
+*particuleEmitter.sprayParticules('explosion', {source :tokenId} )*
 
 **breath (designed for spray)**
 
 ![](doc/pfx-spray-breath-Animation.gif)
+*particuleEmitter.sprayParticules('breath', {source :token.id, target: target.id} )*
 
 **ray (designed for spray)**
 
 ![](doc/pfx-spray-ray-Animation.gif)
+*particuleEmitter.sprayParticules('ray', {source :token.id, target: target.id} )*
+
+**sonar (designed for spray)**
+
+![](doc/pfx-spray-sonar-Animation.gif)
+*particuleEmitter.sprayParticules('sonar', {source :token.id} )*
 
 **trail (designed for missile)**
 
 ![](doc/pfx-missile-trail-Animation.gif)
+*particuleEmitter.missileParticules('trail', {source :token.id, target: target.id} )*
 
 **wave (designed for missile)**
 
 ![](doc/pfx-missile-wave-Animation.gif)
+*particuleEmitter.missileParticules('wave', {source :token.id, target: target.id} )*
 
 **grow (designed for missile)**
 
 ![](doc/pfx-missile-grow-Animation.gif)
+*particuleEmitter.missileParticules('grow', {source :token.id, target: target.id} )*
 
 **vortex (designed for gravitate)**
 
 ![](doc/pfx-gravitate-vortex-Animation.gif)
+*particuleEmitter.gravitateParticules('vortex', {source :tokenId} )*
 
 **aura (designed for gravitate)**
 
 ![](doc/pfx-gravitate-aura-Animation.gif)
+*particuleEmitter.gravitateParticules('aura', {source :tokenId} )*
 
 **satellite (designed for gravitate)**
 
 ![](doc/pfx-gravitate-satellite-Animation.gif)
+*particuleEmitter.gravitateParticules('satellite', {source :tokenId} )*
 
 **slash (designed for gravitate)**
 
 ![](doc/pfx-gravitate-slash-Animation.gif)
+*particuleEmitter.gravitateParticules('slash', {source :tokenId} )*
 
 
 ### Existing color template :
 **ice**
 
 ![](doc/pfx-ice-Animation.gif)
+*particuleEmitter.sprayParticules('breath', 'ice' )*
 
 **fire**
 
 ![](doc/pfx-fire-Animation.gif)
+*particuleEmitter.sprayParticules('breath', 'fire' )*
 
 **light**
 
 ![](doc/pfx-light-Animation.gif)
+*particuleEmitter.sprayParticules('breath', 'light' )*
 
 **death**
 
 ![](doc/pfx-death-Animation.gif)
+*particuleEmitter.sprayParticules('breath', 'death' )*
 
 **poison**
 
 ![](doc/pfx-poison-Animation.gif)
+*particuleEmitter.sprayParticules('breath', 'poison' )*
 
 **silver**
 
 ![](doc/pfx-silver-Animation.gif)
+*particuleEmitter.sprayParticules('breath', 'silver' )*
 
 **cyber**
 
 ![](doc/pfx-cyber-Animation.gif)
+*particuleEmitter.sprayParticules('breath', 'cyber' )*
 
 
 ## Call by chat
@@ -188,6 +223,8 @@ Commands :
 * /pfx gravitate *prefillMotionTemplate* *prefillColorTemplate*
 * /pfx missile *prefillMotionTemplate* *prefillColorTemplate*
 * /pfx help
+
+```/pfx spray ray death```
 
 > To stop a command, you can add the param *--instant* to not have to wait the end of the particules lifetime.
 
