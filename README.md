@@ -1,14 +1,58 @@
 # foundryVTT-particule FX
 
-The module allow to generate particules using a json input and a method to define the mode of emission. The particules are a simple sprite texture moving by script, no need of video files.
+The module contains several methods to generate particules using a json input. The particules are simples sprites textures managed by script, no need of video files.
 
-Note that the emitter neither as the particule is persist. If you reload the page or change scene it disappear.
+Note that neither the emitter neither the particules are persisted. If you reload the page or change the scene it disappears.
 
 
-## Input Parameter
-The input is a json file with the following paramater. If the parameter is not define in the input, the script take the default value.
-This is all the input possible to use.
-> Noticed that if the value XXXend is not given, we use take the start value instead.
+## Emission methods by script
+The emission method is used to interpret the input and manage the particules during their lifetime.
+The method returns its id.
+
+
+### Spray particule
+The spray particule is emitted from a source and move with a velocity in a direction define by an angle.
+
+![](doc/pfx-spray-Animation.gif)
+
+To emit spray particules, you need to use a macro to call the method ```particuleEmitter.sprayParticules``` with an input that contains the default parameters and following ones :
+
+| Parameter name  | accepted value          |  Description          | Default value |
+| :--------------- |:---------------:|:---------------:| -----:|
+|  target               |  Placeable object id or an object with x and y attributes with default pattern inside | The target of the emission, it use to change the angle of the direction and prolonge lifetime of the particules     |    undefined         |
+|  positionSpawning     |  Object with x and y attributes with default pattern inside  | Gap coordinate between source and the real position spawning of the particule (in px)                 |  {x:0,y:0}        |
+|  particuleAngleStart  |  Default pattern  | Direction of the particule at the spawning (in degree)    |   '0_360'     |
+|  particuleAngleEnd    |  Default pattern  | Direction of the particule at his end (in degree)         |   undefined   |
+
+
+### Graviting particule
+The graviting particule turn around the source with a velocity at a distance defined by a radius.
+
+![](doc/pfx-gravitate-Animation.gif)
+
+To emit graviting particules, you need to use a macro to call the method ```particuleEmitter.gravitateParticules``` with an input that contains the default parameters and following ones :
+
+> In this method the particuleVelocityStart and the particuleVelocityEnd are angular velocities (degree/sec)
+
+| Parameter name  | accepted value          |  Description          | Default value |
+| :--------------- |:---------------:|:---------------:| -----:|
+|  particuleAngleStart  |  Default pattern  | Angle where the particule spawn (in degree)                                        |   '0_360'     |
+|  particuleRadiusStart |  Default pattern  | Distance between particule and source at the spawning (in px)                      |   '100%'      |
+|  particuleRadiusEnd   |  Default pattern  | Distance between particule and source at his end (in px)                           |   '50%'       |
+|  onlyEmitterFollow    |  boolean          | If true only new particule is emit from the new position of the source if it move  |   false       |
+
+
+### Missile particule
+The missile method emits a spray particule that is used to emit sub particules.
+
+![](doc/pfx-missile-Animation.gif)
+
+To emit missile particules, you need to use a macro to call the method ```particuleEmitter.missileParticules``` with a same input as Spray particule with a nested object ```subParticules``` containing another input (spray or graviting) and type (equals to "Spraying" or "Graviting").
+
+## Input Default Parameters
+The input is a json file with the following paramaters. If the parameter is not define in the input, the script take the default value.
+This are all the parameters possible to use.
+> Notice that if the value XXXend is not given, but the value XXXstart is given, the start value overrides the default end value.
 
 | Parameter name  | accepted value          |  Description          | Default value |
 | :--------------- |:---------------:|:---------------:| -----:|
@@ -34,75 +78,32 @@ This is all the input possible to use.
 |        vibrationFrequencyEnd     |   Default pattern between 0 and 1   | Frequence of vibration in perpendicular direction of velocity at his end (in milli-sec)                         |   0           |
 
 
-## Emission method by script
-The emission method is use to interpret the input and manage the particule during it lifetime
-
-
-### Spray particule
-The spray particule is emit from a source and move with a velocity in a direction define by an angle
-
-![](doc/pfx-spray-Animation.gif)
-
-To emit spraying particules, you need to use a macro to call the function ```particuleEmitter.sprayParticules``` with an input object with the default input parameter and following one :
-
-| Parameter name  | accepted value          |  Description          | Default value |
-| :--------------- |:---------------:|:---------------:| -----:|
-|  target               |  Placeable object id or an object with x and y attributes with default pattern inside | The target of the emission, it use to change the angle of the direction and prolonge lifetime of the particules     |    undefined         |
-|  positionSpawning     |  Object with x and y attributes with default pattern inside  | Gap coordinate between source and the real position spawning of the particule (in px)                 |  {x:0,y:0}        |
-|  particuleAngleStart  |  Default pattern  | Direction of the particule at the spawning (in degree)    |   '0_360'     |
-|  particuleAngleEnd    |  Default pattern  | Direction of the particule at his end (in degree)         |   undefined   |
-
-
-### Graviting particule
-The graviting particule turn around the source with a velocity at a distance define by a radius
-
-![](doc/pfx-gravitate-Animation.gif)
-
-To emit graviting particule, you need to use a macro to call the function ```particuleEmitter.gravitateParticules```with an input object with the default input parameter and following one :
-
-> In this methode the particuleVelocityStart and particuleVelocityEnd is an angularVelocity (degree/sec)
-
-| Parameter name  | accepted value          |  Description          | Default value |
-| :--------------- |:---------------:|:---------------:| -----:|
-|  particuleAngleStart  |  Default pattern  | Angle where the particule spawn (in degree)                                        |   '0_360'     |
-|  particuleRadiusStart |  Default pattern  | Distance between particule and source at the spawning (in px)                      |   '100%'      |
-|  particuleRadiusEnd   |  Default pattern  | Distance between particule and source at his end (in px)                           |   '50%'       |
-|  onlyEmitterFollow    |  boolean          | If true only new particule is emit from the new position of the source if it move  |   false       |
-
-
-### Missile particule
-Missile particule emit a spray particule that is use to emit sub particules
-
-![](doc/pfx-missile-Animation.gif)
-
-To emit missille particule, you need to use a macro to call the function ```particuleEmitter.missileParticules``` with an same input as Spray particule with ```subParticules``` containing another input (spray or Graviting) and type (equal to "Spraying" or "Graviting")
-
-
-## Default pattern
-For the majority of the parameter with can use multiple pattern
-* Number (ex:9)                   : The direct value that are going to be used
-* String (ex:'9')                 : The value is converted to Number before going to be used
-* Percent (ex:'9%')               : The value is multiply by the grid pixel before going to be used (ex: if grid size is 50px, '10%' become 5px )
-* Array  (ex:[9,8,12])            : A random value of the array is going to be choosed, the value can be of default pattern too (ex: [9,'8','12_15'])
-* Undescored String (ex:'9_14')   : A random value between the two inclusive boundary is going to be used
+### Default pattern
+For the majority of the parameters you can use multiple patterns :
+* Number (ex:9)                   : The direct value
+* String (ex:'9')                 : The value converted to Number
+* Percent (ex:'9%')               : The value multiplied by the grid pixel (ex: if grid size is 50px, '10%' become 5px )
+* Undescored String (ex:'9_14')   : A random value between the two inclusive boundaries, percent accepted (ex: '10%_30%')
+* Array  (ex:[9,8,12])            : A random value of the array, the value can be a any of the default pattern (ex: [9,'8','12_15'])
 
 
 ## Stop all emissions
-To stop all emissions, you need to use a macro to call the function ```particuleEmitter.stopAllEmission``` with a boolean parameter for immediate deletion.
+To stop all emissions, you need to use a macro to call the method ```particuleEmitter.stopAllEmission``` with a boolean parameter, true for instant delete of particules already emitted, false to stop only the emission (living particules are not killed).
 
 
 ## Stop a specific emission
-To stop a specific emission, you need to use a macro to call the function ```particuleEmitter.stopEmissionById``` with with a id parameter :
-* id of the emission
+To stop a specific emission, you need to use a macro to call the method ```particuleEmitter.stopEmissionById``` with an id parameter :
+* id of the emission (returned by the method)
 * 'l' or 'last' for newest emission
 * 'f' or 'first' for oldest emission
 
-An other boolean parameter for immediate deletion
+And a boolean parameter, true for instant delete of particules already emitted, false to stop only the emission (living particules are not killed).
+
 
 
 ## Prefill template
-The methods emitting particules can be call with prefill template. It exist two kind of template **prefillMotionTemplate** and **prefillColorTemplate** that can be combine. If you do so, your input are going to override the attribute of the prefills templates but the prefills templates will use as defaults values.
-The order of the paramater is not important, ```emit('prefillMotionTemplate', 'prefillColorTemplate', {position: {x:100, y:'50_100'}})``` is the same as ```emit('prefillColorTemplate', {position: {x:100, y:'50_100'}}, 'prefillMotionTemplate')```
+The method emitting particules can be called with a prefill template. They are two kinds of template **prefillMotionTemplate** and **prefillColorTemplate** which can be combined. You can add an input to override some attributes of the prefill template.
+The order of the paramater is not important, for example ```particuleEmitter.sprayParticules('prefillMotionTemplate', 'prefillColorTemplate', {position: {x:100, y:'50_100'}})``` is the same as ```particuleEmitter.sprayParticules('prefillColorTemplate', {position: {x:100, y:'50_100'}}, 'prefillMotionTemplate')```
 
 ### Prefill motion template :
 **explosion (designed for spray)**
@@ -177,8 +178,8 @@ The order of the paramater is not important, ```emit('prefillMotionTemplate', 'p
 
 
 ## Call by chat
-You can start orstop emission by chat with command "/pfx"
-It's result on a message response in the chat
+You can start or stop emission by chat with command "/pfx".
+It adds a message response in the chat.
 
 Commands :
 * /pfx stopAll
@@ -188,14 +189,14 @@ Commands :
 * /pfx missile *prefillMotionTemplate* *prefillColorTemplate*
 * /pfx help
 
-> For stop commands, you can add the param *--instant* to not wait the end of the particules lifetime
+> To stop a command, you can add the param *--instant* to not have to wait the end of the particules lifetime.
 
 
 ## Measured template source
-If the source is a measured template, it will override some input property (like angle) to match with the measured tools. For each, measured it work differently if the average velocity value
-| Measured template  | Positive velocity | Null velocity | Negative Velocity |
+If the source is a measured template, it will override some input properties (like angle) to match with the measured tools. For each measured template type, it works differently depending on the average velocity value :
+| Measured template type | Positive velocity | Null velocity | Negative Velocity |
 | :--------------- |:---------------:| :----------:| :------------:|
-| Circle | Emit from the center to the outside of the circle | Emit from the outside to the center of the circle | Appear every where in the circle | 
+| Circle | Emit from the center to the outside of the circle | Emit from the outside to the center of the circle | Appear everywhere in the circle | 
 | Cone | Emit from the center to the outside of the cone | Emit from the outside to the center of the cone | Appear every where in the cone | 
 | Rectangle | Emit from the center to the outside of the rectangle | Emit from the outside to the center of the rectangle | Appear every where in the rectangle | 
 | Ray | Emit from the source to the opposite of the ray | Emit from the sopposite to the source of the ray | Appear every where in the ray | 
