@@ -2,6 +2,8 @@
 
 The module allow to generate particules using a json input and a method to define the mode of emission. The particules are a simple sprite texture moving by script, no need of video files.
 
+Note that the emitter neither as the particule is persist. If you reload the page or change scene it disappear.
+
 
 ## Input Parameter
 The input is a json file with the following paramater. If the parameter is not define in the input, the script take the default value.
@@ -38,6 +40,7 @@ The emission method is use to interpret the input and manage the particule durin
 
 ### Spray particule
 The spray particule is emit from a source and move with a velocity in a direction define by an angle
+[](\doc\pfx-spray-Animation.gif)
 
 To emit spraying particules, you need to use a macro to call the function ```particuleEmitter.sprayParticules``` with an input object with the default input parameter and following one :
 
@@ -51,6 +54,7 @@ To emit spraying particules, you need to use a macro to call the function ```par
 
 ### Graviting particule
 The graviting particule turn around the source with a velocity at a distance define by a radius
+[](\doc\pfx-gravitate-Animation.gif)
 
 To emit graviting particule, you need to use a macro to call the function ```particuleEmitter.gravitateParticules```with an input object with the default input parameter and following one :
 
@@ -66,6 +70,7 @@ To emit graviting particule, you need to use a macro to call the function ```par
 
 ### Missile particule
 Missile particule emit a spray particule that is use to emit sub particules
+[](\doc\pfx-missile-Animation.gif)
 
 To emit missille particule, you need to use a macro to call the function ```particuleEmitter.missileParticules``` with an same input as Spray particule with ```subParticules``` containing another input (spray or Graviting) and type (equal to "Spraying" or "Graviting")
 
@@ -97,24 +102,58 @@ The methods emitting particules can be call with prefill template. It exist two 
 The order of the paramater is not important, ```emit('prefillMotionTemplate', 'prefillColorTemplate', {position: {x:100, y:'50_100'}})``` is the same as ```emit('prefillColorTemplate', {position: {x:100, y:'50_100'}}, 'prefillMotionTemplate')```
 
 ### Prefill motion template :
-* explosion (designed for spray)
-* breath (designed for spray)
-* ray (designed for spray)
-* trail (designed for missile)
-* wave (designed for missile)
-* grow (designed for missile)
-* vortex (designed for gravitate)
-* aura (designed for gravitate)
-* satellite (designed for gravitate)
-* slash (designed for gravitate)
+**explosion (designed for spray)**
+[](\doc\pfx-spray-explosion-Animation.gif)
+
+**breath (designed for spray)**
+[](\doc\pfx-spray-breath-Animation.gif)
+
+**ray (designed for spray)**
+[](\doc\pfx-spray-ray-Animation.gif)
+
+**trail (designed for missile)**
+[](\doc\pfx-missile-trail-Animation.gif)
+
+**wave (designed for missile)**
+[](\doc\pfx-missile-wave-Animation.gif)
+
+**grow (designed for missile)**
+[](\doc\pfx-missile-grow-Animation.gif)
+
+**vortex (designed for gravitate)**
+[](\doc\pfx-gravitate-vortex-Animation.gif)
+
+**aura (designed for gravitate)**
+[](\doc\pfx-gravitate-aura-Animation.gif)
+
+**satellite (designed for gravitate)**
+[](\doc\pfx-gravitate-satellite-Animation.gif)
+
+**slash (designed for gravitate)**
+[](\doc\pfx-gravitate-slash-Animation.gif)
+
 
 ### Existing color template :
-* ice
-* fire
-* light
-* death
-* poison
-* silver
+**ice**
+[](\doc\pfx-ice-Animation.gif)
+
+**fire**
+[](\doc\pfx-fire-Animation.gif)
+
+**light**
+[](\doc\pfx-light-Animation.gif)
+
+**death**
+[](\doc\pfx-death-Animation.gif)
+
+**poison**
+[](\doc\pfx-poison-Animation.gif)
+
+**silver**
+[](\doc\pfx-silver-Animation.gif)
+
+**cyber**
+[](\doc\pfx-cyber-Animation.gif)
 
 
 ## Call by chat
