@@ -123,78 +123,67 @@ The order of the paramater is not important, for example ```particuleEmitter.spr
 
 ![](doc/pfx-spray-explosion-Animation.gif)
 
-*particuleEmitter.sprayParticules('explosion', {source :tokenId} )*
-\
+*particuleEmitter.sprayParticules('explosion', {source :tokenId} )*\
 
 **breath (designed for spray)**
 
 ![](doc/pfx-spray-breath-Animation.gif)
 
-*particuleEmitter.sprayParticules('breath', {source :token.id, target: target.id} )*
-\
+*particuleEmitter.sprayParticules('breath', {source :token.id, target: target.id} )*\
 
 **ray (designed for spray)**
 
 ![](doc/pfx-spray-ray-Animation.gif)
 
-*particuleEmitter.sprayParticules('ray', {source :token.id, target: target.id} )*
-\
+*particuleEmitter.sprayParticules('ray', {source :token.id, target: target.id} )*\
 
 **sonar (designed for spray)**
 
 ![](doc/pfx-spray-sonar-Animation.gif)
 
-*particuleEmitter.sprayParticules('sonar', {source :token.id} )*
-\
+*particuleEmitter.sprayParticules('sonar', {source :token.id} )*\
 
 **trail (designed for missile)**
 
 ![](doc/pfx-missile-trail-Animation.gif)
 
-*particuleEmitter.missileParticules('trail', {source :token.id, target: target.id} )*
-\
+*particuleEmitter.missileParticules('trail', {source :token.id, target: target.id} )*\
 
 **wave (designed for missile)**
 
 ![](doc/pfx-missile-wave-Animation.gif)
 
-*particuleEmitter.missileParticules('wave', {source :token.id, target: target.id} )*
-\
+*particuleEmitter.missileParticules('wave', {source :token.id, target: target.id} )*\
 
 **grow (designed for missile)**
 
 ![](doc/pfx-missile-grow-Animation.gif)
 
-*particuleEmitter.missileParticules('grow', {source :token.id, target: target.id} )*
-\
+*particuleEmitter.missileParticules('grow', {source :token.id, target: target.id} )*\
 
 **vortex (designed for gravitate)**
 
 ![](doc/pfx-gravitate-vortex-Animation.gif)
 
-*particuleEmitter.gravitateParticules('vortex', {source :tokenId} )*
-\
+*particuleEmitter.gravitateParticules('vortex', {source :tokenId} )*\
 
 **aura (designed for gravitate)**
 
 ![](doc/pfx-gravitate-aura-Animation.gif)
 
-*particuleEmitter.gravitateParticules('aura', {source :tokenId} )*
-\
+*particuleEmitter.gravitateParticules('aura', {source :tokenId} )*\
 
 **satellite (designed for gravitate)**
 
 ![](doc/pfx-gravitate-satellite-Animation.gif)
 
-*particuleEmitter.gravitateParticules('satellite', {source :tokenId} )*
-\
+*particuleEmitter.gravitateParticules('satellite', {source :tokenId} )*\
 
 **slash (designed for gravitate)**
 
 ![](doc/pfx-gravitate-slash-Animation.gif)
 
-*particuleEmitter.gravitateParticules('slash', {source :tokenId} )*
-\
+*particuleEmitter.gravitateParticules('slash', {source :tokenId} )*\
 
 
 ### Existing color template :
@@ -202,50 +191,43 @@ The order of the paramater is not important, for example ```particuleEmitter.spr
 
 ![](doc/pfx-ice-Animation.gif)
 
-*particuleEmitter.sprayParticules('breath', 'ice' )*
-\
+*particuleEmitter.sprayParticules('breath', 'ice' )*\
 
 **fire**
 
 ![](doc/pfx-fire-Animation.gif)
 
-*particuleEmitter.sprayParticules('breath', 'fire' )*
-\
+*particuleEmitter.sprayParticules('breath', 'fire' )*\
 
 **light**
 
 ![](doc/pfx-light-Animation.gif)
 
-*particuleEmitter.sprayParticules('breath', 'light' )*
-\
+*particuleEmitter.sprayParticules('breath', 'light' )*\
 
 **death**
 
 ![](doc/pfx-death-Animation.gif)
 
-*particuleEmitter.sprayParticules('breath', 'death' )*
-\
+*particuleEmitter.sprayParticules('breath', 'death' )*\
 
 **poison**
 
 ![](doc/pfx-poison-Animation.gif)
 
-*particuleEmitter.sprayParticules('breath', 'poison' )*
-\
+*particuleEmitter.sprayParticules('breath', 'poison' )*\
 
 **silver**
 
 ![](doc/pfx-silver-Animation.gif)
 
-*particuleEmitter.sprayParticules('breath', 'silver' )*
-\
+*particuleEmitter.sprayParticules('breath', 'silver' )*\
 
 **cyber**
 
 ![](doc/pfx-cyber-Animation.gif)
 
-*particuleEmitter.sprayParticules('breath', 'cyber' )*
-\
+*particuleEmitter.sprayParticules('breath', 'cyber' )*\
 
 ## Call by chat
 You can start or stop emission by chat with command "/pfx".
