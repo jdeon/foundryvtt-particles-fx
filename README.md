@@ -40,7 +40,7 @@ The emission method is use to interpret the input and manage the particule durin
 
 ### Spray particule
 The spray particule is emit from a source and move with a velocity in a direction define by an angle
-[](\doc\pfx-spray-Animation.gif)
+[](doc/pfx-spray-Animation.gif)
 
 To emit spraying particules, you need to use a macro to call the function ```particuleEmitter.sprayParticules``` with an input object with the default input parameter and following one :
 
@@ -54,7 +54,7 @@ To emit spraying particules, you need to use a macro to call the function ```par
 
 ### Graviting particule
 The graviting particule turn around the source with a velocity at a distance define by a radius
-[](\doc\pfx-gravitate-Animation.gif)
+[](doc/pfx-gravitate-Animation.gif)
 
 To emit graviting particule, you need to use a macro to call the function ```particuleEmitter.gravitateParticules```with an input object with the default input parameter and following one :
 
@@ -70,7 +70,7 @@ To emit graviting particule, you need to use a macro to call the function ```par
 
 ### Missile particule
 Missile particule emit a spray particule that is use to emit sub particules
-[](\doc\pfx-missile-Animation.gif)
+[](doc/pfx-missile-Animation.gif)
 
 To emit missille particule, you need to use a macro to call the function ```particuleEmitter.missileParticules``` with an same input as Spray particule with ```subParticules``` containing another input (spray or Graviting) and type (equal to "Spraying" or "Graviting")
 
@@ -103,57 +103,57 @@ The order of the paramater is not important, ```emit('prefillMotionTemplate', 'p
 
 ### Prefill motion template :
 **explosion (designed for spray)**
-[](\doc\pfx-spray-explosion-Animation.gif)
+[](doc/pfx-spray-explosion-Animation.gif)
 
 **breath (designed for spray)**
-[](\doc\pfx-spray-breath-Animation.gif)
+[](doc/pfx-spray-breath-Animation.gif)
 
 **ray (designed for spray)**
-[](\doc\pfx-spray-ray-Animation.gif)
+[](doc/pfx-spray-ray-Animation.gif)
 
 **trail (designed for missile)**
-[](\doc\pfx-missile-trail-Animation.gif)
+[](doc/pfx-missile-trail-Animation.gif)
 
 **wave (designed for missile)**
-[](\doc\pfx-missile-wave-Animation.gif)
+[](doc/pfx-missile-wave-Animation.gif)
 
 **grow (designed for missile)**
-[](\doc\pfx-missile-grow-Animation.gif)
+[](doc/pfx-missile-grow-Animation.gif)
 
 **vortex (designed for gravitate)**
-[](\doc\pfx-gravitate-vortex-Animation.gif)
+[](doc/pfx-gravitate-vortex-Animation.gif)
 
 **aura (designed for gravitate)**
-[](\doc\pfx-gravitate-aura-Animation.gif)
+[](doc/pfx-gravitate-aura-Animation.gif)
 
 **satellite (designed for gravitate)**
-[](\doc\pfx-gravitate-satellite-Animation.gif)
+[](doc/pfx-gravitate-satellite-Animation.gif)
 
 **slash (designed for gravitate)**
-[](\doc\pfx-gravitate-slash-Animation.gif)
+[](doc/pfx-gravitate-slash-Animation.gif)
 
 
 ### Existing color template :
 **ice**
-[](\doc\pfx-ice-Animation.gif)
+[](doc/pfx-ice-Animation.gif)
 
 **fire**
-[](\doc\pfx-fire-Animation.gif)
+[](doc/pfx-fire-Animation.gif)
 
 **light**
-[](\doc\pfx-light-Animation.gif)
+[](doc/pfx-light-Animation.gif)
 
 **death**
-[](\doc\pfx-death-Animation.gif)
+[](doc/pfx-death-Animation.gif)
 
 **poison**
-[](\doc\pfx-poison-Animation.gif)
+[](doc/pfx-poison-Animation.gif)
 
 **silver**
-[](\doc\pfx-silver-Animation.gif)
+[](doc/pfx-silver-Animation.gif)
 
 **cyber**
-[](\doc\pfx-cyber-Animation.gif)
+[](doc/pfx-cyber-Animation.gif)
 
 
 ## Call by chat
