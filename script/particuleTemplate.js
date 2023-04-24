@@ -56,7 +56,7 @@ export class ParticuleTemplate {
         sprite.height = startSize.y;
 
         let angleStart = Utils.getRandomValueFrom(this.particuleRotationStart)
-        sprite.angle = angleStart
+        sprite.angle = angleStart + sourcePosition.r
 
         let colorStart = Utils.getRandomValueFrom(this.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
@@ -66,8 +66,8 @@ export class ParticuleTemplate {
             Utils.getRandomValueFrom(this.particuleLifetime),
             startSize,
             Vector3.build(Utils.getRandomValueFrom(this.sizeEnd)),
-            angleStart,
-            Utils.getRandomValueFrom(this.particuleRotationEnd),    
+            angleStart + sourcePosition.r,
+            Utils.getRandomValueFrom(this.particuleRotationEnd) + sourcePosition.r,    
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),
@@ -134,11 +134,8 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             //Target exist and is different than source
             let targetPosition = Utils.getSourcePosition(target)
             targetAngleDirection = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x)
-            let oldPositionSpawning = {...particuleProperties.positionSpawning}
-            particuleProperties.positionSpawning = {
-                x: oldPositionSpawning.x * Math.cos(targetAngleDirection) - oldPositionSpawning.y * Math.sin(targetAngleDirection),
-                y: oldPositionSpawning.x * Math.sin(targetAngleDirection) + oldPositionSpawning.y * Math.cos(targetAngleDirection)
-            }
+            const oldPositionSpawning = new Vector3(particuleProperties.positionSpawning.x, particuleProperties.positionSpawning.y, 0);
+            particuleProperties.positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
 
             //Upgrade particule lifetime if the target is longer than 5 grid
             let targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x,2) + Math.pow(targetPosition.y - sourcePosition.y,2))
@@ -151,7 +148,9 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
             particuleProperties = {...particuleProperties , ...measuredOverride}
             targetAngleDirection = 0
         } else {
-            targetAngleDirection = 0
+            targetAngleDirection = sourcePosition.r  * Math.PI / 180
+            const oldPositionSpawning = new Vector3(particuleProperties.positionSpawning.x, particuleProperties.positionSpawning.y, 0);
+            particuleProperties.positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
         }
 
         let sprite = new PIXI.Sprite(this.particuleTexture)
@@ -162,7 +161,7 @@ export class SprayingParticuleTemplate extends ParticuleTemplate{
         let startSize = particuleProperties.sizeStart
         sprite.width = startSize.x;
         sprite.height = startSize.y;
-        sprite.angle = particuleProperties.particuleRotationStart + targetAngleDirection * 180 / Math.PI
+        sprite.angle = particuleProperties.particuleRotationStart +  targetAngleDirection * 180 / Math.PI
 
         let colorStart = Vector3.build(particuleProperties.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
@@ -354,7 +353,7 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
         let source = Utils.getRandomValueFrom(this.source)
         let sourcePosition = Utils.getSourcePosition(source)
 
-        let angleStart = Utils.getRandomValueFrom(this.angleStart)
+        let angleStart = Utils.getRandomValueFrom(this.angleStart) + sourcePosition.r
         let radiusStart = Utils.getRandomValueFrom(this.radiusStart)
         
         let sprite = new PIXI.Sprite(this.particuleTexture)
@@ -367,7 +366,7 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
         sprite.height = startSize.y;
 
         let rotationStart = Utils.getRandomValueFrom(this.particuleRotationStart)
-        sprite.angle = rotationStart
+        sprite.angle = rotationStart + sourcePosition.r
 
         let colorStart = Utils.getRandomValueFrom(this.colorStart)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
@@ -383,8 +382,8 @@ export class GravitingParticuleTemplate extends ParticuleTemplate {
             Utils.getRandomValueFrom(this.radiusEnd),
             startSize,
             Utils.getRandomValueFrom(this.sizeEnd),
-            rotationStart,
-            Utils.getRandomValueFrom(this.particuleRotationEnd),  
+            rotationStart + sourcePosition.r,
+            Utils.getRandomValueFrom(this.particuleRotationEnd) + sourcePosition.r,  
             colorStart,
             Utils.getRandomValueFrom(this.colorEnd),
             Utils.getRandomValueFrom(this.alphaStart),

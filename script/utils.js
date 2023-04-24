@@ -69,6 +69,13 @@ export class Vector3 {
             return new Vector3(x, y, z)
         }
     }
+
+    rotateZVector(zAngleRadiant){
+        return {
+            x: this.x * Math.cos(zAngleRadiant) - this.y * Math.sin(zAngleRadiant),
+            y: this.x * Math.sin(zAngleRadiant) + this.y * Math.cos(zAngleRadiant)
+        }
+    }
 } 
 
 export class Utils {
@@ -192,13 +199,19 @@ export class Utils {
 
         let result = {
             x : source.x,
-            y : source.y
+            y : source.y,
+            r : 0
         }
 
         if(! (source instanceof PIXI.Sprite)){
             //Don t use width and length) for Sprite because of anchor
             result.x += (source.w || source.width || 0) /2
             result.y += (source.h || source.height || 0) /2
+        }
+
+        let rotation = source?.document?.rotation
+        if(rotation){
+            result.r = rotation
         }
 
         return result
