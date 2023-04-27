@@ -2,36 +2,56 @@ import { SprayingParticuleTemplate, GravitingParticuleTemplate, MissileParticule
 import { Vector3, Utils } from "./utils.js"
 import { motionTemplateDictionnary, defaultMotionTemplate } from "./prefillMotionTemplate.js"
 import { colorTemplateDictionnary, defaultColorTemplate } from "./prefillColorTemplate.js"
+import { s_EVENT_NAME, s_MESSAGE_TYPES } from "../particule-fx.js"
 
 export default class ParticuleEmitter { 
 
     static maxId = 1
+
+    static newEmitterId(){
+        let lastId = game.settings.get("particule-fx", "maxEmitterId");
+        lastId++
+
+        if(game.user.isGM){
+            game.settings.set("particule-fx", "maxEmitterId", lastId);
+        } else {
+            game.socket.emit(s_EVENT_NAME, {
+                type: s_MESSAGE_TYPES.updateMaxEmitterId,
+                payload: {maxEmitterId: lastId}
+             });
+        }
+
+
+
+        return lastId
+    }
+
 
     static emitters = []
 
     static sprayParticules(...args){
         const orderInputArg = ParticuleEmitter._orderInputArg(args);
 
-        return ParticuleEmitter._sprayParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject)
+        return ParticuleEmitter._sprayParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject, orderInputArg.emitterId)
     }
 
-    static _sprayParticules(colorTemplate, motionTemplate, inputObject){
+    static _sprayParticules(colorTemplate, motionTemplate, inputObject, emitterId){
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
         const particuleTemplate = SprayingParticuleTemplate.build(finalInput, particuleTexture)
 
-        return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate)
+        return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate, emitterId)
     }
 
     static missileParticules(...args){
         const orderInputArg = ParticuleEmitter._orderInputArg(args);
 
-        return ParticuleEmitter._missileParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject)
+        return ParticuleEmitter._missileParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject, orderInputArg.emitterId)
     }
 
-    static _missileParticules(colorTemplate, motionTemplate, inputObject){
+    static _missileParticules(colorTemplate, motionTemplate, inputObject, emitterId){
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
@@ -86,23 +106,23 @@ export default class ParticuleEmitter {
             //finalInput.emissionDuration must be the same as mainParticule.particuleLifetime
             finalInput.emissionDuration = particuleTemplate.mainParticule.particuleLifetime
 
-        return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate)
+        return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate, emitterId)
     }
 
     static gravitateParticules(...args){
         const orderInputArg = ParticuleEmitter._orderInputArg(args);
 
-        return ParticuleEmitter._gravitateParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject)
+        return ParticuleEmitter._gravitateParticules(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject, orderInputArg.emitterId)
     }
 
-    static _gravitateParticules(colorTemplate, motionTemplate, inputObject){
+    static _gravitateParticules(colorTemplate, motionTemplate, inputObject, emitterId){
         const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
         const particuleTemplate = GravitingParticuleTemplate.build(finalInput, particuleTexture)
 
-        return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate)
+        return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate, emitterId)
     }
 
     static stopAllEmission(immediate){
@@ -171,7 +191,7 @@ export default class ParticuleEmitter {
     }
 
 
-    static _abstractInitParticules(inputQuery, finalInput, particuleTemplate){
+    static _abstractInitParticules(inputQuery, finalInput, particuleTemplate, emitterId){
         const particuleEmitter = new ParticuleEmitter(
             particuleTemplate, 
             finalInput.spawningFrequence, 
@@ -183,7 +203,7 @@ export default class ParticuleEmitter {
         // Listen for animate update
         particuleEmitter.callback = particuleEmitter.manageParticules.bind(particuleEmitter)
         particuleEmitter.originalQuery = inputQuery
-        particuleEmitter.id = ParticuleEmitter.maxId ++
+        particuleEmitter.id = emitterId || ParticuleEmitter.newEmitterId()
 
         canvas.app.ticker.add(particuleEmitter.callback)
 
@@ -196,9 +216,12 @@ export default class ParticuleEmitter {
         let inputObject
         let motionTemplate
         let colorTemplate
+        let emitterId
 
         for(let arg of args){
-            if(arg instanceof Object){
+            if(arg.emitterId){
+                emitterId = arg.emitterId
+            }else if(arg instanceof Object){
                 inputObject = arg
             } else if(motionTemplateDictionnary[arg]){
                 motionTemplate =  motionTemplateDictionnary[arg]
@@ -207,7 +230,7 @@ export default class ParticuleEmitter {
             }
         }
 
-        return {colorTemplate, motionTemplate, inputObject}
+        return {colorTemplate, motionTemplate, inputObject, emitterId}
     }
 
     static _mergeTemplate(colorTemplate, motionTemplate, inputObject){

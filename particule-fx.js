@@ -6,17 +6,18 @@ import { Utils } from "./script/utils.js"
  *
  * @type {string}
  */
-const s_EVENT_NAME = 'module.particule-fx';
+export const s_EVENT_NAME = 'module.particule-fx';
 
 /**
  * Defines the different message types that FQL sends over `game.socket`.
  */
-const s_MESSAGE_TYPES = {
+export const s_MESSAGE_TYPES = {
   sprayParticules: 'sprayParticules',
   missileParticules: 'missileParticules',
   gravitateParticules: 'gravitateParticules',
   stopAllEmission: 'stopAllEmission',
-  stopEmissionById: 'stopEmissionById'
+  stopEmissionById: 'stopEmissionById',
+  updateMaxEmitterId: 'updateMaxEmitterId'
 };
 
 const Existing_chat_command = [
@@ -51,10 +52,21 @@ Hooks.once('ready', function () {
 		name: game.i18n.localize("PARTICULE-FX.Settings.Avoid.label"),
 		hint: game.i18n.localize("PARTICULE-FX.Settings.Avoid.description"),
 		scope: "client",
-        config: true,
-        type: Boolean,
-        default: false
+    config: true,
+    type: Boolean,
+    default: false
 	});
+
+  game.settings.register("particule-fx", "maxEmitterId", {
+    name: "Last id emitter",
+    hint: "Don't touch this",
+    default: 0,
+    type: Number,
+    scope: 'world',
+    config: false
+});
+
+
 });
 
 
@@ -193,6 +205,7 @@ function listen()
             case s_MESSAGE_TYPES.gravitateParticules: ParticuleEmitter.gravitateParticules(...data.payload); break;
             case s_MESSAGE_TYPES.stopEmissionById: ParticuleEmitter.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
             case s_MESSAGE_TYPES.stopAllEmission: ParticuleEmitter.stopAllEmission(data.payload); break;
+            case s_MESSAGE_TYPES.updateMaxEmitterId: updateMaxEmitterId(data.payload)
          }
       }
       catch (err)
@@ -202,19 +215,28 @@ function listen()
    });
 }
 
+function updateMaxEmitterId(payload){
+  if(game.user.isGM && payload.maxEmitterId){
+    game.settings.set("particule-fx", "maxEmitterId", payload.maxEmitterId);
+  }
+}
+
 function sprayParticules(...args){
-  emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, args); 
-  return ParticuleEmitter.sprayParticules(...args)
+  let emitterId = { emitterId: ParticuleEmitter.newEmitterId() }
+  emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, args, emitterId); 
+  return ParticuleEmitter.sprayParticules(...args, emitterId)
 }
 
 function missileParticules(...args){
-  emitForOtherClient(s_MESSAGE_TYPES.missileParticules, args); 
-  return ParticuleEmitter.missileParticules(...args)
+  let emitterId = { emitterId: ParticuleEmitter.newEmitterId() }
+  emitForOtherClient(s_MESSAGE_TYPES.missileParticules, args, emitterId); 
+  return ParticuleEmitter.missileParticules(...args, emitterId)
 }
 
 function gravitateParticules(...args){
-  emitForOtherClient(s_MESSAGE_TYPES.gravitateParticules, args); 
-  return ParticuleEmitter.gravitateParticules(...args)
+  let emitterId = { emitterId: ParticuleEmitter.newEmitterId() }
+  emitForOtherClient(s_MESSAGE_TYPES.gravitateParticules, args, emitterId); 
+  return ParticuleEmitter.gravitateParticules(...args, emitterId)
 }
 
 function stopAllEmission(immediate){
@@ -225,7 +247,6 @@ function stopAllEmission(immediate){
 function stopEmissionById(emitterId, immediate){
   emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); 
   return ParticuleEmitter.stopEmissionById(emitterId, immediate)
-}
         
 /*
 MACRO TO USE
