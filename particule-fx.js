@@ -249,16 +249,4 @@ function stopAllEmission(immediate){
 function stopEmissionById(emitterId, immediate){
   emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); 
   return ParticuleEmitter.stopEmissionById(emitterId, immediate)
-        
-/*
-MACRO TO USE
-
-if (canvas.tokens.controlled.length === 0){
-  return ui.notifications.error("Please select a token first");
 }
-
-for (let target of canvas.tokens.controlled) {
-const position = {x:target.x + target.w /2, y:target.position.y + target.h /2}
-	particuleEmitter.emitParticules({positionSpawning:position, particuleVelocityStart : 300})
-}
- */
