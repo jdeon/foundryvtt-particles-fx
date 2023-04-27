@@ -247,7 +247,7 @@ export default class ParticuleEmitter {
     static _mergeTemplate(colorTemplate, motionTemplate, inputObject){
         const inputMergeMotionTemplate = Utils.mergeInputTemplate(inputObject , motionTemplate)
         const inputMergeColorTemplate = Utils.mergeInputTemplate(inputMergeMotionTemplate , colorTemplate)
-        const mergeDefaultValue = Utils.mergeInputTemplate(defaultMotionTemplate , defaultColorTemplate)
+        const mergeDefaultValue = Utils.mergeInputTemplate(defaultMotionTemplate() , defaultColorTemplate())
         const finalInput = Utils.mergeInputTemplate(inputMergeColorTemplate , mergeDefaultValue)
 
         return finalInput;
