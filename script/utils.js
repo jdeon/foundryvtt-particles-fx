@@ -69,9 +69,20 @@ export class Vector3 {
             return new Vector3(x, y, z)
         }
     }
+
+    rotateZVector(zAngleRadiant){
+        return {
+            x: this.x * Math.cos(zAngleRadiant) - this.y * Math.sin(zAngleRadiant),
+            y: this.x * Math.sin(zAngleRadiant) + this.y * Math.cos(zAngleRadiant)
+        }
+    }
 } 
 
 export class Utils {
+
+    static pixelOfDistanceConvertor(){
+        return canvas.scene.grid.size/canvas.scene.grid.distance
+    }
 
     static getRandomValueFrom(inValue){
         if(!isNaN(inValue)){
@@ -79,14 +90,18 @@ export class Utils {
         } else if (typeof inValue === 'string') {
             const valueBoundary = inValue.split('_')
             if(valueBoundary.length === 1){
-                returnNumber(valueBoundary[0]);
+                if(valueBoundary[0].endsWith('%')){
+                    return Utils._managePercent(valueBoundary[0])
+                } else {
+                //Placeable onject value
+                return Utils.getPlaceableObjectById(valueBoundary[0]);
+                }
             } else if (valueBoundary.length === 2){
-                let minValue = Number(valueBoundary[0])
-                let maxValue = Number(valueBoundary[1])
+                let minValue = Utils._managePercent(valueBoundary[0])
+                let maxValue = Utils._managePercent(valueBoundary[1])
 
                 return minValue + (maxValue - minValue) * Utils.includingRandom() ;
             }
-
         } else if (inValue instanceof Vector3) {
             let x = Utils.getRandomValueFrom(inValue.x)
             let y = Utils.getRandomValueFrom(inValue.y)
@@ -97,9 +112,23 @@ export class Utils {
         } else if (Array.isArray(inValue) && inValue.length > 0) {
             const indexToRetrieve =  Math.floor(Math.random() * inValue.length);
             return Utils.getRandomValueFrom(inValue[indexToRetrieve]);
+        } else {
+            return inValue
         }
 
     }
+
+    static getObjectRandomValueFrom(inValue){
+        let result = {}
+        let inKey = Object.keys(inValue)
+
+        for (const key of inKey) {
+            result[key] = Utils.getRandomValueFrom(inValue[key]);
+        }
+
+        return result
+    }
+
 
     static includingRandom(){
         if(Math.random() == 0){
@@ -129,7 +158,7 @@ export class Utils {
                 if (typeof key === 'string' && key.endsWith('End')){
                     //removve end from key and add start
                     let startSuffixKey = key.substring(0,key.length - 3) + 'Start'
-                    result[key] = prioritizeInput[startSuffixKey] || defaultInput[key]
+                    result[key] = prioritizeInput[startSuffixKey] !== undefined ? prioritizeInput[startSuffixKey] : defaultInput[key]
                 } else {
                     result[key] = defaultInput[key]
                 }
@@ -150,15 +179,78 @@ export class Utils {
         return result;
     }
 
-    static getSourcePosition(){
-        if (canvas.tokens.controlled.length === 0){
+    static getSelectedSource(){
+        if (canvas.activeLayer.controlled.length === 0){
             ui.notifications.error(game.i18n.localize("PARTICULE-FX.No-Token-selected"));
             return 
           }
           
-          const source = canvas.tokens.controlled[0];
-
-          return {x:source.x + source.w /2, y:source.y + source.h /2}
+          return canvas.activeLayer.controlled[0];
     }
 
+    static getTargetId(){
+        return game.user.targets.ids.length > 0 ? game.user.targets.ids[0] : undefined
+    }
+
+    static getSourcePosition(source){
+        if(source === undefined || source === null || source.destroyed || source.x === undefined || source.y === undefined){
+            return
+        }
+
+        let result = {
+            x : source.x,
+            y : source.y,
+            r : 0
+        }
+
+        if(! (source instanceof PIXI.Sprite)){
+            //Don t use width and length) for Sprite because of anchor
+            result.x += (source.w || source.width || 0) /2
+            result.y += (source.h || source.height || 0) /2
+        }
+
+        let rotation = source?.document?.rotation
+        if(rotation){
+            result.r = rotation
+        }
+
+        return result
+    }
+
+    static getPlaceableObjectById(id){
+        if(!id){
+            return 
+        }
+
+        let result
+        for(let layer of canvas.layers){
+            if(typeof layer.get === "function"){
+                result = layer.get(id)
+            }
+
+            if(result){
+                break
+            }
+        }
+
+        return result
+    }
+
+    static _managePercent(input){
+        if(input === undefined){
+            return
+        }
+
+        if(! isNaN(input)){
+            return Number(input)
+        }
+
+        if(typeof input === 'string' && input.endsWith('%')){
+            let inputPercent = input.substring(0,input.length - 1)
+            if(! isNaN(inputPercent)){
+                let inputPixel = Number(inputPercent) * canvas.scene.grid.size / 100
+                return inputPixel
+            }
+        }
+    }
 }

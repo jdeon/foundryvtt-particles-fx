@@ -3,7 +3,7 @@
 	"name": "particule-fx",
 	"title": "Particule FX",
 	"description": "Emit particule by script.",
-	"version": "0.7.0",
+	"version": "1.0.0",
 	"compatibility": {
 		"minimum": "10",
 		"verified": "10.291",
@@ -27,7 +27,7 @@
 			"lang": "fr",
 			"name": "Français",
 			"path": "lang/fr.json"
-		  }
+		}
 	],
 	"packs": [
 		{

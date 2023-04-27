@@ -1,8 +1,10 @@
 import { Vector3 } from "./utils.js"
 
-export const defaultColorTemplate = {
-    particuleColorStart:new Vector3('150_240', 250, '150_230'),
-    particuleColorEnd:new Vector3(150, '35_150', 250),
+export const defaultColorTemplate = () =>  {
+    return {
+        particuleColorStart: new Vector3('150_240', 250, '150_230'),
+        particuleColorEnd: new Vector3(150, '35_150', 250)
+    }
 }
 
 const fireColorTemplate = {
@@ -35,11 +37,17 @@ const silverColorTemplate = {
     particuleColorStart:[new Vector3(100,100,100),new Vector3(150,150,150),new Vector3(200,200,200),new Vector3(250,250,250)]
 }
 
+const cyberColorTemplate = {
+    particuleColorStart: new Vector3(0,'200_255',0),
+    particuleColorEnd: new Vector3(0,'175_225',0)
+}
+
 export const colorTemplateDictionnary = {
     fire : fireColorTemplate,
     ice: iceColorTemplate,
     death: deathColorTemplate,
     light: lightColorTemplate,
     poison: poisonColorTemplate,
-    silver: silverColorTemplate
+    silver: silverColorTemplate,
+    cyber: cyberColorTemplate
 }
