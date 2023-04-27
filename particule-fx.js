@@ -216,7 +216,7 @@ function listen()
 }
 
 function updateMaxEmitterId(payload){
-  if(game.user.isGM && payload.maxEmitterId){
+  if(game.user.isGM && payload.maxEmitterId !== undefined && !isNaN(payload.maxEmitterId)){
     game.settings.set("particule-fx", "maxEmitterId", payload.maxEmitterId);
   }
 }
@@ -240,6 +240,7 @@ function gravitateParticules(...args){
 }
 
 function stopAllEmission(immediate){
+  ParticuleEmitter.resetEmitterId()
   emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); 
   return ParticuleEmitter.stopAllEmission(immediate)
 }

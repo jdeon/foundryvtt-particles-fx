@@ -26,6 +26,17 @@ export default class ParticuleEmitter {
         return lastId
     }
 
+    static resetEmitterId(){
+        if(game.user.isGM){
+            game.settings.set("particule-fx", "maxEmitterId", 0);
+        } else {
+            game.socket.emit(s_EVENT_NAME, {
+                type: s_MESSAGE_TYPES.updateMaxEmitterId,
+                payload: {maxEmitterId: 0}
+             });
+        }
+    }
+
 
     static emitters = []
 
