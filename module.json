@@ -3,11 +3,10 @@
 	"name": "particule-fx",
 	"title": "Particule FX",
 	"description": "Emit particule by script.",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"compatibility": {
 		"minimum": "10",
-		"verified": "10.291",
-		"maximum": "10"
+		"verified": "10.291"
 	},
 	"authors": [
 		{
