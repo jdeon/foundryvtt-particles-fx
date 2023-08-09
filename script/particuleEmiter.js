@@ -135,6 +135,25 @@ export default class ParticuleEmitter {
         return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate, emitterId)
     }
 
+    static persistEmitters(){
+        if(game.user.isGM){
+            const activeEmmittersQuery = ParticuleEmitter.emitters
+            .filter(emitter => emitter.remainingTime === undefined || emitter.remainingTime > 0)
+            .map(emitter => {
+                const query = emitter.finalQuery
+                query.emissionDuration = emitter.remainingTime
+                query.type = emitter.particuleTemplate.constructor.getType()
+                return query
+        })
+            
+            if(activeEmmittersQuery){
+                canvas.scene.setFlag(s_MODULE_ID, "emitters", activeEmmittersQuery)
+            } else {
+                canvas.scene.unsetFlag(s_MODULE_ID, "emitters")
+            }
+        }
+    }
+
     static stopAllEmission(immediate){
         let deletedIds = []
 
@@ -213,6 +232,7 @@ export default class ParticuleEmitter {
         // Listen for animate update
         particuleEmitter.callback = particuleEmitter.manageParticules.bind(particuleEmitter)
         particuleEmitter.originalQuery = inputQuery
+        particuleEmitter.finalQuery = finalInput
         particuleEmitter.id = emitterId || ParticuleEmitter.newEmitterId()
 
         canvas.app.ticker.add(particuleEmitter.callback)

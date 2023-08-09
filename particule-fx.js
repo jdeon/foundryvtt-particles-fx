@@ -88,7 +88,8 @@ Hooks.on("init", () => {
 });
 
 
-Hooks.on("canvasInit", () => {
+Hooks.on("canvasTearDown", () => {
+  ParticuleEmitter.persistEmitters()
   return ParticuleEmitter.stopAllEmission(true)
 });
 
