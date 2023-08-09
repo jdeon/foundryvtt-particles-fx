@@ -2,18 +2,18 @@ import { SprayingParticuleTemplate, GravitingParticuleTemplate, MissileParticule
 import { Vector3, Utils } from "./utils.js"
 import { motionTemplateDictionnary, defaultMotionTemplate } from "./prefillMotionTemplate.js"
 import { colorTemplateDictionnary, defaultColorTemplate } from "./prefillColorTemplate.js"
-import { s_EVENT_NAME, s_MESSAGE_TYPES } from "../particule-fx.js"
+import { s_MODULE_ID ,s_EVENT_NAME, s_MESSAGE_TYPES } from "../particule-fx.js"
 
 export default class ParticuleEmitter { 
 
     static maxId = 1
 
     static newEmitterId(){
-        let lastId = game.settings.get("particule-fx", "maxEmitterId");
+        let lastId = game.settings.get(s_MODULE_ID, "maxEmitterId");
         lastId++
 
         if(game.user.isGM){
-            game.settings.set("particule-fx", "maxEmitterId", lastId);
+            game.settings.set(s_MODULE_ID, "maxEmitterId", lastId);
         } else {
             game.socket.emit(s_EVENT_NAME, {
                 type: s_MESSAGE_TYPES.updateMaxEmitterId,
@@ -22,13 +22,12 @@ export default class ParticuleEmitter {
         }
 
 
-
         return lastId
     }
 
     static resetEmitterId(){
         if(game.user.isGM){
-            game.settings.set("particule-fx", "maxEmitterId", 0);
+            game.settings.set(s_MODULE_ID, "maxEmitterId", 0);
         } else {
             game.socket.emit(s_EVENT_NAME, {
                 type: s_MESSAGE_TYPES.updateMaxEmitterId,
@@ -47,7 +46,7 @@ export default class ParticuleEmitter {
     }
 
     static _sprayParticules(colorTemplate, motionTemplate, inputObject, emitterId){
-        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+        const particuleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particule.png`);
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
@@ -63,7 +62,7 @@ export default class ParticuleEmitter {
     }
 
     static _missileParticules(colorTemplate, motionTemplate, inputObject, emitterId){
-        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+        const particuleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particule.png`);
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
         
@@ -127,7 +126,7 @@ export default class ParticuleEmitter {
     }
 
     static _gravitateParticules(colorTemplate, motionTemplate, inputObject, emitterId){
-        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+        const particuleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particule.png`);
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
@@ -194,7 +193,7 @@ export default class ParticuleEmitter {
             originalQuery : verbal ? JSON.stringify(emitter.originalQuery) : undefined
         }
 
-        let htmlMessage = await renderTemplate("modules/particule-fx/template/message-particule_state.hbs", dataExport)
+        let htmlMessage = await renderTemplate(`modules/${s_MODULE_ID}/template/message-particule_state.hbs`, dataExport)
 
         ui.chat.processMessage("/w gm " + htmlMessage );
 
