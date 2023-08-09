@@ -28,6 +28,9 @@ export const s_MESSAGE_TYPES = {
   updateMaxEmitterId: 'updateMaxEmitterId'
 };
 
+//The first scene emitters is load before the game is ready, we need to wait until the ready hooks
+let firstSceneEmittersQueries
+
 const Existing_chat_command = [
     'stopAll',
     'stopById',
@@ -37,25 +40,16 @@ const Existing_chat_command = [
     'help'
 ]
 
+Hooks.on("init", () => {
+  ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
 
-Hooks.once('ready', function () {
-    console.log(`particule-fx | ready to ${s_MODULE_ID}`); 
+  //pfx is added after invalid
+  let invalid = ChatLog.MESSAGE_PATTERNS["invalid"]
+  delete ChatLog.MESSAGE_PATTERNS["invalid"]
+  ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
+});
 
-    if(getProperty(window,'particuleEmitter.emmitParticules')) return;
-		
-    //On call, we call method localy and share data with other client
-    window.particuleEmitter = {
-        ...window.particuleEmitter, 
-        sprayParticules: sprayParticules,
-        missileParticules: missileParticules,
-        gravitateParticules: gravitateParticules,
-        stopAllEmission:  stopAllEmission,
-        stopEmissionById: stopEmissionById,
-        writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById   //No need to emit to other client
-	}
-
-  listen()
-
+Hooks.on("setup", () => {
   game.settings.register(s_MODULE_ID, "avoidParticule", {
 		name: game.i18n.localize("PARTICULE-FX.Settings.Avoid.label"),
 		hint: game.i18n.localize("PARTICULE-FX.Settings.Avoid.description"),
@@ -72,19 +66,44 @@ Hooks.once('ready', function () {
     type: Number,
     scope: 'world',
     config: false
+  });
 });
 
 
+Hooks.on("canvasReady", () => {
+  const emittersQueries = canvas.scene.getFlag(s_MODULE_ID, "emitters")
+
+  if(game.ready){
+    ParticuleEmitter.initEmitters(emittersQueries)
+  } else {
+    //Waiting the world to be ready at the first launch
+    firstSceneEmittersQueries = emittersQueries
+  }
 });
 
 
-Hooks.on("init", () => {
-  ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
+Hooks.once('ready', function () {
+    console.log(`particule-fx | ready to ${s_MODULE_ID}`);
+    
+    if(firstSceneEmittersQueries){
+      ParticuleEmitter.initEmitters(firstSceneEmittersQueries)
+      firstSceneEmittersQueries = undefined
+    }
 
-  //pfx is added after invalid
-  let invalid = ChatLog.MESSAGE_PATTERNS["invalid"]
-  delete ChatLog.MESSAGE_PATTERNS["invalid"]
-  ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
+    if(getProperty(window,'particuleEmitter.emmitParticules')) return;
+		
+    //On call, we call method localy and share data with other client
+    window.particuleEmitter = {
+        ...window.particuleEmitter, 
+        sprayParticules: sprayParticules,
+        missileParticules: missileParticules,
+        gravitateParticules: gravitateParticules,
+        stopAllEmission:  stopAllEmission,
+        stopEmissionById: stopEmissionById,
+        writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById   //No need to emit to other client
+	}
+
+  listen()
 });
 
 

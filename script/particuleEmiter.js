@@ -39,6 +39,26 @@ export default class ParticuleEmitter {
 
     static emitters = []
 
+    static initEmitters(emittersQueries){
+        if(emittersQueries && Array.isArray(emittersQueries)){
+            emittersQueries.forEach(query => {
+              switch (query.type){
+                case SprayingParticuleTemplate.getType() :
+                  ParticuleEmitter.sprayParticules(query);
+                  break;
+                case GravitingParticuleTemplate.getType() :
+                  ParticuleEmitter.gravitateParticules(query);
+                  break;
+                case MissileParticuleTemplate.getType() :
+                  ParticuleEmitter.missileParticules(query);
+                  break;
+                default:
+                  ParticuleEmitter.sprayParticules(query);
+              }
+            });
+        }
+    }
+
     static sprayParticules(...args){
         const orderInputArg = ParticuleEmitter._orderInputArg(args);
 
