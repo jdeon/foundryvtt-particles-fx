@@ -6,7 +6,15 @@ import { Utils } from "./script/utils.js"
  *
  * @type {string}
  */
-export const s_EVENT_NAME = 'module.particule-fx';
+export const s_MODULE_ID = 'particule-fx';
+
+
+/**
+ * Defines the event name to send all messages to over  `game.socket`.
+ *
+ * @type {string}
+ */
+export const s_EVENT_NAME = `module.${s_MODULE_ID}`;
 
 /**
  * Defines the different message types that FQL sends over `game.socket`.
@@ -20,6 +28,9 @@ export const s_MESSAGE_TYPES = {
   updateMaxEmitterId: 'updateMaxEmitterId'
 };
 
+//The first scene emitters is load before the game is ready, we need to wait until the ready hooks
+let firstSceneEmittersQueries
+
 const Existing_chat_command = [
     'stopAll',
     'stopById',
@@ -29,9 +40,68 @@ const Existing_chat_command = [
     'help'
 ]
 
+Hooks.on("init", () => {
+  ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
+
+  //pfx is added after invalid
+  let invalid = ChatLog.MESSAGE_PATTERNS["invalid"]
+  delete ChatLog.MESSAGE_PATTERNS["invalid"]
+  ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
+});
+
+Hooks.on("setup", () => {
+  game.settings.register(s_MODULE_ID, "avoidParticule", {
+		name: game.i18n.localize("PARTICULE-FX.Settings.Avoid.label"),
+		hint: game.i18n.localize("PARTICULE-FX.Settings.Avoid.description"),
+		scope: "client",
+    config: true,
+    type: Boolean,
+    default: false
+	});
+
+  game.settings.register(s_MODULE_ID, "saveEmitters", {
+		name: game.i18n.localize("PARTICULE-FX.Settings.Persist.label"),
+		hint: game.i18n.localize("PARTICULE-FX.Settings.Persist.description"),
+		scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+	});
+
+  game.settings.register(s_MODULE_ID, "maxEmitterId", {
+    name: "Last id emitter",
+    hint: "Don't touch this",
+    default: 0,
+    type: Number,
+    scope: 'world',
+    config: false
+  });
+});
+
+
+Hooks.on("canvasReady", () => {
+  const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
+
+  if(isSaveAllowed){
+    const emittersQueries = canvas.scene.getFlag(s_MODULE_ID, "emitters")
+
+    if(game.ready){
+      ParticuleEmitter.initEmitters(emittersQueries)
+    } else {
+      //Waiting the world to be ready at the first launch
+      firstSceneEmittersQueries = emittersQueries
+    }
+  }
+});
+
 
 Hooks.once('ready', function () {
-    console.log('particule-fx | ready to particule-fx'); 
+    console.log(`particule-fx | ready to ${s_MODULE_ID}`);
+    
+    if(firstSceneEmittersQueries){
+      ParticuleEmitter.initEmitters(firstSceneEmittersQueries)
+      firstSceneEmittersQueries = undefined
+    }
 
     if(getProperty(window,'particuleEmitter.emmitParticules')) return;
 		
@@ -47,40 +117,11 @@ Hooks.once('ready', function () {
 	}
 
   listen()
-
-  game.settings.register("particule-fx", "avoidParticule", {
-		name: game.i18n.localize("PARTICULE-FX.Settings.Avoid.label"),
-		hint: game.i18n.localize("PARTICULE-FX.Settings.Avoid.description"),
-		scope: "client",
-    config: true,
-    type: Boolean,
-    default: false
-	});
-
-  game.settings.register("particule-fx", "maxEmitterId", {
-    name: "Last id emitter",
-    hint: "Don't touch this",
-    default: 0,
-    type: Number,
-    scope: 'world',
-    config: false
 });
 
 
-});
-
-
-Hooks.on("init", () => {
-  ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
-
-  //pfx is added after invalid
-  let invalid = ChatLog.MESSAGE_PATTERNS["invalid"]
-  delete ChatLog.MESSAGE_PATTERNS["invalid"]
-  ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
-});
-
-
-Hooks.on("canvasInit", () => {
+Hooks.on("canvasTearDown", () => {
+  ParticuleEmitter.persistEmitters()
   return ParticuleEmitter.stopAllEmission(true)
 });
 
@@ -160,7 +201,7 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
 
 
 Hooks.on("renderChatMessage", function (chatlog, html, data) {
-  console.log('particule-fx | renderChatMessage with particule-fx'); 
+  console.log(`particule-fx | renderChatMessage with ${s_MODULE_ID}`); 
 
   const buttons = html.find('button[name="button.delete-emitter"]');
 
@@ -194,7 +235,7 @@ function listen()
    {
       if (typeof data !== 'object') { return; }
 
-      if(game.settings.get("particule-fx", "avoidParticule")){ return; }
+      if(game.settings.get(s_MODULE_ID, "avoidParticule")){ return; }
 
       try
       {
@@ -218,7 +259,7 @@ function listen()
 
 function updateMaxEmitterId(payload){
   if(game.user.isGM && payload.maxEmitterId !== undefined && !isNaN(payload.maxEmitterId)){
-    game.settings.set("particule-fx", "maxEmitterId", payload.maxEmitterId);
+    game.settings.set(s_MODULE_ID, "maxEmitterId", payload.maxEmitterId);
   }
 }
 
