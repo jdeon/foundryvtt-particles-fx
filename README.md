@@ -2,10 +2,13 @@
 
 The module contains several methods to generate particules using a json input. The particules are simples sprites textures managed by script, no need of video files.
 
+<br>
+
 ## Settings
 1. Avoid showing particle from other client (useful for minimal configuration)
 2. Save emitters when changing scene and retrieve when returning
 
+<br>
 
 ## Emission methods
 The emission method is used to interpret the input and manage the particules during their lifetime.
@@ -41,6 +44,8 @@ To stop a specific emission, you need to use a macro to call the method ```parti
 
 And a boolean parameter, true for instant delete of particules already emitted, false to stop only the emission (living particules are not killed).
 
+<br>
+
 ## How to call it
 
 ### Call by chat
@@ -72,6 +77,8 @@ Commands :
 > **Example**
 > To emit a missile particule with graviting sub particules that forming a trail 
 > ```particuleEmitter.missileParticules({source : {x:200, y:250} , target: token.id, subParticules : { type: "Graviting", particuleLifetime: 1000, onlyEmitterFollow : true, particuleAngleStart: '0_360'}})```
+
+<br>
 
 ## Prefill template
 The method emitting particules can be called with a prefill template. They are two kinds of template **prefillMotionTemplate** and **prefillColorTemplate** which can be combined. You can add an input to override some attributes of the prefill template.
@@ -204,6 +211,7 @@ The order of the paramater is not important, for example ```particuleEmitter.spr
 ![](doc/pfx-cyber-Animation.gif)
 
 *particuleEmitter.sprayParticules('breath', 'cyber' )*<br>
+
 <br>
 
 ## Measured template source
@@ -215,8 +223,40 @@ If the source is a measured template, it will override some input properties (li
 | Rectangle | Emit from the center to the outside of the rectangle | Emit from the outside to the center of the rectangle | Appear every where in the rectangle | 
 | Ray | Emit from the source to the opposite of the ray | Emit from the sopposite to the source of the ray | Appear every where in the ray | 
 
+<br>
 
 ## Advanced options
+
+The advanced options is a json object to customize the emitters. If one parameter is not define in the input, the script take the default value.
+
+### Input Default Parameters
+The input is a json file with the following paramaters. If the parameter is not define in the input, the script take the default value.
+This are all the parameters possible to use.
+> Notice that if the value XXXend is not given, but the value XXXstart is given, the start value overrides the default end value.
+
+| Parameter name  | accepted value          |  Description          | Default value |
+| :--------------- |:---------------:|:---------------:| -----:|
+|        source                    |             Placeable object id or an object with x and y attributes with default pattern inside   | Source of the emission if it's a placeable object id, the source is the center of the object and it follow the object  |  {x:0,y:0}  |
+|        maxParticules             |   Number                | Max particule allow at the same time for the emitter, if exceed we waiting for a particule to end before emitting another one               |   1000         |
+|        spawningFrequence         |   Number                | Frequence between each emission                                |    3          |
+|        spawningNumber            |   Number                | Number of particule emit at during each frequence              |    1          |
+|        emissionDuration          |   Number                | End particule emission at the end of the duration              |   loop infinitely if undefined       |
+|        particuleVelocityStart    |   Default pattern       | Velocity of the particule at the spawning (in px/sec)          |   200%        |
+|        particuleVelocityEnd      |   Default pattern       | Velocity of the particule at his end (in px/sec)               |   50%         |
+|        particuleSizeStart        |   Default pattern of number or object with x and y | Size of the particule at the spawning (in px)       |   10          |
+|        particuleSizeEnd          |   Default pattern of number or object with x and y | Size of the particule at his end (in px)            |   '10_25'     |
+|        particuleRotationStart    |   Default pattern       | Rotation of the particule at the spawning (in degree)          |   0           |
+|        particuleRotationEnd      |   Default pattern       | Rotation of the particule at his end (in degree)               |   0           |
+|        particuleLifetime         |   Default pattern       | Duration of each particule (in millisec)                       |  [3500,4500]  |
+|        particuleColorStart       |   Object with x, y and z attributes with default pattern between 0 and 255               | Color of the particule at the spawning (in rgb (0 to 255))                |   {x:250,y:250, z: 50}      |
+|        particuleColorEnd         |   Object with x, y and z attributes with default pattern between 0 and 255               | Color of the particule at his end (in rgb (0 to 255))                    |   {x:250,y:'50_100', z: 0}  |
+|        alphaStart                |   Default pattern between 0 and 1   | Alpha color of the particule at the spawning       |   1           |
+|        alphaEnd                  |   Default pattern between 0 and 1   | Alpha color of the particule at his end            |   0           |
+|        vibrationAmplitudeStart   |   Default pattern between 0 and 1   | Amplitude of vibration in perpendicular direction of velocity at the spawning (in px)                                |   0           |
+|        vibrationAmplitudeEnd     |   Default pattern between 0 and 1   | Amplitude of vibration in perpendicular direction of velocity at his end (in px)                                |   0           |
+|        vibrationFrequencyStart   |   Default pattern between 0 and 1   | Frequence of vibration in perpendicular direction of velocity at the spawning (in milli-sec)                         |   0           |
+|        vibrationFrequencyEnd     |   Default pattern between 0 and 1   | Frequence of vibration in perpendicular direction of velocity at his end (in milli-sec)                         |   0           |
+
 
 ### Spraying emission
 | Parameter name  | accepted value          |  Description          | Default value |
@@ -250,34 +290,6 @@ To emit graviting particules, you need to use a macro to call the method ```part
 > **Example**
 > To emit particules graviting around a choosen token and ending at his center. The living particules will not move with the token 
 > ```particuleEmitter.gravitateParticules({source : token.id , particuleRadiusStart : '200%', particuleRadiusEnd : 5, onlyEmitterFollow : true})```
-
-## Input Default Parameters
-The input is a json file with the following paramaters. If the parameter is not define in the input, the script take the default value.
-This are all the parameters possible to use.
-> Notice that if the value XXXend is not given, but the value XXXstart is given, the start value overrides the default end value.
-
-| Parameter name  | accepted value          |  Description          | Default value |
-| :--------------- |:---------------:|:---------------:| -----:|
-|        source                    |             Placeable object id or an object with x and y attributes with default pattern inside   | Source of the emission if it's a placeable object id, the source is the center of the object and it follow the object  |  {x:0,y:0}  |
-|        maxParticules             |   Number                | Max particule allow at the same time for the emitter, if exceed we waiting for a particule to end before emitting another one               |   1000         |
-|        spawningFrequence         |   Number                | Frequence between each emission                                |    3          |
-|        spawningNumber            |   Number                | Number of particule emit at during each frequence              |    1          |
-|        emissionDuration          |   Number                | End particule emission at the end of the duration              |   loop infinitely if undefined       |
-|        particuleVelocityStart    |   Default pattern       | Velocity of the particule at the spawning (in px/sec)          |   200%        |
-|        particuleVelocityEnd      |   Default pattern       | Velocity of the particule at his end (in px/sec)               |   50%         |
-|        particuleSizeStart        |   Default pattern of number or object with x and y | Size of the particule at the spawning (in px)       |   10          |
-|        particuleSizeEnd          |   Default pattern of number or object with x and y | Size of the particule at his end (in px)            |   '10_25'     |
-|        particuleRotationStart    |   Default pattern       | Rotation of the particule at the spawning (in degree)          |   0           |
-|        particuleRotationEnd      |   Default pattern       | Rotation of the particule at his end (in degree)               |   0           |
-|        particuleLifetime         |   Default pattern       | Duration of each particule (in millisec)                       |  [3500,4500]  |
-|        particuleColorStart       |   Object with x, y and z attributes with default pattern between 0 and 255               | Color of the particule at the spawning (in rgb (0 to 255))                |   {x:250,y:250, z: 50}      |
-|        particuleColorEnd         |   Object with x, y and z attributes with default pattern between 0 and 255               | Color of the particule at his end (in rgb (0 to 255))                    |   {x:250,y:'50_100', z: 0}  |
-|        alphaStart                |   Default pattern between 0 and 1   | Alpha color of the particule at the spawning       |   1           |
-|        alphaEnd                  |   Default pattern between 0 and 1   | Alpha color of the particule at his end            |   0           |
-|        vibrationAmplitudeStart   |   Default pattern between 0 and 1   | Amplitude of vibration in perpendicular direction of velocity at the spawning (in px)                                |   0           |
-|        vibrationAmplitudeEnd     |   Default pattern between 0 and 1   | Amplitude of vibration in perpendicular direction of velocity at his end (in px)                                |   0           |
-|        vibrationFrequencyStart   |   Default pattern between 0 and 1   | Frequence of vibration in perpendicular direction of velocity at the spawning (in milli-sec)                         |   0           |
-|        vibrationFrequencyEnd     |   Default pattern between 0 and 1   | Frequence of vibration in perpendicular direction of velocity at his end (in milli-sec)                         |   0           |
 
 
 ### Default pattern
