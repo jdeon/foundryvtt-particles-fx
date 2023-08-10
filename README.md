@@ -5,8 +5,8 @@ The module contains several methods to generate particules using a json input. T
 <br>
 
 ## Settings
-1. Avoid showing particle from other client (useful for minimal configuration)
-2. Save emitters when changing scene and retrieve when returning
+1. Avoid showing particle from other client (useful for minimal configuration) (Client setting)
+2. Save emitters when changing scene and retrieve when returning (World setting)
 
 <br>
 
