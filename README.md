@@ -86,96 +86,95 @@ The order of the paramater is not important, for example ```particuleEmitter.spr
 
 ### Prefill motion template :
 **explosion (designed for spray)**
-<img width="30%" src="doc/pfx-spray-explosion-Animation.gif">
+<br><img width="30%" src="doc/pfx-spray-explosion-Animation.gif"><br>
 
 *particuleEmitter.sprayParticules('explosion', {source :tokenId} )*<br>
 <br>
 
 **breath (designed for spray)**
-<img width="30%" src="doc/pfx-spray-breath-Animation.gif">
+<br><img width="30%" src="doc/pfx-spray-breath-Animation.gif"><br>
 *particuleEmitter.sprayParticules('breath', {source :token.id, target: target.id} )*<br>
 <br>
 
 **ray (designed for spray)**
-<img width="30%" src="doc/pfx-spray-ray-Animation.gif">
+<br><img width="30%" src="doc/pfx-spray-ray-Animation.gif"><br>
 *particuleEmitter.sprayParticules('ray', {source :token.id, target: target.id} )*<br>
 <br>
 
 **sonar (designed for spray)**
-<img width="30%" src="doc/pfx-spray-sonar-Animation.gif">
+<br><img width="30%" src="doc/pfx-spray-sonar-Animation.gif"><br>
 *particuleEmitter.sprayParticules('sonar', {source :token.id} )*<br>
 <br>
 
 **trail (designed for missile)**
-<img width="30%" src="doc/pfx-missile-trail-Animation.gif">
+<br><img width="30%" src="doc/pfx-missile-trail-Animation.gif"><br>
 *particuleEmitter.missileParticules('trail', {source :token.id, target: target.id} )*<br>
 <br>
 
 **wave (designed for missile)**
-<img width="30%" src="doc/pfx-missile-wave-Animation.gif">
+<br><img width="30%" src="doc/pfx-missile-wave-Animation.gif"><br>
 *particuleEmitter.missileParticules('wave', {source :token.id, target: target.id} )*<br>
 <br>
 
 **grow (designed for missile)**
-<img width="30%" src="doc/pfx-missile-grow-Animation.gif">
+<br><img width="30%" src="doc/pfx-missile-grow-Animation.gif"><br>
 *particuleEmitter.missileParticules('grow', {source :token.id, target: target.id} )*<br>
 <br>
 
 **vortex (designed for gravitate)**
-<img width="30%" src="doc/pfx-gravitate-vortex-Animation.gif">
+<br><img width="30%" src="doc/pfx-gravitate-vortex-Animation.gif"><br>
 *particuleEmitter.gravitateParticules('vortex', {source :tokenId} )*<br>
 <br>
 
 **aura (designed for gravitate)**
-<img width="30%" src="doc/pfx-gravitate-aura-Animation.gif">
+<br><img width="30%" src="doc/pfx-gravitate-aura-Animation.gif"><br>
 *particuleEmitter.gravitateParticules('aura', {source :tokenId} )*<br>
 <br>
 
 **satellite (designed for gravitate)**
-<img width="30%" src="doc/pfx-gravitate-satellite-Animation.gif">
+<br><img width="30%" src="doc/pfx-gravitate-satellite-Animation.gif"><br>
 *particuleEmitter.gravitateParticules('satellite', {source :tokenId} )*<br>
 <br>
 
 **slash (designed for gravitate)**
-<img width="30%" src="doc/pfx-gravitate-slash-Animation.gif">
+<br><img width="30%" src="doc/pfx-gravitate-slash-Animation.gif"><br>
 *particuleEmitter.gravitateParticules('slash', {source :tokenId} )*<br>
 <br>
 
 
 ### Existing color template :
 **ice**
-<img width="30%" src="doc/pfx-ice-Animation.gif">
+<br><img width="30%" src="doc/pfx-ice-Animation.gif"><br>
 *particuleEmitter.sprayParticules('breath', 'ice' )*<br>
 <br>
 
 **fire**
-<img width="30%" src="doc/pfx-fire-Animation.gif">
+<br><img width="30%" src="doc/pfx-fire-Animation.gif"><br>
 *particuleEmitter.sprayParticules('breath', 'fire' )*<br>
 <br>
 
 **light**
-<img width="30%" src="doc/pfx-light-Animation.gif">
+<br><img width="30%" src="doc/pfx-light-Animation.gif"><br>
 *particuleEmitter.sprayParticules('breath', 'light' )*<br>
 <br>
 
 **death**
-<img width="30%" src="doc/pfx-death-Animation.gif">
+<br><img width="30%" src="doc/pfx-death-Animation.gif"><br>
 *particuleEmitter.sprayParticules('breath', 'death' )*<br>
 <br>
 
 **poison**
-<img width="30%" src="doc/pfx-poison-Animation.gif">
+<br><img width="30%" src="doc/pfx-poison-Animation.gif"><br>
 *particuleEmitter.sprayParticules('breath', 'poison' )*<br>
 <br>
 
 **silver**
-<img width="30%" src="doc/pfx-silver-Animation.gif">
+<br><img width="30%" src="doc/pfx-silver-Animation.gif"><br>
 *particuleEmitter.sprayParticules('breath', 'silver' )*<br>
 <br>
 
 **cyber**
-<img width="30%" src="doc/pfx-cyber-Animation.gif">
-![](doc/pfx-cyber-Animation.gif)
+<br><img width="30%" src="doc/pfx-cyber-Animation.gif"><br>
 *particuleEmitter.sprayParticules('breath', 'cyber' )*<br>
 <br>
 
