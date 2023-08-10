@@ -2,7 +2,9 @@
 
 The module contains several methods to generate particules using a json input. The particules are simples sprites textures managed by script, no need of video files.
 
-Note that neither the emitter neither the particules are persisted. If you reload the page or change the scene it disappears.
+## Settings
+1. Avoid showing particle from other client (useful for minimal configuration)
+2. Save emitters when changing scene and retrieve when returning
 
 
 ## Emission methods by script
