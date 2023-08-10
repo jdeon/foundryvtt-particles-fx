@@ -40,7 +40,8 @@ export default class ParticuleEmitter {
     static emitters = []
 
     static initEmitters(emittersQueries){
-        if(emittersQueries && Array.isArray(emittersQueries)){
+        const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
+        if(isSaveAllowed && emittersQueries && Array.isArray(emittersQueries)){
             emittersQueries.forEach(query => {
               switch (query.type){
                 case SprayingParticuleTemplate.getType() :
@@ -156,15 +157,17 @@ export default class ParticuleEmitter {
     }
 
     static persistEmitters(){
-        if(game.user.isGM){
+        const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
+
+        if(isSaveAllowed && game.user.isGM){
             const activeEmmittersQuery = ParticuleEmitter.emitters
-            .filter(emitter => emitter.remainingTime === undefined || emitter.remainingTime > 0)
-            .map(emitter => {
-                const query = emitter.finalQuery
-                query.emissionDuration = emitter.remainingTime
-                query.type = emitter.particuleTemplate.constructor.getType()
-                return query
-        })
+                .filter(emitter => emitter.remainingTime === undefined || emitter.remainingTime > 0)
+                .map(emitter => {
+                    const query = emitter.finalQuery
+                    query.emissionDuration = emitter.remainingTime
+                    query.type = emitter.particuleTemplate.constructor.getType()
+                    return query
+            })
             
             if(activeEmmittersQuery){
                 canvas.scene.setFlag(s_MODULE_ID, "emitters", activeEmmittersQuery)

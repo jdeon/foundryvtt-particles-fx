@@ -59,6 +59,15 @@ Hooks.on("setup", () => {
     default: false
 	});
 
+  game.settings.register(s_MODULE_ID, "saveEmitters", {
+		name: game.i18n.localize("PARTICULE-FX.Settings.Persist.label"),
+		hint: game.i18n.localize("PARTICULE-FX.Settings.Persist.description"),
+		scope: "world",
+    config: true,
+    type: Boolean,
+    default: false
+	});
+
   game.settings.register(s_MODULE_ID, "maxEmitterId", {
     name: "Last id emitter",
     hint: "Don't touch this",
@@ -71,13 +80,17 @@ Hooks.on("setup", () => {
 
 
 Hooks.on("canvasReady", () => {
-  const emittersQueries = canvas.scene.getFlag(s_MODULE_ID, "emitters")
+  const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
 
-  if(game.ready){
-    ParticuleEmitter.initEmitters(emittersQueries)
-  } else {
-    //Waiting the world to be ready at the first launch
-    firstSceneEmittersQueries = emittersQueries
+  if(isSaveAllowed){
+    const emittersQueries = canvas.scene.getFlag(s_MODULE_ID, "emitters")
+
+    if(game.ready){
+      ParticuleEmitter.initEmitters(emittersQueries)
+    } else {
+      //Waiting the world to be ready at the first launch
+      firstSceneEmittersQueries = emittersQueries
+    }
   }
 });
 
