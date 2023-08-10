@@ -86,132 +86,97 @@ The order of the paramater is not important, for example ```particuleEmitter.spr
 
 ### Prefill motion template :
 **explosion (designed for spray)**
-
-![](doc/pfx-spray-explosion-Animation.gif)
+<img style="max-width=40%;" src="doc/pfx-spray-explosion-Animation.gif"/>
 
 *particuleEmitter.sprayParticules('explosion', {source :tokenId} )*<br>
 <br>
 
 **breath (designed for spray)**
-
-![](doc/pfx-spray-breath-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-spray-breath-Animation.gif"/>
 *particuleEmitter.sprayParticules('breath', {source :token.id, target: target.id} )*<br>
 <br>
 
 **ray (designed for spray)**
-
-![](doc/pfx-spray-ray-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-spray-ray-Animation.gif"/>
 *particuleEmitter.sprayParticules('ray', {source :token.id, target: target.id} )*<br>
 <br>
 
 **sonar (designed for spray)**
-
-![](doc/pfx-spray-sonar-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-spray-sonar-Animation.gif"/>
 *particuleEmitter.sprayParticules('sonar', {source :token.id} )*<br>
 <br>
 
 **trail (designed for missile)**
-
-![](doc/pfx-missile-trail-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-missile-trail-Animation.gif"/>
 *particuleEmitter.missileParticules('trail', {source :token.id, target: target.id} )*<br>
 <br>
 
 **wave (designed for missile)**
-
-![](doc/pfx-missile-wave-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-missile-wave-Animation.gif"/>
 *particuleEmitter.missileParticules('wave', {source :token.id, target: target.id} )*<br>
 <br>
 
 **grow (designed for missile)**
-
-![](doc/pfx-missile-grow-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-missile-grow-Animation.gif"/>
 *particuleEmitter.missileParticules('grow', {source :token.id, target: target.id} )*<br>
 <br>
 
 **vortex (designed for gravitate)**
-
-![](doc/pfx-gravitate-vortex-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-gravitate-vortex-Animation.gif"/>
 *particuleEmitter.gravitateParticules('vortex', {source :tokenId} )*<br>
 <br>
 
 **aura (designed for gravitate)**
-
-![](doc/pfx-gravitate-aura-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-gravitate-aura-Animation.gif"/>
 *particuleEmitter.gravitateParticules('aura', {source :tokenId} )*<br>
 <br>
 
 **satellite (designed for gravitate)**
-
-![](doc/pfx-gravitate-satellite-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-gravitate-satellite-Animation.gif"/>
 *particuleEmitter.gravitateParticules('satellite', {source :tokenId} )*<br>
 <br>
 
 **slash (designed for gravitate)**
-
-![](doc/pfx-gravitate-slash-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-gravitate-slash-Animation.gif"/>
 *particuleEmitter.gravitateParticules('slash', {source :tokenId} )*<br>
 <br>
 
 
 ### Existing color template :
 **ice**
-
-![](doc/pfx-ice-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-ice-Animation.gif"/>
 *particuleEmitter.sprayParticules('breath', 'ice' )*<br>
 <br>
 
 **fire**
-
-![](doc/pfx-fire-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-fire-Animation.gif"/>
 *particuleEmitter.sprayParticules('breath', 'fire' )*<br>
 <br>
 
 **light**
-
-![](doc/pfx-light-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-light-Animation.gif"/>
 *particuleEmitter.sprayParticules('breath', 'light' )*<br>
 <br>
 
 **death**
-
-![](doc/pfx-death-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-death-Animation.gif"/>
 *particuleEmitter.sprayParticules('breath', 'death' )*<br>
 <br>
 
 **poison**
-
-![](doc/pfx-poison-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-poison-Animation.gif"/>
 *particuleEmitter.sprayParticules('breath', 'poison' )*<br>
 <br>
 
 **silver**
-
-![](doc/pfx-silver-Animation.gif)
-
+<img style="max-width=40%;" src="doc/pfx-silver-Animation.gif"/>
 *particuleEmitter.sprayParticules('breath', 'silver' )*<br>
 <br>
 
 **cyber**
-
+<img style="max-width=40%;" src="doc/pfx-cyber-Animation.gif"/>
 ![](doc/pfx-cyber-Animation.gif)
-
 *particuleEmitter.sprayParticules('breath', 'cyber' )*<br>
-
 <br>
 
 ## Measured template source
@@ -272,12 +237,6 @@ This are all the parameters possible to use.
 
 
 ### Graviting particule
-The graviting particule turn around the source with a velocity at a distance defined by a radius.
-
-![](doc/pfx-gravitate-Animation.gif)
-
-To emit graviting particules, you need to use a macro to call the method ```particuleEmitter.gravitateParticules``` with an input that contains the default parameters and following ones :
-
 > In this method the particuleVelocityStart and the particuleVelocityEnd are angular velocities (degree/sec)
 
 | Parameter name  | accepted value          |  Description          | Default value |
