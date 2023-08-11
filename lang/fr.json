@@ -11,5 +11,7 @@
   "PARTICULE-FX.Emission.Title": "Particule Emission",
   "PARTICULE-FX.Emission.description": "Vous avez créé l'émetteur : ",
   "PARTICULE-FX.Emission.delete-button": "Le supprimer",
-  "PARTICULE-FX.No-Token-selected":"Veuillez sélectionner un token d'abord"
+  "PARTICULE-FX.No-Token-selected":"Veuillez sélectionner un token d'abord",
+  "PARTICULE-FX.Prefill-Template.Bad-Param":"Paramètre incorrect pour sauvegarder le template prédéfini",
+  "PARTICULE-FX.Prefill-Template.Bad-Key":"Pas de template prédéfini pour la clé :"
 }

@@ -11,5 +11,7 @@
     "PARTICULE-FX.Emission.Title": "Particule Emission",
     "PARTICULE-FX.Emission.description": "You have created this emittor : ",
     "PARTICULE-FX.Emission.delete-button": "Delete it",
-    "PARTICULE-FX.No-Token-selected":"Please select a token first"
+    "PARTICULE-FX.No-Token-selected":"Please select a token first",
+    "PARTICULE-FX.Prefill-Template.Bad-Param":"Bad entry to add prefill template",
+    "PARTICULE-FX.Prefill-Template.Bad-Key":"No custom prefill template for key :"
 }

@@ -353,7 +353,7 @@ function removeCustomPrefillMotionTemplate(key){
     } 
     
     if (actualPrefillMotionTemplate[key] === undefined){
-      ui.notifications.warn('No custom prefill template for key :' + key);//TODO localisation
+      ui.notifications.warn(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Key') + key);
       return
     }
 
@@ -401,7 +401,7 @@ function removeCustomPrefillColorTemplate(key){
     } 
     
     if (actualPrefillColorTemplate[key] === undefined){
-      ui.notifications.warn('No custom prefill template for key :' + key);//TODO localisation
+      ui.notifications.warn(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Key') + key);
       return
     }
 
@@ -438,7 +438,7 @@ const customPrefillTemplateDispatchMethod = {
 
 function isCustomPrellTemplateParamValid(key, customPrefillTemplate){
   if(!key || ! typeof key === 'string' || !customPrefillTemplate || !customPrefillTemplate instanceof Object){
-    ui.notifications.error('Bad entry to add prefill template'); //TODO localisation
+    ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Param'));
     return false
   }
 
