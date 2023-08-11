@@ -25,7 +25,8 @@ export const s_MESSAGE_TYPES = {
   gravitateParticules: 'gravitateParticules',
   stopAllEmission: 'stopAllEmission',
   stopEmissionById: 'stopEmissionById',
-  updateMaxEmitterId: 'updateMaxEmitterId'
+  updateMaxEmitterId: 'updateMaxEmitterId',
+  updateCustomPrefillTemplate: 'updateCustomPrefillTemplate'
 };
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
@@ -76,6 +77,18 @@ Hooks.on("setup", () => {
     scope: 'world',
     config: false
   });
+
+  game.settings.register(s_MODULE_ID, "customPrefillMotionTemplate", {
+    name: "Map of custom prefill motion template",
+    hint: "Don't touch this",
+    default: {},
+    type: Object,
+    scope: 'world',
+    config: false,
+    onChange: value => {
+      ParticuleEmitter.addCustomPrefillTemplate(value)
+    }
+  });
 });
 
 
@@ -103,6 +116,8 @@ Hooks.once('ready', function () {
       firstSceneEmittersQueries = undefined
     }
 
+    ParticuleEmitter.addCustomPrefillTemplate(game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate"))
+
     if(getProperty(window,'particuleEmitter.emmitParticules')) return;
 		
     //On call, we call method localy and share data with other client
@@ -113,7 +128,8 @@ Hooks.once('ready', function () {
         gravitateParticules: gravitateParticules,
         stopAllEmission:  stopAllEmission,
         stopEmissionById: stopEmissionById,
-        writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById   //No need to emit to other client
+        writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById,   //No need to emit to other client
+        addCustomPrefillMotionTemplate: addCustomPrefillMotionTemplate,
 	}
 
   listen()
@@ -247,7 +263,8 @@ function listen()
             case s_MESSAGE_TYPES.gravitateParticules: ParticuleEmitter.gravitateParticules(...data.payload); break;
             case s_MESSAGE_TYPES.stopEmissionById: ParticuleEmitter.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
             case s_MESSAGE_TYPES.stopAllEmission: ParticuleEmitter.stopAllEmission(data.payload); break;
-            case s_MESSAGE_TYPES.updateMaxEmitterId: updateMaxEmitterId(data.payload)
+            case s_MESSAGE_TYPES.updateMaxEmitterId: updateMaxEmitterId(data.payload); break;
+            case s_MESSAGE_TYPES.updateCustomPrefillTemplate: updateCustomPrefillTemplate(data.payload); break;
          }
       }
       catch (err)
@@ -290,4 +307,47 @@ function stopAllEmission(immediate){
 function stopEmissionById(emitterId, immediate){
   emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); 
   return ParticuleEmitter.stopEmissionById(emitterId, immediate)
+}
+
+function addCustomPrefillMotionTemplate(key, customPrefillMotionTemplate){
+  if(! isCustomPrellTemplateParamValid(key, customPrefillMotionTemplate)) return;
+
+  if(game.user.isGM){
+    let actualPrefillMotionTemplate = game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate")
+
+    if(actualPrefillMotionTemplate === undefined){
+      actualPrefillMotionTemplate = {}
+    }
+
+    actualPrefillMotionTemplate[key] = customPrefillMotionTemplate
+    game.settings.set(s_MODULE_ID, "customPrefillMotionTemplate", actualPrefillMotionTemplate)
+  } else {
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'motion', operation:'add', key, customPrefillMotionTemplate})
+  }
+}
+
+const customPrefillTemplateDispatchMethod = {
+  motion : {
+    add : addCustomPrefillMotionTemplate
+  }
+}
+
+function isCustomPrellTemplateParamValid(key, customPrefillMotionTemplate){
+  if(!key || !key instanceof String || !customPrefillMotionTemplate || !customPrefillMotionTemplate instanceof Object){
+    ui.notifications.error('Bad entry to add prefill motion template'); //TODO localisation
+    return false
+  }
+
+  return true
+}
+
+function updateCustomPrefillTemplate({type, operation, key, customPrefillMotionTemplate}) {
+  if(! game.user.isGM) return
+
+  const method = customPrefillTemplateDispatchMethod[type][operation]
+
+  if(method !== undefined && typeof method === 'function'){
+    method(key, customPrefillMotionTemplate)
+  }
+
 }
