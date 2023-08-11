@@ -130,6 +130,7 @@ Hooks.once('ready', function () {
         stopEmissionById: stopEmissionById,
         writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById,   //No need to emit to other client
         addCustomPrefillMotionTemplate: addCustomPrefillMotionTemplate,
+        removeCustomPrefillMotionTemplate: removeCustomPrefillMotionTemplate,
 	}
 
   listen()
@@ -326,9 +327,31 @@ function addCustomPrefillMotionTemplate(key, customPrefillMotionTemplate){
   }
 }
 
+function removeCustomPrefillMotionTemplate(key){
+  if(game.user.isGM){
+    let actualPrefillMotionTemplate = game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate")
+
+    if(actualPrefillMotionTemplate === undefined){
+      actualPrefillMotionTemplate = {}
+    } 
+    
+    if (actualPrefillMotionTemplate[key] === undefined){
+      ui.notifications.warn('No custom prefill template for key :' + key);//TODO localisation
+      return
+    }
+
+    delete actualPrefillMotionTemplate[key]
+
+    game.settings.set(s_MODULE_ID, "customPrefillMotionTemplate", actualPrefillMotionTemplate)
+  } else {
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'motion', operation:'remove', key, customPrefillMotionTemplate})
+  }
+}
+
 const customPrefillTemplateDispatchMethod = {
   motion : {
-    add : addCustomPrefillMotionTemplate
+    add : addCustomPrefillMotionTemplate,
+    remove : removeCustomPrefillMotionTemplate
   }
 }
 

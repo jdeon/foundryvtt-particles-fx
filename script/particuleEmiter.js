@@ -223,7 +223,6 @@ export default class ParticuleEmitter {
     }
 
     static addCustomPrefillTemplate(customPrefillTemplate){
-        debugger;
         ParticuleEmitter.prefillMotionTemplate = {...motionTemplateDictionnary, ...customPrefillTemplate}
     }
 
