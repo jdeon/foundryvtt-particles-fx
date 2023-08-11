@@ -8,6 +8,7 @@ export default class ParticuleEmitter {
 
     static maxId = 1
     static prefillMotionTemplate = motionTemplateDictionnary
+    static prefillColorTemplate = colorTemplateDictionnary
 
     static newEmitterId(){
         let lastId = game.settings.get(s_MODULE_ID, "maxEmitterId");
@@ -222,8 +223,12 @@ export default class ParticuleEmitter {
         }
     }
 
-    static addCustomPrefillTemplate(customPrefillTemplate){
-        ParticuleEmitter.prefillMotionTemplate = {...motionTemplateDictionnary, ...customPrefillTemplate}
+    static addCustomPrefillMotionTemplate(customPrefillMotionTemplate){
+        ParticuleEmitter.prefillMotionTemplate = {...motionTemplateDictionnary, ...customPrefillMotionTemplate}
+    }
+
+    static addCustomPrefillColorTemplate(customPrefillColorTemplate){
+        ParticuleEmitter.prefillColorTemplate = {...colorTemplateDictionnary, ...customPrefillColorTemplate}
     }
 
 
@@ -283,8 +288,8 @@ export default class ParticuleEmitter {
                 inputObject = arg
             } else if(ParticuleEmitter.prefillMotionTemplate[arg]){
                 motionTemplate =  ParticuleEmitter.prefillMotionTemplate[arg]
-            } else if(colorTemplateDictionnary[arg]){
-                colorTemplate =  colorTemplateDictionnary[arg]
+            } else if(ParticuleEmitter.prefillColorTemplate[arg]){
+                colorTemplate =  ParticuleEmitter.prefillColorTemplate[arg]
             }
         }
 

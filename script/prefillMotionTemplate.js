@@ -227,11 +227,3 @@ export const motionTemplateDictionnary = {
     slash: slashMotionTemplate,
     sonar: sonarMotionTemplate
 }
-
-const test = {
-    particuleLifetime: [500,1500],
-    particuleVelocityStart: 0,
-    particuleRadiusStart: '0_100',
-    particuleSizeStart: 1,
-    particuleSizeEnd: '10_25'
-}

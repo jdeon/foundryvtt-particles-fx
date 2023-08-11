@@ -86,7 +86,19 @@ Hooks.on("setup", () => {
     scope: 'world',
     config: false,
     onChange: value => {
-      ParticuleEmitter.addCustomPrefillTemplate(value)
+      ParticuleEmitter.addCustomPrefillMotionTemplate(value)
+    }
+  });
+
+  game.settings.register(s_MODULE_ID, "customPrefillColorTemplate", {
+    name: "Map of custom prefill color template",
+    hint: "Don't touch this",
+    default: {},
+    type: Object,
+    scope: 'world',
+    config: false,
+    onChange: value => {
+      ParticuleEmitter.addCustomPrefillColorTemplate(value)
     }
   });
 });
@@ -116,7 +128,8 @@ Hooks.once('ready', function () {
       firstSceneEmittersQueries = undefined
     }
 
-    ParticuleEmitter.addCustomPrefillTemplate(game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate"))
+    ParticuleEmitter.addCustomPrefillMotionTemplate(game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate"))
+    ParticuleEmitter.addCustomPrefillColorTemplate(game.settings.get(s_MODULE_ID, "customPrefillColorTemplate"))
 
     if(getProperty(window,'particuleEmitter.emmitParticules')) return;
 		
@@ -132,6 +145,9 @@ Hooks.once('ready', function () {
         addCustomPrefillMotionTemplate,
         removeCustomPrefillMotionTemplate,
         getCustomPrefillMotionTemplate,
+        addCustomPrefillColorTemplate,
+        removeCustomPrefillColorTemplate,
+        getCustomPrefillColorTemplate,
 	}
 
   listen()
@@ -359,30 +375,83 @@ function getCustomPrefillMotionTemplate(key){
   }
 }
 
+function addCustomPrefillColorTemplate(key, customPrefillColorTemplate){
+  if(! isCustomPrellTemplateParamValid(key, customPrefillColorTemplate)) return;
+
+  if(game.user.isGM){
+    let actualPrefillColorTemplate = game.settings.get(s_MODULE_ID, "customPrefillColorTemplate")
+
+    if(actualPrefillColorTemplate === undefined){
+      actualPrefillColorTemplate = {}
+    }
+
+    actualPrefillColorTemplate[key] = customPrefillColorTemplate
+    game.settings.set(s_MODULE_ID, "customPrefillColorTemplate", actualPrefillColorTemplate)
+  } else {
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'color', operation:'add', key, customPrefillColorTemplate})
+  }
+}
+
+function removeCustomPrefillColorTemplate(key){
+  if(game.user.isGM){
+    let actualPrefillColorTemplate = game.settings.get(s_MODULE_ID, "customPrefillColorTemplate")
+
+    if(actualPrefillColorTemplate === undefined){
+      actualPrefillColorTemplate = {}
+    } 
+    
+    if (actualPrefillColorTemplate[key] === undefined){
+      ui.notifications.warn('No custom prefill template for key :' + key);//TODO localisation
+      return
+    }
+
+    delete actualPrefillColorTemplate[key]
+
+    game.settings.set(s_MODULE_ID, "customPrefillColorTemplate", actualPrefillColorTemplate)
+  } else {
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'color', operation:'remove', key, customPrefillColorTemplate})
+  }
+}
+
+function getCustomPrefillColorTemplate(key){
+  const prefillColorTemplate = game.settings.get(s_MODULE_ID, "customPrefillColorTemplate")
+
+  if(key !== undefined && typeof key === 'string' ){
+    return prefillColorTemplate[key]
+  } else {
+    return prefillColorTemplate
+  }
+}
+
 const customPrefillTemplateDispatchMethod = {
   motion : {
     add : addCustomPrefillMotionTemplate,
     remove : removeCustomPrefillMotionTemplate,
     get : getCustomPrefillMotionTemplate,
+  },
+  color : {
+    add : addCustomPrefillColorTemplate,
+    remove : removeCustomPrefillColorTemplate,
+    get : getCustomPrefillColorTemplate,
   }
 }
 
-function isCustomPrellTemplateParamValid(key, customPrefillMotionTemplate){
-  if(!key || ! typeof key === 'string' || !customPrefillMotionTemplate || !customPrefillMotionTemplate instanceof Object){
-    ui.notifications.error('Bad entry to add prefill motion template'); //TODO localisation
+function isCustomPrellTemplateParamValid(key, customPrefillTemplate){
+  if(!key || ! typeof key === 'string' || !customPrefillTemplate || !customPrefillTemplate instanceof Object){
+    ui.notifications.error('Bad entry to add prefill template'); //TODO localisation
     return false
   }
 
   return true
 }
 
-function updateCustomPrefillTemplate({type, operation, key, customPrefillMotionTemplate}) {
+function updateCustomPrefillTemplate({type, operation, key, customPrefillTemplate}) {
   if(! game.user.isGM) return
 
   const method = customPrefillTemplateDispatchMethod[type][operation]
 
   if(method !== undefined && typeof method === 'function'){
-    method(key, customPrefillMotionTemplate)
+    method(key, customPrefillTemplate)
   }
 
 }
