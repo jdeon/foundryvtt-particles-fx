@@ -129,8 +129,9 @@ Hooks.once('ready', function () {
         stopAllEmission:  stopAllEmission,
         stopEmissionById: stopEmissionById,
         writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById,   //No need to emit to other client
-        addCustomPrefillMotionTemplate: addCustomPrefillMotionTemplate,
-        removeCustomPrefillMotionTemplate: removeCustomPrefillMotionTemplate,
+        addCustomPrefillMotionTemplate,
+        removeCustomPrefillMotionTemplate,
+        getCustomPrefillMotionTemplate,
 	}
 
   listen()
@@ -348,15 +349,26 @@ function removeCustomPrefillMotionTemplate(key){
   }
 }
 
+function getCustomPrefillMotionTemplate(key){
+  const prefillMotionTemplate = game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate")
+
+  if(key !== undefined && typeof key === 'string' ){
+    return prefillMotionTemplate[key]
+  } else {
+    return prefillMotionTemplate
+  }
+}
+
 const customPrefillTemplateDispatchMethod = {
   motion : {
     add : addCustomPrefillMotionTemplate,
-    remove : removeCustomPrefillMotionTemplate
+    remove : removeCustomPrefillMotionTemplate,
+    get : getCustomPrefillMotionTemplate,
   }
 }
 
 function isCustomPrellTemplateParamValid(key, customPrefillMotionTemplate){
-  if(!key || !key instanceof String || !customPrefillMotionTemplate || !customPrefillMotionTemplate instanceof Object){
+  if(!key || ! typeof key === 'string' || !customPrefillMotionTemplate || !customPrefillMotionTemplate instanceof Object){
     ui.notifications.error('Bad entry to add prefill motion template'); //TODO localisation
     return false
   }
