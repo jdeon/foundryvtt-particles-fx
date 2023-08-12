@@ -7,6 +7,8 @@ import { s_MODULE_ID ,s_EVENT_NAME, s_MESSAGE_TYPES } from "../particule-fx.js"
 export default class ParticuleEmitter { 
 
     static maxId = 1
+    static prefillMotionTemplate = motionTemplateDictionnary
+    static prefillColorTemplate = colorTemplateDictionnary
 
     static newEmitterId(){
         let lastId = game.settings.get(s_MODULE_ID, "maxEmitterId");
@@ -221,6 +223,14 @@ export default class ParticuleEmitter {
         }
     }
 
+    static addCustomPrefillMotionTemplate(customPrefillMotionTemplate){
+        ParticuleEmitter.prefillMotionTemplate = {...motionTemplateDictionnary, ...customPrefillMotionTemplate}
+    }
+
+    static addCustomPrefillColorTemplate(customPrefillColorTemplate){
+        ParticuleEmitter.prefillColorTemplate = {...colorTemplateDictionnary, ...customPrefillColorTemplate}
+    }
+
 
     static async writeMessageForEmissionById(emitterId, verbal){
         let emitter = ParticuleEmitter.emitters.find(emitter => emitter.id === emitterId);
@@ -276,10 +286,10 @@ export default class ParticuleEmitter {
                 emitterId = arg.emitterId
             }else if(arg instanceof Object){
                 inputObject = arg
-            } else if(motionTemplateDictionnary[arg]){
-                motionTemplate =  motionTemplateDictionnary[arg]
-            } else if(colorTemplateDictionnary[arg]){
-                colorTemplate =  colorTemplateDictionnary[arg]
+            } else if(ParticuleEmitter.prefillMotionTemplate[arg]){
+                motionTemplate =  ParticuleEmitter.prefillMotionTemplate[arg]
+            } else if(ParticuleEmitter.prefillColorTemplate[arg]){
+                colorTemplate =  ParticuleEmitter.prefillColorTemplate[arg]
             }
         }
 

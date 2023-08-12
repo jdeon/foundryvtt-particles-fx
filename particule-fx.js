@@ -25,7 +25,8 @@ export const s_MESSAGE_TYPES = {
   gravitateParticules: 'gravitateParticules',
   stopAllEmission: 'stopAllEmission',
   stopEmissionById: 'stopEmissionById',
-  updateMaxEmitterId: 'updateMaxEmitterId'
+  updateMaxEmitterId: 'updateMaxEmitterId',
+  updateCustomPrefillTemplate: 'updateCustomPrefillTemplate'
 };
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
@@ -68,6 +69,25 @@ Hooks.on("setup", () => {
     default: false
 	});
 
+  game.settings.register(s_MODULE_ID, "minimalRole", {
+		name: game.i18n.localize("PARTICULE-FX.Settings.minRole.label"),
+		hint: game.i18n.localize("PARTICULE-FX.Settings.minRole.description"),
+    default: CONST.USER_ROLES.GAMEMASTER,
+    choices: Object.entries(CONST.USER_ROLES).reduce(
+        //Generate object of role with id for value
+        (accumulator, [label, id]) => {
+            const capLabel = label[0].toUpperCase() + label.slice(1).toLowerCase()
+            const localizeLabel = game.i18n.localize(`USER.Role${capLabel}`)
+            accumulator[id] = localizeLabel; 
+            return accumulator
+        },
+        {}
+    ),
+    type: String,
+		scope: "world",
+    config: true,
+	});
+
   game.settings.register(s_MODULE_ID, "maxEmitterId", {
     name: "Last id emitter",
     hint: "Don't touch this",
@@ -75,6 +95,30 @@ Hooks.on("setup", () => {
     type: Number,
     scope: 'world',
     config: false
+  });
+
+  game.settings.register(s_MODULE_ID, "customPrefillMotionTemplate", {
+    name: "Map of custom prefill motion template",
+    hint: "Don't touch this",
+    default: {},
+    type: Object,
+    scope: 'world',
+    config: false,
+    onChange: value => {
+      ParticuleEmitter.addCustomPrefillMotionTemplate(value)
+    }
+  });
+
+  game.settings.register(s_MODULE_ID, "customPrefillColorTemplate", {
+    name: "Map of custom prefill color template",
+    hint: "Don't touch this",
+    default: {},
+    type: Object,
+    scope: 'world',
+    config: false,
+    onChange: value => {
+      ParticuleEmitter.addCustomPrefillColorTemplate(value)
+    }
   });
 });
 
@@ -103,6 +147,9 @@ Hooks.once('ready', function () {
       firstSceneEmittersQueries = undefined
     }
 
+    ParticuleEmitter.addCustomPrefillMotionTemplate(game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate"))
+    ParticuleEmitter.addCustomPrefillColorTemplate(game.settings.get(s_MODULE_ID, "customPrefillColorTemplate"))
+
     if(getProperty(window,'particuleEmitter.emmitParticules')) return;
 		
     //On call, we call method localy and share data with other client
@@ -113,7 +160,13 @@ Hooks.once('ready', function () {
         gravitateParticules: gravitateParticules,
         stopAllEmission:  stopAllEmission,
         stopEmissionById: stopEmissionById,
-        writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById   //No need to emit to other client
+        writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById,   //No need to emit to other client
+        addCustomPrefillMotionTemplate,
+        removeCustomPrefillMotionTemplate,
+        getCustomPrefillMotionTemplate,
+        addCustomPrefillColorTemplate,
+        removeCustomPrefillColorTemplate,
+        getCustomPrefillColorTemplate,
 	}
 
   listen()
@@ -247,7 +300,8 @@ function listen()
             case s_MESSAGE_TYPES.gravitateParticules: ParticuleEmitter.gravitateParticules(...data.payload); break;
             case s_MESSAGE_TYPES.stopEmissionById: ParticuleEmitter.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
             case s_MESSAGE_TYPES.stopAllEmission: ParticuleEmitter.stopAllEmission(data.payload); break;
-            case s_MESSAGE_TYPES.updateMaxEmitterId: updateMaxEmitterId(data.payload)
+            case s_MESSAGE_TYPES.updateMaxEmitterId: updateMaxEmitterId(data.payload); break;
+            case s_MESSAGE_TYPES.updateCustomPrefillTemplate: updateCustomPrefillTemplate(data.payload); break;
          }
       }
       catch (err)
@@ -290,4 +344,141 @@ function stopAllEmission(immediate){
 function stopEmissionById(emitterId, immediate){
   emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); 
   return ParticuleEmitter.stopEmissionById(emitterId, immediate)
+}
+
+function addCustomPrefillMotionTemplate(key, customPrefillMotionTemplate){
+  if(! isCustomPrellTemplateParamValid(key, customPrefillMotionTemplate)) return;
+
+  if(game.user.isGM){
+    let actualPrefillMotionTemplate = game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate")
+
+    if(actualPrefillMotionTemplate === undefined){
+      actualPrefillMotionTemplate = {}
+    }
+
+    actualPrefillMotionTemplate[key] = customPrefillMotionTemplate
+    game.settings.set(s_MODULE_ID, "customPrefillMotionTemplate", actualPrefillMotionTemplate)
+  } else if(game.user.role >= game.settings.get(s_MODULE_ID, "minimalRole")){
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'motion', operation:'add', key, customPrefillTemplate: customPrefillMotionTemplate})
+  } else {
+    ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Role'))
+  }
+}
+
+function removeCustomPrefillMotionTemplate(key){
+  if(game.user.isGM){
+    let actualPrefillMotionTemplate = game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate")
+
+    if(actualPrefillMotionTemplate === undefined){
+      actualPrefillMotionTemplate = {}
+    } 
+    
+    if (actualPrefillMotionTemplate[key] === undefined){
+      ui.notifications.warn(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Key') + key);
+      return
+    }
+
+    delete actualPrefillMotionTemplate[key]
+
+    game.settings.set(s_MODULE_ID, "customPrefillMotionTemplate", actualPrefillMotionTemplate)
+  } else if(game.user.role >= game.settings.get(s_MODULE_ID, "minimalRole")){
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'motion', operation:'remove', key})
+  } else {
+    ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Role'))
+  }
+}
+
+function getCustomPrefillMotionTemplate(key){
+  const prefillMotionTemplate = game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate")
+
+  if(key !== undefined && typeof key === 'string' ){
+    return prefillMotionTemplate[key]
+  } else {
+    return prefillMotionTemplate
+  }
+}
+
+function addCustomPrefillColorTemplate(key, customPrefillColorTemplate){
+  if(! isCustomPrellTemplateParamValid(key, customPrefillColorTemplate)) return;
+
+  if(game.user.isGM){
+    let actualPrefillColorTemplate = game.settings.get(s_MODULE_ID, "customPrefillColorTemplate")
+
+    if(actualPrefillColorTemplate === undefined){
+      actualPrefillColorTemplate = {}
+    }
+
+    actualPrefillColorTemplate[key] = customPrefillColorTemplate
+    game.settings.set(s_MODULE_ID, "customPrefillColorTemplate", actualPrefillColorTemplate)
+  } else if(game.user.role >= game.settings.get(s_MODULE_ID, "minimalRole")){
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'color', operation:'add', key, customPrefillTemplate: customPrefillColorTemplate})
+  } else {
+    ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Role'))
+  }
+}
+
+function removeCustomPrefillColorTemplate(key){
+  if(game.user.isGM){
+    let actualPrefillColorTemplate = game.settings.get(s_MODULE_ID, "customPrefillColorTemplate")
+
+    if(actualPrefillColorTemplate === undefined){
+      actualPrefillColorTemplate = {}
+    } 
+    
+    if (actualPrefillColorTemplate[key] === undefined){
+      ui.notifications.warn(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Key') + key);
+      return
+    }
+
+    delete actualPrefillColorTemplate[key]
+
+    game.settings.set(s_MODULE_ID, "customPrefillColorTemplate", actualPrefillColorTemplate)
+  } else if(game.user.role >= game.settings.get(s_MODULE_ID, "minimalRole")){
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'color', operation:'remove', key})
+  } else {
+    ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Role'))
+  }
+}
+
+function getCustomPrefillColorTemplate(key){
+  const prefillColorTemplate = game.settings.get(s_MODULE_ID, "customPrefillColorTemplate")
+
+  if(key !== undefined && typeof key === 'string' ){
+    return prefillColorTemplate[key]
+  } else {
+    return prefillColorTemplate
+  }
+}
+
+const customPrefillTemplateDispatchMethod = {
+  motion : {
+    add : addCustomPrefillMotionTemplate,
+    remove : removeCustomPrefillMotionTemplate,
+    get : getCustomPrefillMotionTemplate,
+  },
+  color : {
+    add : addCustomPrefillColorTemplate,
+    remove : removeCustomPrefillColorTemplate,
+    get : getCustomPrefillColorTemplate,
+  }
+}
+
+function isCustomPrellTemplateParamValid(key, customPrefillTemplate){
+  if(!key || ! typeof key === 'string' || !customPrefillTemplate || !customPrefillTemplate instanceof Object){
+    ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Param'));
+    return false
+  }
+
+  return true
+}
+
+function updateCustomPrefillTemplate({type, operation, key, customPrefillTemplate}) {
+  if(! game.user.isGM) return
+
+  const method = customPrefillTemplateDispatchMethod[type][operation]
+
+  if(method !== undefined && typeof method === 'function'){
+    method(key, customPrefillTemplate)
+  }
+
 }
