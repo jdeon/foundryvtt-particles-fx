@@ -7,6 +7,7 @@ The module contains several methods to generate particules using a json input. T
 ## Settings
 1. Avoid showing particle from other client (useful for minimal configuration) (Client setting)
 2. Save emitters when changing scene and retrieve when returning (World setting)
+3. Define minimal user role to manage the custom prefill templates (World setting)
 
 <br>
 
@@ -177,6 +178,15 @@ The order of the paramater is not important, for example ```particuleEmitter.spr
 <br><img width="30%" src="doc/pfx-cyber-Animation.gif"><br>
 *particuleEmitter.sprayParticules('breath', 'cyber' )*<br>
 <br>
+
+### Added custom prefill template
+You can add some custom prefill template (motion or color) using the methods : ```particuleEmitter.addCustomPrefillMotionTemplate(key, {Advanced options})``` or ```particuleEmitter.addCustomPrefillColorTemplate(key, {Advanced options})```
+If a key is an same of an existing one it replace it.
+You need a minimal role to add custom prefill template define in the setting.
+
+You can also delete custom prefill template (motion or color) using the methods : ```particuleEmitter.removeCustomPrefillMotionTemplate(key)``` or ```particuleEmitter.removeCustomPrefillColorTemplate(key)```. 
+
+You the custom prefill template already added using the methods : ```particuleEmitter.getCustomPrefillMotionTemplate(key)``` or ```particuleEmitter.addCustomPrefillColorTemplate(key)```. If the key is not defined, it retrun all the custom prefill template already created.
 
 ## Measured template source
 If the source is a measured template, it will override some input properties (like angle) to match with the measured tools. For each measured template type, it works differently depending on the average velocity value :
