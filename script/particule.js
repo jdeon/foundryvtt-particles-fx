@@ -1,25 +1,25 @@
-import { Utils } from "./utils.js";
+import { Utils, sameStartKey } from "./utils.js";
 
 export class Particule { 
 
     constructor(sprite, particuleLifetime, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        this.sprite = sprite;                       //PIXI.Sprite
+        this.sprite = sprite;                                                               //PIXI.Sprite
         this.positionVibrationLess = {x : sprite.x, y : sprite.y};  
-        this.remainingTime = particuleLifetime;     //Number
-        this.particuleLifetime = particuleLifetime; //Number
-        this.sizeStart = sizeStart;                 //Vector3
-        this.sizeEnd = sizeEnd;                     //Vector3
+        this.remainingTime = particuleLifetime;                                             //Number
+        this.particuleLifetime = particuleLifetime;                                         //Number
+        this.sizeStart = sizeStart;                                                         //Vector3
+        this.sizeEnd = sizeEnd === sameStartKey ? sizeStart : sizeEnd;                      //Vector3
         this.particuleRotationStart = particuleRotationStart;                 
-        this.particuleRotationEnd = particuleRotationEnd;     
-        this.colorStart = colorStart;               //Vector3
-        this.colorEnd = colorEnd;                   //Vector3
-        this.alphaStart = alphaStart;               //Number
-        this.alphaEnd = alphaEnd;                   //Number
+        this.particuleRotationEnd = particuleRotationEnd === sameStartKey ? particuleRotationStart : particuleRotationEnd;     
+        this.colorStart = colorStart;                                                       //Vector3
+        this.colorEnd = colorEnd  === sameStartKey ? colorStart : colorEnd;                 //Vector3
+        this.alphaStart = alphaStart;                                                       //Number
+        this.alphaEnd = alphaEnd  === sameStartKey ? alphaStart : alphaEnd;                 //Number
         this.vibrationAmplitudeStart = vibrationAmplitudeStart
-        this.vibrationAmplitudeEnd = vibrationAmplitudeEnd
+        this.vibrationAmplitudeEnd = vibrationAmplitudeEnd  === sameStartKey ? vibrationAmplitudeStart : vibrationAmplitudeEnd
         this.vibrationFrequencyStart = vibrationFrequencyStart
-        this.vibrationFrequencyEnd = vibrationFrequencyEnd
+        this.vibrationFrequencyEnd = vibrationFrequencyEnd  === sameStartKey ? vibrationFrequencyStart : sameStartKey
     }
 
     manageLifetime(dt){
@@ -62,10 +62,10 @@ export class SprayingParticule  extends Particule {
         super(sprite, particuleLifetime, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
         this.target = target;
-        this.velocityStart = velocityStart;         //Number      
-        this.velocityEnd = velocityEnd;             //Number
-        this.angleStart = angleStart;               //Number      
-        this.angleEnd = angleEnd;                   //Number
+        this.velocityStart = velocityStart;                                                 //Number      
+        this.velocityEnd = velocityEnd === sameStartKey ? velocityStart : velocityEnd;      //Number
+        this.angleStart = angleStart;                                                       //Number      
+        this.angleEnd = angleEnd === sameStartKey ? angleStart : angleEnd;                  //Number
     }
 
     manageLifetime(dt){
@@ -102,11 +102,11 @@ export class GravitingParticule  extends Particule {
         super(sprite, particuleLifetime, sizeStart, sizeEnd, particuleRotationStart, particuleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
         this.source = source
-        this.angle = angleStart                             //Number 
-        this.angularVelocityStart = angularVelocityStart;  //Number      
-        this.angularVelocityEnd = angularVelocityEnd;      //Number
-        this.radiusStart = radiusStart;                     //Number      
-        this.radiusEnd = radiusEnd;                         //Number
+        this.angle = angleStart                                                     //Number 
+        this.angularVelocityStart = angularVelocityStart;                           //Number      
+        this.angularVelocityEnd = angularVelocityEnd === sameStartKey ? angularVelocityStart : angularVelocityEnd;                               //Number
+        this.radiusStart = radiusStart;                                             //Number      
+        this.radiusEnd = radiusEnd === sameStartKey ? radiusStart : radiusEnd;                                                 //Number
     }
 
     manageLifetime(dt){

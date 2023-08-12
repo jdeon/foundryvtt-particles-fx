@@ -1,3 +1,5 @@
+export const sameStartKey = 'sameStart'
+
 export class Vector3 { 
 
     static build(object){
@@ -92,6 +94,8 @@ export class Utils {
             if(valueBoundary.length === 1){
                 if(valueBoundary[0].endsWith('%')){
                     return Utils._managePercent(valueBoundary[0])
+                } else if (valueBoundary[0] === sameStartKey) {
+                    return sameStartKey
                 } else {
                 //Placeable onject value
                 return Utils.getPlaceableObjectById(valueBoundary[0]);
@@ -126,6 +130,14 @@ export class Utils {
             result[key] = Utils.getRandomValueFrom(inValue[key]);
         }
 
+        //Check for same as start key
+        for (const key of inKey) {
+            if(result[key] === sameStartKey){
+                const startSuffixKey = key.substring(0,key.length - 3) + 'Start'
+                result[key] = result[startSuffixKey]
+            }
+        }
+
         return result
     }
 
@@ -158,7 +170,7 @@ export class Utils {
                 if (typeof key === 'string' && key.endsWith('End')){
                     //removve end from key and add start
                     let startSuffixKey = key.substring(0,key.length - 3) + 'Start'
-                    result[key] = prioritizeInput[startSuffixKey] !== undefined ? prioritizeInput[startSuffixKey] : defaultInput[key]
+                    result[key] = prioritizeInput[startSuffixKey] !== undefined ? sameStartKey : defaultInput[key]
                 } else {
                     result[key] = defaultInput[key]
                 }

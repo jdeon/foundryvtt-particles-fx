@@ -2,18 +2,20 @@ import { SprayingParticuleTemplate, GravitingParticuleTemplate, MissileParticule
 import { Vector3, Utils } from "./utils.js"
 import { motionTemplateDictionnary, defaultMotionTemplate } from "./prefillMotionTemplate.js"
 import { colorTemplateDictionnary, defaultColorTemplate } from "./prefillColorTemplate.js"
-import { s_EVENT_NAME, s_MESSAGE_TYPES } from "../particule-fx.js"
+import { s_MODULE_ID ,s_EVENT_NAME, s_MESSAGE_TYPES } from "../particule-fx.js"
 
 export default class ParticuleEmitter { 
 
     static maxId = 1
+    static prefillMotionTemplate = motionTemplateDictionnary
+    static prefillColorTemplate = colorTemplateDictionnary
 
     static newEmitterId(){
-        let lastId = game.settings.get("particule-fx", "maxEmitterId");
+        let lastId = game.settings.get(s_MODULE_ID, "maxEmitterId");
         lastId++
 
         if(game.user.isGM){
-            game.settings.set("particule-fx", "maxEmitterId", lastId);
+            game.settings.set(s_MODULE_ID, "maxEmitterId", lastId);
         } else {
             game.socket.emit(s_EVENT_NAME, {
                 type: s_MESSAGE_TYPES.updateMaxEmitterId,
@@ -22,13 +24,12 @@ export default class ParticuleEmitter {
         }
 
 
-
         return lastId
     }
 
     static resetEmitterId(){
         if(game.user.isGM){
-            game.settings.set("particule-fx", "maxEmitterId", 0);
+            game.settings.set(s_MODULE_ID, "maxEmitterId", 0);
         } else {
             game.socket.emit(s_EVENT_NAME, {
                 type: s_MESSAGE_TYPES.updateMaxEmitterId,
@@ -40,6 +41,27 @@ export default class ParticuleEmitter {
 
     static emitters = []
 
+    static initEmitters(emittersQueries){
+        const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
+        if(isSaveAllowed && emittersQueries && Array.isArray(emittersQueries)){
+            emittersQueries.forEach(query => {
+              switch (query.type){
+                case SprayingParticuleTemplate.getType() :
+                  ParticuleEmitter.sprayParticules(query);
+                  break;
+                case GravitingParticuleTemplate.getType() :
+                  ParticuleEmitter.gravitateParticules(query);
+                  break;
+                case MissileParticuleTemplate.getType() :
+                  ParticuleEmitter.missileParticules(query);
+                  break;
+                default:
+                  ParticuleEmitter.sprayParticules(query);
+              }
+            });
+        }
+    }
+
     static sprayParticules(...args){
         const orderInputArg = ParticuleEmitter._orderInputArg(args);
 
@@ -47,7 +69,7 @@ export default class ParticuleEmitter {
     }
 
     static _sprayParticules(colorTemplate, motionTemplate, inputObject, emitterId){
-        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+        const particuleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particule.png`);
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
@@ -63,7 +85,7 @@ export default class ParticuleEmitter {
     }
 
     static _missileParticules(colorTemplate, motionTemplate, inputObject, emitterId){
-        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+        const particuleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particule.png`);
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
         
@@ -127,13 +149,34 @@ export default class ParticuleEmitter {
     }
 
     static _gravitateParticules(colorTemplate, motionTemplate, inputObject, emitterId){
-        const particuleTexture = PIXI.Texture.from('/modules/particule-fx/particule.png');
+        const particuleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particule.png`);
 
         const finalInput = ParticuleEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
         const particuleTemplate = GravitingParticuleTemplate.build(finalInput, particuleTexture)
 
         return ParticuleEmitter._abstractInitParticules(inputObject, finalInput, particuleTemplate, emitterId)
+    }
+
+    static persistEmitters(){
+        const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
+
+        if(isSaveAllowed && game.user.isGM){
+            const activeEmmittersQuery = ParticuleEmitter.emitters
+                .filter(emitter => emitter.remainingTime === undefined || emitter.remainingTime > 0)
+                .map(emitter => {
+                    const query = emitter.finalQuery
+                    query.emissionDuration = emitter.remainingTime
+                    query.type = emitter.particuleTemplate.constructor.getType()
+                    return query
+            })
+            
+            if(activeEmmittersQuery){
+                canvas.scene.setFlag(s_MODULE_ID, "emitters", activeEmmittersQuery)
+            } else {
+                canvas.scene.unsetFlag(s_MODULE_ID, "emitters")
+            }
+        }
     }
 
     static stopAllEmission(immediate){
@@ -180,6 +223,14 @@ export default class ParticuleEmitter {
         }
     }
 
+    static addCustomPrefillMotionTemplate(customPrefillMotionTemplate){
+        ParticuleEmitter.prefillMotionTemplate = {...motionTemplateDictionnary, ...customPrefillMotionTemplate}
+    }
+
+    static addCustomPrefillColorTemplate(customPrefillColorTemplate){
+        ParticuleEmitter.prefillColorTemplate = {...colorTemplateDictionnary, ...customPrefillColorTemplate}
+    }
+
 
     static async writeMessageForEmissionById(emitterId, verbal){
         let emitter = ParticuleEmitter.emitters.find(emitter => emitter.id === emitterId);
@@ -194,7 +245,7 @@ export default class ParticuleEmitter {
             originalQuery : verbal ? JSON.stringify(emitter.originalQuery) : undefined
         }
 
-        let htmlMessage = await renderTemplate("modules/particule-fx/template/message-particule_state.hbs", dataExport)
+        let htmlMessage = await renderTemplate(`modules/${s_MODULE_ID}/template/message-particule_state.hbs`, dataExport)
 
         ui.chat.processMessage("/w gm " + htmlMessage );
 
@@ -214,6 +265,7 @@ export default class ParticuleEmitter {
         // Listen for animate update
         particuleEmitter.callback = particuleEmitter.manageParticules.bind(particuleEmitter)
         particuleEmitter.originalQuery = inputQuery
+        particuleEmitter.finalQuery = finalInput
         particuleEmitter.id = emitterId || ParticuleEmitter.newEmitterId()
 
         canvas.app.ticker.add(particuleEmitter.callback)
@@ -234,10 +286,10 @@ export default class ParticuleEmitter {
                 emitterId = arg.emitterId
             }else if(arg instanceof Object){
                 inputObject = arg
-            } else if(motionTemplateDictionnary[arg]){
-                motionTemplate =  motionTemplateDictionnary[arg]
-            } else if(colorTemplateDictionnary[arg]){
-                colorTemplate =  colorTemplateDictionnary[arg]
+            } else if(ParticuleEmitter.prefillMotionTemplate[arg]){
+                motionTemplate =  ParticuleEmitter.prefillMotionTemplate[arg]
+            } else if(ParticuleEmitter.prefillColorTemplate[arg]){
+                colorTemplate =  ParticuleEmitter.prefillColorTemplate[arg]
             }
         }
 

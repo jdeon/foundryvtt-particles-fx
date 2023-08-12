@@ -1,3 +1,4 @@
+import { sameStartKey } from "./utils.js";
 
 export const defaultMotionTemplate = () => {
     return {
@@ -10,7 +11,7 @@ export const defaultMotionTemplate = () => {
         particuleVelocityStart: '200%',
         particuleVelocityEnd: '50%',
         particuleAngleStart: '0_360',
-        particuleAngleEnd: 0,
+        particuleAngleEnd: sameStartKey,
         particuleRadiusStart: '100%',
         particuleRadiusEnd: '50%',
         particuleSizeStart: 10,
