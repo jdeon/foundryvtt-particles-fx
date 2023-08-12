@@ -3,6 +3,8 @@
   "PARTICULE-FX.Settings.Avoid.description": "Ne pas afficher les émissions de particules générés par les autres clients (utils pour les petits configuration)",
   "PARTICULE-FX.Settings.Persist.label": "Sauvegarder les émetteurs",
   "PARTICULE-FX.Settings.Persist.description": "Sauvegarder les émetteurs en cours dans la scene lors du changement de scene. Puis les recharger lors du retour à celle ci",
+  "PARTICULE-FX.Settings.minRole.label":"Role minimal pour les templates personnalisés",
+  "PARTICULE-FX.Settings.minRole.description":"Role minimal pour créer ou supprimer de nouveaux templates prédéfinis personnalisés",
   "PARTICULE-FX.Chat-Command.Stop-All.return": "Toutes les émissions stopées : ",
   "PARTICULE-FX.Chat-Command.Stop-Id.return": "Emission stopée : ",
   "PARTICULE-FX.Chat-Command.help.return":"Voici les commandes du chat existantes pour particule FX : ",
@@ -13,5 +15,6 @@
   "PARTICULE-FX.Emission.delete-button": "Le supprimer",
   "PARTICULE-FX.No-Token-selected":"Veuillez sélectionner un token d'abord",
   "PARTICULE-FX.Prefill-Template.Bad-Param":"Paramètre incorrect pour sauvegarder le template prédéfini",
-  "PARTICULE-FX.Prefill-Template.Bad-Key":"Pas de template prédéfini pour la clé :"
+  "PARTICULE-FX.Prefill-Template.Bad-Key":"Pas de template prédéfini pour la clé :",
+  "PARTICULE-FX.Prefill-Template.Bad-Role":"Permission insufisante pour modifier les templates prédéfinis personnalisés"
 }

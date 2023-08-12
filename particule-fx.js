@@ -69,6 +69,25 @@ Hooks.on("setup", () => {
     default: false
 	});
 
+  game.settings.register(s_MODULE_ID, "minimalRole", {
+		name: game.i18n.localize("PARTICULE-FX.Settings.minRole.label"),
+		hint: game.i18n.localize("PARTICULE-FX.Settings.minRole.description"),
+    default: CONST.USER_ROLES.GAMEMASTER,
+    choices: Object.entries(CONST.USER_ROLES).reduce(
+        //Generate object of role with id for value
+        (accumulator, [label, id]) => {
+            const capLabel = label[0].toUpperCase() + label.slice(1).toLowerCase()
+            const localizeLabel = game.i18n.localize(`USER.Role${capLabel}`)
+            accumulator[id] = localizeLabel; 
+            return accumulator
+        },
+        {}
+    ),
+    type: String,
+		scope: "world",
+    config: true,
+	});
+
   game.settings.register(s_MODULE_ID, "maxEmitterId", {
     name: "Last id emitter",
     hint: "Don't touch this",
@@ -339,8 +358,10 @@ function addCustomPrefillMotionTemplate(key, customPrefillMotionTemplate){
 
     actualPrefillMotionTemplate[key] = customPrefillMotionTemplate
     game.settings.set(s_MODULE_ID, "customPrefillMotionTemplate", actualPrefillMotionTemplate)
+  } else if(game.user.role >= game.settings.get(s_MODULE_ID, "minimalRole")){
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'motion', operation:'add', key, customPrefillTemplate: customPrefillMotionTemplate})
   } else {
-    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'motion', operation:'add', key, customPrefillMotionTemplate})
+    ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Role'))
   }
 }
 
@@ -360,8 +381,10 @@ function removeCustomPrefillMotionTemplate(key){
     delete actualPrefillMotionTemplate[key]
 
     game.settings.set(s_MODULE_ID, "customPrefillMotionTemplate", actualPrefillMotionTemplate)
+  } else if(game.user.role >= game.settings.get(s_MODULE_ID, "minimalRole")){
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'motion', operation:'remove', key})
   } else {
-    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'motion', operation:'remove', key, customPrefillMotionTemplate})
+    ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Role'))
   }
 }
 
@@ -387,8 +410,10 @@ function addCustomPrefillColorTemplate(key, customPrefillColorTemplate){
 
     actualPrefillColorTemplate[key] = customPrefillColorTemplate
     game.settings.set(s_MODULE_ID, "customPrefillColorTemplate", actualPrefillColorTemplate)
+  } else if(game.user.role >= game.settings.get(s_MODULE_ID, "minimalRole")){
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'color', operation:'add', key, customPrefillTemplate: customPrefillColorTemplate})
   } else {
-    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'color', operation:'add', key, customPrefillColorTemplate})
+    ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Role'))
   }
 }
 
@@ -408,8 +433,10 @@ function removeCustomPrefillColorTemplate(key){
     delete actualPrefillColorTemplate[key]
 
     game.settings.set(s_MODULE_ID, "customPrefillColorTemplate", actualPrefillColorTemplate)
+  } else if(game.user.role >= game.settings.get(s_MODULE_ID, "minimalRole")){
+    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'color', operation:'remove', key})
   } else {
-    emitForOtherClient(s_MESSAGE_TYPES.updateCustomPrefillTemplate, {type:'color', operation:'remove', key, customPrefillColorTemplate})
+    ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Role'))
   }
 }
 
