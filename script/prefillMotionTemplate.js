@@ -4,20 +4,20 @@ export const defaultMotionTemplate = () => {
     return {
         spawningFrequence: 3, 
         spawningNumber: 1, 
-        maxParticules: 1000,
+        maxParticles: 1000,
         source: {x:0,y:0},
         positionSpawning: {x:0,y:0},
-        particuleLifetime: [3500,4500],
-        particuleVelocityStart: '200%',
-        particuleVelocityEnd: '50%',
-        particuleAngleStart: '0_360',
-        particuleAngleEnd: sameStartKey,
-        particuleRadiusStart: '100%',
-        particuleRadiusEnd: '50%',
-        particuleSizeStart: 10,
-        particuleSizeEnd: '10_25',
-        particuleRotationStart:0,               
-        particuleRotationEnd:0,
+        particleLifetime: [3500,4500],
+        particleVelocityStart: '200%',
+        particleVelocityEnd: '50%',
+        particleAngleStart: '0_360',
+        particleAngleEnd: sameStartKey,
+        particleRadiusStart: '100%',
+        particleRadiusEnd: '50%',
+        particleSizeStart: 10,
+        particleSizeEnd: '10_25',
+        particleRotationStart:0,               
+        particleRotationEnd:0,
         alphaStart:1,
         alphaEnd:0,
         vibrationAmplitudeStart: 0,
@@ -25,20 +25,20 @@ export const defaultMotionTemplate = () => {
         vibrationFrequencyStart: 0,
         vibrationFrequencyEnd: 0,
         onlyEmitterFollow: false,
-        subParticules : {
+        subParticles : {
             type: "Spraying",
             positionSpawning: {x:0,y:0},
-            particuleLifetime: 500,
-            particuleVelocityStart: '100%',
-            particuleVelocityEnd: 0,
-            particuleAngleStart: 0,
-            particuleAngleEnd: '-45_45',
-            particuleRadiusStart: 10,
-            particuleRadiusEnd: 20,
-            particuleSizeStart: 5,
-            particuleSizeEnd: 2,
-            particuleRotationStart:0,               
-            particuleRotationEnd:0,
+            particleLifetime: 500,
+            particleVelocityStart: '100%',
+            particleVelocityEnd: 0,
+            particleAngleStart: 0,
+            particleAngleEnd: '-45_45',
+            particleRadiusStart: 10,
+            particleRadiusEnd: 20,
+            particleSizeStart: 5,
+            particleSizeEnd: 2,
+            particleRotationStart:0,               
+            particleRotationEnd:0,
             alphaStart:1,
             alphaEnd:0,
             vibrationAmplitudeStart: 0,
@@ -53,20 +53,20 @@ export const defaultMotionTemplate = () => {
 /**
  * SPRAY DESIGNED PREFILLED TEMPLATE
  * 
- * velocity multiply by particule lifetime must done an average of 500% (5 grids)
+ * velocity multiply by particle lifetime must done an average of 500% (5 grids)
  */
 
 const explosionMotionTemplate = {
     emissionDuration : 250,
     spawningNumber: 10,  
     spawningFrequence: 1, 
-    maxParticules: 10000,
-    particuleLifetime: 2000,
-    particuleVelocityStart: '400%_500%',
-    particuleVelocityEnd: '0%_25%',
-    particuleAngleStart: '0_360',
-    particuleSizeStart: 10,
-    particuleSizeEnd: '25_50',
+    maxParticles: 10000,
+    particleLifetime: 2000,
+    particleVelocityStart: '400%_500%',
+    particleVelocityEnd: '0%_25%',
+    particleAngleStart: '0_360',
+    particleSizeStart: 10,
+    particleSizeEnd: '25_50',
     alphaStart:1,
     alphaEnd:.75
 }
@@ -74,13 +74,13 @@ const explosionMotionTemplate = {
 const breathMotionTemplate = {
     emissionDuration : 1000,
     spawningFrequence: 2, 
-    maxParticules: 1000,
-    particuleLifetime: 4000,
-    particuleVelocityStart: '200%_300%',
-    particuleVelocityEnd: '10%_25%',
-    particuleAngleStart: '-30_30',
-    particuleSizeStart: 10,
-    particuleSizeEnd: '10_25',
+    maxParticles: 1000,
+    particleLifetime: 4000,
+    particleVelocityStart: '200%_300%',
+    particleVelocityEnd: '10%_25%',
+    particleAngleStart: '-30_30',
+    particleSizeStart: 10,
+    particleSizeEnd: '10_25',
     alphaStart:1,
     alphaEnd:0
 }
@@ -89,11 +89,11 @@ const rayMotionTemplate = {
     positionSpawning: {x:'50%',y:'-10%_10%'},
     emissionDuration : 3000,
     spawningFrequence: 1, 
-    maxParticules: 10000,
-    particuleLifetime: 1000,
-    particuleVelocityStart: '400%_500%',
-    particuleAngleStart: 0,
-    particuleSizeStart: {x:'50%', y:'15%'},
+    maxParticles: 10000,
+    particleLifetime: 1000,
+    particleVelocityStart: '400%_500%',
+    particleAngleStart: 0,
+    particleSizeStart: {x:'50%', y:'15%'},
     alphaStart:.25,
     vibrationAmplitudeStart: '0_10',
     vibrationFrequencyStart: '0_100'
@@ -102,10 +102,10 @@ const rayMotionTemplate = {
 const sonarMotionTemplate = {
     spawningFrequence: 1000,
     spawningNumber: 2000,  
-    maxParticules: 20000,
-    particuleLifetime: 4000,
-    particuleSizeStart: 5,
-    particuleVelocityStart: '125%',
+    maxParticles: 20000,
+    particleLifetime: 4000,
+    particleSizeStart: 5,
+    particleVelocityStart: '125%',
     alphaStart:.5,
     onlyEmitterFollow: true
 }
@@ -117,39 +117,39 @@ const sonarMotionTemplate = {
 const trailMissileMotionTemlate = {
     spawningFrequence: 5, 
     spawningNumber: 1, 
-    maxParticules: 1000,
-    particuleSizeStart: {x:'50%', y:'15%'},
+    maxParticles: 1000,
+    particleSizeStart: {x:'50%', y:'15%'},
     alphaStart:1,
-    subParticules : {
+    subParticles : {
         type: "Spraying",
         positionSpawning: {x:0,y:'-5%_5%'},
-        particuleLifetime: 2000,
+        particleLifetime: 2000,
         alphaStart:.5,
-        particuleVelocityStart: '0_10%',
-        particuleVelocityEnd: 0,
-        particuleAngleStart: 0,
-        particuleSizeStart: 2,
-	    particuleSizeStart: 5,
+        particleVelocityStart: '0_10%',
+        particleVelocityEnd: 0,
+        particleAngleStart: 0,
+        particleSizeStart: 2,
+	    particleSizeStart: 5,
         vibrationAmplitudeStart: '1%',
         vibrationFrequencyStart: 1000,
     }
 }
 
 const waveMissileMotionTemlate = {
-    subParticules : {
+    subParticles : {
         type: "Spraying",
-        particuleLifetime: 2000, 
-        particuleAngleStart: '0_360'
+        particleLifetime: 2000, 
+        particleAngleStart: '0_360'
     }
 }
 
 const growingMissileMotionTemlate = {
-    subParticules : {
+    subParticles : {
         type: "Graviting",
-        particuleLifetime: 2000, 
-        particuleAngleStart: '0_360',
-        particuleRadiusStart: '10%',
-        particuleRadiusEnd: '50%',
+        particleLifetime: 2000, 
+        particleAngleStart: '0_360',
+        particleRadiusStart: '10%',
+        particleRadiusEnd: '50%',
     }
 }
 
@@ -160,30 +160,30 @@ const growingMissileMotionTemlate = {
  */
 const vortexMotionTemplate = {
     spawningFrequence: 3, 
-    maxParticules: 1000,
-    particuleLifetime: [1000,1500],
-    particuleVelocityStart: 150,
-    particuleVelocityEnd: 50,
-    particuleAngleStart: '0_360',
-    particuleRadiusStart: '100%',
-    particuleRadiusEnd: '25%',
-    particuleSizeStart: 10,
-    particuleSizeEnd: '1_10',
+    maxParticles: 1000,
+    particleLifetime: [1000,1500],
+    particleVelocityStart: 150,
+    particleVelocityEnd: 50,
+    particleAngleStart: '0_360',
+    particleRadiusStart: '100%',
+    particleRadiusEnd: '25%',
+    particleSizeStart: 10,
+    particleSizeEnd: '1_10',
     alphaStart:1,
     alphaEnd:0
 }
 
 const auraMotionTemplate = {
     spawningFrequence: 2, 
-    maxParticules: 10000,
-    particuleLifetime: [1000,1500],
-    particuleVelocityStart: '25_50',
-    particuleVelocityEnd: '0_10',
-    particuleAngleStart: '0_360',
-    particuleRadiusStart: '50%',
-    particuleRadiusEnd: '75%_150%',
-    particuleSizeStart: 10,
-    particuleSizeEnd: '20_40',
+    maxParticles: 10000,
+    particleLifetime: [1000,1500],
+    particleVelocityStart: '25_50',
+    particleVelocityEnd: '0_10',
+    particleAngleStart: '0_360',
+    particleRadiusStart: '50%',
+    particleRadiusEnd: '75%_150%',
+    particleSizeStart: 10,
+    particleSizeEnd: '20_40',
     alphaStart:.5,
     alphaEnd:['0_.25','.1_.25'],
     onlyEmitterFollow: true
@@ -191,26 +191,26 @@ const auraMotionTemplate = {
 
 const satelliteMotionTemplate = {
     spawningFrequence: 1000, 
-    maxParticules: 4,
-    particuleLifetime: 8000,
-    particuleVelocityStart: '90',
-    particuleAngleStart: 0,
-    particuleRadiusStart: '100%',
-    particuleSizeStart: 50,
+    maxParticles: 4,
+    particleLifetime: 8000,
+    particleVelocityStart: '90',
+    particleAngleStart: 0,
+    particleRadiusStart: '100%',
+    particleSizeStart: 50,
     alphaStart:.9,
 }
 
 const slashMotionTemplate = {
     spawningFrequence: .5, 
-    maxParticules: 500,
+    maxParticles: 500,
     emissionDuration : 250,
-    particuleLifetime: 500,
-    particuleVelocityStart: 180,
-    particuleAngleStart: -45,
-    particuleRadiusStart: ['50%', '75%', '100%'],
-    particuleSizeStart: {x:5, y:25},
-    particuleRotationStart:-45,               
-    particuleRotationEnd:45,
+    particleLifetime: 500,
+    particleVelocityStart: 180,
+    particleAngleStart: -45,
+    particleRadiusStart: ['50%', '75%', '100%'],
+    particleSizeStart: {x:5, y:25},
+    particleRotationStart:-45,               
+    particleRotationEnd:45,
     alphaStart:.5
 }
 

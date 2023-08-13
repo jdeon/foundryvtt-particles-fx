@@ -1,4 +1,4 @@
-import ParticuleEmitter from "./script/particuleEmiter.js"
+import ParticlesEmitter from "./script/particlesEmitter.js"
 import { Utils } from "./script/utils.js"
 
 /**
@@ -20,9 +20,9 @@ export const s_EVENT_NAME = `module.${s_MODULE_ID}`;
  * Defines the different message types that FQL sends over `game.socket`.
  */
 export const s_MESSAGE_TYPES = {
-  sprayParticules: 'sprayParticules',
-  missileParticules: 'missileParticules',
-  gravitateParticules: 'gravitateParticules',
+  sprayParticles: 'sprayParticles',
+  missileParticles: 'missileParticles',
+  gravitateParticles: 'gravitateParticles',
   stopAllEmission: 'stopAllEmission',
   stopEmissionById: 'stopEmissionById',
   updateMaxEmitterId: 'updateMaxEmitterId',
@@ -105,7 +105,7 @@ Hooks.on("setup", () => {
     scope: 'world',
     config: false,
     onChange: value => {
-      ParticuleEmitter.addCustomPrefillMotionTemplate(value)
+      ParticlesEmitter.addCustomPrefillMotionTemplate(value)
     }
   });
 
@@ -117,7 +117,7 @@ Hooks.on("setup", () => {
     scope: 'world',
     config: false,
     onChange: value => {
-      ParticuleEmitter.addCustomPrefillColorTemplate(value)
+      ParticlesEmitter.addCustomPrefillColorTemplate(value)
     }
   });
 });
@@ -130,7 +130,7 @@ Hooks.on("canvasReady", () => {
     const emittersQueries = canvas.scene.getFlag(s_MODULE_ID, "emitters")
 
     if(game.ready){
-      ParticuleEmitter.initEmitters(emittersQueries)
+      ParticlesEmitter.initEmitters(emittersQueries)
     } else {
       //Waiting the world to be ready at the first launch
       firstSceneEmittersQueries = emittersQueries
@@ -140,15 +140,15 @@ Hooks.on("canvasReady", () => {
 
 
 Hooks.once('ready', function () {
-    console.log(`particule-fx | ready to ${s_MODULE_ID}`);
+    console.log(`main | ready to ${s_MODULE_ID}`);
     
     if(firstSceneEmittersQueries){
-      ParticuleEmitter.initEmitters(firstSceneEmittersQueries)
+      ParticlesEmitter.initEmitters(firstSceneEmittersQueries)
       firstSceneEmittersQueries = undefined
     }
 
-    ParticuleEmitter.addCustomPrefillMotionTemplate(game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate"))
-    ParticuleEmitter.addCustomPrefillColorTemplate(game.settings.get(s_MODULE_ID, "customPrefillColorTemplate"))
+    ParticlesEmitter.addCustomPrefillMotionTemplate(game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate"))
+    ParticlesEmitter.addCustomPrefillColorTemplate(game.settings.get(s_MODULE_ID, "customPrefillColorTemplate"))
 
     if(getProperty(window,'particuleEmitter.emmitParticules')) return;
 		
@@ -160,7 +160,7 @@ Hooks.once('ready', function () {
         gravitateParticules: gravitateParticules,
         stopAllEmission:  stopAllEmission,
         stopEmissionById: stopEmissionById,
-        writeMessageForEmissionById: ParticuleEmitter.writeMessageForEmissionById,   //No need to emit to other client
+        writeMessageForEmissionById: ParticlesEmitter.writeMessageForEmissionById,   //No need to emit to other client
         addCustomPrefillMotionTemplate,
         removeCustomPrefillMotionTemplate,
         getCustomPrefillMotionTemplate,
@@ -174,8 +174,8 @@ Hooks.once('ready', function () {
 
 
 Hooks.on("canvasTearDown", () => {
-  ParticuleEmitter.persistEmitters()
-  return ParticuleEmitter.stopAllEmission(true)
+  ParticlesEmitter.persistEmitters()
+  return ParticlesEmitter.stopAllEmission(true)
 });
 
 
@@ -220,22 +220,22 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
       case 'spray' : 
         source = Utils.getSelectedSource()
         if(source){
-          idEmitter = sprayParticules({source: source.id, target: Utils.getTargetId()}, ...otherParam)
-          ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+          idEmitter = sprayParticles({source: source.id, target: Utils.getTargetId()}, ...otherParam)
+          ParticlesEmitter.writeMessageForEmissionById(idEmitter)
         }
         break
       case 'missile' : 
         source = Utils.getSelectedSource()
         if(source){
-          idEmitter = missileParticules({source: source.id, target: Utils.getTargetId()}, ...otherParam)
-          ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+          idEmitter = missileParticles({source: source.id, target: Utils.getTargetId()}, ...otherParam)
+          ParticlesEmitter.writeMessageForEmissionById(idEmitter)
         }
         break
       case 'gravitate' : 
         source = Utils.getSelectedSource()
         if(source){
-          idEmitter = gravitateParticules({source: source.id}, ...otherParam)
-          ParticuleEmitter.writeMessageForEmissionById(idEmitter)
+          idEmitter = gravitateParticles({source: source.id}, ...otherParam)
+          ParticlesEmitter.writeMessageForEmissionById(idEmitter)
         }
         break
       case 'help' : 
@@ -254,7 +254,7 @@ Hooks.on("chatMessage", function(chatlog, message, chatData){
 
 
 Hooks.on("renderChatMessage", function (chatlog, html, data) {
-  console.log(`particule-fx | renderChatMessage with ${s_MODULE_ID}`); 
+  console.log(`main | renderChatMessage with ${s_MODULE_ID}`); 
 
   const buttons = html.find('button[name="button.delete-emitter"]');
 
@@ -295,11 +295,11 @@ function listen()
          // Dispatch the incoming message data by the message type.
          switch (data.type)
          {
-            case s_MESSAGE_TYPES.sprayParticules: ParticuleEmitter.sprayParticules(...data.payload); break;
-            case s_MESSAGE_TYPES.missileParticules: ParticuleEmitter.missileParticules(...data.payload); break;
-            case s_MESSAGE_TYPES.gravitateParticules: ParticuleEmitter.gravitateParticules(...data.payload); break;
-            case s_MESSAGE_TYPES.stopEmissionById: ParticuleEmitter.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
-            case s_MESSAGE_TYPES.stopAllEmission: ParticuleEmitter.stopAllEmission(data.payload); break;
+            case s_MESSAGE_TYPES.sprayParticles: ParticlesEmitter.sprayParticles(...data.payload); break;
+            case s_MESSAGE_TYPES.missileParticles: ParticlesEmitter.missileParticles(...data.payload); break;
+            case s_MESSAGE_TYPES.gravitateParticles: ParticlesEmitter.gravitateParticles(...data.payload); break;
+            case s_MESSAGE_TYPES.stopEmissionById: ParticlesEmitter.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
+            case s_MESSAGE_TYPES.stopAllEmission: ParticlesEmitter.stopAllEmission(data.payload); break;
             case s_MESSAGE_TYPES.updateMaxEmitterId: updateMaxEmitterId(data.payload); break;
             case s_MESSAGE_TYPES.updateCustomPrefillTemplate: updateCustomPrefillTemplate(data.payload); break;
          }
@@ -317,33 +317,33 @@ function updateMaxEmitterId(payload){
   }
 }
 
-function sprayParticules(...args){
-  let emitterId = { emitterId: ParticuleEmitter.newEmitterId() }
-  emitForOtherClient(s_MESSAGE_TYPES.sprayParticules, args, emitterId); 
-  return ParticuleEmitter.sprayParticules(...args, emitterId)
+function sprayParticles(...args){
+  let emitterId = { emitterId: ParticlesEmitter.newEmitterId() }
+  emitForOtherClient(s_MESSAGE_TYPES.sprayParticles, args, emitterId); 
+  return ParticlesEmitter.sprayParticles(...args, emitterId)
 }
 
-function missileParticules(...args){
-  let emitterId = { emitterId: ParticuleEmitter.newEmitterId() }
-  emitForOtherClient(s_MESSAGE_TYPES.missileParticules, args, emitterId); 
-  return ParticuleEmitter.missileParticules(...args, emitterId)
+function missileParticles(...args){
+  let emitterId = { emitterId: ParticlesEmitter.newEmitterId() }
+  emitForOtherClient(s_MESSAGE_TYPES.missileParticles, args, emitterId); 
+  return ParticlesEmitter.missileParticles(...args, emitterId)
 }
 
-function gravitateParticules(...args){
-  let emitterId = { emitterId: ParticuleEmitter.newEmitterId() }
-  emitForOtherClient(s_MESSAGE_TYPES.gravitateParticules, args, emitterId); 
-  return ParticuleEmitter.gravitateParticules(...args, emitterId)
+function gravitateParticles(...args){
+  let emitterId = { emitterId: ParticlesEmitter.newEmitterId() }
+  emitForOtherClient(s_MESSAGE_TYPES.gravitateParticles, args, emitterId); 
+  return ParticlesEmitter.gravitateParticles(...args, emitterId)
 }
 
 function stopAllEmission(immediate){
-  ParticuleEmitter.resetEmitterId()
+  ParticlesEmitter.resetEmitterId()
   emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); 
-  return ParticuleEmitter.stopAllEmission(immediate)
+  return ParticlesEmitter.stopAllEmission(immediate)
 }
 
 function stopEmissionById(emitterId, immediate){
   emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); 
-  return ParticuleEmitter.stopEmissionById(emitterId, immediate)
+  return ParticlesEmitter.stopEmissionById(emitterId, immediate)
 }
 
 function addCustomPrefillMotionTemplate(key, customPrefillMotionTemplate){

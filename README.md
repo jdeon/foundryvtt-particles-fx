@@ -1,6 +1,6 @@
-# foundryVTT-particule FX
+# foundryVTT-particles FX
 
-The module contains several methods to generate particules using a json input. The particules are simples sprites textures managed by script, no need of video files.
+The module contains several methods to generate particles using a json input. The particles are simples sprites textures managed by script, no need of video files.
 
 <br>
 
@@ -12,23 +12,23 @@ The module contains several methods to generate particules using a json input. T
 <br>
 
 ## Emission methods
-The emission method is used to interpret the input and manage the particules during their lifetime.
+The emission methods is used to interpret the input and manage the particles during their lifetime.
 The method returns its id.
 
 
-### Spray particule
-The spray particule is emitted from a source and move with a velocity in a direction define by an angle.
+### Spray particles
+The spray particles are emitted from a source and move with a velocity in a direction define by an angle.
 
 ![](doc/pfx-spray-Animation.gif)
 
-### Graviting particule
-The graviting particule turn around the source with a velocity at a distance defined by a radius.
+### Graviting particles
+The graviting particles turn around the source with a velocity at a distance defined by a radius.
 
 ![](doc/pfx-gravitate-Animation.gif)
 
 
-### Missile particule
-The missile method emits a spray particule that is used to emit sub particules.
+### Missile particles
+The missile method emits a spray particles that is used to emit sub particles.
 
 ![](doc/pfx-missile-Animation.gif)
 
@@ -43,7 +43,7 @@ To stop a specific emission, you need to use a macro to call the method ```parti
 * 'l' or 'last' for newest emission
 * 'f' or 'first' for oldest emission
 
-And a boolean parameter, true for instant delete of particules already emitted, false to stop only the emission (living particules are not killed).
+And a boolean parameter, true for instant delete of particles already emitted, false to stop only the emission (living particles are not killed).
 
 <br>
 
@@ -63,26 +63,26 @@ Commands :
 
 ```/pfx spray ray death```
 
-> To stop a command, you can add the param *--instant* to not have to wait the end of the particules lifetime.
+> To stop a command, you can add the param *--instant* to not have to wait the end of the particles lifetime.
 
 ### Call by script
-* To emit spray particules, you need to use a macro to call the method ```particuleEmitter.sprayParticules(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})``` 
-* To emit graviting particules, you need to use a macro to call the method ```particuleEmitter.gravitateParticules(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})``` 
-* To emit missile particules, you need to use a macro to call the method ```particuleEmitter.missileParticules(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})```.  Advanced options has the same input as Spray particule with a nested object ```subParticules``` containing another input (spray or graviting) and type (equals to "Spraying" or "Graviting").
-* To stop all emissions, you need to use a macro to call the method ```particuleEmitter.stopAllEmission(instantDelete)```.  instantDelete is a boolean parameter, if true, it delete all particles already emitted, false to stop only the emission (living particules are not killed).
+* To emit spray particles, you need to use a macro to call the method ```particuleEmitter.sprayParticules(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})``` 
+* To emit graviting particles, you need to use a macro to call the method ```particuleEmitter.gravitateParticules(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})``` 
+* To emit missile particles, you need to use a macro to call the method ```particuleEmitter.missileParticules(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})```.  Advanced options has the same input as Spray particles with a nested object ```subParticles``` containing another input (spray or graviting) and type (equals to "Spraying" or "Graviting").
+* To stop all emissions, you need to use a macro to call the method ```particuleEmitter.stopAllEmission(instantDelete)```.  instantDelete is a boolean parameter, if true, it delete all particles already emitted, false to stop only the emission (living particles are not killed).
 * To stop a specific emission, you need to use a macro to call the method ```particuleEmitter.stopEmissionById(id)```. Id is a number or a string :
   * id of the emission (returned by the method)
   * 'l' or 'last' for newest emission
   * 'f' or 'first' for oldest emission
 
 > **Example**
-> To emit a missile particule with graviting sub particules that forming a trail 
-> ```particuleEmitter.missileParticules({source : {x:200, y:250} , target: token.id, subParticules : { type: "Graviting", particuleLifetime: 1000, onlyEmitterFollow : true, particuleAngleStart: '0_360'}})```
+> To emit a missile particles with graviting sub particles that forming a trail 
+> ```particuleEmitter.missileParticules({source : {x:200, y:250} , target: token.id, subParticles : { type: "Graviting", particleLifetime: 1000, onlyEmitterFollow : true, particleAngleStart: '0_360'}})```
 
 <br>
 
 ## Prefill template
-The method emitting particules can be called with a prefill template. They are two kinds of template **prefillMotionTemplate** and **prefillColorTemplate** which can be combined. You can add an input to override some attributes of the prefill template.
+The method emitting particles can be called with a prefill template. They are two kinds of template **prefillMotionTemplate** and **prefillColorTemplate** which can be combined. You can add an input to override some attributes of the prefill template.
 The order of the paramater is not important, for example ```particuleEmitter.sprayParticules('prefillMotionTemplate', 'prefillColorTemplate', {position: {x:100, y:'50_100'}})``` is the same as ```particuleEmitter.sprayParticules('prefillColorTemplate', {position: {x:100, y:'50_100'}}, 'prefillMotionTemplate')```
 
 ### Prefill motion template :
@@ -211,21 +211,21 @@ This are all the parameters possible to use.
 | Parameter name  | accepted value          |  Description          | Default value |
 | :--------------- |:---------------:|:---------------:| -----:|
 |        source                    |             Placeable object id or an object with x and y attributes with default pattern inside   | Source of the emission if it's a placeable object id, the source is the center of the object and it follow the object  |  {x:0,y:0}  |
-|        maxParticules             |   Number                | Max particule allow at the same time for the emitter, if exceed we waiting for a particule to end before emitting another one               |   1000         |
+|        maxParticules             |   Number                | Max particles allow at the same time for the emitter, if exceed we waiting for a particle to end before emitting another one               |   1000         |
 |        spawningFrequence         |   Number                | Frequence between each emission                                |    3          |
-|        spawningNumber            |   Number                | Number of particule emit at during each frequence              |    1          |
-|        emissionDuration          |   Number                | End particule emission at the end of the duration              |   loop infinitely if undefined       |
-|        particuleVelocityStart    |   Default pattern       | Velocity of the particule at the spawning (in px/sec)          |   200%        |
-|        particuleVelocityEnd      |   Default pattern       | Velocity of the particule at his end (in px/sec)               |   50%         |
-|        particuleSizeStart        |   Default pattern of number or object with x and y | Size of the particule at the spawning (in px)       |   10          |
-|        particuleSizeEnd          |   Default pattern of number or object with x and y | Size of the particule at his end (in px)            |   '10_25'     |
-|        particuleRotationStart    |   Default pattern       | Rotation of the particule at the spawning (in degree)          |   0           |
-|        particuleRotationEnd      |   Default pattern       | Rotation of the particule at his end (in degree)               |   0           |
-|        particuleLifetime         |   Default pattern       | Duration of each particule (in millisec)                       |  [3500,4500]  |
-|        particuleColorStart       |   Object with x, y and z attributes with default pattern between 0 and 255               | Color of the particule at the spawning (in rgb (0 to 255))                |   {x:250,y:250, z: 50}      |
-|        particuleColorEnd         |   Object with x, y and z attributes with default pattern between 0 and 255               | Color of the particule at his end (in rgb (0 to 255))                    |   {x:250,y:'50_100', z: 0}  |
-|        alphaStart                |   Default pattern between 0 and 1   | Alpha color of the particule at the spawning       |   1           |
-|        alphaEnd                  |   Default pattern between 0 and 1   | Alpha color of the particule at his end            |   0           |
+|        spawningNumber            |   Number                | Number of particles emit at during each frequence              |    1          |
+|        emissionDuration          |   Number                | End particles emission at the end of the duration              |   loop infinitely if undefined       |
+|        particleVelocityStart    |   Default pattern       | Velocity of the particle at the spawning (in px/sec)          |   200%        |
+|        particleVelocityEnd      |   Default pattern       | Velocity of the particle at his end (in px/sec)               |   50%         |
+|        particleSizeStart        |   Default pattern of number or object with x and y | Size of the particle at the spawning (in px)       |   10          |
+|        particleSizeEnd          |   Default pattern of number or object with x and y | Size of the particle at his end (in px)            |   '10_25'     |
+|        particleRotationStart    |   Default pattern       | Rotation of the particle at the spawning (in degree)          |   0           |
+|        particleRotationEnd      |   Default pattern       | Rotation of the particle at his end (in degree)               |   0           |
+|        particleLifetime         |   Default pattern       | Duration of each particle (in millisec)                       |  [3500,4500]  |
+|        particleColorStart       |   Object with x, y and z attributes with default pattern between 0 and 255               | Color of the particle at the spawning (in rgb (0 to 255))                |   {x:250,y:250, z: 50}      |
+|        particleColorEnd         |   Object with x, y and z attributes with default pattern between 0 and 255               | Color of the particle at his end (in rgb (0 to 255))                    |   {x:250,y:'50_100', z: 0}  |
+|        alphaStart                |   Default pattern between 0 and 1   | Alpha color of the particle at the spawning       |   1           |
+|        alphaEnd                  |   Default pattern between 0 and 1   | Alpha color of the particle at his end            |   0           |
 |        vibrationAmplitudeStart   |   Default pattern between 0 and 1   | Amplitude of vibration in perpendicular direction of velocity at the spawning (in px)                                |   0           |
 |        vibrationAmplitudeEnd     |   Default pattern between 0 and 1   | Amplitude of vibration in perpendicular direction of velocity at his end (in px)                                |   0           |
 |        vibrationFrequencyStart   |   Default pattern between 0 and 1   | Frequence of vibration in perpendicular direction of velocity at the spawning (in milli-sec)                         |   0           |
@@ -235,29 +235,29 @@ This are all the parameters possible to use.
 ### Spraying emission
 | Parameter name  | accepted value          |  Description          | Default value |
 | :--------------- |:---------------:|:---------------:| -----:|
-|  target               |  Placeable object id or an object with x and y attributes with default pattern inside | The target of the emission, it use to change the angle of the direction and prolonge lifetime of the particules     |    undefined         |
-|  positionSpawning     |  Object with x and y attributes with default pattern inside  | Gap coordinate between source and the real position spawning of the particule (in px)                 |  {x:0,y:0}        |
-|  particuleAngleStart  |  Default pattern  | Direction of the particule at the spawning (in degree)    |   '0_360'     |
-|  particuleAngleEnd    |  Default pattern  | Direction of the particule at his end (in degree)         |   undefined   |
+|  target               |  Placeable object id or an object with x and y attributes with default pattern inside | The target of the emission, it use to change the angle of the direction and prolonge lifetime of the particles     |    undefined         |
+|  positionSpawning     |  Object with x and y attributes with default pattern inside  | Gap coordinate between source and the real position spawning of the particle (in px)                 |  {x:0,y:0}        |
+|  particleAngleStart  |  Default pattern  | Direction of the particle at the spawning (in degree)    |   '0_360'     |
+|  particleAngleEnd    |  Default pattern  | Direction of the particle at his end (in degree)         |   undefined   |
 
 > **Example**
-> To emit particules from a choosen tile direct to a specific token with a constant velocity of 100 px/s
-> ```particuleEmitter.sprayParticules({source :tile.id, target: token.id , particuleVelocityStart : 100, particuleAngleStart : 0})```
+> To emit particles from a choosen tile direct to a specific token with a constant velocity of 100 px/s
+> ```particuleEmitter.sprayParticules({source :tile.id, target: token.id , particleVelocityStart : 100, particleAngleStart : 0})```
 
 
-### Graviting particule
-> In this method the particuleVelocityStart and the particuleVelocityEnd are angular velocities (degree/sec)
+### Graviting particles
+> In this method the particleVelocityStart and the particleVelocityEnd are angular velocities (degree/sec)
 
 | Parameter name  | accepted value          |  Description          | Default value |
 | :--------------- |:---------------:|:---------------:| -----:|
-|  particuleAngleStart  |  Default pattern  | Angle where the particule spawn (in degree)                                        |   '0_360'     |
-|  particuleRadiusStart |  Default pattern  | Distance between particule and source at the spawning (in px)                      |   '100%'      |
-|  particuleRadiusEnd   |  Default pattern  | Distance between particule and source at his end (in px)                           |   '50%'       |
-|  onlyEmitterFollow    |  boolean          | If true only new particule is emit from the new position of the source if it move  |   false       |
+|  particleAngleStart  |  Default pattern  | Angle where the particle spawn (in degree)                                        |   '0_360'     |
+|  particleRadiusStart |  Default pattern  | Distance between particle and source at the spawning (in px)                      |   '100%'      |
+|  particleRadiusEnd   |  Default pattern  | Distance between particle and source at his end (in px)                           |   '50%'       |
+|  onlyEmitterFollow    |  boolean          | If true only new particle is emit from the new position of the source if it move  |   false       |
 
 > **Example**
-> To emit particules graviting around a choosen token and ending at his center. The living particules will not move with the token 
-> ```particuleEmitter.gravitateParticules({source : token.id , particuleRadiusStart : '200%', particuleRadiusEnd : 5, onlyEmitterFollow : true})```
+> To emit particles graviting around a choosen token and ending at his center. The living particles will not move with the token 
+> ```particuleEmitter.gravitateParticules({source : token.id , particleRadiusStart : '200%', particleRadiusEnd : 5, onlyEmitterFollow : true})```
 
 
 ### Default pattern

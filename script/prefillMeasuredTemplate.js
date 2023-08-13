@@ -7,7 +7,7 @@ function generateTemplateForCircle(radius, velocity){
     if(velocity>0){
         result = {
             positionSpawning: {x:0,y:0},
-            particuleLifetime:radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
+            particleLifetime:radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: angle,
             angleEnd: angle,
         }
@@ -17,7 +17,7 @@ function generateTemplateForCircle(radius, velocity){
                 x:radius*Utils.pixelOfDistanceConvertor()*Math.cos(angle*Math.PI/180),
                 y:radius*Utils.pixelOfDistanceConvertor()*Math.sin(angle*Math.PI/180)
             },
-            particuleLifetime:-1*radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
+            particleLifetime:-1*radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: angle,
             angleEnd: angle,
         }
@@ -46,7 +46,7 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
     if(velocity>0){
         result = {
             positionSpawning: {x:0,y:0},
-            particuleLifetime:radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
+            particleLifetime:radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: angle,
             angleEnd: angle,
         }
@@ -56,7 +56,7 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
                 x:radius*Utils.pixelOfDistanceConvertor()*Math.cos(angle*Math.PI/180),
                 y:radius*Utils.pixelOfDistanceConvertor()*Math.sin(angle*Math.PI/180)
             },
-            particuleLifetime:-1*radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
+            particleLifetime:-1*radius*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: angle,
             angleEnd: angle,
         }
@@ -82,7 +82,7 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, veloci
     const rectDiagonal =  diagonalLength*Utils.pixelOfDistanceConvertor()
 
     if(velocity>0){
-        //Source particule is at the center
+        //Source particle is at the center
         const angle = Utils.getRandomValueFrom('0_360')
         //Real velocity on diagonal, slow down the vertical and horisontal
         const teta = angle%180 > 90 ? angle%180 - 2* (angle%180 -90 ) : angle%180
@@ -96,7 +96,7 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, veloci
                 x: rectX/2,
                 y: rectY/2
             },
-            particuleLifetime:rectDiagonal*1000/(2*velocity),
+            particleLifetime:rectDiagonal*1000/(2*velocity),
             velocityStart: (velocity - velocityGap) * velocityFactor,
             velocityEnd: (velocity + velocityGap) * velocityFactor,
             angleStart: angle,
@@ -126,7 +126,7 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, veloci
                 x: spawnPosition.x,
                 y: spawnPosition.y
             },
-            particuleLifetime: -1 * rectDiagonal*1000/(2*velocity),
+            particleLifetime: -1 * rectDiagonal*1000/(2*velocity),
             velocityStart: (velocity - velocityGap) * velocityFactor,
             velocityEnd: (velocity + velocityGap) * velocityFactor,
             angleStart: angle,
@@ -156,7 +156,7 @@ function generateTemplateForRay(length, width, directionAngle, velocity){
                 x: - widthPosition * Math.sin(directionAngle * Math.PI / 180),
                 y: widthPosition * Math.cos(directionAngle * Math.PI / 180)
             },
-            particuleLifetime:length*Utils.pixelOfDistanceConvertor()*1000/velocity,
+            particleLifetime:length*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: directionAngle,
             angleEnd: directionAngle
         }
@@ -169,7 +169,7 @@ function generateTemplateForRay(length, width, directionAngle, velocity){
                 x: targetX - widthPosition * Math.sin(directionAngle * Math.PI / 180),
                 y: targetY + widthPosition * Math.cos(directionAngle * Math.PI / 180)
             },
-            particuleLifetime: -1 * length*Utils.pixelOfDistanceConvertor()*1000/velocity,
+            particleLifetime: -1 * length*Utils.pixelOfDistanceConvertor()*1000/velocity,
             angleStart: directionAngle,
             angleEnd: directionAngle
         }
