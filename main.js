@@ -1,3 +1,4 @@
+import { CompatibiltyV2Manager } from "./script/compatibilityManager.js";
 import ParticlesEmitter from "./script/particlesEmitter.js"
 import { Utils } from "./script/utils.js"
 
@@ -150,14 +151,14 @@ Hooks.once('ready', function () {
     ParticlesEmitter.addCustomPrefillMotionTemplate(game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate"))
     ParticlesEmitter.addCustomPrefillColorTemplate(game.settings.get(s_MODULE_ID, "customPrefillColorTemplate"))
 
-    if(getProperty(window,'particuleEmitter.emmitParticules')) return;
+    if(getProperty(window,'particlesFx.sprayParticles')) return;
 		
     //On call, we call method localy and share data with other client
-    window.particuleEmitter = {
-        ...window.particuleEmitter, 
-        sprayParticules: sprayParticules,
-        missileParticules: missileParticules,
-        gravitateParticules: gravitateParticules,
+    window.particlesFx = {
+        ...window.particlesFx, 
+        sprayParticles: sprayParticles,
+        missileParticles: missileParticles,
+        gravitateParticles: gravitateParticles,
         stopAllEmission:  stopAllEmission,
         stopEmissionById: stopEmissionById,
         writeMessageForEmissionById: ParticlesEmitter.writeMessageForEmissionById,   //No need to emit to other client
@@ -168,6 +169,8 @@ Hooks.once('ready', function () {
         removeCustomPrefillColorTemplate,
         getCustomPrefillColorTemplate,
 	}
+
+  CompatibiltyV2Manager.manageDeprecatedWindowCall()
 
   listen()
 });

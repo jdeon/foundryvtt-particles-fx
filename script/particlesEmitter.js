@@ -3,6 +3,7 @@ import { Vector3, Utils } from "./utils.js"
 import { motionTemplateDictionnary, defaultMotionTemplate } from "./prefillMotionTemplate.js"
 import { colorTemplateDictionnary, defaultColorTemplate } from "./prefillColorTemplate.js"
 import { s_MODULE_ID ,s_EVENT_NAME, s_MESSAGE_TYPES } from "../main.js"
+import { CompatibiltyV2Manager } from "./compatibilityManager.js"
 
 export default class ParticlesEmitter { 
 
@@ -70,6 +71,7 @@ export default class ParticlesEmitter {
 
     static _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId){
         const particleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particle.png`);
+        CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
         const finalInput = ParticlesEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
@@ -86,6 +88,8 @@ export default class ParticlesEmitter {
 
     static _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId){
         const particleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particle.png`);
+
+        CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
         const finalInput = ParticlesEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
         
@@ -150,6 +154,8 @@ export default class ParticlesEmitter {
 
     static _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId){
         const particleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particle.png`);
+
+        CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
         const finalInput = ParticlesEmitter._mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
