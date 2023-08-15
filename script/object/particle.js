@@ -1,4 +1,4 @@
-import { Utils, sameStartKey } from "./utils.js";
+import { Utils, sameStartKey } from "../utils/utils.js";
 
 export class Particle { 
 

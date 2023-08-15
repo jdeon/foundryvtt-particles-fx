@@ -1,3 +1,18 @@
+/**
+ * Defines the event name to send all messages to over  `game.socket`.
+ *
+ * @type {string}
+ */
+export const s_MODULE_ID = 'particule-fx';
+
+
+/**
+ * Defines the event name to send all messages to over  `game.socket`.
+ *
+ * @type {string}
+ */
+export const s_EVENT_NAME = `module.${s_MODULE_ID}`;
+
 export const sameStartKey = 'sameStart'
 
 export class Vector3 { 

@@ -1,4 +1,4 @@
-import { sameStartKey } from "./utils.js";
+import { sameStartKey } from "./utils/utils.js";
 
 export const defaultMotionTemplate = () => {
     return {

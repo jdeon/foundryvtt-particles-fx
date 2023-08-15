@@ -1,4 +1,4 @@
-import { Vector3 } from "./utils.js"
+import { Vector3 } from "./utils/utils.js"
 
 export const defaultColorTemplate = () =>  {
     return {

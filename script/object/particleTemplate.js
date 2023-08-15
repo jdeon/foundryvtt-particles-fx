@@ -1,6 +1,6 @@
 import { Particle, SprayingParticle, GravitingParticle } from './particle.js'
-import { Utils, Vector3 } from "./utils.js"
-import { generatePrefillTemplateForMeasured } from './prefillMeasuredTemplate.js'
+import { Utils, Vector3 } from "../utils/utils.js"
+import { generatePrefillTemplateForMeasured } from '../service/measuredTemplate.service.js'
 
 
 export class ParticleTemplate { 

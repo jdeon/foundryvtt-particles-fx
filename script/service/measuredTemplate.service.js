@@ -1,4 +1,4 @@
-import { Utils } from "./utils.js"
+import { Utils } from "../utils/utils.js"
 
 function generateTemplateForCircle(radius, velocity){
     let result
