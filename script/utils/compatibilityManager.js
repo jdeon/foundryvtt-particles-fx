@@ -1,3 +1,5 @@
+import { s_MODULE_ID } from "./utils.js"
+
 export class CompatibiltyV2Manager { 
 
     static compatibiltyApiMessage(){
@@ -61,5 +63,33 @@ export class CompatibiltyV2Manager {
         }
 
         return deprecatedParam
+    }
+
+    static addMigrationSettings(){
+        game.settings.register(s_MODULE_ID, "avoidParticule", {
+            name: game.i18n.localize("Old settings renamed avoidParticle"),
+            hint: game.i18n.localize("Keep it here for migration purpose"),
+            scope: "client",
+            config: false,
+            type: Boolean,
+            default: false
+        });
+        
+        game.settings.register(s_MODULE_ID, "migrationV2Done", {
+            name: game.i18n.localize("Old settings has been migrate in new one"),
+            hint: game.i18n.localize("Keep it here for migration purpose"),
+            scope: "client",
+            config: false,
+            type: Boolean,
+            default: false
+        });
+    }
+
+    static migrateSettings(){
+        if(!game.settings.get(s_MODULE_ID, "migrationV2Done")){
+            const oldAvoidParticuleSettings =  game.settings.get(s_MODULE_ID, "avoidParticule")
+            game.settings.set(s_MODULE_ID, "avoidParticle", oldAvoidParticuleSettings)
+            game.settings.get(s_MODULE_ID, "migrationV2Done", true)
+        }
     }
 }

@@ -3,6 +3,7 @@ import { initEmitters, persistEmitters, stopAllEmission, writeMessageForEmission
 import { addCustomPrefillMotionTemplate, addCustomPrefillColorTemplate } from "./script/service/prefillTemplate.service.js"
 import * as apiController from "./script/api/windowsController.js"
 import { s_MODULE_ID, Utils } from "./script/utils/utils.js"
+import { CompatibiltyV2Manager } from "./script/utils/compatibilityManager.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 let firstSceneEmittersQueries
@@ -28,7 +29,7 @@ Hooks.on("init", () => {
 });
 
 Hooks.on("setup", () => {
-  game.settings.register(s_MODULE_ID, "avoidParticule", {
+  game.settings.register(s_MODULE_ID, "avoidParticle", {
       name: game.i18n.localize("PARTICULE-FX.Settings.Avoid.label"),
       hint: game.i18n.localize("PARTICULE-FX.Settings.Avoid.description"),
       scope: "client",
@@ -36,6 +37,8 @@ Hooks.on("setup", () => {
   type: Boolean,
   default: false
   });
+
+  CompatibiltyV2Manager.addMigrationSettings()
 
   game.settings.register(s_MODULE_ID, "saveEmitters", {
       name: game.i18n.localize("PARTICULE-FX.Settings.Persist.label"),
@@ -116,6 +119,8 @@ Hooks.on("canvasReady", () => {
 
 Hooks.once('ready', function () {
   console.log(`main | ready to ${s_MODULE_ID}`);
+
+  CompatibiltyV2Manager.migrateSettings()
   
   if(firstSceneEmittersQueries){
       initEmitters(firstSceneEmittersQueries)

@@ -29,7 +29,7 @@ export function listen() {
      {
         if (typeof data !== 'object') { return; }
   
-        if(game.settings.get(s_MODULE_ID, "avoidParticule")){ return; }
+        if(game.settings.get(s_MODULE_ID, "avoidParticle")){ return; }
   
         try
         {
