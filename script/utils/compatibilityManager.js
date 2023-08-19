@@ -3,11 +3,11 @@ import { s_MODULE_ID } from "./utils.js"
 export class CompatibiltyV2Manager { 
 
     static compatibiltyApiMessage(){
-        ui.notifications.warn('Deprecated : use particuleFx.XXX instead of particuleEmitter for api')
+        ui.notifications.warn('Deprecated : use particlesFx.XXX instead of particuleEmitter for api')
     }
 
     static compatibiltyParamMessage(errorParam){
-        ui.notifications.warn(`Deprecated : use input param with particule replace it by particle : ${errorParam}`)
+        ui.notifications.warn(`Deprecated : use input param with 'particule' replace it by 'particle' : ${errorParam}`)
     }
 
     static manageDeprecatedWindowCall(){
