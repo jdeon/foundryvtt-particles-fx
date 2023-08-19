@@ -55,6 +55,7 @@ export class CompatibiltyV2Manager {
                 deprecatedParam.push(key)
                 const fixKey = key.replaceAll('articule', 'article')
                 input[fixKey] = input[key]
+                delete input[key]
             }
         }
 
