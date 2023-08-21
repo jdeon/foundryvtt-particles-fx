@@ -1,59 +1,19 @@
-import * as particlesEmitterService from "../service/particlesEmitter.service.js"
+import { s_MODULE_ID } from "../utils/utils.js"
 import { s_MESSAGE_TYPES, emitForOtherClient } from "../utils/socketManager.js"
-import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
 
-export function subscribeApiToWindow(){
-    if(getProperty(window,'particlesFx.sprayParticles')) return;
-            
-    //On call, we call method localy and share data with other client
-    window.particlesFx = {
-        ...window.particlesFx, 
-        sprayParticles: sprayParticles,
-        missileParticles: missileParticles,
-        gravitateParticles: gravitateParticles,
-        stopAllEmission:  stopAllEmission,
-        stopEmissionById: stopEmissionById,
-        writeMessageForEmissionById: particlesEmitterService.writeMessageForEmissionById,   //No need to emit to other client
-        addCustomPrefillMotionTemplate,
-        removeCustomPrefillMotionTemplate,
-        getCustomPrefillMotionTemplate,
-        addCustomPrefillColorTemplate,
-        removeCustomPrefillColorTemplate,
-        getCustomPrefillColorTemplate,
+export default {
+    motion : {
+      add : addCustomPrefillMotionTemplate,
+      remove : removeCustomPrefillMotionTemplate,
+      get : getCustomPrefillMotionTemplate,
+    },
+    color : {
+      add : addCustomPrefillColorTemplate,
+      remove : removeCustomPrefillColorTemplate,
+      get : getCustomPrefillColorTemplate,
     }
-
-    CompatibiltyV2Manager.manageDeprecatedWindowCall()
 }
 
-export function sprayParticles(...args){
-    let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
-    emitForOtherClient(s_MESSAGE_TYPES.sprayParticles, args, emitterId); 
-    return particlesEmitterService.sprayParticles(...args, emitterId)
-}
-  
-export function missileParticles(...args){
-    let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
-    emitForOtherClient(s_MESSAGE_TYPES.missileParticles, args, emitterId); 
-    return particlesEmitterService.missileParticles(...args, emitterId)
-}
-  
-export function gravitateParticles(...args){
-    let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
-    emitForOtherClient(s_MESSAGE_TYPES.gravitateParticles, args, emitterId); 
-    return particlesEmitterService.gravitateParticles(...args, emitterId)
-}
-  
-export function stopAllEmission(immediate){
-    particlesEmitterService.resetEmitterId()
-    emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); 
-    return particlesEmitterService.stopAllEmission(immediate)
-}
-  
-export function stopEmissionById(emitterId, immediate){
-    emitForOtherClient(s_MESSAGE_TYPES.stopEmissionById, {emitterId, immediate}); 
-    return particlesEmitterService.stopEmissionById(emitterId, immediate)
-}
-  
 function addCustomPrefillMotionTemplate(key, customPrefillMotionTemplate){
     if(! isCustomPrefillTemplateParamValid(key, customPrefillMotionTemplate)) return;
   
@@ -168,15 +128,3 @@ function isCustomPrefillTemplateParamValid(key, customPrefillTemplate){
     return true
 }
 
-export const customPrefillTemplateDispatchMethod = {
-    motion : {
-      add : addCustomPrefillMotionTemplate,
-      remove : removeCustomPrefillMotionTemplate,
-      get : getCustomPrefillMotionTemplate,
-    },
-    color : {
-      add : addCustomPrefillColorTemplate,
-      remove : removeCustomPrefillColorTemplate,
-      get : getCustomPrefillColorTemplate,
-    }
-}

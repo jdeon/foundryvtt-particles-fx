@@ -1,4 +1,6 @@
 import { s_MODULE_ID } from "./utils.js"
+import emitController from "../api/emitController.js";
+import templateController from "../api/templateController.js";
 
 export class CompatibiltyV2Manager { 
 
@@ -11,23 +13,25 @@ export class CompatibiltyV2Manager {
     }
 
     static manageDeprecatedWindowCall(){
+        if(getProperty(window,'particlesFx.particuleEmitter')) return;
+
         //On call, we call method localy and share data with other client
         Object.defineProperty(window,'particuleEmitter',{
             get: function(){
                 CompatibiltyV2Manager.compatibiltyApiMessage()
                 return {
-                    sprayParticules: window.particlesFx.sprayParticles,
-                    missileParticules: window.particlesFx.missileParticles,
-                    gravitateParticules: window.particlesFx.gravitateParticles,
-                    stopAllEmission:  window.particlesFx.stopAllEmission,
-                    stopEmissionById: window.particlesFx.stopEmissionById,
-                    writeMessageForEmissionById: window.particlesFx.writeMessageForEmissionById,
-                    addCustomPrefillMotionTemplate:window.particlesFx.addCustomPrefillMotionTemplate,
-                    removeCustomPrefillMotionTemplate:window.particlesFx.removeCustomPrefillMotionTemplate,
-                    getCustomPrefillMotionTemplate:window.particlesFx.getCustomPrefillMotionTemplate,
-                    addCustomPrefillColorTemplate:window.particlesFx.addCustomPrefillColorTemplate,
-                    removeCustomPrefillColorTemplate:window.particlesFx.removeCustomPrefillColorTemplate,
-                    getCustomPrefillColorTemplate:window.particlesFx.getCustomPrefillColorTemplate,
+                    sprayParticules: emitController.spray,
+                    gravitateParticules: emitController.gravit,
+                    missileParticules: emitController.missile,
+                    stopEmissionById: emitController.stop,
+                    stopAllEmission:  emitController.stopAll,
+                    writeMessageForEmissionById: emitController.writeMessage,
+                    addCustomPrefillMotionTemplate: templateController.motion.add,
+                    removeCustomPrefillMotionTemplate: templateController.motion.remove,
+                    getCustomPrefillMotionTemplate: templateController.motion.get,
+                    addCustomPrefillColorTemplate: templateController.color.add,
+                    removeCustomPrefillColorTemplate: templateController.color.remove,
+                    getCustomPrefillColorTemplate: templateController.color.get,
                 }
             },
         

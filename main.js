@@ -1,9 +1,10 @@
 import { listen } from "./script/utils/socketManager.js"
 import { initEmitters, persistEmitters, stopAllEmission, writeMessageForEmissionById } from "./script/service/particlesEmitter.service.js"
 import { addCustomPrefillMotionTemplate, addCustomPrefillColorTemplate } from "./script/service/prefillTemplate.service.js"
-import * as apiController from "./script/api/windowsController.js"
 import { s_MODULE_ID, Utils } from "./script/utils/utils.js"
 import { CompatibiltyV2Manager } from "./script/utils/compatibilityManager.js"
+import emitController from "./script/api/emitController.js"
+import apiController from "./script/api/apiController.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 let firstSceneEmittersQueries
@@ -130,7 +131,8 @@ Hooks.once('ready', function () {
   addCustomPrefillMotionTemplate(game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate"))
   addCustomPrefillColorTemplate(game.settings.get(s_MODULE_ID, "customPrefillColorTemplate"))
 
-  apiController.subscribeApiToWindow()
+  game.modules.get(s_MODULE_ID).api = apiController
+  CompatibiltyV2Manager.manageDeprecatedWindowCall()
 
   listen()
 });  
@@ -175,31 +177,31 @@ Hooks.on("canvasTearDown", () => {
   
       switch (functionName){
           case 'stopAll':
-          response = apiController.stopAllEmission(isImmediate)
+          response = emitController.stopAll(isImmediate)
           resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-All.return") + JSON.stringify(response)
           break
           case 'stopById' :
-          response = apiController.stopEmissionById(functionParam, isImmediate)
+          response = emitController.stop(functionParam, isImmediate)
           resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
           break
           case 'spray' : 
           source = Utils.getSelectedSource()
           if(source){
-              idEmitter = apiController.sprayParticles({source: source.id, target: Utils.getTargetId()}, ...otherParam)
+              idEmitter = emitController.spray({source: source.id, target: Utils.getTargetId()}, ...otherParam)
               writeMessageForEmissionById(idEmitter)
           }
           break
           case 'missile' : 
           source = Utils.getSelectedSource()
           if(source){
-              idEmitter = apiController.missileParticles({source: source.id, target: Utils.getTargetId()}, ...otherParam)
+              idEmitter = emitController.missile({source: source.id, target: Utils.getTargetId()}, ...otherParam)
               writeMessageForEmissionById(idEmitter)
           }
           break
           case 'gravitate' : 
           source = Utils.getSelectedSource()
           if(source){
-              idEmitter = apiController.gravitateParticles({source: source.id}, ...otherParam)
+              idEmitter = emitController.gravit({source: source.id}, ...otherParam)
               writeMessageForEmissionById(idEmitter)
           }
           break
@@ -228,7 +230,7 @@ Hooks.on("canvasTearDown", () => {
     buttons.on("click", (event) => {
     let button = event.currentTarget
     if(button.dataset.action === "delete"){
-        apiController.stopEmissionById(button.dataset.emitterId);
+        emitController.stop(button.dataset.emitterId);
     }
   })
 });

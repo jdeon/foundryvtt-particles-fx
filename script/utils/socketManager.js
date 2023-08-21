@@ -1,4 +1,5 @@
 import { s_MODULE_ID, s_EVENT_NAME } from "./utils.js"
+import customPrefillTemplateApi from "../api/templateController.js"
 
 /**
  * Defines the different message types that FQL sends over `game.socket`.
@@ -55,7 +56,7 @@ export function listen() {
 function updateCustomPrefillTemplate({type, operation, key, customPrefillTemplate}) {
     if(! game.user.isGM) return
   
-    const method = customPrefillTemplateDispatchMethod[type][operation]
+    const method = customPrefillTemplateApi[type][operation]
   
     if(method !== undefined && typeof method === 'function'){
         method(key, customPrefillTemplate)
