@@ -5,6 +5,7 @@ import { s_MODULE_ID, Utils } from "./script/utils/utils.js"
 import { CompatibiltyV2Manager } from "./script/utils/compatibilityManager.js"
 import emitController from "./script/api/emitController.js"
 import apiController from "./script/api/apiController.js"
+import { subscribeApiToWindow } from "./script/api/windowsController.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 let firstSceneEmittersQueries
@@ -132,7 +133,7 @@ Hooks.once('ready', function () {
   addCustomPrefillColorTemplate(game.settings.get(s_MODULE_ID, "customPrefillColorTemplate"))
 
   game.modules.get(s_MODULE_ID).api = apiController
-  CompatibiltyV2Manager.manageDeprecatedWindowCall()
+  subscribeApiToWindow()
 
   listen()
 });  

@@ -38,7 +38,7 @@ To stop all emissions in the scene and reset the particle emitters ids index.
 
 
 ### Stop a specific emission
-To stop a specific emission, you need to use a macro to call the method ```game.modules.get("particule-fx").api.emit.stop(id)``` with an id parameter :
+To stop a specific emission, you need to use a macro to call the method ```particlesFx.stopEmissionById``` with an id parameter :
 * id of the emission (returned by the method)
 * 'l' or 'last' for newest emission
 * 'f' or 'first' for oldest emission
@@ -66,128 +66,147 @@ Commands :
 > To stop a command, you can add the param *--instant* to not have to wait the end of the particles lifetime.
 
 ### Call by script
-* To emit spray particles, you need to use a macro to call the method ```game.modules.get("particule-fx").api.emit.spray(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})``` 
-* To emit graviting particles, you need to use a macro to call the method ```game.modules.get("particule-fx").api.emit.gravit(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})``` 
-* To emit missile particles, you need to use a macro to call the method ```game.modules.get("particule-fx").api.emit.missile(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})```.  Advanced options has the same input as Spray particles with a nested object ```subParticles``` containing another input (spray or graviting) and type (equals to "Spraying" or "Graviting").
-* Write a message to describe the emitter and a button to stop it ```game.modules.get("particule-fx").api.emit.writeMessage(emitterId, isVerbal)```. isVerbal parameter also write advanced input in the message
-* To stop all emissions, you need to use a macro to call the method ```game.modules.get("particule-fx").api.emit.stopAll(instantDelete)```.  instantDelete is a boolean parameter, if true, it delete all particles already emitted, false to stop only the emission (living particles are not killed).
-* To stop a specific emission, you need to use a macro to call the method ```game.modules.get("particule-fx").api.emit.stop(id)```. Id is a number or a string :
+* To emit spray particles, you need to use a macro to call the method ```particlesFx.sprayParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})``` 
+* To emit graviting particles, you need to use a macro to call the method ```particlesFx.gravitateParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})``` 
+* To emit missile particles, you need to use a macro to call the method ```particlesFx.missileParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})```.  Advanced options has the same input as Spray particles with a nested object ```subParticles``` containing another input (spray or graviting) and type (equals to "Spraying" or "Graviting").
+* Write a message to describe the emitter and a button to stop it ```particlesFx.writeMessageForEmissionById(emitterId, isVerbal)```. isVerbal parameter also write advanced input in the message
+* To stop all emissions, you need to use a macro to call the method ```particlesFx.stopAllEmission(instantDelete)```.  instantDelete is a boolean parameter, if true, it delete all particles already emitted, false to stop only the emission (living particles are not killed).
+* To stop a specific emission, you need to use a macro to call the method ```particlesFx.stopEmissionById(id)```. Id is a number or a string :
   * id of the emission (returned by the method)
   * 'l' or 'last' for newest emission
   * 'f' or 'first' for oldest emission
 
 > **Example**
 > To emit a missile particles with graviting sub particles that forming a trail 
-> ```game.modules.get("particule-fx").api.emit.missile({source : {x:200, y:250} , target: token.id, subParticles : { type: "Graviting", particleLifetime: 1000, onlyEmitterFollow : true, particleAngleStart: '0_360'}})```
+> ```particlesFx.missileParticles({source : {x:200, y:250} , target: token.id, subParticles : { type: "Graviting", particleLifetime: 1000, onlyEmitterFollow : true, particleAngleStart: '0_360'}})```
+
+#### Apis methods
+All this methods can also be calls with the modules API 'game.modules.get("particule-fx").api' with the same parameters and behaviour:
+* xxx.api.emit.spray(xxx)
+* xxx.api.emit.gravit(xxx)
+* xxx.api.emit.missile(xxx)
+* xxx.api.emit.writeMessage(xxx)
+* xxx.api.emit.stopAll(xxx)
+* xxx.api.emit.stop(xxx)
+
 
 <br>
 
 ## Prefill template
 The method emitting particles can be called with a prefill template. They are two kinds of template **prefillMotionTemplate** and **prefillColorTemplate** which can be combined. You can add an input to override some attributes of the prefill template.
-The order of the paramater is not important, for example ```game.modules.get("particule-fx").api.emit.spray('prefillMotionTemplate', 'prefillColorTemplate', {position: {x:100, y:'50_100'}})``` is the same as ```game.modules.get("particule-fx").api.emit.spray('prefillColorTemplate', {position: {x:100, y:'50_100'}}, 'prefillMotionTemplate')```
+The order of the paramater is not important, for example ```particlesFx.sprayParticles('prefillMotionTemplate', 'prefillColorTemplate', {position: {x:100, y:'50_100'}})``` is the same as ```particlesFx.sprayParticles('prefillColorTemplate', {position: {x:100, y:'50_100'}}, 'prefillMotionTemplate')```
 
 ### Prefill motion template :
 **explosion (designed for spray)**
 <br><img width="30%" src="doc/pfx-spray-explosion-Animation.gif"><br>
 
-*game.modules.get("particule-fx").api.emit.spray('explosion', {source :tokenId} )*<br>
+*particlesFx.sprayParticles('explosion', {source :tokenId} )*<br>
 <br>
 
 **breath (designed for spray)**
 <br><img width="30%" src="doc/pfx-spray-breath-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.spray('breath', {source :token.id, target: target.id} )*<br>
+*particlesFx.sprayParticles('breath', {source :token.id, target: target.id} )*<br>
 <br>
 
 **ray (designed for spray)**
 <br><img width="30%" src="doc/pfx-spray-ray-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.spray('ray', {source :token.id, target: target.id} )*<br>
+*particlesFx.sprayParticles('ray', {source :token.id, target: target.id} )*<br>
 <br>
 
 **sonar (designed for spray)**
 <br><img width="30%" src="doc/pfx-spray-sonar-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.spray('sonar', {source :token.id} )*<br>
+*particlesFx.sprayParticles('sonar', {source :token.id} )*<br>
 <br>
 
 **trail (designed for missile)**
 <br><img width="30%" src="doc/pfx-missile-trail-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.missile('trail', {source :token.id, target: target.id} )*<br>
+*particlesFx.missileParticles('trail', {source :token.id, target: target.id} )*<br>
 <br>
 
 **wave (designed for missile)**
 <br><img width="30%" src="doc/pfx-missile-wave-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.missile('wave', {source :token.id, target: target.id} )*<br>
+*particlesFx.missileParticles('wave', {source :token.id, target: target.id} )*<br>
 <br>
 
 **grow (designed for missile)**
 <br><img width="30%" src="doc/pfx-missile-grow-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.missile('grow', {source :token.id, target: target.id} )*<br>
+*particlesFx.missileParticles('grow', {source :token.id, target: target.id} )*<br>
 <br>
 
 **vortex (designed for gravitate)**
 <br><img width="30%" src="doc/pfx-gravitate-vortex-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.gravit('vortex', {source :tokenId} )*<br>
+*particlesFx.gravitateParticles('vortex', {source :tokenId} )*<br>
 <br>
 
 **aura (designed for gravitate)**
 <br><img width="30%" src="doc/pfx-gravitate-aura-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.gravit('aura', {source :tokenId} )*<br>
+*particlesFx.gravitateParticles('aura', {source :tokenId} )*<br>
 <br>
 
 **satellite (designed for gravitate)**
 <br><img width="30%" src="doc/pfx-gravitate-satellite-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.gravit('satellite', {source :tokenId} )*<br>
+*particlesFx.gravitateParticles('satellite', {source :tokenId} )*<br>
 <br>
 
 **slash (designed for gravitate)**
 <br><img width="30%" src="doc/pfx-gravitate-slash-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.gravit('slash', {source :tokenId} )*<br>
+*particlesFx.gravitateParticles('slash', {source :tokenId} )*<br>
 <br>
 
 
 ### Existing color template :
 **ice**
 <br><img width="30%" src="doc/pfx-ice-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.spray('breath', 'ice' )*<br>
+*particlesFx.sprayParticles('breath', 'ice' )*<br>
 <br>
 
 **fire**
 <br><img width="30%" src="doc/pfx-fire-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.spray('breath', 'fire' )*<br>
+*particlesFx.sprayParticles('breath', 'fire' )*<br>
 <br>
 
 **light**
 <br><img width="30%" src="doc/pfx-light-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.spray('breath', 'light' )*<br>
+*particlesFx.sprayParticles('breath', 'light' )*<br>
 <br>
 
 **death**
 <br><img width="30%" src="doc/pfx-death-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.spray('breath', 'death' )*<br>
+*particlesFx.sprayParticles('breath', 'death' )*<br>
 <br>
 
 **poison**
 <br><img width="30%" src="doc/pfx-poison-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.spray('breath', 'poison' )*<br>
+*particlesFx.sprayParticles('breath', 'poison' )*<br>
 <br>
 
 **silver**
 <br><img width="30%" src="doc/pfx-silver-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.spray('breath', 'silver' )*<br>
+*particlesFx.sprayParticles('breath', 'silver' )*<br>
 <br>
 
 **cyber**
 <br><img width="30%" src="doc/pfx-cyber-Animation.gif"><br>
-*game.modules.get("particule-fx").api.emit.spray('breath', 'cyber' )*<br>
+*particlesFx.sprayParticles('breath', 'cyber' )*<br>
 <br>
 
 ### Added custom prefill template
-You can add some custom prefill template (motion or color) using the methods : ```game.modules.get("particule-fx").api.template.motion.add(key, {Advanced options})``` or ```game.modules.get("particule-fx").api.template.color.add(key, {Advanced options})```
+You can add some custom prefill template (motion or color) using the methods : ```particlesFx.addCustomPrefillMotionTemplate(key, {Advanced options})``` or ```particlesFx.addCustomPrefillColorTemplate(key, {Advanced options})```
 If a key is an same of an existing one it replace it.
 You need a minimal role to add custom prefill template define in the setting.
 
-You can also delete custom prefill template (motion or color) using the methods : ```game.modules.get("particule-fx").api.template.motion.remove(key)``` or ```game.modules.get("particule-fx").api.template.color.remove(key)```. 
+You can also delete custom prefill template (motion or color) using the methods : ```particlesFx.removeCustomPrefillMotionTemplate(key)``` or ```particlesFx.removeCustomPrefillColorTemplate(key)```. 
 
-You the custom prefill template already added using the methods : ```game.modules.get("particule-fx").api.template.motion.get(key)``` or ```game.modules.get("particule-fx").api.template.color.get(key)```. If the key is not defined, it retrun all the custom prefill template already created.
+You the custom prefill template already added using the methods : ```particlesFx.getCustomPrefillMotionTemplate(key)``` or ```particlesFx.addCustomPrefillColorTemplate(key)```. If the key is not defined, it retrun all the custom prefill template already created.
+
+#### Apis methods
+All this methods can also be calls with the modules API 'game.modules.get("particule-fx").api' with the same parameters and behaviour:
+* xxx.api.template.motion.add(xxx)
+* xxx.api.template.color.add(xxx)
+* xxx.api.template.motion.remove(xxx)
+* xxx.api.template.color.remove(xxx)
+* xxx.api.template.motion.get(xxx)
+* xxx.api.template.color.get(xxx)
 
 ## Measured template source
 If the source is a measured template, it will override some input properties (like angle) to match with the measured tools. For each measured template type, it works differently depending on the average velocity value :
@@ -243,7 +262,7 @@ This are all the parameters possible to use.
 
 > **Example**
 > To emit particles from a choosen tile direct to a specific token with a constant velocity of 100 px/s
-> ```game.modules.get("particule-fx").api.emit.spray({source :tile.id, target: token.id , particleVelocityStart : 100, particleAngleStart : 0})```
+> ```particlesFx.sprayParticles({source :tile.id, target: token.id , particleVelocityStart : 100, particleAngleStart : 0})```
 
 
 ### Graviting particles
@@ -258,7 +277,7 @@ This are all the parameters possible to use.
 
 > **Example**
 > To emit particles graviting around a choosen token and ending at his center. The living particles will not move with the token 
-> ```game.modules.get("particule-fx").api.emit.gravit({source : token.id , particleRadiusStart : '200%', particleRadiusEnd : 5, onlyEmitterFollow : true})```
+> ```particlesFx.gravitateParticles({source : token.id , particleRadiusStart : '200%', particleRadiusEnd : 5, onlyEmitterFollow : true})```
 
 
 ### Default pattern
