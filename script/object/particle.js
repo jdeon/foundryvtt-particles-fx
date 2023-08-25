@@ -19,7 +19,7 @@ export class Particle {
         this.vibrationAmplitudeStart = vibrationAmplitudeStart
         this.vibrationAmplitudeEnd = vibrationAmplitudeEnd  === sameStartKey ? vibrationAmplitudeStart : vibrationAmplitudeEnd
         this.vibrationFrequencyStart = vibrationFrequencyStart
-        this.vibrationFrequencyEnd = vibrationFrequencyEnd  === sameStartKey ? vibrationFrequencyStart : sameStartKey
+        this.vibrationFrequencyEnd = vibrationFrequencyEnd  === sameStartKey ? vibrationFrequencyStart : vibrationFrequencyEnd
     }
 
     manageLifetime(dt){

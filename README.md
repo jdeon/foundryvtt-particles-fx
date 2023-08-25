@@ -69,6 +69,7 @@ Commands :
 * To emit spray particles, you need to use a macro to call the method ```particlesFx.sprayParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})``` 
 * To emit graviting particles, you need to use a macro to call the method ```particlesFx.gravitateParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})``` 
 * To emit missile particles, you need to use a macro to call the method ```particlesFx.missileParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})```.  Advanced options has the same input as Spray particles with a nested object ```subParticles``` containing another input (spray or graviting) and type (equals to "Spraying" or "Graviting").
+* Write a message to describe the emitter and a button to stop it ```particlesFx.writeMessageForEmissionById(emitterId, isVerbal)```. isVerbal parameter also write advanced input in the message
 * To stop all emissions, you need to use a macro to call the method ```particlesFx.stopAllEmission(instantDelete)```.  instantDelete is a boolean parameter, if true, it delete all particles already emitted, false to stop only the emission (living particles are not killed).
 * To stop a specific emission, you need to use a macro to call the method ```particlesFx.stopEmissionById(id)```. Id is a number or a string :
   * id of the emission (returned by the method)
@@ -78,6 +79,16 @@ Commands :
 > **Example**
 > To emit a missile particles with graviting sub particles that forming a trail 
 > ```particlesFx.missileParticles({source : {x:200, y:250} , target: token.id, subParticles : { type: "Graviting", particleLifetime: 1000, onlyEmitterFollow : true, particleAngleStart: '0_360'}})```
+
+#### Apis methods
+All this methods can also be calls with the modules API 'game.modules.get("particule-fx").api' with the same parameters and behaviour:
+* xxx.api.emit.spray(xxx)
+* xxx.api.emit.gravit(xxx)
+* xxx.api.emit.missile(xxx)
+* xxx.api.emit.writeMessage(xxx)
+* xxx.api.emit.stopAll(xxx)
+* xxx.api.emit.stop(xxx)
+
 
 <br>
 
@@ -187,6 +198,15 @@ You need a minimal role to add custom prefill template define in the setting.
 You can also delete custom prefill template (motion or color) using the methods : ```particlesFx.removeCustomPrefillMotionTemplate(key)``` or ```particlesFx.removeCustomPrefillColorTemplate(key)```. 
 
 You the custom prefill template already added using the methods : ```particlesFx.getCustomPrefillMotionTemplate(key)``` or ```particlesFx.addCustomPrefillColorTemplate(key)```. If the key is not defined, it retrun all the custom prefill template already created.
+
+#### Apis methods
+All this methods can also be calls with the modules API 'game.modules.get("particule-fx").api' with the same parameters and behaviour:
+* xxx.api.template.motion.add(xxx)
+* xxx.api.template.color.add(xxx)
+* xxx.api.template.motion.remove(xxx)
+* xxx.api.template.color.remove(xxx)
+* xxx.api.template.motion.get(xxx)
+* xxx.api.template.color.get(xxx)
 
 ## Measured template source
 If the source is a measured template, it will override some input properties (like angle) to match with the measured tools. For each measured template type, it works differently depending on the average velocity value :
