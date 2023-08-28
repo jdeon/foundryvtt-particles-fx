@@ -1,6 +1,6 @@
 # foundryVTT-particles FX
 
-The module contains several methods to generate particles using a json input. The particles are simples sprites textures managed by script, no need of video files.
+The module contains several methods to generate particles without needing premade video files. The particles are simples sprites textures managed by script, you can use or add some prefill templates for the emitter or customize it with a json input.
 
 <br>
 
