@@ -1,9 +1,8 @@
 {
 	"id": "particule-fx",
-	"name": "particule-fx",
-	"title": "Particule FX",
-	"description": "Emit particule by script.",
-	"version": "1.1.0",
+	"title": "Particles FX",
+	"description": "Emit particles using chat message commands or api calls.",
+	"version": "2.0.0",
 	"compatibility": {
 		"minimum": "10",
 		"verified": "11.307"
@@ -14,7 +13,7 @@
 		}
 	],
 	"esmodules": [
-		"./particule-fx.js"
+		"./main.js"
 	],
 	"languages": [
 		{
@@ -30,14 +29,14 @@
 	],
 	"packs": [
 		{
-		  "name": "particule-fx-macros",
-		  "label": "Particule FX Macros",
-		  "path": "packs/particule-fx-macros.db",
+		  "name": "particles-fx-macros",
+		  "label": "Particle FX Macros",
+		  "path": "packs/particles-fx-macros.db",
 		  "type": "Macro"
 		}
 	],
 	"socket": true,
-	"url": "https://github.com/jdeon/foundryvtt-particule-fx",
-	"manifest": "https://github.com/jdeon/foundryvtt-particule-fx/releases/latest/download/module.json",
-	"download": "https://github.com/jdeon/foundryvtt-particule-fx/archive/refs/tags/VERSION_PATHHOLDER.zip"
+	"url": "https://github.com/jdeon/foundryvtt-particles-fx",
+	"manifest": "https://github.com/jdeon/foundryvtt-particles-fx/releases/latest/download/module.json",
+	"download": "https://github.com/jdeon/foundryvtt-particles-fx/archive/refs/tags/VERSION_PATHHOLDER.zip"
 }
