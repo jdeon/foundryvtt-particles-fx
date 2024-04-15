@@ -220,13 +220,13 @@ Hooks.on("canvasTearDown", () => {
   
   
   Hooks.on("renderChatMessage", function (chatlog, html, data) {
-    console.log(`main | renderChatMessage with ${s_MODULE_ID}`); 
-
     const buttons = html.find('button[name="button.delete-emitter"]');
 
     if(buttons === undefined || buttons.length === 0){
     return
     }
+
+    console.log(`main | renderChatMessage with ${s_MODULE_ID}`); 
 
     buttons.on("click", (event) => {
     let button = event.currentTarget
