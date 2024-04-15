@@ -24,7 +24,9 @@ export class ParticleTemplate {
 
     constructor(source, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd,  
         particleLifetime, particleTexture,  colorStart, colorEnd, alphaStart, alphaEnd, 
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, 
+        advanced
+        ){
         this.source = ParticleTemplate._translatePlaceableObject(source)                        
         this.sizeStart = Vector3.build(sizeStart);                 
         this.sizeEnd = Vector3.build(sizeEnd);  
@@ -40,42 +42,44 @@ export class ParticleTemplate {
         this.vibrationAmplitudeEnd = vibrationAmplitudeEnd
         this.vibrationFrequencyStart = vibrationFrequencyStart
         this.vibrationFrequencyEnd = vibrationFrequencyEnd
+        this.advanced = advanced
     }
 
     generateParticles(){
+        let advancedVariable = this.advanced?.variables
 
-        let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source))
+        let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable))
 
         let sprite = new PIXI.Sprite(this.particleTexture)
         sprite.x = sourcePosition.x;
         sprite.y = sourcePosition.y;
         sprite.anchor.set(0.5);
 
-        let startSize = Vector3.build(Utils.getRandomValueFrom(this.sizeStart))
+        let startSize = Vector3.build(Utils.getRandomValueFrom(this.sizeStart, advancedVariable))
         sprite.width = startSize.x;
         sprite.height = startSize.y;
 
-        let angleStart = Utils.getRandomValueFrom(this.particleRotationStart)
+        let angleStart = Utils.getRandomValueFrom(this.particleRotationStart, advancedVariable)
         sprite.angle = angleStart + sourcePosition.r
 
-        let colorStart = Utils.getRandomValueFrom(this.colorStart)
+        let colorStart = Utils.getRandomValueFrom(this.colorStart, advancedVariable)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
 
         return new Particle(
             sprite,
-            Utils.getRandomValueFrom(this.particleLifetime),
+            Utils.getRandomValueFrom(this.particleLifetime, advancedVariable),
             startSize,
-            Vector3.build(Utils.getRandomValueFrom(this.sizeEnd)),
+            Vector3.build(Utils.getRandomValueFrom(this.sizeEnd, advancedVariable)),
             angleStart + sourcePosition.r,
-            Utils.getRandomValueFrom(this.particleRotationEnd) + sourcePosition.r,    
+            Utils.getRandomValueFrom(this.particleRotationEnd, advancedVariable) + sourcePosition.r,    
             colorStart,
-            Utils.getRandomValueFrom(this.colorEnd),
-            Utils.getRandomValueFrom(this.alphaStart),
-            Utils.getRandomValueFrom(this.alphaEnd),
-            Utils.getRandomValueFrom(this.vibrationAmplitudeStart),
-            Utils.getRandomValueFrom(this.vibrationAmplitudeEnd),
-            Utils.getRandomValueFrom(this.vibrationFrequencyStart),
-            Utils.getRandomValueFrom(this.vibrationFrequencyEnd)
+            Utils.getRandomValueFrom(this.colorEnd, advancedVariable),
+            Utils.getRandomValueFrom(this.alphaStart, advancedVariable),
+            Utils.getRandomValueFrom(this.alphaEnd, advancedVariable),
+            Utils.getRandomValueFrom(this.vibrationAmplitudeStart, advancedVariable),
+            Utils.getRandomValueFrom(this.vibrationAmplitudeEnd, advancedVariable),
+            Utils.getRandomValueFrom(this.vibrationFrequencyStart, advancedVariable),
+            Utils.getRandomValueFrom(this.vibrationFrequencyEnd, advancedVariable)
         )
     }
 }
@@ -109,13 +113,14 @@ export class SprayingParticleTemplate extends ParticleTemplate{
             input.vibrationAmplitudeEnd,
             input.vibrationFrequencyStart, 
             input.vibrationFrequencyEnd,
+            input.advanced,
             );
     }
 
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        super(source, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced){
+        super(source, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
         this.target = ParticleTemplate._translatePlaceableObject(target);   
         this.positionSpawning = Vector3.build(positionSpawning);   
         this.velocityStart = velocityStart;         //Array of Number      
@@ -125,7 +130,7 @@ export class SprayingParticleTemplate extends ParticleTemplate{
     }
 
     generateParticles(){
-        let particleProperties = Utils.getObjectRandomValueFrom(this)
+        let particleProperties = Utils.getObjectRandomValueFrom(this, this.advanced?.variables)
 
         let sourcePosition = Utils.getSourcePosition(particleProperties.source)
         let target = particleProperties.target
@@ -185,7 +190,7 @@ export class SprayingParticleTemplate extends ParticleTemplate{
             particleProperties.vibrationAmplitudeStart,
             particleProperties.vibrationAmplitudeEnd,
             particleProperties.vibrationFrequencyStart,
-            particleProperties.vibrationFrequencyEnd
+            particleProperties.vibrationFrequencyEnd,
         )
     }
 }
@@ -199,10 +204,10 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, subParticleTemplate){
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced, subParticleTemplate){
         super(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd, 
             sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, 
-            vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+            vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
         
         this.mainParticle = this.generateMainParticles()
         this.initGenerate = false
@@ -332,14 +337,15 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             input.vibrationAmplitudeEnd,
             input.vibrationFrequencyStart, 
             input.vibrationFrequencyEnd,
-            input.onlyEmitterFollow
+            input.onlyEmitterFollow,
+            input.advanced
             );
     }
 
     constructor(source, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd, 
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow){
-        super(source, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow, advanced){
+        super(source, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
         
         this.angleStart = angleStart;                        //Array of Number
         this.angularVelocityStart = angularVelocityStart;  //Number      
@@ -350,48 +356,50 @@ export class GravitingParticleTemplate extends ParticleTemplate {
     }
 
     generateParticles(){
-        let source = Utils.getRandomValueFrom(this.source)
-        let sourcePosition = Utils.getSourcePosition(source)
+        let advancedVariable = this.advanced?.variables
 
-        let angleStart = Utils.getRandomValueFrom(this.angleStart) + sourcePosition.r
-        let radiusStart = Utils.getRandomValueFrom(this.radiusStart)
+        let source = Utils.getRandomValueFrom(this.source, advancedVariable)
+        let sourcePosition = Utils.getSourcePosition(source, advancedVariable)
+
+        let angleStart = Utils.getRandomValueFrom(this.angleStart, advancedVariable) + sourcePosition.r
+        let radiusStart = Utils.getRandomValueFrom(this.radiusStart, advancedVariable)
         
         let sprite = new PIXI.Sprite(this.particleTexture)
         sprite.anchor.set(0.5);
         sprite.x = sourcePosition.x + Math.cos(angleStart * (Math.PI / 180)) * radiusStart;
         sprite.y = sourcePosition.y + Math.sin(angleStart * (Math.PI / 180)) * radiusStart;
 
-        let startSize = Utils.getRandomValueFrom(this.sizeStart)
+        let startSize = Utils.getRandomValueFrom(this.sizeStart, advancedVariable)
         sprite.width = startSize.x;
         sprite.height = startSize.y;
 
-        let rotationStart = Utils.getRandomValueFrom(this.particleRotationStart)
+        let rotationStart = Utils.getRandomValueFrom(this.particleRotationStart, advancedVariable)
         sprite.angle = rotationStart + sourcePosition.r
 
-        let colorStart = Utils.getRandomValueFrom(this.colorStart)
+        let colorStart = Utils.getRandomValueFrom(this.colorStart, advancedVariable)
         sprite.tint = Color.fromRGB([Math.floor(colorStart.x)/255,Math.floor(colorStart.y)/255, Math.floor(colorStart.z)/255])
 
         return new GravitingParticle(
             sprite,
             this.onlyEmitterFollow? sourcePosition : source,
-            Utils.getRandomValueFrom(this.particleLifetime),
+            Utils.getRandomValueFrom(this.particleLifetime, advancedVariable),
             angleStart,
-            Utils.getRandomValueFrom(this.angularVelocityStart),
-            Utils.getRandomValueFrom(this.angularVelocityEnd),
+            Utils.getRandomValueFrom(this.angularVelocityStart, advancedVariable),
+            Utils.getRandomValueFrom(this.angularVelocityEnd, advancedVariable),
             radiusStart,
-            Utils.getRandomValueFrom(this.radiusEnd),
+            Utils.getRandomValueFrom(this.radiusEnd, advancedVariable),
             startSize,
-            Utils.getRandomValueFrom(this.sizeEnd),
+            Utils.getRandomValueFrom(this.sizeEnd, advancedVariable),
             rotationStart + sourcePosition.r,
-            Utils.getRandomValueFrom(this.particleRotationEnd) + sourcePosition.r,  
+            Utils.getRandomValueFrom(this.particleRotationEnd, advancedVariable) + sourcePosition.r,  
             colorStart,
-            Utils.getRandomValueFrom(this.colorEnd),
-            Utils.getRandomValueFrom(this.alphaStart),
-            Utils.getRandomValueFrom(this.alphaEnd),
-            Utils.getRandomValueFrom(this.vibrationAmplitudeStart),
-            Utils.getRandomValueFrom(this.vibrationAmplitudeEnd),
-            Utils.getRandomValueFrom(this.vibrationFrequencyStart),
-            Utils.getRandomValueFrom(this.vibrationFrequencyEnd)
+            Utils.getRandomValueFrom(this.colorEnd, advancedVariable),
+            Utils.getRandomValueFrom(this.alphaStart, advancedVariable),
+            Utils.getRandomValueFrom(this.alphaEnd, advancedVariable),
+            Utils.getRandomValueFrom(this.vibrationAmplitudeStart, advancedVariable),
+            Utils.getRandomValueFrom(this.vibrationAmplitudeEnd, advancedVariable),
+            Utils.getRandomValueFrom(this.vibrationFrequencyStart, advancedVariable),
+            Utils.getRandomValueFrom(this.vibrationFrequencyEnd, advancedVariable)
         )
     }
 }

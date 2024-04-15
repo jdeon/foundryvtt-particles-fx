@@ -28,7 +28,7 @@ export class Vector3 {
             for(let item of object){
                 result.push(Vector3.build(item))
             }
-        } else if(!isNaN(object)){
+        } else if(!isNaN(object) || typeof object === "string"){
             result = new Vector3 (
                 object,
                 object,
@@ -101,10 +101,12 @@ export class Utils {
         return canvas.scene.grid.size/canvas.scene.grid.distance
     }
 
-    static getRandomValueFrom(inValue){
+    static getRandomValueFrom(inValue, advancedVariable){
         if(!isNaN(inValue)){
             return inValue;
         } else if (typeof inValue === 'string') {
+            inValue = Utils._replaceWithAdvanceVariable(inValue, advancedVariable)
+
             const valueBoundary = inValue.split('_')
             if(valueBoundary.length === 1){
                 if(valueBoundary[0].endsWith('%')){
@@ -122,27 +124,50 @@ export class Utils {
                 return minValue + (maxValue - minValue) * Utils.includingRandom() ;
             }
         } else if (inValue instanceof Vector3) {
-            let x = Utils.getRandomValueFrom(inValue.x)
-            let y = Utils.getRandomValueFrom(inValue.y)
-            let z = Utils.getRandomValueFrom(inValue.z)
+            let x = Utils.getRandomValueFrom(inValue.x, advancedVariable)
+            let y = Utils.getRandomValueFrom(inValue.y, advancedVariable)
+            let z = Utils.getRandomValueFrom(inValue.z, advancedVariable)
 
             return new Vector3(x,y,z);
         
         } else if (Array.isArray(inValue) && inValue.length > 0) {
             const indexToRetrieve =  Math.floor(Math.random() * inValue.length);
-            return Utils.getRandomValueFrom(inValue[indexToRetrieve]);
+            return Utils.getRandomValueFrom(inValue[indexToRetrieve], advancedVariable);
         } else {
             return inValue
         }
-
     }
 
-    static getObjectRandomValueFrom(inValue){
+    static _replaceWithAdvanceVariable(inValue, advancedVariable){
+        if(!advancedVariable){
+            return inValue
+        }
+
+        const valueAdvancedSplit = inValue.split(/{{|}}/)
+
+        if(valueAdvancedSplit.length === 1){
+            return inValue
+        }
+
+        let result = ""
+        for(let i = 0; i < valueAdvancedSplit.length; i += 2){
+            result += valueAdvancedSplit[i]
+            const variableKey = valueAdvancedSplit[i+1]
+
+            if(advancedVariable[variableKey]){
+                result += advancedVariable[variableKey]
+            }
+        }
+
+        return result
+    }
+
+    static getObjectRandomValueFrom(inValue, advancedVariable){
         let result = {}
-        let inKey = Object.keys(inValue)
+        let inKey = Object.keys(inValue).filter((key) => key !== 'advanced')
 
         for (const key of inKey) {
-            result[key] = Utils.getRandomValueFrom(inValue[key]);
+            result[key] = Utils.getRandomValueFrom(inValue[key], advancedVariable);
         }
 
         //Check for same as start key
