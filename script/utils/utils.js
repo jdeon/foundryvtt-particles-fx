@@ -176,7 +176,18 @@ export class Utils {
 
         //Check for same as start key
         for (const key of inKey) {
-            if(result[key] === sameStartKey){
+            if(result[key] instanceof Vector3){
+                const startSuffixKey = key.substring(0,key.length - 3) + 'Start'
+                const startVector = result[startSuffixKey] 
+                if(startVector){
+                    result[key] = new Vector3(
+                        result[key].x === sameStartKey ? startVector.x : result[key].x,
+                        result[key].y === sameStartKey ? startVector.y : result[key].y,
+                        result[key].z === sameStartKey ? startVector.z : result[key].z
+                    )
+                } 
+                
+            } else if(result[key] === sameStartKey){
                 const startSuffixKey = key.substring(0,key.length - 3) + 'Start'
                 result[key] = result[startSuffixKey]
             }
