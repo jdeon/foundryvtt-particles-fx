@@ -46,7 +46,7 @@ export class ParticleTemplate {
     }
 
     generateParticles(){
-        let advancedVariable = this.advanced?.variables
+        let advancedVariable = Utils.getObjectRandomValueFrom(this.advanced?.variables)
 
         let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable))
 
@@ -130,7 +130,9 @@ export class SprayingParticleTemplate extends ParticleTemplate{
     }
 
     generateParticles(){
-        let particleProperties = Utils.getObjectRandomValueFrom(this, this.advanced?.variables)
+        let advancedVariable = Utils.getObjectRandomValueFrom(this.advanced?.variables)
+
+        let particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable)
 
         let sourcePosition = Utils.getSourcePosition(particleProperties.source)
         let target = particleProperties.target
@@ -356,7 +358,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
     }
 
     generateParticles(){
-        let advancedVariable = this.advanced?.variables
+        let advancedVariable = Utils.getObjectRandomValueFrom(this.advanced?.variables)
 
         let source = Utils.getRandomValueFrom(this.source, advancedVariable)
         let sourcePosition = Utils.getSourcePosition(source, advancedVariable)

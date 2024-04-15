@@ -103,13 +103,15 @@ export class Utils {
 
     static getRandomValueFrom(inValue, advancedVariable){
         if(!isNaN(inValue)){
-            return inValue;
+            return Number(inValue);
         } else if (typeof inValue === 'string') {
             inValue = Utils._replaceWithAdvanceVariable(inValue, advancedVariable)
 
             const valueBoundary = inValue.split('_')
             if(valueBoundary.length === 1){
-                if(valueBoundary[0].endsWith('%')){
+                if(!isNaN(valueBoundary[0])){
+                    return Number(valueBoundary[0]);
+                } else if(valueBoundary[0].endsWith('%')){
                     return Utils._managePercent(valueBoundary[0])
                 } else if (valueBoundary[0] === sameStartKey) {
                     return sameStartKey
@@ -163,6 +165,8 @@ export class Utils {
     }
 
     static getObjectRandomValueFrom(inValue, advancedVariable){
+        if(!inValue) return
+
         let result = {}
         let inKey = Object.keys(inValue).filter((key) => key !== 'advanced')
 
