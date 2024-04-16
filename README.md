@@ -219,7 +219,7 @@ If the source is a measured template, it will override some input properties (li
 
 <br>
 
-## Advanced options
+## Customize options
 
 The advanced options is a json object to customize the emitters. If one parameter is not define in the input, the script take the default value.
 
@@ -287,3 +287,39 @@ For the majority of the parameters you can use multiple patterns :
 * Percent (ex:'9%')               : The value multiplied by the grid pixel (ex: if grid size is 50px, '10%' become 5px )
 * Undescored String (ex:'9_14')   : A random value between the two inclusive boundaries, percent accepted (ex: '10%_30%')
 * Array  (ex:[9,8,12])            : A random value of the array, the value can be a any of the default pattern (ex: [9,'8','12_15'])
+
+## Advanced Option
+
+The attribute advanced exist in the input to handle advance behaviour
+
+### Variables
+
+```advanced.variables```
+You can add variables inside with the name of your choice with a value using a default pattern
+
+```json
+  [...]
+  "advanced" : {
+    "variables" : {
+      "a" : "5_10"
+    }
+  }
+``` 
+
+This variables will be compute at the particles generation and be propagate in all input with the name of the input inside {{}} to link the value between multiple input.
+
+
+```js
+particuleEmitter.sprayParticules({
+    source :source.id, 
+    target: targetId , 
+    particleVelocityStart : "{{a}}",
+    particleAngleStart : "{{a}}",
+    particleSizeStart : "{{a}}%",
+    advanced: {
+        variables : {
+            a : "1_360"
+        }
+    }
+})
+``` 
