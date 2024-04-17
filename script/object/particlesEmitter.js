@@ -15,7 +15,7 @@ export default class ParticlesEmitter {
         this.particleTemplate = particleTemplate;
         this.particleFrequence = particleFrequence;
         this.spawningNumber = spawningNumber;
-        this.maxParticles = maxParticles
+        this.maxParticles = maxParticles;
         this.remainingTime = emissionDuration
         this.isGravitate = isGravitate
         this.lastUpdate = Date.now();
