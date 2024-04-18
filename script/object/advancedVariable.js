@@ -11,10 +11,10 @@ export class AdvancedVariable {
         const result = []
 
         for (const key of inKey) {
-            result.push(new AdvancedVariable(key, staticAdvancedVariables[key])); //TODO use value in getter
+            result.push(new AdvancedVariable(key, staticAdvancedVariables[key]));
         }
 
-        result.sort(Utils._compare)
+        result.sort(AdvancedVariable._compare)
 
         return result.reduce((acc, item) => {
             item.generate(acc)
