@@ -42,7 +42,7 @@ export class AdvancedVariable {
         if(!found?.length){
 
             if(AdvancedVariable._doLog(`badFormatParameters_${variableKey}`)){
-                ui.notifications.warn(game.i18n.localize('PARTICULE-FX.advancedMode.badFormatFunction' ))
+                ui.notifications.warn(game.i18n.format('PARTICULE-FX.advancedMode.badFormatInput', {variableKey} ))
             }
             return []
         }
@@ -95,6 +95,16 @@ export class AdvancedVariable {
 
     generate(advancedVariables){
         if(this.isFinish || !this.input instanceof Function) return
+
+        if(!this._isSecuredFunction()){
+            if(AdvancedVariable._doLog(`badFormatFunction_${this.key}`)){
+                ui.notifications.warn(game.i18n.format('PARTICULE-FX.advancedMode.badFormatFunction', {variableKey: this.key} ))
+            }
+            this.value = 1
+            this.isFinish = true
+            return
+        }
+        
         const missingParameters = []
 
         const requiredParam = this.requiredParam.reduce(
@@ -111,7 +121,7 @@ export class AdvancedVariable {
         )
 
         if(missingParameters?.length > 0 && AdvancedVariable._doLog(`missingParameters_${this.key}`)){
-            ui.notifications.warn(game.i18n.format('PARTICULE-FX.advancedMode.missingParameters', {variableKey: this.key, missingParameters : missingParameters.join(', ')}))//TODO localize sans variable
+            ui.notifications.warn(game.i18n.format('PARTICULE-FX.advancedMode.missingParameters', {variableKey: this.key, missingParameters : missingParameters.join(', ')}))
         }
 
         try{
@@ -125,11 +135,27 @@ export class AdvancedVariable {
             this.value = 1
 
             if(AdvancedVariable._doLog(`computeError${this.key}`)){
-                ui.notifications.warn(game.i18n.format('PARTICULE-FX.advancedMode.computeError', {variableKey: this.key}))//TODO localize sans variable
+                ui.notifications.warn(game.i18n.format('PARTICULE-FX.advancedMode.computeError', {variableKey: this.key}))
             }
         }
         
         this.isFinish = true
     }
 
+    _isSecuredFunction(){
+        //check if function have . other than Math.
+        if(!this.input instanceof Function) return true
+
+        let stringFunction = this.input.toString()
+            .replace('Math.', '') // Remove Math.
+
+        const regex = /\./g; //Regex to find other.
+        const found = stringFunction.toString().match(regex);
+
+        if(!found?.length){
+            return true
+        } 
+
+        return false
+    }
 }
