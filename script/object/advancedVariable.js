@@ -2,6 +2,8 @@ import { Utils } from "../utils/utils.js"
 
 export class AdvancedVariable { 
 
+    static LIST_OF_LOGGED_ERROR = []
+
     static computeAdvancedVariables(advancedVariable){
         if(!advancedVariable) return
 
@@ -24,9 +26,26 @@ export class AdvancedVariable {
         {});
     }
 
-    static _getParam(inputFunction){
+    static _doLog(key){
+        if(! AdvancedVariable.LIST_OF_LOGGED_ERROR.includes(key)){
+            AdvancedVariable.LIST_OF_LOGGED_ERROR.push(key)
+            return true
+        } else {
+            return false
+        }
+    }
+
+    static _getParam(variableKey, inputFunction){
         const regex = /\(\{.*?\}\)/g; //Regex to find ({...})
         const found = inputFunction.toString().match(regex);
+
+        if(!found?.length){
+
+            if(AdvancedVariable._doLog(`badFormatParameters_${variableKey}`)){
+                ui.notifications.warn(game.i18n.localize('PARTICULE-FX.advancedMode.badFormatFunction' ))
+            }
+            return []
+        }
 
         const result = found[0] //First result for param
             .replace(/(\(\{|\}\))/g, '') // Remove "({" and "})""
@@ -65,7 +84,7 @@ export class AdvancedVariable {
         this.input = input;
 
         if(input instanceof Function){
-            this.requiredParam = AdvancedVariable._getParam(input)
+            this.requiredParam = AdvancedVariable._getParam(this.key, input)
             this.isFinish = false
         }else{
             this.value = input
@@ -76,16 +95,41 @@ export class AdvancedVariable {
 
     generate(advancedVariables){
         if(this.isFinish || !this.input instanceof Function) return
+        const missingParameters = []
 
         const requiredParam = this.requiredParam.reduce(
             (acc, key) => {
                 acc[key] = advancedVariables[key]?.value
+
+                if(acc[key] === undefined){
+                    missingParameters.push(key)
+                }
+
                 return acc
             },
             {}
         )
 
-        this.value = this.input(requiredParam)
+        if(missingParameters?.length > 0 && AdvancedVariable._doLog(`missingParameters_${this.key}`)){
+            ui.notifications.warn(game.i18n.format('PARTICULE-FX.advancedMode.missingParameters', {variableKey: this.key, missingParameters : missingParameters.join(', ')}))//TODO localize sans variable
+        }
+
+        try{
+            this.value = this.input(requiredParam)
+
+            if(Number.isNaN(this.value) || Infinity === this.value){
+                throw new Error('NaN')
+            }
+        } catch (e){
+        
+            this.value = 1
+
+            if(AdvancedVariable._doLog(`computeError${this.key}`)){
+                ui.notifications.warn(game.i18n.format('PARTICULE-FX.advancedMode.computeError', {variableKey: this.key}))//TODO localize sans variable
+            }
+        }
+        
+        this.isFinish = true
     }
 
 }

@@ -16,5 +16,8 @@
   "PARTICULE-FX.No-Token-selected":"Veuillez sélectionner un token d'abord",
   "PARTICULE-FX.Prefill-Template.Bad-Param":"Paramètre incorrect pour sauvegarder le template prédéfini",
   "PARTICULE-FX.Prefill-Template.Bad-Key":"Pas de template prédéfini pour la clé :",
-  "PARTICULE-FX.Prefill-Template.Bad-Role":"Permission insufisante pour modifier les templates prédéfinis personnalisés"
+  "PARTICULE-FX.Prefill-Template.Bad-Role":"Permission insufisante pour modifier les templates prédéfinis personnalisés",
+  "PARTICULE-FX.advancedMode.badFormatFunction":"Impossible de gérer la fonction d'une variable avancée à cause du format des paramètres. Essayer ({a,b})",
+  "PARTICULE-FX.advancedMode.missingParameters":"La variable avancée {variableKey} a des paramètres introuvables : {missingParameters}",
+  "PARTICULE-FX.advancedMode.computeError":"Une erreur s'est produite à l'éxécution de la variable {variableKey}"
 }
