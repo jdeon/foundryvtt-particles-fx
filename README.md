@@ -295,13 +295,14 @@ The attribute advanced exist in the input to handle advance behaviour
 ### Variables
 
 ```advanced.variables```
-You can add variables inside with the name of your choice with a value using a default pattern
+You can add variables inside with the name of your choice with a value using a default pattern or be function (only using operators, Math object and condition)
 
 ```json
   [...]
   "advanced" : {
     "variables" : {
-      "a" : "5_10"
+      "a" : "5_10",
+      "c" : ({a, d}) => Math.cos(a) * 2,
     }
   }
 ``` 
@@ -313,12 +314,15 @@ This variables will be compute at the particles generation and be propagate in a
 particuleEmitter.sprayParticules({
     source :source.id, 
     target: targetId , 
-    particleVelocityStart : "{{a}}",
+    particleVelocityStart : "{{b}}",
     particleAngleStart : "{{a}}",
-    particleSizeStart : "{{a}}%",
+    particleSizeStart : "{{d}}%",
     advanced: {
         variables : {
-            a : "1_360"
+            a : "1_360",
+            b : ({c}) => (c+1) * 100,
+            c : ({a, d}) => Math.cos(a),
+            d : ({a}) => a/10 +5,
         }
     }
 })
