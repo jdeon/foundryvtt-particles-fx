@@ -1,6 +1,7 @@
 import { Particle, SprayingParticle, GravitingParticle } from './particle.js'
 import { Utils, Vector3 } from "../utils/utils.js"
 import { generatePrefillTemplateForMeasured } from '../service/measuredTemplate.service.js'
+import { AdvancedVariable } from './advancedVariable.js'
 
 
 export class ParticleTemplate { 
@@ -46,7 +47,7 @@ export class ParticleTemplate {
     }
 
     generateParticles(){
-        let advancedVariable = Utils.getObjectRandomValueFrom(this.advanced?.variables)
+        let advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
 
         let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable))
 
@@ -130,7 +131,7 @@ export class SprayingParticleTemplate extends ParticleTemplate{
     }
 
     generateParticles(){
-        let advancedVariable = Utils.getObjectRandomValueFrom(this.advanced?.variables)
+        let advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
 
         let particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable)
 
@@ -358,7 +359,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
     }
 
     generateParticles(){
-        let advancedVariable = Utils.getObjectRandomValueFrom(this.advanced?.variables)
+        let advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
 
         let source = Utils.getRandomValueFrom(this.source, advancedVariable)
         let sourcePosition = Utils.getSourcePosition(source, advancedVariable)

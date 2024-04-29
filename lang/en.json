@@ -16,5 +16,9 @@
     "PARTICULE-FX.No-Token-selected":"Please select a token first",
     "PARTICULE-FX.Prefill-Template.Bad-Param":"Bad entry to add prefill template",
     "PARTICULE-FX.Prefill-Template.Bad-Key":"No custom prefill template for key :",
-    "PARTICULE-FX.Prefill-Template.Bad-Role":"Permission incorrect to send custom prefill template"
+    "PARTICULE-FX.Prefill-Template.Bad-Role":"Permission incorrect to send custom prefill template",
+    "PARTICULE-FX.advancedMode.badFormatInput":"{variableKey} : Can't handle advanced variable function due to bad format of the parmeter. Try ({a,b})",
+    "PARTICULE-FX.advancedMode.badFormatFunction":"{variableKey} : function use object other than Math",
+    "PARTICULE-FX.advancedMode.missingParameters":"{variableKey} advanced variable has some inputs that could not be found : {missingParameters}",
+    "PARTICULE-FX.advancedMode.computeError":"Error durring computation of {variableKey}"
 }
