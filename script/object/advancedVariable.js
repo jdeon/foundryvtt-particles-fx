@@ -149,7 +149,7 @@ export class AdvancedVariable {
         let stringFunction = this.input.toString()
             .replace('Math.', '') // Remove Math.
 
-        const regex = /\./g; //Regex to find other.
+        const regex = /\.|\[|\]|\"|\'/g; //Regex to find other.
         const found = stringFunction.toString().match(regex);
 
         if(!found?.length){

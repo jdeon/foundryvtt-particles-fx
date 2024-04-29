@@ -297,7 +297,7 @@ The attribute advanced exist in the input to handle advance behaviour
 ```advanced.variables```
 You can add variables inside with the name of your choice with a value using a default pattern or be function (only using operators, Math object and condition)
 
-```json
+```js
   [...]
   "advanced" : {
     "variables" : {
