@@ -198,7 +198,7 @@ export class SprayingParticleTemplate extends ParticleTemplate{
             particleProperties.sizeEnd,
             particleRotationStart,
             particleRotationEnd,
-            colorStart,
+            particleProperties.colorStart,
             particleProperties.colorEnd,
             particleProperties.alphaStart,
             particleProperties.alphaEnd,

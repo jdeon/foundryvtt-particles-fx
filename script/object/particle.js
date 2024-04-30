@@ -3,7 +3,7 @@ import { Utils, Vector3, sameStartKey } from "../utils/utils.js";
 export class Particle { 
 
     static _computeValue(beginValue, endValue, lifetimeProportion){
-        if(endValue === undefined && beginValue !== endValue){
+        if(endValue !== undefined && endValue !== sameStartKey && beginValue !== endValue){
             if(beginValue instanceof Vector3){
                 return beginValue.minus(endValue).multiply(lifetimeProportion).add(endValue)
             } else {
@@ -138,7 +138,7 @@ export class GravitingParticle  extends Particle {
         this.angle += updatedVelocity * dt /1000
         let angleRadiant = this.angle * (Math.PI / 180);
         
-        const updatedRadius = Particle._computeValue(this.radiusStart, this.radiusEnd, lifetimeProportion)
+        const updatedRadius = Particle._computeValue(this.radiusStart.getValue(), this.radiusEnd.getValue(), lifetimeProportion)
 
         
 
