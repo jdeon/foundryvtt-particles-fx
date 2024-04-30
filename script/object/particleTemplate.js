@@ -170,7 +170,7 @@ export class SprayingParticleTemplate extends ParticleTemplate{
         sprite.y = sourcePosition.y + positionSpawning.y;
         sprite.anchor.set(0.5);
 
-        let startSize = particleProperties.sizeStart
+        let startSize = particleProperties.sizeStart.getValue()
         sprite.width = startSize.x;
         sprite.height = startSize.y;
         sprite.angle = particleProperties.particleRotationStart.getValue() +  targetAngleDirection * 180 / Math.PI
@@ -194,7 +194,7 @@ export class SprayingParticleTemplate extends ParticleTemplate{
             particleProperties.velocityEnd,
             angleStart,
             angleEnd,
-            startSize,
+            particleProperties.sizeStart,
             particleProperties.sizeEnd,
             particleRotationStart,
             particleRotationEnd,
@@ -249,12 +249,12 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
             //Missile must go to the target
             const targetAngleDirection = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x)
-            mainParticle.angleStart = targetAngleDirection * 180 / Math.PI
-            mainParticle.angleEnd = targetAngleDirection * 180 / Math.PI
+            mainParticle.angleStart = new ParticleInput(targetAngleDirection * 180 / Math.PI)
+            mainParticle.angleEnd = new ParticleInput(targetAngleDirection * 180 / Math.PI)
 
             //The missile must stop at the target
             const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x,2) + Math.pow(targetPosition.y - sourcePosition.y,2))
-            const averageVelocity = mainParticle.velocityEnd !== undefined ? (mainParticle.velocityStart + mainParticle.velocityEnd) /2 : mainParticle.velocityStart
+            const averageVelocity = mainParticle.velocityEnd?.getValue() !== undefined ? (mainParticle.velocityStart?.getValue() + mainParticle.velocityEnd?.getValue()) /2 : mainParticle.velocityStart?.getValue()
             
             if(averageVelocity !== 0){
                 const lifetime = 1000 * targetDistance/averageVelocity
@@ -313,8 +313,8 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             generatedParticle.positionVibrationLess = {x : generatedSprite.x, y : generatedSprite.y}; 
 
             //We change the angle to be the trail of the direction by default
-            generatedParticle.angleStart += sourceDirection + 180
-            generatedParticle.angleEnd += sourceDirection + 180
+            generatedParticle.angleStart = new ParticleInput(generatedParticle.angleStart.getValue() + sourceDirection + 180) 
+            generatedParticle.angleEnd = new ParticleInput(generatedParticle.angleEnd.getValue() + sourceDirection + 180) 
         } else if (this.subParticleTemplate instanceof GravitingParticleTemplate){
             generatedParticle = this.subParticleTemplate.generateParticles()
             generatedParticle.angle += sourceDirection + 180
