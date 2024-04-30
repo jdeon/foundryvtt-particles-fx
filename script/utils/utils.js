@@ -1,3 +1,5 @@
+import { ParticleInput } from "../object/particleInput.js";
+
 /**
  * Defines the event name to send all messages to over  `game.socket`.
  *
@@ -34,6 +36,8 @@ export class Vector3 {
                 object,
                 object,
             )
+        } else if(object instanceof ParticleInput){
+            result = Vector3.build(object.getValue()) //TODO
         } else {
             result = new Vector3 (
                 object.x || 0,
@@ -140,6 +144,12 @@ export class Utils {
         }
     }
 
+    static getRandomParticuleInputFrom(inValue, advancedVariables){
+        const computeValue = Utils.getRandomValueFrom(inValue, advancedVariables)
+
+        return new ParticleInput(computeValue, inValue, advancedVariables)
+    }
+
     static _replaceWithAdvanceVariable(inValue, advancedVariables){
         if(!advancedVariables){
             return inValue
@@ -152,7 +162,7 @@ export class Utils {
         }
 
         let result = ""
-        for(let i = 0; i < valueAdvancedSplit.length; i += 2){
+        for(let i = 0; i < valueAdvancedSplit.length + 1 ; i += 2){
             result += valueAdvancedSplit[i]
             const variableKey = valueAdvancedSplit[i+1]
 
@@ -164,7 +174,7 @@ export class Utils {
         return result
     }
 
-    static getObjectRandomValueFrom(inValue, advancedVariables){
+    static getObjectRandomValueFrom(inValue, advancedVariables, inputMode){
         if(!inValue) return
 
         let result = {}
@@ -190,6 +200,12 @@ export class Utils {
             } else if(result[key] === sameStartKey){
                 const startSuffixKey = key.substring(0,key.length - 3) + 'Start'
                 result[key] = result[startSuffixKey]
+            }
+        }
+
+        if(inputMode){
+            for (const key of inKey) {
+                result[key] = new ParticleInput(result[key], inValue[key], advancedVariables);
             }
         }
 
@@ -319,5 +335,13 @@ export class Utils {
                 return inputPixel
             }
         }
+    }
+
+    static intersectionArray(array1, array2){
+        if(Array.isArray(array1) && array1?.length && Array.isArray(array2) && array2?.length){
+            return array1.filter(value => array2.includes(value));
+        }
+        
+        return []
     }
 }

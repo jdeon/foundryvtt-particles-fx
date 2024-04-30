@@ -2,6 +2,8 @@ import { Utils } from "../utils/utils.js"
 
 export class AdvancedVariable { 
 
+    static RESERVED_TIMED_PARAM = ["dt", "lt", "tp"]
+     
     static LIST_OF_LOGGED_ERROR = []
 
     static computeAdvancedVariables(advancedVariable){
@@ -82,6 +84,7 @@ export class AdvancedVariable {
     constructor(key, input){
         this.key = key
         this.input = input;
+        this.isTimedLinked = false
 
         if(input instanceof Function){
             this.requiredParam = AdvancedVariable._getParam(this.key, input)
@@ -104,6 +107,11 @@ export class AdvancedVariable {
             this.isFinish = true
             return
         }
+
+        const haveTimedParam = Utils.intersectionArray(AdvancedVariable.RESERVED_TIMED_PARAM, this.requiredParam)
+        if(haveTimedParam?.length){
+            this.isTimedLinked = true
+        }
         
         const missingParameters = []
 
@@ -115,18 +123,23 @@ export class AdvancedVariable {
                     missingParameters.push(key)
                 }
 
+                if(advancedVariables[key].isTimedLinked){
+                    this.isTimedLinked = true
+                }
+
                 return acc
             },
             {}
         )
+
+        missingParameters = missingParameters.filter((item) => ! AdvancedVariable.RESERVED_TIMED_PARAM.includes(item))
 
         if(missingParameters?.length > 0 && AdvancedVariable._doLog(`missingParameters_${this.key}`)){
             ui.notifications.warn(game.i18n.format('PARTICULE-FX.advancedMode.missingParameters', {variableKey: this.key, missingParameters : missingParameters.join(', ')}))
         }
 
         try{
-            this.value = this.input(requiredParam)
-
+            this.value = this.input({...requiredParam, "dt" : 1000/Number(game.settings.get('core',"maxFPS")),  "lt": 1000, "tp":0})//TODO find lifeTime
             if(Number.isNaN(this.value) || Infinity === this.value){
                 throw new Error('NaN')
             }
@@ -139,7 +152,9 @@ export class AdvancedVariable {
             }
         }
         
-        this.isFinish = true
+        if(! this.isTimedLinked){
+            this.isFinish = true
+        }
     }
 
     _isSecuredFunction(){
