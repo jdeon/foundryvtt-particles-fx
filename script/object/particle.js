@@ -7,7 +7,7 @@ export class Particle {
             if(beginValue instanceof Vector3){
                 return beginValue.minus(endValue).multiply(lifetimeProportion).add(endValue)
             } else {
-                return beginValue - endValue * lifetimeProportion + endValue
+                return (beginValue - endValue) * lifetimeProportion + endValue
             }
         }
 
