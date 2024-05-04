@@ -113,7 +113,7 @@ export class AdvancedVariable {
             this.isTimedLinked = true
         }
         
-        const missingParameters = []
+        let missingParameters = []
 
         const requiredParam = this.requiredParam.reduce(
             (acc, key) => {
@@ -121,9 +121,7 @@ export class AdvancedVariable {
 
                 if(acc[key] === undefined){
                     missingParameters.push(key)
-                }
-
-                if(advancedVariables[key].isTimedLinked){
+                } else if(advancedVariables[key].isTimedLinked){
                     this.isTimedLinked = true
                 }
 
@@ -162,7 +160,7 @@ export class AdvancedVariable {
         if(!this.input instanceof Function) return true
 
         let stringFunction = this.input.toString()
-            .replace('Math.', '') // Remove Math.
+            .replaceAll('Math.', '') // Remove Math.
 
         const regex = /\.|\[|\]|\"|\'/g; //Regex to find other.
         const found = stringFunction.toString().match(regex);

@@ -17,7 +17,7 @@ export class ParticleInput {
            const usedVariables =  this.inputCmd.match(/(?<=\{\{).+?(?=\}\})/g) //Get all value inside {{}}
             
            if(usedVariables?.length > 0){
-                for(let key in usedVariables){
+                for(let key of usedVariables){
                     if(advancedVariables[key]?.isTimedLinked){
                         this.isTimedLinked = true
                         break
@@ -62,12 +62,12 @@ export class ParticleInput {
 
     _computeTimeValue(advancedVariables){
         //TODO vector ?
-        const result = Number(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables))
+        let result = Number(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables))
 
         if(isNaN(result)) return this.inputValue
 
-        for(let valueOperation in this._valueOperations){
-            result = valueOperation.operationType(result, valueOperation.value)
+        for(let valueOperation of this._valueOperations){
+            result = valueOperation.operation(result, valueOperation.value)
         }
 
         return result
