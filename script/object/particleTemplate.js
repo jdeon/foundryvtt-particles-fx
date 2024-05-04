@@ -244,8 +244,8 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
             //Missile must go to the target
             const targetAngleDirection = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x)
-            mainParticle.angleStart = new ParticleInput(targetAngleDirection * 180 / Math.PI)
-            mainParticle.angleEnd = new ParticleInput(targetAngleDirection * 180 / Math.PI)
+            mainParticle.angleStart = ParticleInput.build(targetAngleDirection * 180 / Math.PI)
+            mainParticle.angleEnd = ParticleInput.build(targetAngleDirection * 180 / Math.PI)
 
             //The missile must stop at the target
             const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x,2) + Math.pow(targetPosition.y - sourcePosition.y,2))

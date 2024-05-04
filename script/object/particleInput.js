@@ -7,29 +7,66 @@ const OperationType = {
 
 export class ParticleInput {
 
-    constructor(inputValue, inputCmd, advancedVariables){
-        this.inputCmd = inputCmd
-        this.inputValue = inputValue
-        this.isTimedLinked = false //Default
-        this._valueOperations = []
+    static build(inputValue, inputCmd, advancedVariables){
+        let isTimedLinked = false
 
         if(typeof inputCmd === 'string'){
-           const usedVariables =  this.inputCmd.match(/(?<=\{\{).+?(?=\}\})/g) //Get all value inside {{}}
-            
-           if(usedVariables?.length > 0){
-                for(let key of usedVariables){
-                    if(advancedVariables[key]?.isTimedLinked){
-                        this.isTimedLinked = true
-                        break
-                    }
-                }
-           }
-        } 
+            const usedVariables =  inputCmd.match(/(?<=\{\{).+?(?=\}\})/g) //Get all value inside {{}}
+             
+            if(usedVariables?.length > 0){
+                 for(let key of usedVariables){
+                     if(advancedVariables[key]?.isTimedLinked){
+                         isTimedLinked = true
+                         break
+                     }
+                 }
+            }
+         }
+         
+         
+         if(isTimedLinked){
+            return new TimedParticleInput (inputValue, inputCmd)
+         } else {
+            return new ParticleInput(inputValue)
+         }
+    }
+
+    constructor(inputValue){
+        this.inputValue = inputValue
+    }
+
+    getValue(){
+        return this.inputValue
+    }
+
+    multiply(value){
+        if(isNaN(value)) return this
+
+        this.value = this.value * value
+
+        return this
+    }
+
+    add(value){
+        if(isNaN(value)) return this
+
+        this.value = this.value + value
+
+        return this
+    }
+}
+
+  export class TimedParticleInput  extends ParticleInput {
+
+    constructor(inputValue, inputCmd){
+        super(inputValue)
+        this.inputCmd = inputCmd
+        this._valueOperations = []
     }
 
     getValue(advancedVariables){
         
-        if( this.isTimedLinked && advancedVariables){
+        if( advancedVariables ){
             return this._computeTimeValue(advancedVariables)
         }
 
@@ -39,11 +76,7 @@ export class ParticleInput {
     multiply(value){
         if(isNaN(value)) return this
 
-        if(this.isTimedLinked){
-            this._valueOperations.push({value, operation:OperationType.Multiply})
-        } else {
-            this.value * value
-        }
+        this._valueOperations.push({value, operation:OperationType.Multiply})
 
         return this
     }
@@ -51,11 +84,7 @@ export class ParticleInput {
     add(value){
         if(isNaN(value)) return this
 
-        if(this.isTimedLinked){
-            this._valueOperations.push({value, operation:OperationType.Add})
-        } else {
-            this.value + value
-        }
+        this._valueOperations.push({value, operation:OperationType.Add})
 
         return this
     }

@@ -147,7 +147,7 @@ export class Utils {
     static getRandomParticuleInputFrom(inValue, advancedVariables){
         const computeValue = Utils.getRandomValueFrom(inValue, advancedVariables)
 
-        return new ParticleInput(computeValue, inValue, advancedVariables)
+        return ParticleInput.build(computeValue, inValue, advancedVariables)
     }
 
     static _replaceWithAdvanceVariable(inValue, advancedVariables){
@@ -205,7 +205,7 @@ export class Utils {
 
         if(inputMode){
             for (const key of inKey) {
-                result[key] = new ParticleInput(result[key], inValue[key], advancedVariables);
+                result[key] = ParticleInput.build(result[key], inValue[key], advancedVariables);
             }
         }
 
