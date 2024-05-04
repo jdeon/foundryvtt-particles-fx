@@ -16,7 +16,7 @@ export class Particle {
 
     constructor(advancedVariables, sprite, particleLifetime, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd){
-        this.advancedVariables = advancedVariables;
+        this.advancedVariables = advancedVariables;                                         //Map<key,AdvancedVariable>
         this.sprite = sprite;                                                               //PIXI.Sprite
         this.positionVibrationLess = {x : sprite.x, y : sprite.y};  
         this.remainingTime = particleLifetime;                                             //Number

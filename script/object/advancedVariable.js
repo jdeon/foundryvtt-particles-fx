@@ -2,14 +2,18 @@ import { Utils } from "../utils/utils.js"
 
 export class AdvancedVariable { 
 
-    static RESERVED_TIMED_PARAM = ["dt", "lt", "tp"]
+    static RESERVED_TIMED_PARAM = [
+        "dt", //Delta time with last frame
+        "lt", //Lifetime (time of existence in millisecond)
+        "tp"  //Percentage of living time
+    ]
      
     static LIST_OF_LOGGED_ERROR = []
 
-    static computeAdvancedVariables(advancedVariable){
-        if(!advancedVariable) return
+    static computeAdvancedVariables(advancedVariables){
+        if(!advancedVariables) return
 
-        const staticAdvancedVariables = Utils.getObjectRandomValueFrom(advancedVariable)
+        const staticAdvancedVariables = Utils.getObjectRandomValueFrom(advancedVariables)
 
         let inKey = Object.keys(staticAdvancedVariables)
         const result = []
