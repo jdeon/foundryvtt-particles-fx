@@ -1,4 +1,5 @@
 import { Utils, Vector3, sameStartKey } from "../utils/utils.js";
+import { AdvancedVariable } from "./advancedVariable.js";
 
 export class Particle { 
 
@@ -33,27 +34,37 @@ export class Particle {
         this.vibrationAmplitudeEnd = vibrationAmplitudeEnd.getValue()  === sameStartKey ? vibrationAmplitudeStart : vibrationAmplitudeEnd
         this.vibrationFrequencyStart = vibrationFrequencyStart
         this.vibrationFrequencyEnd = vibrationFrequencyEnd.getValue()  === sameStartKey ? vibrationFrequencyStart : vibrationFrequencyEnd
+        this.timedParticule = this.advancedVariables && !!Object.values(this.advancedVariables).filter((item) => item.isTimedLinked).length
     }
 
     manageLifetime(dt){
         let lifetimeProportion = this.getLifetimeProportion()
 
+        if( this.timedParticule ) {
+            const lifetime = this.particleLifetime - this.remainingTime
+            AdvancedVariable.generateAll(this.advancedVariables, dt, lifetime,lifetimeProportion);
+        }
+
+        this._manageLifetime(dt, lifetimeProportion)
+    }
+
+    _manageLifetime(dt, lifetimeProportion){
         //Particle change size
-        const updatedSize = Particle._computeValue(this.sizeStart.getValue(), this.sizeEnd?.getValue(), lifetimeProportion)
+        const updatedSize = Particle._computeValue(this.sizeStart.getValue(this.advancedVariables), this.sizeEnd?.getValue(this.advancedVariables), lifetimeProportion)
         this.sprite.width = updatedSize.x
         this.sprite.height = updatedSize.y
 
-        let particleRotation = Particle._computeValue(this.particleRotationStart.getValue(), this.particleRotationEnd?.getValue(), lifetimeProportion);
+        let particleRotation = Particle._computeValue(this.particleRotationStart.getValue(this.advancedVariables), this.particleRotationEnd?.getValue(this.advancedVariables), lifetimeProportion);
         this.sprite.angle = particleRotation
 
         //Particle change color
-        this.sprite.alpha = Particle._computeValue(this.alphaStart.getValue(), this.alphaEnd.getValue(), lifetimeProportion);
+        this.sprite.alpha = Particle._computeValue(this.alphaStart.getValue(this.advancedVariables), this.alphaEnd.getValue(this.advancedVariables), lifetimeProportion);
 
-        const actualColorVector = Particle._computeValue(this.colorStart.getValue(), this.colorEnd.getValue(), lifetimeProportion)
+        const actualColorVector = Particle._computeValue(this.colorStart.getValue(this.advancedVariables), this.colorEnd.getValue(this.advancedVariables), lifetimeProportion)
         this.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x)/255,Math.floor(actualColorVector.y)/255, Math.floor(actualColorVector.z)/255])
 
-        let vibrationAmplitudeCurrent = Particle._computeValue(this.vibrationAmplitudeStart.getValue(), this.vibrationAmplitudeEnd.getValue(), lifetimeProportion);
-        let vibrationFrequencyCurrent = Particle._computeValue(this.vibrationFrequencyStart.getValue(), this.vibrationFrequencyEnd.getValue(), lifetimeProportion);
+        let vibrationAmplitudeCurrent = Particle._computeValue(this.vibrationAmplitudeStart.getValue(this.advancedVariables), this.vibrationAmplitudeEnd.getValue(this.advancedVariables), lifetimeProportion);
+        let vibrationFrequencyCurrent = Particle._computeValue(this.vibrationFrequencyStart.getValue(this.advancedVariables), this.vibrationFrequencyEnd.getValue(this.advancedVariables), lifetimeProportion);
         if(vibrationAmplitudeCurrent && vibrationFrequencyCurrent){
             let timeFromStart = (this.particleLifetime - this.remainingTime)
             this.vibrationCurrent = vibrationAmplitudeCurrent * Math.sin(2*Math.PI*(timeFromStart/vibrationFrequencyCurrent))
@@ -84,14 +95,19 @@ export class SprayingParticle  extends Particle {
     manageLifetime(dt){
         let lifetimeProportion = this.getLifetimeProportion()
 
+        if( this.timedParticule ) {
+            const lifetime = this.particleLifetime - this.remainingTime
+            AdvancedVariable.generateAll(this.advancedVariables, dt, lifetime,lifetimeProportion);
+        }
+
         //Particle move
-        const updatedVelocity = Particle._computeValue(this.velocityStart.getValue(), this.velocityEnd.getValue(), lifetimeProportion);
+        const updatedVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
         let angleRadiant = this.getDirection() * (Math.PI / 180)
 
         this.positionVibrationLess.x += Math.cos(angleRadiant) * updatedVelocity * dt /1000;
         this.positionVibrationLess.y += Math.sin(angleRadiant) * updatedVelocity * dt /1000;
 
-        super.manageLifetime(dt)
+        super._manageLifetime(dt, lifetimeProportion)
 
         if(this.vibrationCurrent) {
             this.sprite.x = this.positionVibrationLess.x + this.vibrationCurrent * Math.cos(angleRadiant - (Math.PI/2))
@@ -103,7 +119,7 @@ export class SprayingParticle  extends Particle {
     }
 
     getDirection(){
-        return Particle._computeValue(this.angleStart.getValue(), this.angleEnd.getValue(), this.getLifetimeProportion())
+        return Particle._computeValue(this.angleStart.getValue(this.advancedVariables), this.angleEnd.getValue(this.advancedVariables), this.getLifetimeProportion())
     }
 }
 
@@ -125,6 +141,11 @@ export class GravitingParticle  extends Particle {
     manageLifetime(dt){
         let lifetimeProportion = this.getLifetimeProportion()
 
+        if( this.timedParticule ) {
+            const lifetime = this.particleLifetime - this.remainingTime
+            AdvancedVariable.generateAll(this.advancedVariables, dt, lifetime,lifetimeProportion);
+        }
+
         let source = Utils.getSourcePosition(this.source)
 
         if(source === undefined){
@@ -134,18 +155,18 @@ export class GravitingParticle  extends Particle {
         }
 
         //Particle move
-        const updatedVelocity = Particle._computeValue(this.angularVelocityStart.getValue(),  this.angularVelocityEnd.getValue(), lifetimeProportion);
+        const updatedVelocity = Particle._computeValue(this.angularVelocityStart.getValue(this.advancedVariables),  this.angularVelocityEnd.getValue(this.advancedVariables), lifetimeProportion);
         this.angle += updatedVelocity * dt /1000
         let angleRadiant = this.angle * (Math.PI / 180);
         
-        const updatedRadius = Particle._computeValue(this.radiusStart.getValue(), this.radiusEnd.getValue(), lifetimeProportion)
+        const updatedRadius = Particle._computeValue(this.radiusStart.getValue(this.advancedVariables), this.radiusEnd.getValue(this.advancedVariables), lifetimeProportion)
 
         
 
         this.positionVibrationLess.x = source.x + Math.cos(angleRadiant) * updatedRadius;
         this.positionVibrationLess.y = source.y + Math.sin(angleRadiant) * updatedRadius;
 
-        super.manageLifetime(dt)
+        super._manageLifetime(dt, lifetimeProportion)
 
         if(this.vibrationCurrent) {
             this.sprite.x = this.positionVibrationLess.x + this.vibrationCurrent* Math.cos(angleRadiant)

@@ -32,6 +32,10 @@ export class AdvancedVariable {
         {});
     }
 
+    static generateAll(advancedVariables, deltaTime, lifetime, lifetimeProportion){
+        Object.keys(advancedVariables).forEach((key) => advancedVariables[key].generate(advancedVariables, deltaTime, lifetime, lifetimeProportion));
+    }
+
     static _doLog(key){
         if(! AdvancedVariable.LIST_OF_LOGGED_ERROR.includes(key)){
             AdvancedVariable.LIST_OF_LOGGED_ERROR.push(key)
@@ -100,8 +104,12 @@ export class AdvancedVariable {
         }
     }
 
-    generate(advancedVariables){
+    generate(advancedVariables, deltaTime, lifetime = 0, lifetimeProportion = 0){
         if(this.isFinish || !this.input instanceof Function) return
+
+        if(!deltaTime){
+            deltaTime =  1000/Number(game.settings.get('core',"maxFPS"))
+        }
 
         if(!this._isSecuredFunction()){
             if(AdvancedVariable._doLog(`badFormatFunction_${this.key}`)){
@@ -141,7 +149,7 @@ export class AdvancedVariable {
         }
 
         try{
-            this.value = this.input({...requiredParam, "dt" : 1000/Number(game.settings.get('core',"maxFPS")),  "lt": 1000, "tp":0})//TODO find lifeTime
+            this.value = this.input({...requiredParam, "dt" : deltaTime,  "lt": lifetime, "tp":lifetimeProportion})
             if(Number.isNaN(this.value) || Infinity === this.value){
                 throw new Error('NaN')
             }
