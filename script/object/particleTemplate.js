@@ -156,10 +156,12 @@ export class SprayingParticleTemplate extends ParticleTemplate{
             if(targetDistance > 5 * canvas.scene.grid.size){
                 particleLifetime *= (targetDistance/(5 * canvas.scene.grid.size)) 
             }
-        } else if (this.source instanceof MeasuredTemplate){//TODO MeasuredTemplate
+        } else if (this.source instanceof MeasuredTemplate){
             sourcePosition={x:this.source.x, y:this.source.y}//Don t use width and length
             let measuredOverride = generatePrefillTemplateForMeasured(this.source.document, particleProperties.velocityStart.getValue(), particleProperties.velocityEnd.getValue())
             particleProperties = {...particleProperties , ...measuredOverride}
+            particleLifetime = particleProperties.particleLifetime.getValue()
+            positionSpawning = particleProperties.positionSpawning.getValue()
             targetAngleDirection = 0
         } else {
             targetAngleDirection = sourcePosition.r  * Math.PI / 180
