@@ -59,6 +59,8 @@ export class Vector3 {
                 endVector[coord] = startVector[coord]
             }
         }
+
+        return endVector
     }
 
     constructor(x, y, z){
