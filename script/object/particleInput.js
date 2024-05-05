@@ -1,9 +1,4 @@
-import { Utils } from "../utils/utils.js"
-
-const OperationType = {
-    Add : (a,b) => a + b,
-    Multiply : (a, b) => a * b
-  }
+import { Utils, Vector3 } from "../utils/utils.js"
 
 export class ParticleInput {
 
@@ -25,8 +20,14 @@ export class ParticleInput {
          
          
          if(isTimedLinked){
-            return new TimedParticleInput (inputValue, inputCmd)
-         } else {
+            if(inputValue instanceof Vector3){
+                return new TimedParticleVectorInput(inputValue)
+            } else {
+                return new TimedParticleInput (inputValue, inputCmd)
+            }
+         } else if(inputValue instanceof Vector3){
+            return new ParticleVectorInput(inputValue)
+         }else {
             return new ParticleInput(inputValue)
          }
     }
@@ -42,7 +43,7 @@ export class ParticleInput {
     multiply(value){
         if(isNaN(value)) return this
 
-        this.value = this.value * value
+        this.inputValue = this.inputValue * value
 
         return this
     }
@@ -50,13 +51,36 @@ export class ParticleInput {
     add(value){
         if(isNaN(value)) return this
 
-        this.value = this.value + value
+        this.inputValue = this.inputValue + value
 
         return this
     }
 }
 
-  export class TimedParticleInput  extends ParticleInput {
+export class ParticleVectorInput extends ParticleInput {
+
+    constructor(inputValue){
+        super(inputValue)
+    }
+
+    getValue(){
+        return this.inputValue
+    }
+
+    multiply(value){
+        this.inputValue = this.inputValue.multiply(value)
+        return this
+    }
+
+    add(value){
+        this.inputValue = this.inputValue.add(value)
+        return this
+    }
+}
+
+
+//TODO Weird behaviour when targeting
+export class TimedParticleInput  extends ParticleInput {
 
     constructor(inputValue, inputCmd){
         super(inputValue)
@@ -76,7 +100,7 @@ export class ParticleInput {
     multiply(value){
         if(isNaN(value)) return this
 
-        this._valueOperations.push({value, operation:OperationType.Multiply})
+        this._valueOperations.push({value, operation:(a, b) => a * b})
 
         return this
     }
@@ -84,16 +108,59 @@ export class ParticleInput {
     add(value){
         if(isNaN(value)) return this
 
-        this._valueOperations.push({value, operation:OperationType.Add})
+        this._valueOperations.push({value, operation:(a,b) => a + b})
 
         return this
     }
 
     _computeTimeValue(advancedVariables){
-        //TODO vector ?
         let result = Number(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables))
 
         if(isNaN(result)) return this.inputValue
+
+        for(let valueOperation of this._valueOperations){
+            result = valueOperation.operation(result, valueOperation.value)
+        }
+
+        return result
+    }
+}
+
+export class TimedParticleVectorInput  extends TimedParticleInput {
+
+    constructor(inputValue, inputCmd){
+        super(inputValue, inputCmd)
+    }
+
+    getValue(advancedVariables){
+        
+        if( advancedVariables ){
+            return this._computeTimeValue(advancedVariables)
+        }
+
+        return this.inputValue
+    }
+
+    multiply(value){
+        if(isNaN(value) && !value instanceof Vector3) return this
+
+        this._valueOperations.push({value, operation:(a, b) => a.multiply(b)})
+
+        return this
+    }
+
+    add(value){
+        if(isNaN(value)  && !value instanceof Vector3) return this
+
+        this._valueOperations.push({value, operation:(a,b) => a.add(b)})
+
+        return this
+    }
+
+    _computeTimeValue(advancedVariables){
+        let result = Vector3.build(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables))
+
+        if(!result.toNumber()) return this.inputValue
 
         for(let valueOperation of this._valueOperations){
             result = valueOperation.operation(result, valueOperation.value)

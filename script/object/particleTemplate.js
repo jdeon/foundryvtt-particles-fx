@@ -288,7 +288,6 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
         let generatedParticle
 
-        //TODO subParticle not spraying the same way
         if(this.subParticleTemplate instanceof SprayingParticleTemplate){
             generatedParticle = this.subParticleTemplate.generateParticles()
        

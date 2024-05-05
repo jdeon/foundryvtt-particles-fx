@@ -37,7 +37,7 @@ export class Vector3 {
                 object,
             )
         } else if(object instanceof ParticleInput){
-            result = Vector3.build(object.getValue()) //TODO
+            result = Vector3.build(object.getValue())
         } else {
             result = new Vector3 (
                 object.x || 0,
@@ -61,6 +61,8 @@ export class Vector3 {
         } else if (other instanceof Vector3){
             return new Vector3(this.x + other.x, this.y + other.y, this.z + other.z)
         }
+
+        return this
     }
 
     minus(other){
@@ -69,6 +71,8 @@ export class Vector3 {
         } else if (other instanceof Vector3){
             return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z)
         }
+
+        return this
     }
 
     multiply(other){
@@ -77,6 +81,8 @@ export class Vector3 {
         } else if (other instanceof Vector3){
             return new Vector3(this.x * other.x, this.y * other.y, this.z * other.z)
         }
+
+        return this
     }
 
     divide(other){
@@ -89,6 +95,8 @@ export class Vector3 {
 
             return new Vector3(x, y, z)
         }
+
+        return this
     }
 
     rotateZVector(zAngleRadiant){
@@ -96,6 +104,14 @@ export class Vector3 {
             x: this.x * Math.cos(zAngleRadiant) - this.y * Math.sin(zAngleRadiant),
             y: this.x * Math.sin(zAngleRadiant) + this.y * Math.cos(zAngleRadiant)
         }
+    }
+
+    toNumber(){
+        this.x = Number(this.x)
+        this.y = Number(this.y)
+        this.z = Number(this.z)
+
+        return ! (isNaN(this.x) || isNaN(this.y) || isNaN(this.z))
     }
 } 
 
@@ -155,7 +171,16 @@ export class Utils {
             return inValue
         }
 
-        const valueAdvancedSplit = inValue.split(/{{|}}/)
+        let valueAdvancedSplit
+
+        if(inValue instanceof Object){
+            valueAdvancedSplit = {}
+            for(key of Object.keys(inValue)){
+                valueAdvancedSplit[key] = Utils._replaceWithAdvanceVariable(inValue[key])
+            }
+        } else {
+            valueAdvancedSplit = inValue.split(/{{|}}/)
+        }
 
         if(valueAdvancedSplit.length === 1){
             return inValue
