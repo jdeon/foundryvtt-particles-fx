@@ -49,6 +49,18 @@ export class Vector3 {
         return result
     }
 
+    static replaceSameAsStart(startVector, endVector){
+        if(endVector.x === sameStartKey && endVector.y === sameStartKey && endVector.z === sameStartKey){
+            return startVector
+        }
+
+        for(let coord of ['x','y','z']){
+            if(endVector[coord] === sameStartKey){
+                endVector[coord] = startVector[coord]
+            }
+        }
+    }
+
     constructor(x, y, z){
         this.x = x;
         this.y = y;
@@ -207,25 +219,6 @@ export class Utils {
 
         for (const key of inKey) {
             result[key] = Utils.getRandomValueFrom(inValue[key], advancedVariables);
-        }
-
-        //Check for same as start key
-        for (const key of inKey) {
-            if(result[key] instanceof Vector3){
-                const startSuffixKey = key.substring(0,key.length - 3) + 'Start'
-                const startVector = result[startSuffixKey] 
-                if(startVector){
-                    result[key] = new Vector3(
-                        result[key].x === sameStartKey ? startVector.x : result[key].x,
-                        result[key].y === sameStartKey ? startVector.y : result[key].y,
-                        result[key].z === sameStartKey ? startVector.z : result[key].z
-                    )
-                } 
-                
-            } else if(result[key] === sameStartKey){
-                const startSuffixKey = key.substring(0,key.length - 3) + 'Start'
-                result[key] = result[startSuffixKey]
-            }
         }
 
         if(inputMode){

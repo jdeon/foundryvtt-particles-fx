@@ -3,16 +3,21 @@ import { AdvancedVariable } from "./advancedVariable.js";
 
 export class Particle { 
 
-    static _computeValue(beginValue, endValue, lifetimeProportion){
-        if(endValue !== undefined && endValue !== sameStartKey && beginValue !== endValue){
-            if(beginValue instanceof Vector3){
-                return beginValue.minus(endValue).multiply(lifetimeProportion).add(endValue)
+    static _computeValue(startValue, endValue, lifetimeProportion){
+        if(endValue !== undefined && endValue !== sameStartKey && startValue !== endValue){
+            if(startValue instanceof Vector3){
+                endValue = Vector3.replaceSameAsStart(startValue, endValue)
+                if(endValue === startValue){
+                    return startValue
+                }
+                return startValue.minus(endValue).multiply(lifetimeProportion).add(endValue)
+
             } else {
-                return (beginValue - endValue) * lifetimeProportion + endValue
+                return (startValue - endValue) * lifetimeProportion + endValue
             }
         }
 
-        return beginValue
+        return startValue
     }
 
     constructor(advancedVariables, sprite, particleLifetime, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,

@@ -1,4 +1,4 @@
-import { Utils, Vector3 } from "../utils/utils.js"
+import { Utils, Vector3, sameStartKey } from "../utils/utils.js"
 
 export class ParticleInput {
 
@@ -41,7 +41,7 @@ export class ParticleInput {
     }
 
     multiply(value){
-        if(isNaN(value)) return this
+        if(this._isInvalidOperation(value)) return this
 
         this.inputValue = this.inputValue * value
 
@@ -49,11 +49,15 @@ export class ParticleInput {
     }
 
     add(value){
-        if(isNaN(value)) return this
+        if(this._isInvalidOperation(value)) return this
 
         this.inputValue = this.inputValue + value
 
         return this
+    }
+
+    _isInvalidOperation(value){
+        return isNaN(value) || this.inputValue === sameStartKey
     }
 }
 
@@ -98,7 +102,7 @@ export class TimedParticleInput  extends ParticleInput {
     }
 
     multiply(value){
-        if(isNaN(value)) return this
+        if(this._isInvalidOperation(value)) return this
 
         this._valueOperations.push({value, operation:(a, b) => a * b})
 
@@ -106,7 +110,7 @@ export class TimedParticleInput  extends ParticleInput {
     }
 
     add(value){
-        if(isNaN(value)) return this
+        if(this._isInvalidOperation(value)) return this
 
         this._valueOperations.push({value, operation:(a,b) => a + b})
 
