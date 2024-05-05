@@ -10,10 +10,10 @@ export class Particle {
                 if(endValue === startValue){
                     return startValue
                 }
-                return startValue.minus(endValue).multiply(lifetimeProportion).add(endValue)
+                return startValue.add(endValue.minus(startValue).multiply(lifetimeProportion))
 
             } else {
-                return (startValue - endValue) * lifetimeProportion + endValue
+                return startValue + (endValue - startValue) * lifetimeProportion
             }
         }
 
@@ -79,7 +79,7 @@ export class Particle {
     }
 
     getLifetimeProportion(){
-        return this.remainingTime / this.particleLifetime
+        return 1 - (this.remainingTime / this.particleLifetime)
     }
 }
 

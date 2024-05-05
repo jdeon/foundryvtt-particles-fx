@@ -83,7 +83,6 @@ export class ParticleVectorInput extends ParticleInput {
 }
 
 
-//TODO Weird behaviour when targeting
 export class TimedParticleInput  extends ParticleInput {
 
     constructor(inputValue, inputCmd){
