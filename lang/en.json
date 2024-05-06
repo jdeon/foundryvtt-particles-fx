@@ -11,7 +11,7 @@
     "PARTICULE-FX.Chat-Command.Unrecognized":"Particle chat command not recognized, use /pfx help",
     "PARTICULE-FX.Emission.Not-found": "No emitter found for id : ",
     "PARTICULE-FX.Emission.Title": "Particle Emission",
-    "PARTICULE-FX.Emission.description": "You have created this emittor : ",
+    "PARTICULE-FX.Emission.description": "You have created this emitter : ",
     "PARTICULE-FX.Emission.delete-button": "Delete it",
     "PARTICULE-FX.No-Token-selected":"Please select a token first",
     "PARTICULE-FX.Prefill-Template.Bad-Param":"Bad entry to add prefill template",

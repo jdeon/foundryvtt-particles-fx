@@ -233,7 +233,7 @@ export async function  writeMessageForEmissionById(emitterId, verbal){
 
     //show originalQuery if verbal
     const dataExport = {
-        emittorId: emitterId,
+        emitterId,
         originalQuery : verbal ? JSON.stringify(emitter.originalQuery) : undefined
     }
 
