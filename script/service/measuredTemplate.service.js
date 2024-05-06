@@ -1,3 +1,4 @@
+import { ParticleInput } from "../object/particleInput.js"
 import { Utils } from "../utils/utils.js"
 
 function generateTemplateForCircle(radius, velocity){
@@ -203,6 +204,16 @@ export function generatePrefillTemplateForMeasured(measuredTemplate, velocitySta
         result = generateTemplateForRect(measuredTemplate.distance, measuredTemplate.direction, velocity, (velocityEnd - velocityStart)/2 )
     } else if (measuredTemplate.t === "ray") {
         result = generateTemplateForRay(measuredTemplate.distance, measuredTemplate.width, measuredTemplate.direction, velocity)
+    }
+
+    return mapToInputParticle(result)
+}
+
+function mapToInputParticle(result){
+    const keys = Object.keys(result)
+
+    for(let key of keys){
+        result[key] = ParticleInput.build(result[key])
     }
 
     return result

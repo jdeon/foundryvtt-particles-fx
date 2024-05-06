@@ -1,3 +1,5 @@
+import { ParticleInput } from "../object/particleInput.js";
+
 /**
  * Defines the event name to send all messages to over  `game.socket`.
  *
@@ -34,6 +36,8 @@ export class Vector3 {
                 object,
                 object,
             )
+        } else if(object instanceof ParticleInput){
+            result = Vector3.build(object.getValue())
         } else {
             result = new Vector3 (
                 object.x || 0,
@@ -43,6 +47,20 @@ export class Vector3 {
         }
 
         return result
+    }
+
+    static replaceSameAsStart(startVector, endVector){
+        if(endVector.x === sameStartKey && endVector.y === sameStartKey && endVector.z === sameStartKey){
+            return startVector
+        }
+
+        for(let coord of ['x','y','z']){
+            if(endVector[coord] === sameStartKey){
+                endVector[coord] = startVector[coord]
+            }
+        }
+
+        return endVector
     }
 
     constructor(x, y, z){
@@ -57,6 +75,8 @@ export class Vector3 {
         } else if (other instanceof Vector3){
             return new Vector3(this.x + other.x, this.y + other.y, this.z + other.z)
         }
+
+        return this
     }
 
     minus(other){
@@ -65,6 +85,8 @@ export class Vector3 {
         } else if (other instanceof Vector3){
             return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z)
         }
+
+        return this
     }
 
     multiply(other){
@@ -73,6 +95,8 @@ export class Vector3 {
         } else if (other instanceof Vector3){
             return new Vector3(this.x * other.x, this.y * other.y, this.z * other.z)
         }
+
+        return this
     }
 
     divide(other){
@@ -85,6 +109,8 @@ export class Vector3 {
 
             return new Vector3(x, y, z)
         }
+
+        return this
     }
 
     rotateZVector(zAngleRadiant){
@@ -92,6 +118,14 @@ export class Vector3 {
             x: this.x * Math.cos(zAngleRadiant) - this.y * Math.sin(zAngleRadiant),
             y: this.x * Math.sin(zAngleRadiant) + this.y * Math.cos(zAngleRadiant)
         }
+    }
+
+    toNumber(){
+        this.x = Number(this.x)
+        this.y = Number(this.y)
+        this.z = Number(this.z)
+
+        return ! (isNaN(this.x) || isNaN(this.y) || isNaN(this.z))
     }
 } 
 
@@ -140,19 +174,34 @@ export class Utils {
         }
     }
 
+    static getRandomParticuleInputFrom(inValue, advancedVariables){
+        const computeValue = Utils.getRandomValueFrom(inValue, advancedVariables)
+
+        return ParticleInput.build(computeValue, inValue, advancedVariables)
+    }
+
     static _replaceWithAdvanceVariable(inValue, advancedVariables){
         if(!advancedVariables){
             return inValue
         }
 
-        const valueAdvancedSplit = inValue.split(/{{|}}/)
+        let valueAdvancedSplit
+
+        if(inValue instanceof Object){
+            valueAdvancedSplit = {}
+            for(key of Object.keys(inValue)){
+                valueAdvancedSplit[key] = Utils._replaceWithAdvanceVariable(inValue[key])
+            }
+        } else {
+            valueAdvancedSplit = inValue.split(/{{|}}/)
+        }
 
         if(valueAdvancedSplit.length === 1){
             return inValue
         }
 
         let result = ""
-        for(let i = 0; i < valueAdvancedSplit.length; i += 2){
+        for(let i = 0; i < valueAdvancedSplit.length + 1 ; i += 2){
             result += valueAdvancedSplit[i]
             const variableKey = valueAdvancedSplit[i+1]
 
@@ -164,7 +213,7 @@ export class Utils {
         return result
     }
 
-    static getObjectRandomValueFrom(inValue, advancedVariables){
+    static getObjectRandomValueFrom(inValue, advancedVariables, inputMode){
         if(!inValue) return
 
         let result = {}
@@ -174,22 +223,9 @@ export class Utils {
             result[key] = Utils.getRandomValueFrom(inValue[key], advancedVariables);
         }
 
-        //Check for same as start key
-        for (const key of inKey) {
-            if(result[key] instanceof Vector3){
-                const startSuffixKey = key.substring(0,key.length - 3) + 'Start'
-                const startVector = result[startSuffixKey] 
-                if(startVector){
-                    result[key] = new Vector3(
-                        result[key].x === sameStartKey ? startVector.x : result[key].x,
-                        result[key].y === sameStartKey ? startVector.y : result[key].y,
-                        result[key].z === sameStartKey ? startVector.z : result[key].z
-                    )
-                } 
-                
-            } else if(result[key] === sameStartKey){
-                const startSuffixKey = key.substring(0,key.length - 3) + 'Start'
-                result[key] = result[startSuffixKey]
+        if(inputMode){
+            for (const key of inKey) {
+                result[key] = ParticleInput.build(result[key], inValue[key], advancedVariables);
             }
         }
 
@@ -319,5 +355,13 @@ export class Utils {
                 return inputPixel
             }
         }
+    }
+
+    static intersectionArray(array1, array2){
+        if(Array.isArray(array1) && array1?.length && Array.isArray(array2) && array2?.length){
+            return array1.filter(value => array2.includes(value));
+        }
+        
+        return []
     }
 }

@@ -2,12 +2,18 @@ import { Utils } from "../utils/utils.js"
 
 export class AdvancedVariable { 
 
+    static RESERVED_TIMED_PARAM = [
+        "dt", //Delta time with last frame
+        "lt", //Lifetime (time of existence in millisecond)
+        "tp"  //Percentage of living time
+    ]
+     
     static LIST_OF_LOGGED_ERROR = []
 
-    static computeAdvancedVariables(advancedVariable){
-        if(!advancedVariable) return
+    static computeAdvancedVariables(advancedVariables){
+        if(!advancedVariables) return
 
-        const staticAdvancedVariables = Utils.getObjectRandomValueFrom(advancedVariable)
+        const staticAdvancedVariables = Utils.getObjectRandomValueFrom(advancedVariables)
 
         let inKey = Object.keys(staticAdvancedVariables)
         const result = []
@@ -24,6 +30,10 @@ export class AdvancedVariable {
             return acc
         }, 
         {});
+    }
+
+    static generateAll(advancedVariables, deltaTime, lifetime, lifetimeProportion){
+        Object.keys(advancedVariables).forEach((key) => advancedVariables[key].generate(advancedVariables, deltaTime, lifetime, lifetimeProportion));
     }
 
     static _doLog(key){
@@ -82,6 +92,7 @@ export class AdvancedVariable {
     constructor(key, input){
         this.key = key
         this.input = input;
+        this.isTimedLinked = false
 
         if(input instanceof Function){
             this.requiredParam = AdvancedVariable._getParam(this.key, input)
@@ -93,8 +104,12 @@ export class AdvancedVariable {
         }
     }
 
-    generate(advancedVariables){
+    generate(advancedVariables, deltaTime, lifetime = 0, lifetimeProportion = 0){
         if(this.isFinish || !this.input instanceof Function) return
+
+        if(!deltaTime){
+            deltaTime =  1000/Number(game.settings.get('core',"maxFPS"))
+        }
 
         if(!this._isSecuredFunction()){
             if(AdvancedVariable._doLog(`badFormatFunction_${this.key}`)){
@@ -104,8 +119,13 @@ export class AdvancedVariable {
             this.isFinish = true
             return
         }
+
+        const haveTimedParam = Utils.intersectionArray(AdvancedVariable.RESERVED_TIMED_PARAM, this.requiredParam)
+        if(haveTimedParam?.length){
+            this.isTimedLinked = true
+        }
         
-        const missingParameters = []
+        let missingParameters = []
 
         const requiredParam = this.requiredParam.reduce(
             (acc, key) => {
@@ -113,6 +133,8 @@ export class AdvancedVariable {
 
                 if(acc[key] === undefined){
                     missingParameters.push(key)
+                } else if(advancedVariables[key].isTimedLinked){
+                    this.isTimedLinked = true
                 }
 
                 return acc
@@ -120,13 +142,14 @@ export class AdvancedVariable {
             {}
         )
 
+        missingParameters = missingParameters.filter((item) => ! AdvancedVariable.RESERVED_TIMED_PARAM.includes(item))
+
         if(missingParameters?.length > 0 && AdvancedVariable._doLog(`missingParameters_${this.key}`)){
             ui.notifications.warn(game.i18n.format('PARTICULE-FX.advancedMode.missingParameters', {variableKey: this.key, missingParameters : missingParameters.join(', ')}))
         }
 
         try{
-            this.value = this.input(requiredParam)
-
+            this.value = this.input({...requiredParam, "dt" : deltaTime,  "lt": lifetime, "tp":lifetimeProportion})
             if(Number.isNaN(this.value) || Infinity === this.value){
                 throw new Error('NaN')
             }
@@ -139,7 +162,9 @@ export class AdvancedVariable {
             }
         }
         
-        this.isFinish = true
+        if(! this.isTimedLinked){
+            this.isFinish = true
+        }
     }
 
     _isSecuredFunction(){
@@ -147,7 +172,7 @@ export class AdvancedVariable {
         if(!this.input instanceof Function) return true
 
         let stringFunction = this.input.toString()
-            .replace('Math.', '') // Remove Math.
+            .replaceAll('Math.', '') // Remove Math.
 
         const regex = /\.|\[|\]|\"|\'/g; //Regex to find other.
         const found = stringFunction.toString().match(regex);
