@@ -8,6 +8,19 @@ export default class ParticlesEmitter {
 
     static emitters = []
 
+    static _EMISSION_CANVAS
+
+    static INIT_EMISSION_CANVAS = () => {
+        if(canvas.app.stage.rendered.environment.effects.moduleParticlesFx) {
+            canvas.app.stage.rendered.environment.effects.moduleParticlesFx.destroy()
+        }
+            
+        const particleFxCanvas = new PIXI.Container()
+        canvas.app.stage.rendered.environment.effects.addChild(particleFxCanvas);
+        canvas.app.stage.rendered.environment.effects.moduleParticlesFx = particleFxCanvas
+        ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
+    }
+
 
     constructor(particleTemplate, particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate){
         this.spawnedEnable = true;
@@ -19,6 +32,10 @@ export default class ParticlesEmitter {
         this.remainingTime = emissionDuration
         this.isGravitate = isGravitate
         this.lastUpdate = Date.now();
+
+        if(!ParticlesEmitter._EMISSION_CANVAS){
+            ParticlesEmitter.INIT_EMISSION_CANVAS()
+        }
     }
 
     manageParticles(){
@@ -62,7 +79,7 @@ export default class ParticlesEmitter {
                     this.remainingTime = 0
                     break
                 }
-                canvas.app.stage.addChild(particle.sprite);
+                ParticlesEmitter._EMISSION_CANVAS.addChild(particle.sprite);
                 this.particles.push(particle)
             }
 

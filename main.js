@@ -6,6 +6,7 @@ import { CompatibiltyV2Manager } from "./script/utils/compatibilityManager.js"
 import emitController from "./script/api/emitController.js"
 import apiController from "./script/api/apiController.js"
 import { subscribeApiToWindow } from "./script/api/windowsController.js"
+import ParticlesEmitter from "./script/object/particlesEmitter.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 let firstSceneEmittersQueries
@@ -105,6 +106,8 @@ Hooks.on("setup", () => {
 });
 
 Hooks.on("canvasReady", () => {
+  ParticlesEmitter.INIT_EMISSION_CANVAS()
+
   const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
 
   if(isSaveAllowed){
