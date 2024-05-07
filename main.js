@@ -111,14 +111,14 @@ Hooks.on("canvasReady", () => {
   const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
 
   if(isSaveAllowed){
-  const emittersQueries = canvas.scene.getFlag(s_MODULE_ID, "emitters")
+    const emittersQueries = canvas.scene.getFlag(s_MODULE_ID, "emitters")
 
-  if(game.ready){
-      initEmitters(emittersQueries)
-  } else {
-      //Waiting the world to be ready at the first launch
-      firstSceneEmittersQueries = emittersQueries
-  }
+    if(game.ready){
+        initEmitters(emittersQueries)
+    } else {
+        //Waiting the world to be ready at the first launch
+        firstSceneEmittersQueries = emittersQueries
+    }
   }
 });
 
@@ -225,9 +225,7 @@ Hooks.on("canvasTearDown", () => {
   Hooks.on("renderChatMessage", function (chatlog, html, data) {
     const buttons = html.find('button[name="button.delete-emitter"]');
 
-    if(buttons === undefined || buttons.length === 0){
-    return
-    }
+    if(buttons === undefined || buttons.length === 0) return
 
     console.log(`main | renderChatMessage with ${s_MODULE_ID}`); 
 
