@@ -134,7 +134,7 @@ The order of the paramater is not important, for example ```particlesFx.sprayPar
 <br><img width="30%" src="pfx-fire-Animation.gif"><br>
 
 ## More details in the readme
-To do more advanced thing please read the ![WIKI](https://github.com/jdeon/foundryvtt-particles-fx/wiki) for more details :
+To do more advanced thing please read the [WIKI](https://github.com/jdeon/foundryvtt-particles-fx/wiki) for more details :
 * More example of how to use the module
 * Add and manage custom prefill template
 * Particular behavior of measured template as source
