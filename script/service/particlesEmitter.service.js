@@ -131,6 +131,7 @@ function  _missileParticles(colorTemplate, motionTemplate, inputObject, emitterI
         finalInput.vibrationAmplitudeEnd,
         finalInput.vibrationFrequencyStart, 
         finalInput.vibrationFrequencyEnd,
+        finalInput.advanced,
         subParticleTemplate,
         );
 
@@ -232,7 +233,7 @@ export async function  writeMessageForEmissionById(emitterId, verbal){
 
     //show originalQuery if verbal
     const dataExport = {
-        emittorId: emitterId,
+        emitterId,
         originalQuery : verbal ? JSON.stringify(emitter.originalQuery) : undefined
     }
 

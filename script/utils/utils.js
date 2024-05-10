@@ -1,3 +1,5 @@
+import { ParticleInput } from "../object/particleInput.js";
+
 /**
  * Defines the event name to send all messages to over  `game.socket`.
  *
@@ -28,12 +30,14 @@ export class Vector3 {
             for(let item of object){
                 result.push(Vector3.build(item))
             }
-        } else if(!isNaN(object)){
+        } else if(!isNaN(object) || typeof object === "string"){
             result = new Vector3 (
                 object,
                 object,
                 object,
             )
+        } else if(object instanceof ParticleInput){
+            result = Vector3.build(object.getValue())
         } else {
             result = new Vector3 (
                 object.x || 0,
@@ -43,6 +47,20 @@ export class Vector3 {
         }
 
         return result
+    }
+
+    static replaceSameAsStart(startVector, endVector){
+        if(endVector.x === sameStartKey && endVector.y === sameStartKey && endVector.z === sameStartKey){
+            return startVector
+        }
+
+        for(let coord of ['x','y','z']){
+            if(endVector[coord] === sameStartKey){
+                endVector[coord] = startVector[coord]
+            }
+        }
+
+        return endVector
     }
 
     constructor(x, y, z){
@@ -57,6 +75,8 @@ export class Vector3 {
         } else if (other instanceof Vector3){
             return new Vector3(this.x + other.x, this.y + other.y, this.z + other.z)
         }
+
+        return this
     }
 
     minus(other){
@@ -65,6 +85,8 @@ export class Vector3 {
         } else if (other instanceof Vector3){
             return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z)
         }
+
+        return this
     }
 
     multiply(other){
@@ -73,6 +95,8 @@ export class Vector3 {
         } else if (other instanceof Vector3){
             return new Vector3(this.x * other.x, this.y * other.y, this.z * other.z)
         }
+
+        return this
     }
 
     divide(other){
@@ -85,6 +109,8 @@ export class Vector3 {
 
             return new Vector3(x, y, z)
         }
+
+        return this
     }
 
     rotateZVector(zAngleRadiant){
@@ -92,6 +118,14 @@ export class Vector3 {
             x: this.x * Math.cos(zAngleRadiant) - this.y * Math.sin(zAngleRadiant),
             y: this.x * Math.sin(zAngleRadiant) + this.y * Math.cos(zAngleRadiant)
         }
+    }
+
+    toNumber(){
+        this.x = Number(this.x)
+        this.y = Number(this.y)
+        this.z = Number(this.z)
+
+        return ! (isNaN(this.x) || isNaN(this.y) || isNaN(this.z))
     }
 } 
 
@@ -101,13 +135,17 @@ export class Utils {
         return canvas.scene.grid.size/canvas.scene.grid.distance
     }
 
-    static getRandomValueFrom(inValue){
+    static getRandomValueFrom(inValue, advancedVariables){
         if(!isNaN(inValue)){
-            return inValue;
+            return Number(inValue);
         } else if (typeof inValue === 'string') {
+            inValue = Utils._replaceWithAdvanceVariable(inValue, advancedVariables)
+
             const valueBoundary = inValue.split('_')
             if(valueBoundary.length === 1){
-                if(valueBoundary[0].endsWith('%')){
+                if(!isNaN(valueBoundary[0])){
+                    return Number(valueBoundary[0]);
+                } else if(valueBoundary[0].endsWith('%')){
                     return Utils._managePercent(valueBoundary[0])
                 } else if (valueBoundary[0] === sameStartKey) {
                     return sameStartKey
@@ -122,34 +160,72 @@ export class Utils {
                 return minValue + (maxValue - minValue) * Utils.includingRandom() ;
             }
         } else if (inValue instanceof Vector3) {
-            let x = Utils.getRandomValueFrom(inValue.x)
-            let y = Utils.getRandomValueFrom(inValue.y)
-            let z = Utils.getRandomValueFrom(inValue.z)
+            let x = Utils.getRandomValueFrom(inValue.x, advancedVariables)
+            let y = Utils.getRandomValueFrom(inValue.y, advancedVariables)
+            let z = Utils.getRandomValueFrom(inValue.z, advancedVariables)
 
             return new Vector3(x,y,z);
         
         } else if (Array.isArray(inValue) && inValue.length > 0) {
             const indexToRetrieve =  Math.floor(Math.random() * inValue.length);
-            return Utils.getRandomValueFrom(inValue[indexToRetrieve]);
+            return Utils.getRandomValueFrom(inValue[indexToRetrieve], advancedVariables);
         } else {
             return inValue
         }
-
     }
 
-    static getObjectRandomValueFrom(inValue){
-        let result = {}
-        let inKey = Object.keys(inValue)
+    static getRandomParticuleInputFrom(inValue, advancedVariables){
+        const computeValue = Utils.getRandomValueFrom(inValue, advancedVariables)
 
-        for (const key of inKey) {
-            result[key] = Utils.getRandomValueFrom(inValue[key]);
+        return ParticleInput.build(computeValue, inValue, advancedVariables)
+    }
+
+    static _replaceWithAdvanceVariable(inValue, advancedVariables){
+        if(!advancedVariables){
+            return inValue
         }
 
-        //Check for same as start key
+        let valueAdvancedSplit
+
+        if(inValue instanceof Object){
+            valueAdvancedSplit = {}
+            for(key of Object.keys(inValue)){
+                valueAdvancedSplit[key] = Utils._replaceWithAdvanceVariable(inValue[key])
+            }
+        } else {
+            valueAdvancedSplit = inValue.split(/{{|}}/)
+        }
+
+        if(valueAdvancedSplit.length === 1){
+            return inValue
+        }
+
+        let result = ""
+        for(let i = 0; i < valueAdvancedSplit.length + 1 ; i += 2){
+            result += valueAdvancedSplit[i]
+            const variableKey = valueAdvancedSplit[i+1]
+
+            if(advancedVariables[variableKey]?.value){
+                result += advancedVariables[variableKey].value
+            }
+        }
+
+        return result
+    }
+
+    static getObjectRandomValueFrom(inValue, advancedVariables, inputMode){
+        if(!inValue) return
+
+        let result = {}
+        let inKey = Object.keys(inValue).filter((key) => key !== 'advanced')
+
         for (const key of inKey) {
-            if(result[key] === sameStartKey){
-                const startSuffixKey = key.substring(0,key.length - 3) + 'Start'
-                result[key] = result[startSuffixKey]
+            result[key] = Utils.getRandomValueFrom(inValue[key], advancedVariables);
+        }
+
+        if(inputMode){
+            for (const key of inKey) {
+                result[key] = ParticleInput.build(result[key], inValue[key], advancedVariables);
             }
         }
 
@@ -279,5 +355,13 @@ export class Utils {
                 return inputPixel
             }
         }
+    }
+
+    static intersectionArray(array1, array2){
+        if(Array.isArray(array1) && array1?.length && Array.isArray(array2) && array2?.length){
+            return array1.filter(value => array2.includes(value));
+        }
+        
+        return []
     }
 }

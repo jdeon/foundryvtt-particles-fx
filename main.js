@@ -6,6 +6,7 @@ import { CompatibiltyV2Manager } from "./script/utils/compatibilityManager.js"
 import emitController from "./script/api/emitController.js"
 import apiController from "./script/api/apiController.js"
 import { subscribeApiToWindow } from "./script/api/windowsController.js"
+import ParticlesEmitter from "./script/object/particlesEmitter.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 let firstSceneEmittersQueries
@@ -105,17 +106,19 @@ Hooks.on("setup", () => {
 });
 
 Hooks.on("canvasReady", () => {
+  ParticlesEmitter.INIT_EMISSION_CANVAS()
+
   const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
 
   if(isSaveAllowed){
-  const emittersQueries = canvas.scene.getFlag(s_MODULE_ID, "emitters")
+    const emittersQueries = canvas.scene.getFlag(s_MODULE_ID, "emitters")
 
-  if(game.ready){
-      initEmitters(emittersQueries)
-  } else {
-      //Waiting the world to be ready at the first launch
-      firstSceneEmittersQueries = emittersQueries
-  }
+    if(game.ready){
+        initEmitters(emittersQueries)
+    } else {
+        //Waiting the world to be ready at the first launch
+        firstSceneEmittersQueries = emittersQueries
+    }
   }
 });
 
@@ -220,13 +223,11 @@ Hooks.on("canvasTearDown", () => {
   
   
   Hooks.on("renderChatMessage", function (chatlog, html, data) {
-    console.log(`main | renderChatMessage with ${s_MODULE_ID}`); 
-
     const buttons = html.find('button[name="button.delete-emitter"]');
 
-    if(buttons === undefined || buttons.length === 0){
-    return
-    }
+    if(buttons === undefined || buttons.length === 0) return
+
+    console.log(`main | renderChatMessage with ${s_MODULE_ID}`); 
 
     buttons.on("click", (event) => {
     let button = event.currentTarget
