@@ -27,8 +27,33 @@ export function automationInitialisation(){
             })
         )
 
+        const mainDamage = damages.reduce((acc, damage) => {
+            if(damage.value > acc.value){
+                return damage
+            }
+
+            return acc
+        },
+        {value : -100})
+
         emitDataArray.forEach(emitData => {
-            emitController.missile(emitData)
+            emitController.missile(emitData, DAMAGE_COLOR[mainDamage.type])
         });
     })
+}
+
+const DAMAGE_COLOR = {
+    acid: "poison",//TODO
+    bludgeoning: "silver",
+    fire: "fire",
+    force: "cyber",//TODO
+    lightning: "ice",//TODO
+    cold: "ice",
+    necrotic: "death",
+    piercing: "silver",
+    poison: "poison",
+    psychic: "death",//TODO
+    radiant: "light",
+    thunder: "cyber",//TODO
+    slashing: "silver"
 }
