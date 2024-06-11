@@ -5,10 +5,37 @@ export function automationInitialisation(){
     Hooks.on("dnd5e.rollDamage", async (item, rolls) => {
         console.log('Particles FX automation', item, rolls)
 
-        const damages = rolls?.map((roll) => ({
-            type : roll.options.type, 
-            value : roll.total
-        })) ?? []
+        const damageData = rolls?.reduce((acc, roll) => {
+            const colorDamage = DAMAGE_COLOR[roll.options.type]
+
+            if(acc[colorDamage]){
+                acc[colorDamage].value += roll.total
+            } else if (roll.total > 0){
+                acc[colorDamage] = { value : roll.total }
+            }
+
+            acc.resume.total += roll.total
+
+            if(! acc.resume.mainDamage.colorDamage || acc.resume.mainDamage.value < acc[colorDamage].value ){
+                acc.resume.mainDamage = { colorDamage , value: acc[colorDamage].value }
+            }
+
+            return acc
+        },
+        { 
+            resume : {
+                mainDamage: { colorDamage : undefined, value: 0 },
+                total : 0 
+            }
+        })
+
+        const damageResumed = damageData.resume
+        if(damageResumed.total === 0) return //No damage no particles
+        delete damageData.resume
+
+        const damages = Object.keys(damageData).map((key) => ({
+            colorDamage: key , value: damageData[key].value
+        }))
 
         const controlledToken = canvas?.activeLayer?.controlled ?? []
 
@@ -27,18 +54,14 @@ export function automationInitialisation(){
             })
         )
 
-        const mainDamage = damages.reduce((acc, damage) => {
-            if(damage.value > acc.value){
-                return damage
-            }
-
-            return acc
-        },
-        {value : -100})
-
-        emitDataArray.forEach(emitData => {
-            emitController.missile(emitData, DAMAGE_COLOR[mainDamage.type])
-        });
+        emitDataArray.forEach((emitData) => damages.forEach(
+            (damage) => {
+                emitController.missile(
+                    {...emitData, spawningFrequence: (10*(damageResumed.total/damage.value))}, 
+                    damage.colorDamage
+            )
+            })
+        );
     })
 }
 
