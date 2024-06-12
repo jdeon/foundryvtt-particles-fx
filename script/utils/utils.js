@@ -135,6 +135,11 @@ export class Utils {
         return canvas.scene.grid.size/canvas.scene.grid.distance
     }
 
+    static getGridDistanceBetweenPoint(source, target){
+        const pixelDistance = Math.sqrt(Math.pow((source.x - target.x), 2) + Math.pow((source.y - target.y), 2))
+        return pixelDistance/canvas.scene.grid.size
+    }
+
     static getRandomValueFrom(inValue, advancedVariables){
         if(!isNaN(inValue)){
             return Number(inValue);
