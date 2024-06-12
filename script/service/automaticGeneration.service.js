@@ -56,10 +56,18 @@ export function automationInitialisation(){
 
         emitDataArray.forEach((emitData) => damages.forEach(
             (damage) => {
-                emitController.missile(
-                    {...emitData, spawningFrequence: (10*(damageResumed.total/damage.value))}, 
-                    damage.colorDamage
-            )
+                if(emitData.distance < 2 ){
+                    emitController.gravit(
+                        {...emitData, spawningFrequence: (10*(damageResumed.total/damage.value))}, 
+                        damage.colorDamage,
+                        'slash'
+                    )
+                } else {
+                    emitController.missile(
+                        {...emitData, spawningFrequence: (10*(damageResumed.total/damage.value))}, 
+                        damage.colorDamage
+                    )
+                }
             })
         );
     })
