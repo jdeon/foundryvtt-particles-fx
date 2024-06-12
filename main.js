@@ -179,8 +179,7 @@ Hooks.on("canvasTearDown", () => {
       
       let resumeMessage
       let response
-      let source
-      let idEmitter
+      let emmissionMethod
   
       switch (functionName){
           case 'stopAll':
@@ -192,33 +191,30 @@ Hooks.on("canvasTearDown", () => {
           resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
           break
           case 'spray' : 
-          source = Utils.getSelectedSource()
-          if(source){
-              idEmitter = emitController.spray({source: source.id, target: Utils.getTargetId()}, ...otherParam)
-              writeMessageForEmissionById(idEmitter)
-          }
+          emmissionMethod = emitController.spray
           break
           case 'missile' : 
-          source = Utils.getSelectedSource()
-          if(source){
-              idEmitter = emitController.missile({source: source.id, target: Utils.getTargetId()}, ...otherParam)
-              writeMessageForEmissionById(idEmitter)
-          }
+          emmissionMethod = emitController.missile
           break
           case 'gravitate' : 
-          source = Utils.getSelectedSource()
-          if(source){
-              idEmitter = emitController.gravit({source: source.id}, ...otherParam)
-              writeMessageForEmissionById(idEmitter)
-          }
+          emmissionMethod = emitController.gravit
           break
           case 'help' : 
           resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Existing_chat_command.join(',');
           break
           default :
-          ui.notifications.error(game.i18n.localize("PARTICULE-FX.Chat-Command.Unrecognized"));
+          ui.notifications.error(game.i18n.localize("PARTICULE-FX.Chat-Command.Unrecognized"));    
       }
-  //Existing_chat_command
+
+      if (emmissionMethod){
+            const source = Utils.getSelectedSource()
+            if(source){
+                const idEmitter = emmissionMethod({source: source.id, target: Utils.getTargetId()}, ...otherParam)
+                writeMessageForEmissionById(idEmitter)
+            }
+      }
+
+        //Existing_chat_command
       if(resumeMessage){
           ui.chat.processMessage("/w gm " + resumeMessage )
       }
