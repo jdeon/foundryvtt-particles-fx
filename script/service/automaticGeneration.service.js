@@ -44,7 +44,7 @@ export function automationInitialisation(){
 
         const emitDataArray = controlledToken.flatMap((source) => 
             targets.map((target) => {
-                const distance = Utils.getGridDistanceBetweenPoint(source, target)
+                const distance = Utils.getGridDistanceBetweenPoint(source, target) //TODO v12 replace by canvas.grid.measurePath([source, target])
                 const isRange = !["mwak", "msak"].includes(item?.system?.actionType) ||  distance >= itemRange + 1
                 return { 
                     source: source.id,
