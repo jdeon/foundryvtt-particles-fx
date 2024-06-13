@@ -65,7 +65,7 @@ export function automationInitialisation(){
                     )
                 } else {
                     emitController.gravit(
-                        {...emitData, spawningFrequence: (10*(damageResumed.total/damage.value))}, 
+                        {...emitData, spawningFrequence: (10*(damageResumed.total/damage.value)), particleRadiusStart: [`${emitData.distance * 50}%`, `${emitData.distance * 75}%`, `${emitData.distance * 100}%`]}, 
                         damage.colorDamage,
                         'slash'
                     )
