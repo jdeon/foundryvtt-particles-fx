@@ -4,7 +4,7 @@ import emitController from "../api/emitController.js"
 export function automationInitialisation(){
     Hooks.on("dnd5e.rollDamage", async (item, rolls) => {
         console.log('Particles FX automation', item, rolls)
-        const itemRange = item?.system?.range.value ?? canvas.scene.grid.distance
+        const itemRange = item?.system?.range?.value ? item?.system?.range?.value / canvas.scene.grid.distance : 1
 
         const damageData = rolls?.reduce((acc, roll) => {
             const colorDamage = DAMAGE_COLOR[roll.options.type]
@@ -45,7 +45,7 @@ export function automationInitialisation(){
         const emitDataArray = controlledToken.flatMap((source) => 
             targets.map((target) => {
                 const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                const isRange = ["rwak", "rsak"].includes(item?.system?.type) ||  distance >= itemRange + 1
+                const isRange = ["rwak", "rsak"].includes(item?.system?.actionType) ||  distance >= itemRange + 1
                 return { 
                     source: source.id,
                     target: target.id,
