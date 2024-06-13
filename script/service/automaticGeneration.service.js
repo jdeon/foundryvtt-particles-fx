@@ -45,7 +45,7 @@ export function automationInitialisation(){
         const emitDataArray = controlledToken.flatMap((source) => 
             targets.map((target) => {
                 const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                const isRange = ["rwak", "rsak"].includes(item?.system?.actionType) ||  distance >= itemRange + 1
+                const isRange = !["mwak", "msak"].includes(item?.system?.actionType) ||  distance >= itemRange + 1
                 return { 
                     source: source.id,
                     target: target.id,
