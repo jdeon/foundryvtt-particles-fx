@@ -4,6 +4,7 @@ import emitController from "../api/emitController.js"
 export function automationInitialisation(){
     Hooks.on("dnd5e.rollDamage", async (item, rolls) => {
         console.log('Particles FX automation', item, rolls)
+        const itemRange = item?.system?.range?.value ? item?.system?.range?.value / canvas.scene.grid.distance : 1
 
         const damageData = rolls?.reduce((acc, roll) => {
             const colorDamage = DAMAGE_COLOR[roll.options.type]
@@ -43,23 +44,40 @@ export function automationInitialisation(){
 
         const emitDataArray = controlledToken.flatMap((source) => 
             targets.map((target) => {
-                const distance = Utils.getGridDistanceBetweenPoint(source, target)
-
+                const distance = Utils.getGridDistanceBetweenPoint(source, target) //TODO v12 replace by canvas.grid.measurePath([source, target])
+                const isRange = !["mwak", "msak"].includes(item?.system?.actionType) ||  distance >= itemRange + 1
                 return { 
                     source: source.id,
                     target: target.id,
                     distance,
-                    particleVelocityStart: (distance * 100) + '%'
+                    isRange
                 }
             })
         )
 
         emitDataArray.forEach((emitData) => damages.forEach(
             (damage) => {
-                emitController.missile(
-                    {...emitData, spawningFrequence: (10*(damageResumed.total/damage.value))}, 
-                    damage.colorDamage
-            )
+                if(emitData.isRange){
+                    emitController.missile(
+                        {
+                            ...emitData, 
+                            spawningFrequence: (10*(damageResumed.total/damage.value)),
+                            particleVelocityStart: (distance * 100) + '%'
+                        }, 
+                        damage.colorDamage
+                    )
+                } else {
+                    emitController.gravit(
+                        {
+                            ...emitData, 
+                            spawningFrequence: ((damageResumed.total/damage.value)), 
+                            particleRadiusStart: [`${emitData.distance * 50}%`, `${emitData.distance * 75}%`, `${emitData.distance * 100}%`],
+                            particleSizeStart: {x: emitData.distance * 5, y:emitData.distance * 25},                        
+                        }, 
+                        damage.colorDamage,
+                        'slash'
+                    )
+                }
             })
         );
     })
