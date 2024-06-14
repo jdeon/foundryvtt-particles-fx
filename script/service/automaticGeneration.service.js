@@ -50,7 +50,6 @@ export function automationInitialisation(){
                     source: source.id,
                     target: target.id,
                     distance,
-                    particleVelocityStart: (distance * 100) + '%',
                     isRange
                 }
             })
@@ -60,12 +59,21 @@ export function automationInitialisation(){
             (damage) => {
                 if(emitData.isRange){
                     emitController.missile(
-                        {...emitData, spawningFrequence: (10*(damageResumed.total/damage.value))}, 
+                        {
+                            ...emitData, 
+                            spawningFrequence: (10*(damageResumed.total/damage.value)),
+                            particleVelocityStart: (distance * 100) + '%'
+                        }, 
                         damage.colorDamage
                     )
                 } else {
                     emitController.gravit(
-                        {...emitData, spawningFrequence: (10*(damageResumed.total/damage.value)), particleRadiusStart: [`${emitData.distance * 50}%`, `${emitData.distance * 75}%`, `${emitData.distance * 100}%`]}, 
+                        {
+                            ...emitData, 
+                            spawningFrequence: ((damageResumed.total/damage.value)), 
+                            particleRadiusStart: [`${emitData.distance * 50}%`, `${emitData.distance * 75}%`, `${emitData.distance * 100}%`],
+                            particleSizeStart: {x: emitData.distance * 5, y:emitData.distance * 25},                        
+                        }, 
                         damage.colorDamage,
                         'slash'
                     )
