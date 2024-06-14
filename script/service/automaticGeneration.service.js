@@ -62,7 +62,7 @@ export function automationInitialisation(){
                         {
                             ...emitData, 
                             spawningFrequence: (10*(damageResumed.total/damage.value)),
-                            particleVelocityStart: (distance * 100) + '%'
+                            particleVelocityStart: (emitData.distance * 100) + '%'
                         }, 
                         damage.colorDamage
                     )
