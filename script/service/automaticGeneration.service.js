@@ -6,39 +6,11 @@ export function automationInitialisation(){
         console.log('Particles FX automation', item, rolls)
         const itemRange = item?.system?.range?.value ? item?.system?.range?.value / canvas.scene.grid.distance : 1
 
-        const damageData = rolls?.reduce((acc, roll) => {
-            const colorDamage = DAMAGE_COLOR[roll.options.type]
-
-            if(acc[colorDamage]){
-                acc[colorDamage].value += roll.total
-            } else if (roll.total > 0){
-                acc[colorDamage] = { value : roll.total }
-            }
-
-            acc.resume.total += roll.total
-
-            if(! acc.resume.mainDamage.colorDamage || acc.resume.mainDamage.value < acc[colorDamage].value ){
-                acc.resume.mainDamage = { colorDamage , value: acc[colorDamage].value }
-            }
-
-            return acc
-        },
-        { 
-            resume : {
-                mainDamage: { colorDamage : undefined, value: 0 },
-                total : 0 
-            }
-        })
-
-        const damageResumed = damageData.resume
-        if(damageResumed.total === 0) return //No damage no particles
-        delete damageData.resume
-
-        const damages = Object.keys(damageData).map((key) => ({
-            colorDamage: key , value: damageData[key].value
-        }))
+        const colors = _getColorsFromDamageRolls(rolls)
 
         const controlledToken = canvas?.activeLayer?.controlled ?? []
+
+
 
         const targets = Array.from(game?.user?.targets ?? [])
 
@@ -55,32 +27,72 @@ export function automationInitialisation(){
             })
         )
 
-        emitDataArray.forEach((emitData) => damages.forEach(
-            (damage) => {
-                if(emitData.isRange){
-                    emitController.missile(
-                        {
-                            ...emitData, 
-                            spawningFrequence: (10*(damageResumed.total/damage.value)),
-                            particleVelocityStart: (distance * 100) + '%'
-                        }, 
-                        damage.colorDamage
-                    )
-                } else {
-                    emitController.gravit(
-                        {
-                            ...emitData, 
-                            spawningFrequence: ((damageResumed.total/damage.value)), 
-                            particleRadiusStart: [`${emitData.distance * 50}%`, `${emitData.distance * 75}%`, `${emitData.distance * 100}%`],
-                            particleSizeStart: {x: emitData.distance * 5, y:emitData.distance * 25},                        
-                        }, 
-                        damage.colorDamage,
-                        'slash'
-                    )
-                }
-            })
-        );
+        _emitParticle(emitDataArray, colors)
     })
+
+}
+
+function _getColorsFromDamageRolls (rolls) {
+
+
+    const colorData = rolls?.reduce((acc, roll) => {
+        const colorDamage = DAMAGE_COLOR[roll.options.type]
+
+        if(acc[colorDamage]){
+            acc[colorDamage].value += roll.total
+        } else if (roll.total > 0){
+            acc[colorDamage] = { value : roll.total }
+        }
+
+        acc.resume.total += roll.total
+
+        if(! acc.resume.mainDamage.colorDamage || acc.resume.mainDamage.value < acc[colorDamage].value ){
+            acc.resume.mainDamage = { colorDamage , value: acc[colorDamage].value }
+        }
+
+        return acc
+    },
+    { 
+        resume : {
+            mainDamage: { colorDamage : undefined, value: 0 },
+            total : 0 
+        }
+    })
+
+    const colorResumed = colorData.resume
+    if(colorResumed.total === 0) return []
+    delete colorData.resume
+
+    return Object.keys(colorData)
+        .map((key) => ({id: key , fraction: colorData[key].value / colorResumed.total}))
+        .filter((finalColor) => finalColor.fraction > 0)
+}
+
+function _emitParticle (emitDataArray, colors){
+    emitDataArray.forEach((emitData) => 
+        colors.forEach((color) => {
+            if(emitData.isRange){
+                emitController.missile(
+                    {
+                        ...emitData, 
+                        spawningFrequence: 10*color.fraction,
+                        particleVelocityStart: (emitData.distance * 100) + '%'
+                    }, 
+                    color.id
+                )
+            } else {
+                emitController.gravit(
+                    {
+                        ...emitData, 
+                        spawningFrequence: color.fraction, 
+                        particleRadiusStart: [`${emitData.distance * 50}%`, `${emitData.distance * 75}%`, `${emitData.distance * 100}%`],
+                        particleSizeStart: {x: emitData.distance * 5, y:emitData.distance * 25},                        
+                    }, 
+                    color.id,
+                    'slash'
+                )
+            }
+        })
 }
 
 const DAMAGE_COLOR = {
