@@ -54,10 +54,11 @@ export class AutoEmissionTemplateCache {
 
                     emitController.missile(
                         {
+                            particleLifetime : 500,
                             source: source.id, 
-                            target: this._template.id,
+                            target:  Utils.getSourcePosition(this._template), //No really define with od
                             spawningFrequence: 10*color.fraction,
-                            particleVelocityStart: (distance * 100) + '%'
+                            particleVelocityStart: (distance * 100 * 2) + '%',
                         }, 
                         color.id,
                         'grow'
@@ -71,14 +72,14 @@ export class AutoEmissionTemplateCache {
                             {
                                 source: this._template.id, 
                                 spawningFrequence: 10*color.fraction,
-                                emissionDuration : 5000,
+                                emissionDuration : 4500,
                             }, 
                             color.id,
                             'grow'
                         )
                     })
                 }
-                ,1000
+                ,500
             )
        }
     }
