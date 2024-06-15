@@ -33,6 +33,9 @@ export function automationInitialisation(){
 }
 
 function _getColorsFromDamageRolls (rolls) {
+    if(!Array.isArray(rolls)){
+        rolls = [rolls]
+    }
 
 
     const colorData = rolls?.reduce((acc, roll) => {
@@ -93,6 +96,7 @@ function _emitParticle (emitDataArray, colors){
                 )
             }
         })
+    );
 }
 
 const DAMAGE_COLOR = {
