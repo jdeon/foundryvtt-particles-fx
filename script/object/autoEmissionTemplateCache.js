@@ -1,0 +1,85 @@
+import emitController from "../api/emitController.js"
+import { Utils } from "../utils/utils.js"
+
+export class AutoEmissionTemplateCache { 
+
+    static _CACHED = {}
+
+    static findByItem (itemId) {
+        let result = AutoEmissionTemplateCache._CACHED[itemId]
+        
+        if(!result){
+            result = new AutoEmissionTemplateCache(itemId)
+            AutoEmissionTemplateCache._CACHED[itemId] = result
+        }
+
+        return result
+    }
+
+    constructor(itemId){
+        this._itemId = itemId
+        this._sources = []
+        this._colors = []
+        this._template
+        this._createdAt = Date.now() 
+    }
+    
+    setColors(colors){
+        this._colors = colors
+        this._generateOnReady()
+    }
+
+    setSources(sources){
+        this._sources = sources
+        this._generateOnReady()
+    }
+
+    setTemplate(template){
+        this._template = template
+        this._generateOnReady()
+    }
+    
+
+    _checkAllReady(){
+        return this._colors?.length > 0 && this._sources?.length && this._template !== undefined && this._template.rendered
+    }
+
+    _generateOnReady(){
+        if(this._checkAllReady()){
+            delete AutoEmissionTemplateCache._CACHED[this._itemId]
+
+            this._sources.forEach((source) => 
+                this._colors.forEach((color) => {
+                    const distance = Utils.getGridDistanceBetweenPoint(source, this._template)
+
+                    emitController.missile(
+                        {
+                            source: source.id, 
+                            target: this._template.id,
+                            spawningFrequence: 10*color.fraction,
+                            particleVelocityStart: (distance * 100) + '%'
+                        }, 
+                        color.id,
+                        'grow'
+                    )
+                })
+            );
+
+            setTimeout(() => {
+                    this._colors.forEach((color) => {
+                        emitController.spray(
+                            {
+                                source: this._template.id, 
+                                spawningFrequence: 10*color.fraction,
+                                emissionDuration : 5000,
+                            }, 
+                            color.id,
+                            'grow'
+                        )
+                    })
+                }
+                ,1000
+            )
+       }
+    }
+}

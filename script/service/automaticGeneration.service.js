@@ -1,5 +1,6 @@
 import { Utils } from "../utils/utils.js"
 import emitController from "../api/emitController.js"
+import { AutoEmissionTemplateCache } from "../object/autoEmissionTemplateCache.js"
 
 export function automationInitialisation(){
     Hooks.on("dnd5e.rollDamage", async (item, rolls) => {
@@ -10,6 +11,12 @@ export function automationInitialisation(){
 
         const controlledToken = canvas?.activeLayer?.controlled ?? []
 
+        if(item.hasAreaTarget){
+            const aetc = AutoEmissionTemplateCache.findByItem(item.id)
+            aetc.setColors(colors)
+            aetc.setSources(controlledToken)
+            return
+        }
 
 
         const targets = Array.from(game?.user?.targets ?? [])
@@ -29,7 +36,18 @@ export function automationInitialisation(){
 
         _emitParticle(emitDataArray, colors)
     })
+    Hooks.on("createMeasuredTemplate", async (template, data, userId) => {
+        if (userId !== game.user.id) { return };
 
+        const originsTemplate = template?.flags?.dnd5e?.origin?.split('.') ?? []
+
+        const itemIndex = originsTemplate.indexOf('Item') + 1
+
+        if(itemIndex>0){
+            const aetc = AutoEmissionTemplateCache.findByItem(originsTemplate[itemIndex])
+            aetc.setTemplate(template)
+        }
+    })
 }
 
 function _getColorsFromDamageRolls (rolls) {
