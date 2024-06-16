@@ -1,5 +1,6 @@
 import emitController from "../api/emitController.js"
 import { Utils } from "../utils/utils.js"
+import { computeTemplateForMeasuredDimension } from "../service/measuredTemplate.service.js"
 
 export class AutoEmissionTemplateCache { 
 
@@ -67,15 +68,23 @@ export class AutoEmissionTemplateCache {
             );
 
             setTimeout(() => {
+                    const templateDimension = computeTemplateForMeasuredDimension(this._template)
+                    const templateGridAverage = (templateDimension.w + templateDimension.h) /2 / canvas.scene.grid.distance
+
                     this._colors.forEach((color) => {
                         emitController.spray(
                             {
                                 source: this._template.id, 
                                 spawningFrequence: 10*color.fraction,
                                 emissionDuration : 4500,
+                                spawningFrequence: 5*color.fraction,
+                                emissionDuration : 1500,
+                                particleSizeStart: `${10/2*templateGridAverage/2}%`,
+                                particleSizeEnd: `${25/2*templateGridAverage/2}%_${50/2*templateGridAverage/2}%`,
                             }, 
                             color.id,
                             'grow'
+                            'explosion'
                         )
                     })
                 }
