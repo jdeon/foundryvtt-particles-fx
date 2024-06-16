@@ -67,26 +67,26 @@ export class AutoEmissionTemplateCache {
                 })
             );
 
-            setTimeout(() => {
-                    const templateDimension = computeTemplateForMeasuredDimension(this._template)
-                    const templateGridAverage = (templateDimension.w + templateDimension.h) /2 / canvas.scene.grid.distance
-
-                    this._colors.forEach((color) => {
-                        emitController.spray(
-                            {
-                                source: this._template.id, 
-                                spawningFrequence: 5*color.fraction,
-                                emissionDuration : 1500,
-                                particleSizeStart: `${10/2*templateGridAverage/2}%`,
-                                particleSizeEnd: `${25/2*templateGridAverage/2}%_${50/2*templateGridAverage/2}%`,
-                            }, 
-                            color.id,
-                            'explosion'
-                        )
-                    })
-                }
-                ,500
-            )
+            setTimeout(this._generateMeasuredTemplateEmission.bind(this), 500)
        }
+    }
+
+    _generateMeasuredTemplateEmission () {
+        const templateDimension = computeTemplateForMeasuredDimension(this._template)
+        const templateGridAverage = this._template.t === 'ray' ? templateDimension.w /2 / canvas.scene.grid.distance : (templateDimension.w + templateDimension.h) /2 / canvas.scene.grid.distance
+
+        this._colors.forEach((color) => {
+            emitController.spray(
+                {
+                    source: this._template.id, 
+                    spawningFrequence: 5*color.fraction,
+                    emissionDuration : 1500,
+                    particleSizeStart: `${10/2*templateGridAverage/2}%`,
+                    particleSizeEnd: this._template.t === 'ray' ? undefined : `${25/2*templateGridAverage/2}%_${50/2*templateGridAverage/2}%`,
+                }, 
+                color.id,
+                'explosion'
+            )
+        })
     }
 }
