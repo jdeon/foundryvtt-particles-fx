@@ -35,7 +35,19 @@ export function automationInitialisation(){
         )
         _emitParticle(emitDataArray, colors)
     })
-  
+
+    Hooks.on("dnd5e.useItem", async (item) => {
+        if(item.hasAreaTarget && !item.hasDamage && item.type === "spell" && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(item.system.school)){
+            const controlledToken = canvas?.activeLayer?.controlled?.length ? canvas?.activeLayer?.controlled : [item.parent.token]
+            const aetc = AutoEmissionTemplateCache.findByItem(item.id)
+            aetc.setColors([{
+                    id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school] , 
+                    fraction: 1
+                }])
+            aetc.setSources(controlledToken)
+        }
+    })
+    
     Hooks.on("createMeasuredTemplate", async (template, data, userId) => {
         if (userId !== game.user.id) { return };
 
