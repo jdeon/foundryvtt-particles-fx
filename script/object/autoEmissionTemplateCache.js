@@ -75,15 +75,12 @@ export class AutoEmissionTemplateCache {
                         emitController.spray(
                             {
                                 source: this._template.id, 
-                                spawningFrequence: 10*color.fraction,
-                                emissionDuration : 4500,
                                 spawningFrequence: 5*color.fraction,
                                 emissionDuration : 1500,
                                 particleSizeStart: `${10/2*templateGridAverage/2}%`,
                                 particleSizeEnd: `${25/2*templateGridAverage/2}%_${50/2*templateGridAverage/2}%`,
                             }, 
                             color.id,
-                            'grow'
                             'explosion'
                         )
                     })

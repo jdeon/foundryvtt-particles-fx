@@ -218,8 +218,8 @@ export function computeTemplateForMeasuredDimension(measuredTemplate){
         result = { w: measuredTemplate.distance *2, h: measuredTemplate.distance *2 }
     } else if (measuredTemplate.t === "rect") {
         result = { 
-            w: measuredTemplate.distance*Utils.pixelOfDistanceConvertor()*Math.cos(measuredTemplate.direction*Math.PI/180), 
-            h: measuredTemplate.distance*Utils.pixelOfDistanceConvertor()*Math.sin(measuredTemplate.direction*Math.PI/180) 
+            w: measuredTemplate.distance*Math.cos(measuredTemplate.direction*Math.PI/180), 
+            h: measuredTemplate.distance*Math.sin(measuredTemplate.direction*Math.PI/180) 
         }
     } else if (measuredTemplate.t === "ray") {
         result = { 
