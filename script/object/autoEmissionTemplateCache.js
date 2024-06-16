@@ -42,7 +42,9 @@ export class AutoEmissionTemplateCache {
     
 
     _checkAllReady(){
-        return this._colors?.length > 0 && this._sources?.length && this._template !== undefined && this._template.rendered
+        return this._colors?.length > 0 
+        && this._sources?.filter((source) => !source.destroyed).length 
+        && this._template !== undefined && this._template.rendered
     }
 
     _generateOnReady(){
