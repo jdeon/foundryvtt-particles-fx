@@ -33,9 +33,9 @@ export function automationInitialisation(){
                 }
             })
         )
-
         _emitParticle(emitDataArray, colors)
     })
+  
     Hooks.on("createMeasuredTemplate", async (template, data, userId) => {
         if (userId !== game.user.id) { return };
 
