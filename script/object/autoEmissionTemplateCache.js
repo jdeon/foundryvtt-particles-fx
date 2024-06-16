@@ -6,15 +6,38 @@ export class AutoEmissionTemplateCache {
 
     static _CACHED = {}
 
+    static _INTERVAL_ID
+
     static findByItem (itemId) {
         let result = AutoEmissionTemplateCache._CACHED[itemId]
         
         if(!result){
             result = new AutoEmissionTemplateCache(itemId)
             AutoEmissionTemplateCache._CACHED[itemId] = result
+
+            if(AutoEmissionTemplateCache._INTERVAL_ID === undefined){
+                AutoEmissionTemplateCache._INTERVAL_ID = setInterval(AutoEmissionTemplateCache._removeToOldCache, 30000);
+            }
         }
 
         return result
+    }
+
+    static _removeById(itemId){
+        delete AutoEmissionTemplateCache._CACHED[itemId]
+
+        if(AutoEmissionTemplateCache._INTERVAL_ID && Object.keys(AutoEmissionTemplateCache._CACHED).length === 0){
+            clearInterval(AutoEmissionTemplateCache._INTERVAL_ID)
+        }
+    }
+
+    static _removeToOldCache(){
+        const maxCacheDuration = 5 * 60 * 1000
+        const currentTime = Date.now()
+
+        Object.keys(AutoEmissionTemplateCache._CACHED)
+            .filter((key) => currentTime - AutoEmissionTemplateCache._CACHED[key]._createdAt > maxCacheDuration)
+            .forEach((key) => AutoEmissionTemplateCache._removeById(key))
     }
 
     constructor(itemId){
@@ -49,7 +72,7 @@ export class AutoEmissionTemplateCache {
 
     _generateOnReady(){
         if(this._checkAllReady()){
-            delete AutoEmissionTemplateCache._CACHED[this._itemId]
+            AutoEmissionTemplateCache._removeById(this._itemId)
 
             this._sources.forEach((source) => 
                 this._colors.forEach((color) => {
