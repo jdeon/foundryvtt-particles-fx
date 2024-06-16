@@ -132,3 +132,14 @@ const DAMAGE_COLOR = {
     thunder: "cyber",//TODO
     slashing: "silver"
 }
+
+const MAGIC_SPELL_SCHOOL_COLOR = {
+    abj: "silver",
+    con: "cyber",
+    div: "light",
+    enc: "charm",
+    evo: "fire",
+    ill: "ice",
+    nec: "death",
+    trs: "poison",
+}

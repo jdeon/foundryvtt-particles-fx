@@ -42,12 +42,18 @@ const cyberColorTemplate = {
     particleColorEnd: new Vector3(0,'175_225',0)
 }
 
+const charmColorTemplate = {
+    particleColorStart: [new Vector3(255,'175_255','200_255'),  new Vector3(255, '175', '200')],
+    particleColorEnd: [new Vector3('100_255','50_175', '140_200'), new Vector3('100','50', '140')]
+}
+
 export const colorTemplateDictionnary = {
+    charm: charmColorTemplate,
+    cyber: cyberColorTemplate,
+    death: deathColorTemplate,
     fire : fireColorTemplate,
     ice: iceColorTemplate,
-    death: deathColorTemplate,
     light: lightColorTemplate,
     poison: poisonColorTemplate,
     silver: silverColorTemplate,
-    cyber: cyberColorTemplate
 }
