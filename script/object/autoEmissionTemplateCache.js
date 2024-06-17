@@ -110,7 +110,7 @@ export class AutoEmissionTemplateCache {
                     particleSizeEnd: this._template.t === 'ray' ? undefined : `${25/2*templateGridAverage/2}%_${50/2*templateGridAverage/2}%`,
                 }, 
                 color.id,
-                'explosion'
+                this._template.t === 'ray' ? 'ray' : 'explosion'
             )
         })
     }
