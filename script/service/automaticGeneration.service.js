@@ -23,7 +23,7 @@ export function automationInitialisation(){
 
         const emitDataArray = controlledToken.flatMap((source) => 
             targets.map((target) => {
-                const distance = Utils.getGridDistanceBetweenPoint(source, target) //TODO v12 replace by canvas.grid.measurePath([source, target])
+                const distance = Utils.getGridDistanceBetweenPoint(source, target)
                 const isRange = !["mwak", "msak"].includes(item?.system?.actionType) ||  distance >= itemRange + 1
                 return { 
                     source: source.id,
@@ -37,14 +37,37 @@ export function automationInitialisation(){
     })
 
     Hooks.on("dnd5e.useItem", async (item) => {
-        if(item.hasAreaTarget && !item.hasDamage && item.type === "spell" && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(item.system.school)){
+        if(!item.hasDamage && item.type === "spell" && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(item.system.school)){
             const controlledToken = canvas?.activeLayer?.controlled?.length ? canvas?.activeLayer?.controlled : [item.parent.token]
-            const aetc = AutoEmissionTemplateCache.findByItem(item.id)
-            aetc.setColors([{
+            
+            if(item.hasAreaTarget){
+                const aetc = AutoEmissionTemplateCache.findByItem(item.id)
+                aetc.setColors()
+                aetc.setSources(controlledToken)
+            } else {
+                const targets = Array.from(game?.user?.targets ?? [])
+
+                const emitDataArray = controlledToken.flatMap((source) => 
+                    targets.map((target) => {
+                        const distance = Utils.getGridDistanceBetweenPoint(source, target)
+                        return { 
+                            source: source.id,
+                            target: target.id,
+                            distance,
+                            isRange: true
+                        }
+                    })
+                )
+
+                _emitParticle(emitDataArray,
+                     [{
                     id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school] , 
                     fraction: 1
                 }])
             aetc.setSources(controlledToken)
+                    }]
+                )
+            }
         }
     })
     
