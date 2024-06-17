@@ -66,7 +66,6 @@ export class AutoEmissionTemplateCache {
 
     _checkAllReady(){
         return this._colors?.length > 0 
-        && this._sources?.filter((source) => !source.destroyed).length 
         && this._template !== undefined && this._template.rendered
     }
 
@@ -74,26 +73,32 @@ export class AutoEmissionTemplateCache {
         if(this._checkAllReady()){
             AutoEmissionTemplateCache._removeById(this._itemId)
 
-            this._sources.forEach((source) => 
-                this._colors.forEach((color) => {
-                    const distance = Utils.getGridDistanceBetweenPoint(source, this._template)
+            const isWithoutSource = this._sources?.filter((source) => !source.destroyed)?.length == 0
 
-                    emitController.missile(
-                        {
-                            particleLifetime : 500,
-                            source: source.id, 
-                            target:  Utils.getSourcePosition(this._template), //No really define with od
-                            spawningFrequence: 10*color.fraction,
-                            particleVelocityStart: (distance * 100 * 2) + '%',
-                        }, 
-                        color.id,
-                        'grow'
-                    )
-                })
-            );
+            if(isWithoutSource){
+                this._generateMeasuredTemplateEmission()
+            } else {
+                this._sources.forEach((source) => 
+                    this._colors.forEach((color) => {
+                        const distance = Utils.getGridDistanceBetweenPoint(source, this._template)
 
-            setTimeout(this._generateMeasuredTemplateEmission.bind(this), 500)
-       }
+                        emitController.missile(
+                            {
+                                particleLifetime : 500,
+                                source: source.id, 
+                                target:  Utils.getSourcePosition(this._template), //No really define with od
+                                spawningFrequence: 10*color.fraction,
+                                particleVelocityStart: (distance * 100 * 2) + '%',
+                            }, 
+                            color.id,
+                            'grow'
+                        )
+                    })
+                );
+
+                setTimeout(this._generateMeasuredTemplateEmission.bind(this), 500)
+            }
+        }
     }
 
     _generateMeasuredTemplateEmission () {

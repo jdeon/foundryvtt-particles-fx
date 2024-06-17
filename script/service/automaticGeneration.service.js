@@ -13,8 +13,8 @@ export function automationInitialisation(){
 
         if(item.hasAreaTarget){
             const aetc = AutoEmissionTemplateCache.findByItem(item.id)
-            aetc.setColors(colors)
             aetc.setSources(controlledToken)
+            aetc.setColors(colors)
             return
         }
 
@@ -42,8 +42,11 @@ export function automationInitialisation(){
             
             if(item.hasAreaTarget){
                 const aetc = AutoEmissionTemplateCache.findByItem(item.id)
-                aetc.setColors()
                 aetc.setSources(controlledToken)
+                aetc.setColors([{
+                    id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school] , 
+                    fraction: 1
+                    }])
             } else {
                 const targets = Array.from(game?.user?.targets ?? [])
 
