@@ -63,8 +63,6 @@ export function automationInitialisation(){
                      [{
                     id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school] , 
                     fraction: 1
-                }])
-            aetc.setSources(controlledToken)
                     }]
                 )
             }
@@ -153,18 +151,19 @@ function _emitParticle (emitDataArray, colors){
 }
 
 const DAMAGE_COLOR = {
-    acid: "poison",//TODO
+    acid: "cyber",
     bludgeoning: "silver",
     fire: "fire",
-    force: "cyber",//TODO
-    lightning: "ice",//TODO
+    force: "charm",
+    healing: undefined,
+    lightning: "ice",
     cold: "ice",
     necrotic: "death",
     piercing: "silver",
     poison: "poison",
-    psychic: "death",//TODO
+    psychic: "death",
     radiant: "light",
-    thunder: "cyber",//TODO
+    thunder: "silver",
     slashing: "silver"
 }
 
