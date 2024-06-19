@@ -6,6 +6,7 @@ export const TYPE_EMISSION = {
     meleeAttack: 1,
     rangeAttack: 2,
     bonusEffect: 3,
+    penaltyEffect: 4,
 }
 
 export function automationInitialisation(){
@@ -99,6 +100,8 @@ function findTypeEmission(item, isMelee){
         emissionType = TYPE_EMISSION.meleeAttack
     } else if (["heal", "util"].includes(item?.system?.actionType)){
         emissionType = TYPE_EMISSION.bonusEffect
+    } else if ("save" === item?.system?.actionType){
+        emissionType = TYPE_EMISSION.penaltyEffect
     } else {
         emissionType = TYPE_EMISSION.rangeAttack
     }
@@ -148,6 +151,7 @@ function _getColorsFromDamageRolls (rolls) {
 function _emitParticle (emitDataArray, colors){
     emitDataArray.forEach((emitData) => 
         colors.forEach((color) => {
+            let gridSizeSource
             switch(emitData.type){
                 case TYPE_EMISSION.meleeAttack :
                     emitController.gravit(
@@ -174,12 +178,12 @@ function _emitParticle (emitDataArray, colors){
                     )
                     break
                 case TYPE_EMISSION.bonusEffect :
-                    const gridSizeSource = (Math.max(emitData.target.w, emitData.target.h) ?? canvas.scene.grid.size)/canvas.scene.grid.size 
+                    gridSizeSource = (Math.max(emitData.target.w, emitData.target.h) ?? canvas.scene.grid.size)/canvas.scene.grid.size 
                     emitController.gravit(
                         {
                             source: emitData.target.id,
                             emissionDuration: 2000,
-                            spawningFrequence: 10*color.fraction,
+                            spawningFrequence: 5*color.fraction,
                             particleRadiusStart: `${gridSizeSource*50}%`,
                             particleRadiusEnd: `${gridSizeSource*50 + 25}%_${gridSizeSource*100 + 50}%`,
                         }, 
@@ -187,6 +191,26 @@ function _emitParticle (emitDataArray, colors){
                         "aura"
                     )
                     break
+                case TYPE_EMISSION.penaltyEffect :
+                    gridSizeSource = (Math.max(emitData.target.w, emitData.target.h) ?? canvas.scene.grid.size)/canvas.scene.grid.size 
+                    emitController.gravit(
+                        {
+                            source: emitData.target.id,
+                            emissionDuration: 2000,
+                            spawningFrequence: 6*color.fraction,
+                            particleRadiusStart: `${gridSizeSource*50}%`,
+                            particleRadiusEnd: `${gridSizeSource*50 + 25}%_${gridSizeSource*100 + 50}%`,
+                            particleRadiusStart: `${gridSizeSource*50 + 50}%`,
+                            particleRadiusEnd: `${gridSizeSource*25}%`,
+                        }, 
+                        color.id,
+                        "vortex"
+                    )
+                    break
+                default :
+                console.warn('Automatic emission with unknown type ' + emitData.type)
+                break
+                    
             }
         })
     );
