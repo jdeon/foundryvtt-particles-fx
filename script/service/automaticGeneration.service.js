@@ -2,6 +2,12 @@ import { Utils } from "../utils/utils.js"
 import emitController from "../api/emitController.js"
 import { AutoEmissionTemplateCache } from "../object/autoEmissionTemplateCache.js"
 
+export const TYPE_EMISSION = {
+    meleeAttack: 1,
+    rangeAttack: 2,
+    bonusEffect: 3,
+}
+
 export function automationInitialisation(){
     Hooks.on("dnd5e.rollDamage", async (item, rolls) => {
         console.log('Particles FX automation', item, rolls)
@@ -24,12 +30,12 @@ export function automationInitialisation(){
         const emitDataArray = controlledToken.flatMap((source) => 
             targets.map((target) => {
                 const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                const isRange = !["mwak", "msak"].includes(item?.system?.actionType) ||  distance >= itemRange + 1
+                const type = findTypeEmission(item, distance < itemRange + 1)
                 return { 
-                    source: source.id,
-                    target: target.id,
+                    source: source,
+                    target: target,
                     distance,
-                    isRange
+                    type
                 }
             })
         )
@@ -53,11 +59,12 @@ export function automationInitialisation(){
                 const emitDataArray = controlledToken.flatMap((source) => 
                     targets.map((target) => {
                         const distance = Utils.getGridDistanceBetweenPoint(source, target)
+                        const type = findTypeEmission(item, false)
                         return { 
-                            source: source.id,
-                            target: target.id,
+                            source: source,
+                            target: target,
                             distance,
-                            isRange: true
+                            type: type
                         }
                     })
                 )
@@ -84,6 +91,19 @@ export function automationInitialisation(){
             aetc.setTemplate(template)
         }
     })
+}
+
+function findTypeEmission(item, isMelee){
+    let emissionType
+    if(["mwak", "msak"].includes(item?.system?.actionType) && isMelee){
+        emissionType = TYPE_EMISSION.meleeAttack
+    } else if (["heal", "util"].includes(item?.system?.actionType)){
+        emissionType = TYPE_EMISSION.bonusEffect
+    } else {
+        emissionType = TYPE_EMISSION.rangeAttack
+    }
+
+    return emissionType
 }
 
 function _getColorsFromDamageRolls (rolls) {
@@ -128,26 +148,45 @@ function _getColorsFromDamageRolls (rolls) {
 function _emitParticle (emitDataArray, colors){
     emitDataArray.forEach((emitData) => 
         colors.forEach((color) => {
-            if(emitData.isRange){
-                emitController.missile(
-                    {
-                        ...emitData, 
-                        spawningFrequence: 10*color.fraction,
-                        particleVelocityStart: (emitData.distance * 100) + '%'
-                    }, 
-                    color.id
-                )
-            } else {
-                emitController.gravit(
-                    {
-                        ...emitData, 
-                        spawningFrequence: color.fraction, 
-                        particleRadiusStart: [`${emitData.distance * 50}%`, `${emitData.distance * 75}%`, `${emitData.distance * 100}%`],
-                        particleSizeStart: {x: emitData.distance * 5, y:emitData.distance * 25},                        
-                    }, 
-                    color.id,
-                    'slash'
-                )
+            switch(emitData.type){
+                case TYPE_EMISSION.meleeAttack :
+                    emitController.gravit(
+                        {
+                            source: emitData.source?.id,
+                            target: emitData.target?.id, 
+                            spawningFrequence: color.fraction, 
+                            particleRadiusStart: [`${emitData.distance * 50}%`, `${emitData.distance * 75}%`, `${emitData.distance * 100}%`],
+                            particleSizeStart: {x: emitData.distance * 5, y:emitData.distance * 25},                        
+                        }, 
+                        color.id,
+                        'slash'
+                    )
+                    break
+                case TYPE_EMISSION.rangeAttack :
+                    emitController.missile(
+                        {
+                            source: emitData.source?.id,
+                            target: emitData.target?.id, 
+                            spawningFrequence: 10*color.fraction,
+                            particleVelocityStart: (emitData.distance * 100) + '%'
+                        }, 
+                        color.id
+                    )
+                    break
+                case TYPE_EMISSION.bonusEffect :
+                    const gridSizeSource = (Math.max(emitData.target.w, emitData.target.h) ?? canvas.scene.grid.size)/canvas.scene.grid.size 
+                    emitController.gravit(
+                        {
+                            source: emitData.target.id,
+                            emissionDuration: 2000,
+                            spawningFrequence: 10*color.fraction,
+                            particleRadiusStart: `${gridSizeSource*50}%`,
+                            particleRadiusEnd: `${gridSizeSource*50 + 25}%_${gridSizeSource*100 + 50}%`,
+                        }, 
+                        color.id,
+                        "aura"
+                    )
+                    break
             }
         })
     );
