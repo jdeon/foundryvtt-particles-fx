@@ -59,11 +59,12 @@ export function automationInitialisation(){
                 const emitDataArray = controlledToken.flatMap((source) => 
                     targets.map((target) => {
                         const distance = Utils.getGridDistanceBetweenPoint(source, target)
+                        const type = findTypeEmission(item, false)
                         return { 
                             source: source,
                             target: target,
                             distance,
-                            type: TYPE_EMISSION.rangeAttack
+                            type: type
                         }
                     })
                 )
