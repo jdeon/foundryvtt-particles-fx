@@ -7,7 +7,7 @@ import emitController from "./script/api/emitController.js"
 import apiController from "./script/api/apiController.js"
 import { subscribeApiToWindow } from "./script/api/windowsController.js"
 import ParticlesEmitter from "./script/object/particlesEmitter.js"
-import { automationInitialisation } from "./script/service/automaticGeneration.service.js"
+import { automationInitialisation } from "./script/autoGeneration/automaticGeneration.service.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 let firstSceneEmittersQueries

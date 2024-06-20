@@ -1,13 +1,6 @@
-import { Utils } from "../utils/utils.js"
-import emitController from "../api/emitController.js"
-import { AutoEmissionTemplateCache } from "../object/autoEmissionTemplateCache.js"
-
-export const TYPE_EMISSION = {
-    meleeAttack: 1,
-    rangeAttack: 2,
-    bonusEffect: 3,
-    penaltyEffect: 4,
-}
+import { Utils } from "../../utils/utils.js"
+import { AutoEmissionTemplateCache } from "../../object/autoEmissionTemplateCache.js"
+import { ColorData, EmitData, emitParticle, TYPE_EMISSION } from "../automaticGeneration.service.js"
 
 export function automationInitialisation(){
     Hooks.on("dnd5e.rollDamage", async (item, rolls) => {
@@ -31,16 +24,11 @@ export function automationInitialisation(){
         const emitDataArray = controlledToken.flatMap((source) => 
             targets.map((target) => {
                 const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                const type = findTypeEmission(item, distance < itemRange + 1)
-                return { 
-                    source: source,
-                    target: target,
-                    distance,
-                    type
-                }
+                const type = _findTypeEmission(item, distance < itemRange + 1)
+                return new EmitData(type, source, target, distance)
             })
         )
-        _emitParticle(emitDataArray, colors)
+        emitParticle(emitDataArray, colors)
     })
 
     Hooks.on("dnd5e.useItem", async (item) => {
@@ -60,17 +48,12 @@ export function automationInitialisation(){
                 const emitDataArray = controlledToken.flatMap((source) => 
                     targets.map((target) => {
                         const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                        const type = findTypeEmission(item, false)
-                        return { 
-                            source: source,
-                            target: target,
-                            distance,
-                            type: type
-                        }
+                        const type = _findTypeEmission(item, false)
+                        return new EmitData(type, source, target, distance)
                     })
                 )
 
-                _emitParticle(emitDataArray,
+                emitParticle(emitDataArray,
                      [{
                     id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school] , 
                     fraction: 1
@@ -94,7 +77,7 @@ export function automationInitialisation(){
     })
 }
 
-function findTypeEmission(item, isMelee){
+function _findTypeEmission(item, isMelee){
     let emissionType
     if(["mwak", "msak"].includes(item?.system?.actionType) && isMelee){
         emissionType = TYPE_EMISSION.meleeAttack
@@ -144,76 +127,8 @@ function _getColorsFromDamageRolls (rolls) {
     delete colorData.resume
 
     return Object.keys(colorData)
-        .map((key) => ({id: key , fraction: colorData[key].value / colorResumed.total}))
+        .map((key) => new ColorData(key, colorData[key].value / colorResumed.total))
         .filter((finalColor) => finalColor.fraction > 0)
-}
-
-function _emitParticle (emitDataArray, colors){
-    emitDataArray.forEach((emitData) => 
-        colors.forEach((color) => {
-            let gridSizeSource
-            switch(emitData.type){
-                case TYPE_EMISSION.meleeAttack :
-                    emitController.gravit(
-                        {
-                            source: emitData.source?.id,
-                            target: emitData.target?.id, 
-                            spawningFrequence: color.fraction, 
-                            particleRadiusStart: [`${emitData.distance * 50}%`, `${emitData.distance * 75}%`, `${emitData.distance * 100}%`],
-                            particleSizeStart: {x: emitData.distance * 5, y:emitData.distance * 25},                        
-                        }, 
-                        color.id,
-                        'slash'
-                    )
-                    break
-                case TYPE_EMISSION.rangeAttack :
-                    emitController.missile(
-                        {
-                            source: emitData.source?.id,
-                            target: emitData.target?.id, 
-                            spawningFrequence: 10*color.fraction,
-                            particleVelocityStart: (emitData.distance * 100) + '%'
-                        }, 
-                        color.id
-                    )
-                    break
-                case TYPE_EMISSION.bonusEffect :
-                    gridSizeSource = (Math.max(emitData.target.w, emitData.target.h) ?? canvas.scene.grid.size)/canvas.scene.grid.size 
-                    emitController.gravit(
-                        {
-                            source: emitData.target.id,
-                            emissionDuration: 2000,
-                            spawningFrequence: 5*color.fraction,
-                            particleRadiusStart: `${gridSizeSource*50}%`,
-                            particleRadiusEnd: `${gridSizeSource*50 + 25}%_${gridSizeSource*100 + 50}%`,
-                        }, 
-                        color.id,
-                        "aura"
-                    )
-                    break
-                case TYPE_EMISSION.penaltyEffect :
-                    gridSizeSource = (Math.max(emitData.target.w, emitData.target.h) ?? canvas.scene.grid.size)/canvas.scene.grid.size 
-                    emitController.gravit(
-                        {
-                            source: emitData.target.id,
-                            emissionDuration: 2000,
-                            spawningFrequence: 6*color.fraction,
-                            particleRadiusStart: `${gridSizeSource*50}%`,
-                            particleRadiusEnd: `${gridSizeSource*50 + 25}%_${gridSizeSource*100 + 50}%`,
-                            particleRadiusStart: `${gridSizeSource*50 + 50}%`,
-                            particleRadiusEnd: `${gridSizeSource*25}%`,
-                        }, 
-                        color.id,
-                        "vortex"
-                    )
-                    break
-                default :
-                console.warn('Automatic emission with unknown type ' + emitData.type)
-                break
-                    
-            }
-        })
-    );
 }
 
 const DAMAGE_COLOR = {
