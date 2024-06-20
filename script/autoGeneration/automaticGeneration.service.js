@@ -1,4 +1,5 @@
 import emitController from "../api/emitController.js"
+import { s_MODULE_ID } from "../utils/utils.js"
 import * as dnd5e from "./system/dnd5eHandling.js"
 
 //Suported system script need to have automationInitialisation and getColorsFromDamageRolls methods
@@ -31,9 +32,22 @@ export class ColorData {
     }
 }
 
-export function automationInitialisation(){
+export function setupAutomation(){
     systemMethods = SUPPORTED_SYSTEM[game.system.id]
 
+    if(systemMethods){
+        game.settings.register(s_MODULE_ID, "autoEmission", {
+            name: game.i18n.localize("PARTICULE-FX.Settings.autoEmission.label"),
+            hint: game.i18n.localize("PARTICULE-FX.Settings.autoEmission.description"),
+            scope: "client",
+        config: true,
+        type: Boolean,
+        default: true
+        });
+    }
+}
+
+export function automationInitialisation(){
     if(systemMethods){
         systemMethods.automationInitialisation()
     }

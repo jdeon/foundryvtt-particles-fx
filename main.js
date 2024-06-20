@@ -7,7 +7,7 @@ import emitController from "./script/api/emitController.js"
 import apiController from "./script/api/apiController.js"
 import { subscribeApiToWindow } from "./script/api/windowsController.js"
 import ParticlesEmitter from "./script/object/particlesEmitter.js"
-import { automationInitialisation } from "./script/autoGeneration/automaticGeneration.service.js"
+import { setupAutomation, automationInitialisation } from "./script/autoGeneration/automaticGeneration.service.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 let firstSceneEmittersQueries
@@ -30,8 +30,6 @@ Hooks.on("init", () => {
   let invalid = ChatLog.MESSAGE_PATTERNS["invalid"]
   delete ChatLog.MESSAGE_PATTERNS["invalid"]
   ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
-
-  automationInitialisation()
 });
 
 Hooks.on("setup", () => {
@@ -73,6 +71,8 @@ Hooks.on("setup", () => {
       scope: "world",
   config: true,
   });
+
+  setupAutomation()
 
   game.settings.register(s_MODULE_ID, "maxEmitterId", {
   name: "Last id emitter",
@@ -140,6 +140,7 @@ Hooks.once('ready', function () {
 
   game.modules.get(s_MODULE_ID).api = apiController
   subscribeApiToWindow()
+  automationInitialisation()
 
   listen()
 });  

@@ -1,4 +1,6 @@
 {
+    "PARTICULE-FX.Settings.autoEmission.label":"Automatic emission",
+    "PARTICULE-FX.Settings.autoEmission.description":"Auto-generate emission when using some item with a target",
     "PARTICULE-FX.Settings.Avoid.label": "Avoid particle emission",
     "PARTICULE-FX.Settings.Avoid.description": "Don't show particles from other client (useful for lower config)",
     "PARTICULE-FX.Settings.Persist.label": "Save emitters",
