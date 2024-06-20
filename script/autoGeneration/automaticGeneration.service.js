@@ -8,6 +8,7 @@ const SUPPORTED_SYSTEM = {
 }
 
 let systemMethods
+let isInit = false
 
 export const TYPE_EMISSION = {
     meleeAttack: 1,
@@ -40,16 +41,18 @@ export function setupAutomation(){
             name: game.i18n.localize("PARTICULE-FX.Settings.autoEmission.label"),
             hint: game.i18n.localize("PARTICULE-FX.Settings.autoEmission.description"),
             scope: "client",
-        config: true,
-        type: Boolean,
-        default: true
+            config: true,
+            type: Boolean,
+            default: true,
+            onChange: automationInitialisation
         });
     }
 }
 
 export function automationInitialisation(){
-    if(systemMethods){
+    if(!isInit && systemMethods && game.settings.get(s_MODULE_ID, "autoEmission")){
         systemMethods.automationInitialisation()
+        isInit =true
     }
 }
 
@@ -59,6 +62,11 @@ export function automationInitialisation(){
  * @param {[ColorData]} colors 
  */
 export function emitParticle (emitDataArray, colors){
+    if(! game.settings.get(s_MODULE_ID, "autoEmission")){
+        console.log('particles FX | autoEmission is disable')
+        return
+    }
+
     emitDataArray.forEach((emitData) => 
         colors.forEach((color) => {
             let gridSizeSource
