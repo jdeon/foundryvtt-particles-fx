@@ -1,13 +1,13 @@
 import { Utils } from "../../utils/utils.js"
 import { AutoEmissionTemplateCache } from "../../object/autoEmissionTemplateCache.js"
-import { ColorData, EmitData, emitParticle, TYPE_EMISSION } from "../automaticGeneration.service.js"
+import { getColorsFromDamageRolls, EmitData, emitParticle, TYPE_EMISSION } from "../automaticGeneration.service.js"
 
 export function automationInitialisation(){
     Hooks.on("dnd5e.rollDamage", async (item, rolls) => {
         console.log('Particles FX automation', item, rolls)
         const itemRange = item?.system?.range?.value ? item?.system?.range?.value / canvas.scene.grid.distance : 1
 
-        const colors = _getColorsFromDamageRolls(rolls)
+        const colors = getColorsFromDamageRolls(rolls)
 
         const controlledToken = canvas?.activeLayer?.controlled ?? []
 
@@ -92,43 +92,8 @@ function _findTypeEmission(item, isMelee){
     return emissionType
 }
 
-function _getColorsFromDamageRolls (rolls) {
-    if(!Array.isArray(rolls)){
-        rolls = [rolls]
-    }
-
-
-    const colorData = rolls?.reduce((acc, roll) => {
-        const colorDamage = DAMAGE_COLOR[roll.options.type]
-
-        if(acc[colorDamage]){
-            acc[colorDamage].value += roll.total
-        } else if (roll.total > 0){
-            acc[colorDamage] = { value : roll.total }
-        }
-
-        acc.resume.total += roll.total
-
-        if(! acc.resume.mainDamage.colorDamage || acc.resume.mainDamage.value < acc[colorDamage].value ){
-            acc.resume.mainDamage = { colorDamage , value: acc[colorDamage].value }
-        }
-
-        return acc
-    },
-    { 
-        resume : {
-            mainDamage: { colorDamage : undefined, value: 0 },
-            total : 0 
-        }
-    })
-
-    const colorResumed = colorData.resume
-    if(colorResumed.total === 0) return []
-    delete colorData.resume
-
-    return Object.keys(colorData)
-        .map((key) => new ColorData(key, colorData[key].value / colorResumed.total))
-        .filter((finalColor) => finalColor.fraction > 0)
+export function getColorFromDamageRolls(roll){
+    return DAMAGE_COLOR[roll.options.type]
 }
 
 const DAMAGE_COLOR = {

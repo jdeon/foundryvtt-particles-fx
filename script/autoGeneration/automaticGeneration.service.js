@@ -1,6 +1,7 @@
 import emitController from "../api/emitController.js"
 import * as dnd5e from "./system/dnd5eHandling.js"
 
+//Suported system script need to have automationInitialisation and getColorsFromDamageRolls methods
 const SUPPORTED_SYSTEM = {
     dnd5e: dnd5e
 }
@@ -31,7 +32,11 @@ export class ColorData {
 }
 
 export function automationInitialisation(){
-    dnd5e.automationInitialisation()
+    systemMethods = SUPPORTED_SYSTEM[game.system.id]
+
+    if(systemMethods){
+        systemMethods.automationInitialisation()
+    }
 }
 
 /**
@@ -105,4 +110,41 @@ export function emitParticle (emitDataArray, colors){
             }
         })
     );
+}
+
+export function getColorsFromDamageRolls (rolls) {
+    if(!Array.isArray(rolls)){
+        rolls = [rolls]
+    }
+
+    const colorResumed = {
+        mainDamage: { colorDamage : undefined, value: 0 },
+        total : 0 
+    }
+    const colorData = rolls?.reduce((acc, roll) => {
+        const colorDamage = systemMethods.getColorFromDamageRolls(roll)
+
+        if(acc[colorDamage]){
+            acc[colorDamage].value += roll.total
+        } else if (roll.total > 0){
+            acc[colorDamage] = { value : roll.total }
+        }
+
+        colorResumed.total += roll.total
+
+        if(! colorResumed.mainDamage.colorDamage || colorResumed.mainDamage.value < acc[colorDamage].value ){
+            colorResumed.mainDamage = { colorDamage , value: acc[colorDamage].value }
+        }
+
+        return acc
+    },
+    {})
+
+
+    if(colorResumed.total === 0) return []
+    delete colorData.resume
+
+    return Object.keys(colorData)
+        .map((key) => new ColorData(key, colorData[key].value / colorResumed.total))
+        .filter((finalColor) => finalColor.fraction > 0)
 }
