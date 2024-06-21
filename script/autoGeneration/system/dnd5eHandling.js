@@ -62,19 +62,22 @@ export function automationInitialisation(){
             }
         }
     })
-    
-    Hooks.on("createMeasuredTemplate", async (template, data, userId) => {
-        if (userId !== game.user.id) { return };
+}
 
-        const originsTemplate = template?.flags?.dnd5e?.origin?.split('.') ?? []
+export function getColorFromDamageRolls(roll){
+    return DAMAGE_COLOR[roll.options.type]
+}
 
-        const itemIndex = originsTemplate.indexOf('Item') + 1
+export function getItemIdFromTemplate(template){
+    const originsTemplate = template?.flags?.dnd5e?.origin?.split('.') ?? []
 
-        if(itemIndex>0){
-            const aetc = AutoEmissionTemplateCache.findByItem(originsTemplate[itemIndex])
-            aetc.setTemplate(template)
-        }
-    })
+    const itemIndex = originsTemplate.indexOf('Item') + 1
+
+    if(itemIndex>0){
+        return originsTemplate[itemIndex]
+    } else {
+        return
+    }
 }
 
 function _findTypeEmission(item, isMelee){
@@ -90,10 +93,6 @@ function _findTypeEmission(item, isMelee){
     }
 
     return emissionType
-}
-
-export function getColorFromDamageRolls(roll){
-    return DAMAGE_COLOR[roll.options.type]
 }
 
 const DAMAGE_COLOR = {

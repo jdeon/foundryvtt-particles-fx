@@ -1,8 +1,9 @@
 import emitController from "../api/emitController.js"
 import { s_MODULE_ID } from "../utils/utils.js"
+import { AutoEmissionTemplateCache } from "./autoEmissionTemplateCache.js"
 import * as dnd5e from "./system/dnd5eHandling.js"
 
-//Suported system script need to have automationInitialisation and getColorsFromDamageRolls methods
+//Suported system script need to have automationInitialisation, getColorsFromDamageRolls and getItemIdFromTemplate methods
 const SUPPORTED_SYSTEM = {
     dnd5e: dnd5e
 }
@@ -52,6 +53,7 @@ export function setupAutomation(){
 export function automationInitialisation(){
     if(!isInit && systemMethods && game.settings.get(s_MODULE_ID, "autoEmission")){
         systemMethods.automationInitialisation()
+        _initGlobalHooks()
         isInit =true
     }
 }
@@ -169,4 +171,17 @@ export function getColorsFromDamageRolls (rolls) {
     return Object.keys(colorData)
         .map((key) => new ColorData(key, colorData[key].value / colorResumed.total))
         .filter((finalColor) => finalColor.fraction > 0)
+}
+
+function _initGlobalHooks(){
+    Hooks.on("createMeasuredTemplate", async (template, data, userId) => {
+        if (userId !== game.user.id && ! systemMethods) return
+
+        const itemId = systemMethods.getItemIdFromTemplate(template)
+
+        if(itemId){
+            const aetc = AutoEmissionTemplateCache.findByItem(itemId)
+            aetc.setTemplate(template)
+        }
+    })
 }
