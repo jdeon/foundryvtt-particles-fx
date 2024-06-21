@@ -1,5 +1,5 @@
 import { Utils } from "../../utils/utils.js"
-import { AutoEmissionTemplateCache } from "../../object/autoEmissionTemplateCache.js"
+import { AutoEmissionTemplateCache } from "../autoEmissionTemplateCache.js"
 import { getColorsFromDamageRolls, EmitData, emitParticle, TYPE_EMISSION } from "../automaticGeneration.service.js"
 
 export function automationInitialisation(){
