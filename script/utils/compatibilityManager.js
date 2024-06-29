@@ -94,7 +94,7 @@ export class CompatibiltyV2Manager {
         if(!game.settings.get(s_MODULE_ID, "migrationV2Done")){
             const oldAvoidParticuleSettings =  game.settings.get(s_MODULE_ID, "avoidParticule")
             game.settings.set(s_MODULE_ID, "avoidParticle", oldAvoidParticuleSettings)
-            game.settings.get(s_MODULE_ID, "migrationV2Done", true)
+            game.settings.set(s_MODULE_ID, "migrationV2Done", true)
         }
     }
 }
