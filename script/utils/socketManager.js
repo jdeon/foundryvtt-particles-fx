@@ -1,5 +1,7 @@
 import { s_MODULE_ID, s_EVENT_NAME } from "./utils.js"
 import customPrefillTemplateApi from "../api/templateController.js"
+import * as particlesEmitterService from "../service/particlesEmitter.service.js"
+
 
 /**
  * Defines the different message types that FQL sends over `game.socket`.
