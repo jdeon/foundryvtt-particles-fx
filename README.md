@@ -7,11 +7,13 @@ The module contains several methods to generate particles without needing premad
 
 ## What's New
 - **v2.1.0**: We added advanced mode to link multiple inputs together and change the static value with dynamic functions.
+- **v2.2.0**: We added automatic emission settings. Particles can be generate on items usage (Only existing on DnD 5e)
 
 ## Settings
 1. Avoid showing particle from other client (useful for minimal configuration) (Client setting)
 2. Save emitters when changing scene and retrieve when returning (World setting)
 3. Define minimal user role to manage the custom prefill templates (World setting)
+4. Automatic generate emission when using items (Client setting) (Only existing on DnD 5e)
 
 ## Emission Methods
 The emission methods are used to interpret the input and manage the particles during their lifetime. The method returns its ID.
