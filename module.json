@@ -2,7 +2,7 @@
 	"id": "particule-fx",
 	"title": "Particles FX",
 	"description": "Emit particles using chat message commands or api calls.",
-	"version": "2.1.0",
+	"version": "2.2.0",
 	"compatibility": {
 		"minimum": "10",
 		"verified": "11.315"

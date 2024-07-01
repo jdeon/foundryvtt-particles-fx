@@ -166,8 +166,6 @@ export class GravitingParticle  extends Particle {
         
         const updatedRadius = Particle._computeValue(this.radiusStart.getValue(this.advancedVariables), this.radiusEnd.getValue(this.advancedVariables), lifetimeProportion)
 
-        
-
         this.positionVibrationLess.x = source.x + Math.cos(angleRadiant) * updatedRadius;
         this.positionVibrationLess.y = source.y + Math.sin(angleRadiant) * updatedRadius;
 

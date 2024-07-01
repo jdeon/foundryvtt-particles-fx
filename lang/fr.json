@@ -1,4 +1,6 @@
 {
+  "PARTICULE-FX.Settings.autoEmission.label":"Automatique emission",
+  "PARTICULE-FX.Settings.autoEmission.description":"Génère automatiquement des emission à l'usage de certains objets avec une cible",
   "PARTICULE-FX.Settings.Avoid.label": "Bloquer les émissions",
   "PARTICULE-FX.Settings.Avoid.description": "Ne pas afficher les émissions de particules générés par les autres clients (utils pour les petits configuration)",
   "PARTICULE-FX.Settings.Persist.label": "Sauvegarder les émetteurs",

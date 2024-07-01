@@ -7,6 +7,7 @@ import emitController from "./script/api/emitController.js"
 import apiController from "./script/api/apiController.js"
 import { subscribeApiToWindow } from "./script/api/windowsController.js"
 import ParticlesEmitter from "./script/object/particlesEmitter.js"
+import { setupAutomation, automationInitialisation } from "./script/autoGeneration/automaticGeneration.service.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 let firstSceneEmittersQueries
@@ -70,6 +71,8 @@ Hooks.on("setup", () => {
       scope: "world",
   config: true,
   });
+
+  setupAutomation()
 
   game.settings.register(s_MODULE_ID, "maxEmitterId", {
   name: "Last id emitter",
@@ -137,6 +140,7 @@ Hooks.once('ready', function () {
 
   game.modules.get(s_MODULE_ID).api = apiController
   subscribeApiToWindow()
+  automationInitialisation()
 
   listen()
 });  
@@ -176,8 +180,7 @@ Hooks.on("canvasTearDown", () => {
       
       let resumeMessage
       let response
-      let source
-      let idEmitter
+      let emmissionMethod
   
       switch (functionName){
           case 'stopAll':
@@ -189,33 +192,30 @@ Hooks.on("canvasTearDown", () => {
           resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
           break
           case 'spray' : 
-          source = Utils.getSelectedSource()
-          if(source){
-              idEmitter = emitController.spray({source: source.id, target: Utils.getTargetId()}, ...otherParam)
-              writeMessageForEmissionById(idEmitter)
-          }
+          emmissionMethod = emitController.spray
           break
           case 'missile' : 
-          source = Utils.getSelectedSource()
-          if(source){
-              idEmitter = emitController.missile({source: source.id, target: Utils.getTargetId()}, ...otherParam)
-              writeMessageForEmissionById(idEmitter)
-          }
+          emmissionMethod = emitController.missile
           break
           case 'gravitate' : 
-          source = Utils.getSelectedSource()
-          if(source){
-              idEmitter = emitController.gravit({source: source.id}, ...otherParam)
-              writeMessageForEmissionById(idEmitter)
-          }
+          emmissionMethod = emitController.gravit
           break
           case 'help' : 
           resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Existing_chat_command.join(',');
           break
           default :
-          ui.notifications.error(game.i18n.localize("PARTICULE-FX.Chat-Command.Unrecognized"));
+          ui.notifications.error(game.i18n.localize("PARTICULE-FX.Chat-Command.Unrecognized"));    
       }
-  //Existing_chat_command
+
+      if (emmissionMethod){
+            const source = Utils.getSelectedSource()
+            if(source){
+                const idEmitter = emmissionMethod({source: source.id, target: Utils.getTargetId()}, ...otherParam)
+                writeMessageForEmissionById(idEmitter)
+            }
+      }
+
+        //Existing_chat_command
       if(resumeMessage){
           ui.chat.processMessage("/w gm " + resumeMessage )
       }

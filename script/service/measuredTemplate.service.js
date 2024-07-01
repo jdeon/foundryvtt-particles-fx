@@ -209,6 +209,28 @@ export function generatePrefillTemplateForMeasured(measuredTemplate, velocitySta
     return mapToInputParticle(result)
 }
 
+export function computeTemplateForMeasuredDimension(measuredTemplate){
+    let result
+
+    if(measuredTemplate.t === "circle"){
+        result = { w: measuredTemplate.distance *2, h: measuredTemplate.distance *2 }
+    } else if (measuredTemplate.t === "cone") {
+        result = { w: measuredTemplate.distance *2, h: measuredTemplate.distance *2 }
+    } else if (measuredTemplate.t === "rect") {
+        result = { 
+            w: measuredTemplate.distance*Math.cos(measuredTemplate.direction*Math.PI/180), 
+            h: measuredTemplate.distance*Math.sin(measuredTemplate.direction*Math.PI/180) 
+        }
+    } else if (measuredTemplate.t === "ray") {
+        result = { 
+            w: measuredTemplate.distance, 
+            h: measuredTemplate.width 
+        }
+    }
+
+    return result
+}
+
 function mapToInputParticle(result){
     const keys = Object.keys(result)
 
