@@ -150,7 +150,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             //Target exist and is different than source
             let targetPosition = Utils.getSourcePosition(target)
             targetAngleDirection = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x)
-            const oldPositionSpawning = new Vector3(positionSpawning.x, positionSpawning.y, 0);
+            const oldPositionSpawning = new Vector3(positionSpawning.x, positionSpawning.y, positionSpawning.z);
             positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
 
             //Upgrade particle lifetime if the target is longer than 5 grid
@@ -159,7 +159,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
                 particleLifetime *= (targetDistance / (5 * canvas.scene.grid.size))
             }
         } else if (this.source instanceof MeasuredTemplate) {
-            sourcePosition = { x: this.source.x, y: this.source.y }//Don t use width and length
+            sourcePosition = { x: this.source.x, y: this.source.y, z: this.source.document?.elevation }//Don t use width and length
             let measuredOverride = generatePrefillTemplateForMeasured(this.source.document, particleProperties.velocityStart.getValue(), particleProperties.velocityEnd.getValue())
             particleProperties = { ...particleProperties, ...measuredOverride }
             particleLifetime = particleProperties.particleLifetime.getValue()
@@ -167,7 +167,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             targetAngleDirection = 0
         } else {
             targetAngleDirection = sourcePosition.r * Math.PI / 180
-            const oldPositionSpawning = new Vector3(positionSpawning.x, positionSpawning.y, 0);
+            const oldPositionSpawning = new Vector3(positionSpawning.x, positionSpawning.y, positionSpawning.z);
             positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
         }
 
@@ -254,7 +254,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             mainParticle.angleEnd = ParticleInput.build(targetAngleDirection * 180 / Math.PI)
 
             //The missile must stop at the target
-            const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2))
+            const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2)) //TODO velocity z
             const averageVelocity = mainParticle.velocityEnd?.getValue() !== undefined ? (mainParticle.velocityStart?.getValue() + mainParticle.velocityEnd?.getValue()) / 2 : mainParticle.velocityStart?.getValue()
 
             if (averageVelocity !== 0) {
@@ -285,7 +285,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             return
         }
 
-        const sourcePosition = new Vector3(this.mainParticle.sprite.x, this.mainParticle.sprite.y, 0)
+        const sourcePosition = new Vector3(this.mainParticle.sprite.x, this.mainParticle.sprite.y, this.mainParticle.positionVibrationLess.z)
 
         const sourceDirection = this.mainParticle.getDirection()
         const sourceDirectionRadian = sourceDirection * Math.PI / 180

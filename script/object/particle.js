@@ -24,10 +24,9 @@ export class Particle {
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd) {
         this.advancedVariables = advancedVariables;                                         //Map<key,AdvancedVariable>
         this.sprite = sprite;                                                               //PIXI.Sprite
-        this.positionVibrationLess = { x: sprite.x, y: sprite.y };
+        this.positionVibrationLess = { x: sprite.x, y: sprite.y, z: elevationStart };
         this.remainingTime = particleLifetime;                                              //Number
-        this.particleLifetime = particleLifetime;                                           //Number
-        this.elevation = elevationStart;                                                    //Number
+        this.particleLifetime = particleLifetime;                                             //Number
         this.sizeStart = sizeStart;                                                        //ParticuleInput<Vector3>
         this.sizeEnd = sizeEnd.getValue() === sameStartKey ? sizeStart : sizeEnd;                     //ParticuleInput<Vector3>
         this.particleRotationStart = particleRotationStart;
@@ -58,7 +57,7 @@ export class Particle {
         //Particle change size
         const updatedSize = Particle._computeValue(this.sizeStart.getValue(this.advancedVariables), this.sizeEnd?.getValue(this.advancedVariables), lifetimeProportion)
 
-        const sizeFactor = Utils.handleElevationFactorForSize(this.elevation)
+        const sizeFactor = Utils.handleElevationFactorForSize(this.positionVibrationLess.z)
         this.sprite.width = updatedSize.x * sizeFactor
         this.sprite.height = updatedSize.y * sizeFactor
 
