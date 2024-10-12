@@ -116,7 +116,8 @@ export class Vector3 {
     rotateZVector(zAngleRadiant) {
         return {
             x: this.x * Math.cos(zAngleRadiant) - this.y * Math.sin(zAngleRadiant),
-            y: this.x * Math.sin(zAngleRadiant) + this.y * Math.cos(zAngleRadiant)
+            y: this.x * Math.sin(zAngleRadiant) + this.y * Math.cos(zAngleRadiant),
+            z: this.z
         }
     }
 
@@ -324,6 +325,20 @@ export class Utils {
         }
 
         return result
+    }
+
+    static handleElevationFactorForSize(elevation) {
+        if (!elevation || Number.isNaN(elevation)) {
+            return 1
+        }
+
+        const factor = elevation / canvas.scene.grid.distance / 10 //Size double every 10 grid space
+
+        if (factor < 0) {
+            return 1 / Math.abs(factor)
+        }
+
+        return factor
     }
 
     static getPlaceableObjectById(id) {
