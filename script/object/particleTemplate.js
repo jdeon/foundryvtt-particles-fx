@@ -308,10 +308,10 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
             //We change the spawning replacing the one without direction inside to a new one
             const generatedSprite = generatedParticle.sprite
-            const oldPositionSpawning = { x: generatedSprite.x - sourcePosition.x, y: generatedSprite.y - sourcePosition.y }
-            generatedSprite.x = sourcePosition.x + dircetionXFactor.x * oldPositionSpawning.x + dircetionYFactor.x * oldPositionSpawning.y;
-            generatedSprite.y = sourcePosition.y + dircetionXFactor.y * oldPositionSpawning.x + dircetionYFactor.y * oldPositionSpawning.y;
-            generatedParticle.positionVibrationLess = { x: generatedSprite.x, y: generatedSprite.y };
+            const oldPositionHorizontalSpawning = { x: generatedSprite.x - sourcePosition.x, y: generatedSprite.y - sourcePosition.y }
+            generatedSprite.x = sourcePosition.x + dircetionXFactor.x * oldPositionHorizontalSpawning.x + dircetionYFactor.x * oldPositionHorizontalSpawning.y;
+            generatedSprite.y = sourcePosition.y + dircetionXFactor.y * oldPositionHorizontalSpawning.x + dircetionYFactor.y * oldPositionHorizontalSpawning.y;
+            generatedParticle.positionVibrationLess = { x: generatedSprite.x, y: generatedSprite.y, z: sourcePosition.z };
 
             //We change the angle to be the trail of the direction by default
             generatedParticle.angleStart.add(sourceDirection + 180)
