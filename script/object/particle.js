@@ -111,10 +111,14 @@ export class SprayingParticle extends Particle {
 
         //Particle move
         const updatedVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const riseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const horizontalMovement = updatedVelocity * (1 - Math.abs(riseRate)) * dt / 1000
+
         let angleRadiant = this.getDirection() * (Math.PI / 180)
 
-        this.positionVibrationLess.x += Math.cos(angleRadiant) * updatedVelocity * dt / 1000;
-        this.positionVibrationLess.y += Math.sin(angleRadiant) * updatedVelocity * dt / 1000;
+        this.positionVibrationLess.x += Math.cos(angleRadiant) * horizontalMovement;
+        this.positionVibrationLess.y += Math.sin(angleRadiant) * horizontalMovement;
+        this.positionVibrationLess.z += updatedVelocity * riseRate * dt / 1000;
 
         super._manageLifetime(dt, lifetimeProportion)
 
