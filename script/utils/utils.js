@@ -334,13 +334,9 @@ export class Utils {
             return 1
         }
 
-
-        if (factor < 0) {
-            return 1 / Math.abs(factor)
-        }
         const factor = elevation / canvas.scene.grid.size / 10 //Size double every 10 grid space
 
-        return factor
+        return Math.pow(2, factor)
     }
 
     static getPlaceableObjectById(id) {
