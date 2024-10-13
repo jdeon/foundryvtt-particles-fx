@@ -20,13 +20,15 @@ export class Particle {
         return startValue
     }
 
-    constructor(advancedVariables, sprite, particleLifetime, elevationStart, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
+    constructor(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd) {
         this.advancedVariables = advancedVariables;                                         //Map<key,AdvancedVariable>
         this.sprite = sprite;                                                               //PIXI.Sprite
         this.positionVibrationLess = { x: sprite.x, y: sprite.y, z: elevationStart };
         this.remainingTime = particleLifetime;                                              //Number
         this.particleLifetime = particleLifetime;                                             //Number
+        this.riseRateStart = riseRateStart;                                                        //ParticuleInput<Number>
+        this.riseRateEnd = riseRateEnd.getValue() === sameStartKey ? riseRateStart : riseRateEnd;   //ParticuleInput<Number>
         this.sizeStart = sizeStart;                                                        //ParticuleInput<Vector3>
         this.sizeEnd = sizeEnd.getValue() === sameStartKey ? sizeStart : sizeEnd;                     //ParticuleInput<Vector3>
         this.particleRotationStart = particleRotationStart;
@@ -87,10 +89,10 @@ export class Particle {
 
 export class SprayingParticle extends Particle {
 
-    constructor(advancedVariables, sprite, target, particleLifetime, elevationStart, velocityStart, velocityEnd, angleStart, angleEnd,
+    constructor(advancedVariables, sprite, target, particleLifetime, elevationStart, riseRateStart, riseRateEnd, velocityStart, velocityEnd, angleStart, angleEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd) {
-        super(advancedVariables, sprite, particleLifetime, elevationStart, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
         this.target = target;
         this.velocityStart = velocityStart;                                                             //ParticleInput<Number>      
@@ -132,10 +134,10 @@ export class SprayingParticle extends Particle {
 
 export class GravitingParticle extends Particle {
 
-    constructor(advancedVariables, sprite, source, particleLifetime, elevationStart, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd,
+    constructor(advancedVariables, sprite, source, particleLifetime, elevationStart, riseRateStart, riseRateEnd, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd) {
-        super(advancedVariables, sprite, particleLifetime, elevationStart, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
         this.source = source
         this.angle = angleStart                                                     //Number 

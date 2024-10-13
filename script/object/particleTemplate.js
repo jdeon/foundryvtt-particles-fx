@@ -25,11 +25,11 @@ export class ParticleTemplate {
     }
 
     constructor(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd,
-        particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
+        particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd,
         advanced
     ) {
-        this.source = ParticleTemplate._translatePlaceableObject(source)
+        this.source = ParticleTemplate._translatePlaceableObject(source);
         this.target = ParticleTemplate._translatePlaceableObject(target);
         this.sizeStart = Vector3.build(sizeStart);
         this.sizeEnd = Vector3.build(sizeEnd);
@@ -41,11 +41,13 @@ export class ParticleTemplate {
         this.colorEnd = Vector3.build(colorEnd);
         this.alphaStart = alphaStart;
         this.alphaEnd = alphaEnd;
-        this.vibrationAmplitudeStart = vibrationAmplitudeStart
-        this.vibrationAmplitudeEnd = vibrationAmplitudeEnd
-        this.vibrationFrequencyStart = vibrationFrequencyStart
-        this.vibrationFrequencyEnd = vibrationFrequencyEnd
-        this.advanced = advanced
+        this.riseRateStart = riseRateStart;
+        this.riseRateEnd = riseRateEnd;
+        this.vibrationAmplitudeStart = vibrationAmplitudeStart;
+        this.vibrationAmplitudeEnd = vibrationAmplitudeEnd;
+        this.vibrationFrequencyStart = vibrationFrequencyStart;
+        this.vibrationFrequencyEnd = vibrationFrequencyEnd;
+        this.advanced = advanced;
     }
 
     generateParticles() {
@@ -75,6 +77,8 @@ export class ParticleTemplate {
             sprite,
             Utils.getRandomValueFrom(this.particleLifetime, advancedVariable),
             sourcePosition.z,
+            Utils.getRandomParticuleInputFrom(this.riseRateStart, advancedVariable),
+            Utils.getRandomParticuleInputFrom(this.riseRateEnd, advancedVariable),
             startSizeInput,
             Vector3.build(Utils.getRandomParticuleInputFrom(this.sizeEnd, advancedVariable)),
             angleStartInput,
@@ -104,6 +108,8 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             input.positionSpawning,
             input.particleVelocityStart,
             input.particleVelocityEnd,
+            input.particleRiseRateStart,
+            input.particleRiseRateEnd,
             input.particleAngleStart,
             input.particleAngleEnd,
             input.particleSizeStart,
@@ -124,10 +130,10 @@ export class SprayingParticleTemplate extends ParticleTemplate {
         );
     }
 
-    constructor(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd,
+    constructor(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced) {
-        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
+        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
         this.positionSpawning = Vector3.build(positionSpawning);
         this.velocityStart = velocityStart;         //Array of Number      
         this.velocityEnd = velocityEnd;             //Array of Number
@@ -191,6 +197,8 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             target,
             particleLifetime,
             sourcePosition.z + positionSpawning.z,
+            particleProperties.riseRateStart,
+            particleProperties.riseRateEnd,
             particleProperties.velocityStart,
             particleProperties.velocityEnd,
             particleProperties.angleStart.add(targetAngleDirection * 180 / Math.PI),
@@ -218,10 +226,10 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         return "Missile"
     }
 
-    constructor(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd,
+    constructor(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced, subParticleTemplate) {
-        super(source, target, positionSpawning, velocityStart, velocityEnd, angleStart, angleEnd,
+        super(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
             sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
             vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
 
@@ -269,6 +277,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
     }
 
     generateParticles() {
+        //TODO handle elevation during flight
         if (!this.initGenerate) {
             //First init the main particles
             this.initGenerate = true
@@ -338,6 +347,8 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             input.particleAngleStart,
             input.particleVelocityStart,
             input.particleVelocityEnd,
+            input.particleRiseRateStart,
+            input.particleRiseRateEnd,
             input.particleRadiusStart,
             input.particleRadiusEnd,
             input.particleSizeStart,
@@ -359,10 +370,10 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         );
     }
 
-    constructor(source, target, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd,
+    constructor(source, target, angleStart, angularVelocityStart, angularVelocityEnd, riseRateStart, riseRateEnd, radiusStart, radiusEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow, advanced) {
-        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
+        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
 
         this.angleStart = angleStart;                        //Array of Number
         this.angularVelocityStart = angularVelocityStart;  //Number      
@@ -410,6 +421,8 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             this.onlyEmitterFollow ? sourcePosition : source,
             Utils.getRandomParticuleInputFrom(this.particleLifetime, advancedVariable).getValue(),
             sourcePosition.z,
+            Utils.getRandomParticuleInputFrom(this.riseRateStart, advancedVariable),
+            Utils.getRandomParticuleInputFrom(this.riseRateEnd, advancedVariable),
             angleStart,
             Utils.getRandomParticuleInputFrom(this.angularVelocityStart, advancedVariable),
             Utils.getRandomParticuleInputFrom(this.angularVelocityEnd, advancedVariable),

@@ -10,6 +10,8 @@ export const defaultMotionTemplate = () => {
         particleLifetime: [3500, 4500],
         particleVelocityStart: '200%',
         particleVelocityEnd: '50%',
+        particleRiseRateStart: 0,
+        particleRiseRateEnd: 0,
         particleAngleStart: '0_360',
         particleAngleEnd: sameStartKey,
         particleRadiusStart: '100%',
