@@ -306,10 +306,12 @@ export class Utils {
             return
         }
 
+        const sourceElevation = source.document?.elevation ?? 0
+
         let result = {
             x: source.x,
             y: source.y,
-            z: source.document?.elevation ?? 0,
+            z: sourceElevation * canvas.scene.grid.size,
             r: 0
         }
 
@@ -332,11 +334,11 @@ export class Utils {
             return 1
         }
 
-        const factor = elevation / canvas.scene.grid.distance / 10 //Size double every 10 grid space
 
         if (factor < 0) {
             return 1 / Math.abs(factor)
         }
+        const factor = elevation / canvas.scene.grid.size / 10 //Size double every 10 grid space
 
         return factor
     }
