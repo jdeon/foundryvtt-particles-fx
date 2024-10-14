@@ -112,7 +112,7 @@ export class SprayingParticle extends Particle {
         //Particle move
         const updatedVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
         const riseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
-        const horizontalMovement = updatedVelocity * (1 - Math.abs(riseRate)) * dt / 1000
+        const horizontalMovement = updatedVelocity * Math.pow((1 - Math.pow(riseRate, 2)), 1 / 2) * dt / 1000
 
         let angleRadiant = this.getDirection() * (Math.PI / 180)
 

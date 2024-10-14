@@ -248,7 +248,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         const mainParticle = super.generateParticles();
 
         if (mainParticle.target) {
-            const sourcePosition = { x: mainParticle.sprite.x, y: mainParticle.sprite.y }
+            const sourcePosition = { x: mainParticle.sprite.x, y: mainParticle.sprite.y, z: mainParticle.positionVibrationLess?.z ?? 0 }
             const targetPosition = Utils.getSourcePosition(mainParticle.target)
 
             if ((sourcePosition.x === targetPosition.x && sourcePosition.y === targetPosition.y)) {
@@ -262,8 +262,14 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             mainParticle.angleEnd = ParticleInput.build(targetAngleDirection * 180 / Math.PI)
 
             //The missile must stop at the target
-            const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2)) //TODO velocity z
+            const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2) + Math.pow(targetPosition.z - sourcePosition.z, 2))
             const averageVelocity = mainParticle.velocityEnd?.getValue() !== undefined ? (mainParticle.velocityStart?.getValue() + mainParticle.velocityEnd?.getValue()) / 2 : mainParticle.velocityStart?.getValue()
+
+            //Handle verticality
+            const riseRate = (targetPosition.z - sourcePosition.z) / targetDistance
+            mainParticle.riseRateStart = ParticleInput.build(riseRate)
+            mainParticle.riseRateEnd = ParticleInput.build(riseRate)
+
 
             if (averageVelocity !== 0) {
                 const lifetime = 1000 * targetDistance / averageVelocity
