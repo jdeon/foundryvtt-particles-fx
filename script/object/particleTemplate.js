@@ -160,10 +160,14 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
 
             //Upgrade particle lifetime if the target is longer than 5 grid
-            let targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2))
+            const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2) + Math.pow(targetPosition.z - sourcePosition.z, 2))
             if (targetDistance > 5 * canvas.scene.grid.size) {
                 particleLifetime *= (targetDistance / (5 * canvas.scene.grid.size))
             }
+            const targetRiseRate = (targetPosition.z - sourcePosition.z) / targetDistance
+            particleProperties.riseRateStart.add(targetRiseRate)
+            particleProperties.riseRateEnd.add(targetRiseRate)
+
         } else if (this.source instanceof MeasuredTemplate) {
             sourcePosition = { x: this.source.x, y: this.source.y, z: this.source.document?.elevation }//Don t use width and length
             let measuredOverride = generatePrefillTemplateForMeasured(this.source.document, particleProperties.velocityStart.getValue(), particleProperties.velocityEnd.getValue())
