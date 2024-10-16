@@ -136,9 +136,8 @@ export class Utils {
         return canvas.scene.grid.size / canvas.scene.grid.distance
     }
 
-    static getGridDistanceBetweenPoint(source, target) {//TODO v12 replace by canvas.grid.measurePath([source, target])
-        const pixelDistance = Math.sqrt(Math.pow((source.x - target.x), 2) + Math.pow((source.y - target.y), 2))
-        return pixelDistance / canvas.scene.grid.size
+    static getGridDistanceBetweenPoint(source, target) {
+        return canvas.grid.measurePath([source, target])?.spaces
     }
 
     static getRandomValueFrom(inValue, advancedVariables) {
