@@ -169,20 +169,17 @@ export class GravitingParticle extends Particle {
 
         //Particle move
         const updatedVelocity = Particle._computeValue(this.angularVelocityStart.getValue(this.advancedVariables), this.angularVelocityEnd.getValue(this.advancedVariables), lifetimeProportion);
-        let riseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
-        riseRate *= Math.cos(this.angle * (Math.PI / 180))
+        const riseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
 
-        const horizontalMovement = updatedVelocity * Math.pow((1 - Math.pow(riseRate, 2)), 1 / 2) * dt / 1000
-        this.angle += horizontalMovement
+        //const horizontalMovement = updatedVelocity * Math.pow((1 - Math.pow(riseRate, 2)), 1 / 2) * dt / 1000
+        this.angle += updatedVelocity * dt / 1000
         const angleRadiant = this.angle * (Math.PI / 180);
 
         const updatedRadius = Particle._computeValue(this.radiusStart.getValue(this.advancedVariables), this.radiusEnd.getValue(this.advancedVariables), lifetimeProportion)
 
-
-        //TODO middle formula -> ELevation Ok, but it turn un round and not ellypse
-        this.positionVibrationLess.x -= Math.sin(angleRadiant) * horizontalMovement * updatedRadius * (Math.PI / 180);
-        this.positionVibrationLess.y += Math.cos(angleRadiant) * horizontalMovement * updatedRadius * (Math.PI / 180);
-        this.positionVibrationLess.z += updatedVelocity * dt / 1000 * riseRate * updatedRadius * (Math.PI / 180);
+        this.positionVibrationLess.x = source.x + updatedRadius * Math.cos(angleRadiant);
+        this.positionVibrationLess.y = source.y + updatedRadius * Math.sin(angleRadiant) * Math.sqrt(1 - Math.pow(riseRate, 2));
+        this.positionVibrationLess.z = source.z + updatedRadius * Math.sin(angleRadiant) * riseRate;
 
         super._manageLifetime(dt, lifetimeProportion)
 
