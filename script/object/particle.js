@@ -57,11 +57,11 @@ export class Particle {
 
     _manageLifetime(dt, lifetimeProportion) {
         //Particle change size
-        const updatedSize = Particle._computeValue(this.sizeStart.getValue(this.advancedVariables), this.sizeEnd?.getValue(this.advancedVariables), lifetimeProportion)
+        const currentSize = Particle._computeValue(this.sizeStart.getValue(this.advancedVariables), this.sizeEnd?.getValue(this.advancedVariables), lifetimeProportion)
 
         const sizeFactor = Utils.handleElevationFactorForSize(this.positionVibrationLess.z)
-        this.sprite.width = updatedSize.x * sizeFactor
-        this.sprite.height = updatedSize.y * sizeFactor
+        this.sprite.width = currentSize.x * sizeFactor
+        this.sprite.height = currentSize.y * sizeFactor
 
         let particleRotation = Particle._computeValue(this.particleRotationStart.getValue(this.advancedVariables), this.particleRotationEnd?.getValue(this.advancedVariables), lifetimeProportion);
         this.sprite.angle = particleRotation
@@ -110,15 +110,15 @@ export class SprayingParticle extends Particle {
         }
 
         //Particle move
-        const updatedVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
-        const riseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
-        const horizontalMovement = updatedVelocity * Math.pow((1 - Math.pow(riseRate, 2)), 1 / 2) * dt / 1000
+        const currentVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const currentRiseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const horizontalMovement = currentVelocity * Math.pow((1 - Math.pow(currentRiseRate, 2)), 1 / 2) * dt / 1000
 
         let angleRadiant = this.getDirection() * (Math.PI / 180)
 
         this.positionVibrationLess.x += Math.cos(angleRadiant) * horizontalMovement;
         this.positionVibrationLess.y += Math.sin(angleRadiant) * horizontalMovement;
-        this.positionVibrationLess.z += updatedVelocity * riseRate * dt / 1000;
+        this.positionVibrationLess.z += currentVelocity * currentRiseRate * dt / 1000;
 
         super._manageLifetime(dt, lifetimeProportion)
 
@@ -168,18 +168,16 @@ export class GravitingParticle extends Particle {
         }
 
         //Particle move
-        const updatedVelocity = Particle._computeValue(this.angularVelocityStart.getValue(this.advancedVariables), this.angularVelocityEnd.getValue(this.advancedVariables), lifetimeProportion);
-        const riseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
-
-        //const horizontalMovement = updatedVelocity * Math.pow((1 - Math.pow(riseRate, 2)), 1 / 2) * dt / 1000
-        this.angle += updatedVelocity * dt / 1000
+        const currentVelocity = Particle._computeValue(this.angularVelocityStart.getValue(this.advancedVariables), this.angularVelocityEnd.getValue(this.advancedVariables), lifetimeProportion);
+        this.angle += currentVelocity * dt / 1000
         const angleRadiant = this.angle * (Math.PI / 180);
 
-        const updatedRadius = Particle._computeValue(this.radiusStart.getValue(this.advancedVariables), this.radiusEnd.getValue(this.advancedVariables), lifetimeProportion)
+        const currentRiseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const currentRadius = Particle._computeValue(this.radiusStart.getValue(this.advancedVariables), this.radiusEnd.getValue(this.advancedVariables), lifetimeProportion);
 
-        this.positionVibrationLess.x = source.x + updatedRadius * Math.cos(angleRadiant);
-        this.positionVibrationLess.y = source.y + updatedRadius * Math.sin(angleRadiant) * Math.sqrt(1 - Math.pow(riseRate, 2));
-        this.positionVibrationLess.z = source.z + updatedRadius * Math.sin(angleRadiant) * riseRate;
+        this.positionVibrationLess.x = source.x + currentRadius * Math.cos(angleRadiant);
+        this.positionVibrationLess.y = source.y + currentRadius * Math.sin(angleRadiant) * Math.sqrt(1 - Math.pow(currentRiseRate, 2));
+        this.positionVibrationLess.z = source.z + currentRadius * Math.sin(angleRadiant) * currentRiseRate;
 
         super._manageLifetime(dt, lifetimeProportion)
 
