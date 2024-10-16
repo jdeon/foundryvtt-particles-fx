@@ -169,13 +169,19 @@ export class GravitingParticle extends Particle {
 
         //Particle move
         const updatedVelocity = Particle._computeValue(this.angularVelocityStart.getValue(this.advancedVariables), this.angularVelocityEnd.getValue(this.advancedVariables), lifetimeProportion);
+        let riseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
+        riseRate *= Math.sin(this.angle * (Math.PI / 180))
+
         this.angle += updatedVelocity * dt / 1000
-        let angleRadiant = this.angle * (Math.PI / 180);
+        const angleRadiant = this.angle * (Math.PI / 180);
 
         const updatedRadius = Particle._computeValue(this.radiusStart.getValue(this.advancedVariables), this.radiusEnd.getValue(this.advancedVariables), lifetimeProportion)
+        const horizontalRadius = updatedRadius * Math.pow((1 - Math.pow(riseRate, 2)), 1 / 2)
 
-        this.positionVibrationLess.x = source.x + Math.cos(angleRadiant) * updatedRadius;
-        this.positionVibrationLess.y = source.y + Math.sin(angleRadiant) * updatedRadius;
+        //TODO bad formula
+        this.positionVibrationLess.x = source.x + Math.cos(angleRadiant) * horizontalRadius;
+        this.positionVibrationLess.y = source.y + Math.sin(angleRadiant) * horizontalRadius;
+        this.positionVibrationLess.z = source.z + updatedRadius * riseRate;
 
         super._manageLifetime(dt, lifetimeProportion)
 
