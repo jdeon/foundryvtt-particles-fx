@@ -383,4 +383,14 @@ export class Utils {
 
         return []
     }
+
+    static handleFraction(input) {
+        if (input > 1) {
+            return 1 //Fraction can t be more than 1
+        } else if (input < -1) {
+            return -1 //Fraction can t be more than -1
+        }
+
+        return input
+    }
 }

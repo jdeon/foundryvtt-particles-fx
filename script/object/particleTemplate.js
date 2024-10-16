@@ -406,14 +406,27 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         const radiusStartInput = Utils.getRandomParticuleInputFrom(this.radiusStart, advancedVariable)
         let radiusStart = radiusStartInput.getValue()
 
+        const riseRateStart = Utils.getRandomParticuleInputFrom(this.riseRateStart, advancedVariable)
+        const riseRateEnd = Utils.getRandomParticuleInputFrom(this.riseRateEnd, advancedVariable)
+
+        if (targetPosition?.z) {
+            const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2) + Math.pow(targetPosition.z - sourcePosition.z, 2))
+
+            riseRateStart.add((targetPosition.z - sourcePosition.z) / targetDistance)
+            riseRateEnd.add((targetPosition.z - sourcePosition.z) / targetDistance)
+        }
+
+        const riseRate = Utils.handleFraction(riseRateStart.getValue())
+
         const sprite = new PIXI.Sprite(this.particleTexture)
         sprite.anchor.set(0.5);
         sprite.x = sourcePosition.x + Math.cos(angleStart * (Math.PI / 180)) * radiusStart;
-        sprite.y = sourcePosition.y + Math.sin(angleStart * (Math.PI / 180)) * radiusStart;
+        sprite.y = sourcePosition.y + Math.sin(angleStart * (Math.PI / 180)) * radiusStart * Math.sqrt(1 - Math.pow(riseRate, 2));;
+        let elevation = sourcePosition.z + Math.sin(angleStart * (Math.PI / 180)) * radiusStart * riseRate
 
         const startSizeInput = Utils.getRandomParticuleInputFrom(this.sizeStart, advancedVariable)
         let startSize = startSizeInput.getValue();
-        const sizeFactor = Utils.handleElevationFactorForSize(sourcePosition.z);
+        const sizeFactor = Utils.handleElevationFactorForSize(elevation);
         sprite.width = startSize.x * sizeFactor;
         sprite.height = startSize.y * sizeFactor;
 
@@ -429,9 +442,9 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             sprite,
             this.onlyEmitterFollow ? sourcePosition : source,
             Utils.getRandomParticuleInputFrom(this.particleLifetime, advancedVariable).getValue(),
-            sourcePosition.z,
-            Utils.getRandomParticuleInputFrom(this.riseRateStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.riseRateEnd, advancedVariable),
+            elevation,
+            riseRateStart,
+            riseRateEnd,
             angleStart,
             Utils.getRandomParticuleInputFrom(this.angularVelocityStart, advancedVariable),
             Utils.getRandomParticuleInputFrom(this.angularVelocityEnd, advancedVariable),

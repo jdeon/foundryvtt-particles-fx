@@ -82,6 +82,12 @@ export class Particle {
         this.remainingTime -= dt;
     }
 
+    _computeRiseRate(lifetimeProportion) {
+        const currentRiseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
+
+        return Utils.handleFraction(currentRiseRate)
+    }
+
     getLifetimeProportion() {
         return 1 - (this.remainingTime / this.particleLifetime)
     }
@@ -111,7 +117,7 @@ export class SprayingParticle extends Particle {
 
         //Particle move
         const currentVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
-        const currentRiseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const currentRiseRate = this._computeRiseRate(lifetimeProportion);
         const horizontalMovement = currentVelocity * Math.pow((1 - Math.pow(currentRiseRate, 2)), 1 / 2) * dt / 1000
 
         let angleRadiant = this.getDirection() * (Math.PI / 180)
@@ -172,8 +178,8 @@ export class GravitingParticle extends Particle {
         this.angle += currentVelocity * dt / 1000
         const angleRadiant = this.angle * (Math.PI / 180);
 
-        const currentRiseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
         const currentRadius = Particle._computeValue(this.radiusStart.getValue(this.advancedVariables), this.radiusEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const currentRiseRate = this._computeRiseRate(lifetimeProportion);
 
         this.positionVibrationLess.x = source.x + currentRadius * Math.cos(angleRadiant);
         this.positionVibrationLess.y = source.y + currentRadius * Math.sin(angleRadiant) * Math.sqrt(1 - Math.pow(currentRiseRate, 2));
