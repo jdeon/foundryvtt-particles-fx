@@ -144,13 +144,14 @@ export class SprayingParticle extends Particle {
 
 export class GravitingParticle extends Particle {
 
-    constructor(advancedVariables, sprite, source, particleLifetime, elevationStart, riseRateStart, riseRateEnd, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd,
+    constructor(advancedVariables, sprite, source, particleLifetime, elevationStart, axisElevationAngle, riseRateStart, riseRateEnd, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd) {
         super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
 
         this.source = source
         this.angle = angleStart                                                     //Number 
+        this.axisElevationAngle = axisElevationAngle
         this.angularVelocityStart = angularVelocityStart;                           //ParticleInput<Number>
         this.angularVelocityEnd = angularVelocityEnd.getValue() === sameStartKey ? angularVelocityStart : angularVelocityEnd;                               //ParticleInput<Number>
         this.radiusStart = radiusStart;                                             //ParticleInput<Number>

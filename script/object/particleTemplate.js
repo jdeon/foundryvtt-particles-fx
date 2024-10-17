@@ -354,6 +354,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             input.source,
             input.target,
             input.particleAngleStart,
+            input.particleAxisElevationAngle,
             input.particleVelocityStart,
             input.particleVelocityEnd,
             input.particleRiseRateStart,
@@ -379,12 +380,13 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         );
     }
 
-    constructor(source, target, angleStart, angularVelocityStart, angularVelocityEnd, riseRateStart, riseRateEnd, radiusStart, radiusEnd,
+    constructor(source, target, angleStart, axisElevationAngle, angularVelocityStart, angularVelocityEnd, riseRateStart, riseRateEnd, radiusStart, radiusEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow, advanced) {
         super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
 
         this.angleStart = angleStart;                        //Array of Number
+        this.axisElevationAngle = axisElevationAngle;
         this.angularVelocityStart = angularVelocityStart;  //Number      
         this.angularVelocityEnd = angularVelocityEnd;      //Number
         this.radiusStart = radiusStart;                     //Number      
@@ -443,6 +445,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             this.onlyEmitterFollow ? sourcePosition : source,
             Utils.getRandomParticuleInputFrom(this.particleLifetime, advancedVariable).getValue(),
             elevation,
+            this.axisElevationAngle,
             riseRateStart,
             riseRateEnd,
             angleStart,
