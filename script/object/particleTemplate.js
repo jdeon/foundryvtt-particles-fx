@@ -422,9 +422,10 @@ export class GravitingParticleTemplate extends ParticleTemplate {
 
         const sprite = new PIXI.Sprite(this.particleTexture)
         sprite.anchor.set(0.5);
-        sprite.x = sourcePosition.x + Math.cos(angleStart * (Math.PI / 180)) * radiusStart;
-        sprite.y = sourcePosition.y + Math.sin(angleStart * (Math.PI / 180)) * radiusStart * Math.sqrt(1 - Math.pow(riseRate, 2));;
-        let elevation = sourcePosition.z + Math.sin(angleStart * (Math.PI / 180)) * radiusStart * riseRate
+        const particlePosition = GravitingParticle.computeParticlePosition(sourcePosition, radiusStart, angleStart * (Math.PI / 180), riseRate, this.axisElevationAngle)
+        sprite.x = particlePosition.x;
+        sprite.y = particlePosition.y;
+        let elevation = particlePosition.z;
 
         const startSizeInput = Utils.getRandomParticuleInputFrom(this.sizeStart, advancedVariable)
         let startSize = startSizeInput.getValue();

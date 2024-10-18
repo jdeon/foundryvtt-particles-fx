@@ -144,6 +144,26 @@ export class SprayingParticle extends Particle {
 
 export class GravitingParticle extends Particle {
 
+    static computeParticlePosition(source, radius, angleOnTrack, riseRate, trackRotation) {
+        const xBeforeRotation = radius * Math.cos(angleOnTrack)
+        const yBeforeRotation = radius * Math.sin(angleOnTrack) * Math.sqrt(1 - Math.pow(riseRate, 2))
+
+        if (!trackRotation) {
+            return {
+                x: source.x + xBeforeRotation,
+                y: source.y + yBeforeRotation,
+                z: source.z + radius * Math.sin(angleOnTrack) * riseRate
+            }
+        }
+
+        let radianTrackRotation = trackRotation * (Math.PI / 180)
+        return {
+            x: source.x + xBeforeRotation * Math.cos(radianTrackRotation) + yBeforeRotation * Math.sin(radianTrackRotation),
+            y: source.y - xBeforeRotation * Math.sin(radianTrackRotation) + yBeforeRotation * Math.cos(radianTrackRotation),
+            z: source.z + radius * Math.sin(angleOnTrack) * riseRate
+        }
+    }
+
     constructor(advancedVariables, sprite, source, particleLifetime, elevationStart, axisElevationAngle, riseRateStart, riseRateEnd, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd) {
@@ -182,9 +202,7 @@ export class GravitingParticle extends Particle {
         const currentRadius = Particle._computeValue(this.radiusStart.getValue(this.advancedVariables), this.radiusEnd.getValue(this.advancedVariables), lifetimeProportion);
         const currentRiseRate = this._computeRiseRate(lifetimeProportion);
 
-        this.positionVibrationLess.x = source.x + currentRadius * Math.cos(angleRadiant);
-        this.positionVibrationLess.y = source.y + currentRadius * Math.sin(angleRadiant) * Math.sqrt(1 - Math.pow(currentRiseRate, 2));
-        this.positionVibrationLess.z = source.z + currentRadius * Math.sin(angleRadiant) * currentRiseRate;
+        this.positionVibrationLess = GravitingParticle.computeParticlePosition(source, currentRadius, angleRadiant, currentRiseRate, this.axisElevationAngle)
 
         super._manageLifetime(dt, lifetimeProportion)
 
