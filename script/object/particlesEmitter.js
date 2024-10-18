@@ -14,12 +14,8 @@ export default class ParticlesEmitter {
         if (canvas.app.stage.rendered.interface.moduleParticlesFx) {
             canvas.app.stage.rendered.interface.moduleParticlesFx.destroy()
         }
-        //ZIndex to 200 to be same level as tokens
+
         const particleFxCanvas = new PIXI.Container()
-        //particleFxCanvas.zIndex = 200
-        //canvas.app.stage.rendered.interface.tiles.addChild(particleFxCanvas);
-        //canvas.primary.addChild(particleFxCanvas);
-        //canvas.app.stage.rendered.interface.tiles.moduleParticlesFx = particleFxCanvas;
         canvas.app.stage.rendered.interface.addChild(particleFxCanvas);
         canvas.app.stage.rendered.interface.moduleParticlesFx = particleFxCanvas
         ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
