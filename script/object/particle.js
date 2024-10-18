@@ -42,6 +42,8 @@ export class Particle {
         this.vibrationFrequencyStart = vibrationFrequencyStart
         this.vibrationFrequencyEnd = vibrationFrequencyEnd.getValue() === sameStartKey ? vibrationFrequencyStart : vibrationFrequencyEnd
         this.timedParticule = this.advancedVariables && !!Object.values(this.advancedVariables).filter((item) => item.isTimedLinked).length
+
+        this.sprite.elevation = elevationStart / Utils.pixelOfDistanceConvertor()
     }
 
     manageLifetime(dt) {
@@ -78,6 +80,8 @@ export class Particle {
             let timeFromStart = (this.particleLifetime - this.remainingTime)
             this.vibrationCurrent = vibrationAmplitudeCurrent * Math.sin(2 * Math.PI * (timeFromStart / vibrationFrequencyCurrent))
         }
+
+        this.sprite.elevation = this.positionVibrationLess.z / Utils.pixelOfDistanceConvertor()
 
         this.remainingTime -= dt;
     }
