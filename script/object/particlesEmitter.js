@@ -59,6 +59,7 @@ export default class ParticlesEmitter {
                 i--
             }
         }
+        canvas.primary.sortChildren()
 
         //Decrease remainingTime of emmission if it has one
         if (this.remainingTime !== undefined) {
@@ -92,7 +93,9 @@ export default class ParticlesEmitter {
 
             setTimeout(this.enableSpawning.bind(this), this.particleFrequence + increaseTime)
 
-        } if (this.remainingTime !== undefined && this.remainingTime <= 0 && this.particles.length === 0) {
+        }
+
+        if (this.remainingTime !== undefined && this.remainingTime <= 0 && this.particles.length === 0) {
             //delete emission
             canvas.app.ticker.remove(this.callback);
             const emitterIndex = ParticlesEmitter.emitters.findIndex((emitter) => emitter.id === this.id)
