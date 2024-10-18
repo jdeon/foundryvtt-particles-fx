@@ -311,7 +311,7 @@ export class Utils {
         let result = {
             x: source.x,
             y: source.y,
-            z: sourceElevation * canvas.scene.grid.size,
+            z: sourceElevation * Utils.pixelOfDistanceConvertor(),
             r: 0
         }
 
