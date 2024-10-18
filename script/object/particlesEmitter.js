@@ -84,6 +84,7 @@ export default class ParticlesEmitter {
                     break
                 }
                 ParticlesEmitter._EMISSION_CANVAS.addChild(particle.sprite);
+                canvas.primary.addChild(particle.sprite)
                 this.particles.push(particle)
             }
 
