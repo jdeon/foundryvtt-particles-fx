@@ -3,6 +3,8 @@ import { AdvancedVariable } from "./advancedVariable.js";
 
 export class Particle {
 
+    static SORT_LAYER = 950
+
     static _computeValue(startValue, endValue, lifetimeProportion) {
         if (endValue !== undefined && endValue !== sameStartKey && startValue !== endValue) {
             if (startValue instanceof Vector3) {
@@ -44,6 +46,7 @@ export class Particle {
         this.timedParticule = this.advancedVariables && !!Object.values(this.advancedVariables).filter((item) => item.isTimedLinked).length
 
         this.sprite.elevation = elevationStart / Utils.pixelOfDistanceConvertor()
+        this.sprite.sortLayer = Particle.SORT_LAYER
     }
 
     manageLifetime(dt) {
