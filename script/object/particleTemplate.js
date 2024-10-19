@@ -403,26 +403,46 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         const target = Utils.getRandomValueFrom(this.target, advancedVariable)
         const targetPosition = Utils.getSourcePosition(target)
 
-        const angleOriginValue = targetPosition && (sourcePosition.x !== this.target.x || sourcePosition.y !== this.target.y) ? Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x) * 180 / Math.PI : sourcePosition.r
-        const angleStart = Utils.getRandomValueFrom(this.angleStart, advancedVariable) + angleOriginValue
-        const radiusStartInput = Utils.getRandomParticuleInputFrom(this.radiusStart, advancedVariable)
-        let radiusStart = radiusStartInput.getValue()
-
         const riseRateStart = Utils.getRandomParticuleInputFrom(this.riseRateStart, advancedVariable)
         const riseRateEnd = Utils.getRandomParticuleInputFrom(this.riseRateEnd, advancedVariable)
 
-        if (targetPosition?.z !== undefined && targetPosition.z - sourcePosition.z !== 0) {
-            const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2) + Math.pow(targetPosition.z - sourcePosition.z, 2))
+        let angleOriginValue
+        let axisElevationAngle
+        //Handle target direction
+        if (targetPosition) {
+            if (sourcePosition.x !== this.target.x || sourcePosition.y !== this.target.y) {
+                //Handle horizontal target direction
+                angleOriginValue = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x) * 180 / Math.PI
 
-            riseRateStart.add((targetPosition.z - sourcePosition.z) / targetDistance)
-            riseRateEnd.add((targetPosition.z - sourcePosition.z) / targetDistance)
+                if (this.axisElevationAngle !== undefined) {
+                    //We rotate angleOriginValue and axisElevationAngle to have the higher particle point the target
+                    axisElevationAngle = this.axisElevationAngle - angleOriginValue + 90
+                    angleOriginValue = 90
+                }
+            }
+
+            if (targetPosition.z !== undefined && targetPosition.z - sourcePosition.z !== 0) {
+                //Handle vertical target direction
+                const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2) + Math.pow(targetPosition.z - sourcePosition.z, 2))
+
+                riseRateStart.add((targetPosition.z - sourcePosition.z) / targetDistance)
+                riseRateEnd.add((targetPosition.z - sourcePosition.z) / targetDistance)
+            }
+
+        } else {
+            angleOriginValue = sourcePosition.r
+            axisElevationAngle = this.axisElevationAngle
         }
+
+        const angleStart = Utils.getRandomValueFrom(this.angleStart, advancedVariable) + angleOriginValue
+        const radiusStartInput = Utils.getRandomParticuleInputFrom(this.radiusStart, advancedVariable)
+        let radiusStart = radiusStartInput.getValue()
 
         const riseRate = Utils.handleFraction(riseRateStart.getValue())
 
         const sprite = new PIXI.Sprite(this.particleTexture)
         sprite.anchor.set(0.5);
-        const particlePosition = GravitingParticle.computeParticlePosition(sourcePosition, radiusStart, angleStart * (Math.PI / 180), riseRate, this.axisElevationAngle)
+        const particlePosition = GravitingParticle.computeParticlePosition(sourcePosition, radiusStart, angleStart * (Math.PI / 180), riseRate, axisElevationAngle)
         sprite.x = particlePosition.x;
         sprite.y = particlePosition.y;
         let elevation = particlePosition.z;
@@ -446,7 +466,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             this.onlyEmitterFollow ? sourcePosition : source,
             Utils.getRandomParticuleInputFrom(this.particleLifetime, advancedVariable).getValue(),
             elevation,
-            this.axisElevationAngle,
+            axisElevationAngle,
             riseRateStart,
             riseRateEnd,
             angleStart,
