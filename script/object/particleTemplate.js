@@ -415,7 +415,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
                 angleOriginValue = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x) * 180 / Math.PI
 
                 if (this.axisElevationAngle !== undefined) {
-                    //We rotate angleOriginValue and axisElevationAngle to have the higher particle point the target
+                    //We rotate angleOriginValue and axisElevationAngle to have the particle face the target when it appears
                     axisElevationAngle = this.axisElevationAngle - angleOriginValue + 90
                     angleOriginValue = 90
                 }
