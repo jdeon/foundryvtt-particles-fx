@@ -411,7 +411,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         const riseRateStart = Utils.getRandomParticuleInputFrom(this.riseRateStart, advancedVariable)
         const riseRateEnd = Utils.getRandomParticuleInputFrom(this.riseRateEnd, advancedVariable)
 
-        if (targetPosition?.z) {
+        if (targetPosition?.z !== undefined && targetPosition.z - sourcePosition.z !== 0) {
             const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2) + Math.pow(targetPosition.z - sourcePosition.z, 2))
 
             riseRateStart.add((targetPosition.z - sourcePosition.z) / targetDistance)
