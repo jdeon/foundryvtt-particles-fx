@@ -72,6 +72,15 @@ Hooks.on("setup", () => {
         config: true,
     });
 
+    game.settings.register(s_MODULE_ID, "activateElevation", {
+        name: game.i18n.localize("PARTICULE-FX.Settings.activateElevation.label"),
+        hint: game.i18n.localize("PARTICULE-FX.Settings.activateElevation.description"),
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: true
+    });
+
     setupAutomation()
 
     game.settings.register(s_MODULE_ID, "maxEmitterId", {

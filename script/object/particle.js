@@ -23,10 +23,10 @@ export class Particle {
     }
 
     constructor(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd) {
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage) {
         this.advancedVariables = advancedVariables;                                         //Map<key,AdvancedVariable>
         this.sprite = sprite;                                                               //PIXI.Sprite
-        this.positionVibrationLess = { x: sprite.x, y: sprite.y, z: elevationStart };
+        this.positionVibrationLess = { x: sprite.x, y: sprite.y, z: isElevationManage ? elevationStart : 0 };
         this.remainingTime = particleLifetime;                                              //Number
         this.particleLifetime = particleLifetime;                                             //Number
         this.riseRateStart = riseRateStart;                                                        //ParticuleInput<Number>
@@ -44,8 +44,9 @@ export class Particle {
         this.vibrationFrequencyStart = vibrationFrequencyStart
         this.vibrationFrequencyEnd = vibrationFrequencyEnd.getValue() === sameStartKey ? vibrationFrequencyStart : vibrationFrequencyEnd
         this.timedParticule = this.advancedVariables && !!Object.values(this.advancedVariables).filter((item) => item.isTimedLinked).length
+        this.isElevationManage = isElevationManage;
 
-        this.sprite.elevation = elevationStart / Utils.pixelOfDistanceConvertor()
+        this.sprite.elevation = isElevationManage ? elevationStart / Utils.pixelOfDistanceConvertor() : undefined
         this.sprite.sortLayer = Particle.SORT_LAYER
     }
 
@@ -84,12 +85,16 @@ export class Particle {
             this.vibrationCurrent = vibrationAmplitudeCurrent * Math.sin(2 * Math.PI * (timeFromStart / vibrationFrequencyCurrent))
         }
 
-        this.sprite.elevation = this.positionVibrationLess.z / Utils.pixelOfDistanceConvertor()
+        this.sprite.elevation = this.isElevationManage ? this.positionVibrationLess.z / Utils.pixelOfDistanceConvertor() : 0
 
         this.remainingTime -= dt;
     }
 
     _computeRiseRate(lifetimeProportion) {
+        if (!this.isElevationManage) {
+            return 0
+        }
+
         const currentRiseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
 
         return Utils.handleFraction(currentRiseRate)
@@ -104,8 +109,8 @@ export class SprayingParticle extends Particle {
 
     constructor(advancedVariables, sprite, target, particleLifetime, elevationStart, riseRateStart, riseRateEnd, velocityStart, velocityEnd, angleStart, angleEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd) {
-        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage) {
+        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage)
 
         this.target = target;
         this.velocityStart = velocityStart;                                                             //ParticleInput<Number>      
@@ -124,14 +129,19 @@ export class SprayingParticle extends Particle {
 
         //Particle move
         const currentVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
-        const currentRiseRate = this._computeRiseRate(lifetimeProportion);
-        const horizontalMovement = currentVelocity * Math.pow((1 - Math.pow(currentRiseRate, 2)), 1 / 2) * dt / 1000
-
         let angleRadiant = this.getDirection() * (Math.PI / 180)
+        if (this.isElevationManage) {
+            const currentRiseRate = this._computeRiseRate(lifetimeProportion);
+            const horizontalMovement = currentVelocity * Math.pow((1 - Math.pow(currentRiseRate, 2)), 1 / 2) * dt / 1000
 
-        this.positionVibrationLess.x += Math.cos(angleRadiant) * horizontalMovement;
-        this.positionVibrationLess.y += Math.sin(angleRadiant) * horizontalMovement;
-        this.positionVibrationLess.z += currentVelocity * currentRiseRate * dt / 1000;
+            this.positionVibrationLess.x += Math.cos(angleRadiant) * horizontalMovement;
+            this.positionVibrationLess.y += Math.sin(angleRadiant) * horizontalMovement;
+            this.positionVibrationLess.z += currentVelocity * currentRiseRate * dt / 1000;
+        } else {
+            this.positionVibrationLess.x += Math.cos(angleRadiant) * currentVelocity;
+            this.positionVibrationLess.y += Math.sin(angleRadiant) * currentVelocity;
+        }
+
 
         super._manageLifetime(dt, lifetimeProportion)
 
@@ -173,8 +183,8 @@ export class GravitingParticle extends Particle {
 
     constructor(advancedVariables, sprite, source, particleLifetime, elevationStart, axisElevationAngle, riseRateStart, riseRateEnd, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd) {
-        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd)
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage) {
+        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage)
 
         this.source = source
         this.angle = angleStart                                                     //Number 
@@ -209,7 +219,7 @@ export class GravitingParticle extends Particle {
         const currentRadius = Particle._computeValue(this.radiusStart.getValue(this.advancedVariables), this.radiusEnd.getValue(this.advancedVariables), lifetimeProportion);
         const currentRiseRate = this._computeRiseRate(lifetimeProportion);
 
-        this.positionVibrationLess = GravitingParticle.computeParticlePosition(source, currentRadius, angleRadiant, currentRiseRate, this.axisElevationAngle)
+        this.positionVibrationLess = GravitingParticle.computeParticlePosition(source, currentRadius, angleRadiant, currentRiseRate, this.isElevationManage ? this.axisElevationAngle : 0)
 
         super._manageLifetime(dt, lifetimeProportion)
 

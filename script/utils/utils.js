@@ -301,14 +301,19 @@ export class Utils {
         return game.user.targets.ids.length > 0 ? game.user.targets.ids[0] : undefined
     }
 
-    static getSourcePosition(source) {
+    static getSourcePosition(source, isElevationManage = true) {
         if (source === undefined || source === null || source.destroyed || source.x === undefined || source.y === undefined) {
             return
         }
 
-        const sourceElevation = source.document?.elevation ?
-            source.document.elevation * Utils.pixelOfDistanceConvertor() :
-            source.z ?? 0
+        let sourceElevation = 0
+        if (isElevationManage) {
+            if (source.document?.elevation) {
+                sourceElevation = source.document.elevation * Utils.pixelOfDistanceConvertor()
+            } else if (source.z) {
+                sourceElevation = source.z
+            }
+        }
 
         let result = {
             x: source.x,
