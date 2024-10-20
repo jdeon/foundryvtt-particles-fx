@@ -359,6 +359,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             input.source,
             input.target,
             input.particleAngleStart,
+            input.particleAxisElevationAngle,
             input.particleVelocityStart,
             input.particleVelocityEnd,
             input.particleRiseRateStart,
@@ -384,12 +385,13 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         );
     }
 
-    constructor(source, target, angleStart, angularVelocityStart, angularVelocityEnd, riseRateStart, riseRateEnd, radiusStart, radiusEnd,
+    constructor(source, target, angleStart, axisElevationAngle, angularVelocityStart, angularVelocityEnd, riseRateStart, riseRateEnd, radiusStart, radiusEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow, advanced) {
         super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
 
         this.angleStart = angleStart;                        //Array of Number
+        this.axisElevationAngle = axisElevationAngle;
         this.angularVelocityStart = angularVelocityStart;  //Number      
         this.angularVelocityEnd = angularVelocityEnd;      //Number
         this.radiusStart = radiusStart;                     //Number      
@@ -406,28 +408,49 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         const target = Utils.getRandomValueFrom(this.target, advancedVariable)
         const targetPosition = Utils.getSourcePosition(target)
 
-        const angleOriginValue = targetPosition && (sourcePosition.x !== this.target.x || sourcePosition.y !== this.target.y) ? Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x) * 180 / Math.PI : sourcePosition.r
-        const angleStart = Utils.getRandomValueFrom(this.angleStart, advancedVariable) + angleOriginValue
-        const radiusStartInput = Utils.getRandomParticuleInputFrom(this.radiusStart, advancedVariable)
-        let radiusStart = radiusStartInput.getValue()
-
         const riseRateStart = Utils.getRandomParticuleInputFrom(this.riseRateStart, advancedVariable)
         const riseRateEnd = Utils.getRandomParticuleInputFrom(this.riseRateEnd, advancedVariable)
 
-        if (targetPosition?.z) {
-            const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2) + Math.pow(targetPosition.z - sourcePosition.z, 2))
+        let angleOriginValue
+        let axisElevationAngle
+        //Handle target direction
+        if (targetPosition) {
+            if (sourcePosition.x !== this.target.x || sourcePosition.y !== this.target.y) {
+                //Handle horizontal target direction
+                angleOriginValue = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x) * 180 / Math.PI
 
-            riseRateStart.add((targetPosition.z - sourcePosition.z) / targetDistance)
-            riseRateEnd.add((targetPosition.z - sourcePosition.z) / targetDistance)
+                if (this.axisElevationAngle !== undefined) {
+                    //We rotate angleOriginValue and axisElevationAngle to have the particle face the target when it appears
+                    axisElevationAngle = this.axisElevationAngle - angleOriginValue + 90
+                    angleOriginValue = 90
+                }
+            }
+
+            if (targetPosition.z !== undefined && targetPosition.z - sourcePosition.z !== 0) {
+                //Handle vertical target direction
+                const targetDistance = Math.sqrt(Math.pow(targetPosition.x - sourcePosition.x, 2) + Math.pow(targetPosition.y - sourcePosition.y, 2) + Math.pow(targetPosition.z - sourcePosition.z, 2))
+
+                riseRateStart.add((targetPosition.z - sourcePosition.z) / targetDistance)
+                riseRateEnd.add((targetPosition.z - sourcePosition.z) / targetDistance)
+            }
+
+        } else {
+            angleOriginValue = sourcePosition.r
+            axisElevationAngle = this.axisElevationAngle
         }
+
+        const angleStart = Utils.getRandomValueFrom(this.angleStart, advancedVariable) + angleOriginValue
+        const radiusStartInput = Utils.getRandomParticuleInputFrom(this.radiusStart, advancedVariable)
+        let radiusStart = radiusStartInput.getValue()
 
         const riseRate = Utils.handleFraction(riseRateStart.getValue())
 
         const sprite = new PIXI.Sprite(this.particleTexture)
         sprite.anchor.set(0.5);
-        sprite.x = sourcePosition.x + Math.cos(angleStart * (Math.PI / 180)) * radiusStart;
-        sprite.y = sourcePosition.y + Math.sin(angleStart * (Math.PI / 180)) * radiusStart * Math.sqrt(1 - Math.pow(riseRate, 2));;
-        let elevation = sourcePosition.z + Math.sin(angleStart * (Math.PI / 180)) * radiusStart * riseRate
+        const particlePosition = GravitingParticle.computeParticlePosition(sourcePosition, radiusStart, angleStart * (Math.PI / 180), riseRate, axisElevationAngle)
+        sprite.x = particlePosition.x;
+        sprite.y = particlePosition.y;
+        let elevation = particlePosition.z;
 
         const startSizeInput = Utils.getRandomParticuleInputFrom(this.sizeStart, advancedVariable)
         let startSize = startSizeInput.getValue();
@@ -448,6 +471,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             this.onlyEmitterFollow ? sourcePosition : source,
             Utils.getRandomParticuleInputFrom(this.particleLifetime, advancedVariable).getValue(),
             elevation,
+            axisElevationAngle,
             riseRateStart,
             riseRateEnd,
             angleStart,
