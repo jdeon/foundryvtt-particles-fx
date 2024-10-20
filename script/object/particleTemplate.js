@@ -397,7 +397,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
 
         this.angleStart = angleStart;                        //Array of Number
-        this.axisElevationAngle = axisElevationAngle;
+        this.axisElevationAngle = this.isElevationManage ? axisElevationAngle : undefined;
         this.angularVelocityStart = angularVelocityStart;  //Number      
         this.angularVelocityEnd = angularVelocityEnd;      //Number
         this.radiusStart = radiusStart;                     //Number      
@@ -427,7 +427,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
 
                 if (this.axisElevationAngle !== undefined) {
                     //We rotate angleOriginValue and axisElevationAngle to have the particle face the target when it appears
-                    axisElevationAngle = this.axisElevationAngle - angleOriginValue + 90 //TODO isElevationManage
+                    axisElevationAngle = this.axisElevationAngle - angleOriginValue + 90
                     angleOriginValue = 90
                 }
             }
