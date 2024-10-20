@@ -306,12 +306,14 @@ export class Utils {
             return
         }
 
-        const sourceElevation = source.document?.elevation ?? 0
+        const sourceElevation = source.document?.elevation ?
+            source.document.elevation * Utils.pixelOfDistanceConvertor() :
+            source.z ?? 0
 
         let result = {
             x: source.x,
             y: source.y,
-            z: sourceElevation * canvas.scene.grid.size,
+            z: sourceElevation,
             r: 0
         }
 

@@ -331,6 +331,11 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             generatedSprite.y = sourcePosition.y + dircetionXFactor.y * oldPositionHorizontalSpawning.x + dircetionYFactor.y * oldPositionHorizontalSpawning.y;
             generatedParticle.positionVibrationLess = { x: generatedSprite.x, y: generatedSprite.y, z: sourcePosition.z };
 
+            //We change the size with elevation
+            const sizeFactor = Utils.handleElevationFactorForSize(generatedParticle.positionVibrationLess.z)
+            generatedParticle.sprite.width *= sizeFactor
+            generatedParticle.sprite.height *= sizeFactor
+
             //We change the angle to be the trail of the direction by default
             generatedParticle.angleStart.add(sourceDirection + 180)
             generatedParticle.angleEnd.add(sourceDirection + 180)
