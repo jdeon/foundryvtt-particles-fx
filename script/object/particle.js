@@ -65,7 +65,7 @@ export class Particle {
         //Particle change size
         const currentSize = Particle._computeValue(this.sizeStart.getValue(this.advancedVariables), this.sizeEnd?.getValue(this.advancedVariables), lifetimeProportion)
 
-        const sizeFactor = Utils.handleElevationFactorForSize(this.positionVibrationLess.z)
+        const sizeFactor = Utils.handleElevationFactorForSize(this.isElevationManage ? this.positionVibrationLess.z : undefined)
         this.sprite.width = currentSize.x * sizeFactor
         this.sprite.height = currentSize.y * sizeFactor
 
