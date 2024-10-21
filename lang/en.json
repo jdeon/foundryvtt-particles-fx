@@ -5,6 +5,8 @@
     "PARTICULE-FX.Settings.autoEmission.description": "Auto-generate emission when using some item with a target",
     "PARTICULE-FX.Settings.Avoid.label": "Avoid particle emission",
     "PARTICULE-FX.Settings.Avoid.description": "Don't show particles from other client (useful for lower config)",
+    "PARTICULE-FX.Settings.doubleSizeElevation.label": "Double size elevation",
+    "PARTICULE-FX.Settings.doubleSizeElevation.description": "Number of grids of elevation to double the size of the particles",
     "PARTICULE-FX.Settings.Persist.label": "Save emitters",
     "PARTICULE-FX.Settings.Persist.description": "Save unfinished emitters in the scene when changing. Reload them when go back to the scene",
     "PARTICULE-FX.Settings.minRole.label": "Custom template minimal role",

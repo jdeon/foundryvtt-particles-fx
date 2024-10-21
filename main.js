@@ -81,6 +81,16 @@ Hooks.on("setup", () => {
         default: true
     });
 
+    game.settings.register(s_MODULE_ID, "doubleSizeElevation", {
+        name: game.i18n.localize("PARTICULE-FX.Settings.doubleSizeElevation.label"),
+        hint: game.i18n.localize("PARTICULE-FX.Settings.doubleSizeElevation.description"),
+        scope: "world",
+        config: true,
+        type: Number,
+        requiresReload: true,
+        default: 10
+    });
+
     setupAutomation()
 
     game.settings.register(s_MODULE_ID, "maxEmitterId", {

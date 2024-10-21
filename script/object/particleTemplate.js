@@ -31,7 +31,6 @@ export class ParticleTemplate {
     ) {
         const isElevationManage = game.settings.get(s_MODULE_ID, "activateElevation");
 
-
         this.source = ParticleTemplate._translatePlaceableObject(source);
         this.target = ParticleTemplate._translatePlaceableObject(target);
         this.sizeStart = Vector3.build(sizeStart);
