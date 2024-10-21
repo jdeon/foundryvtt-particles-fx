@@ -130,18 +130,22 @@ export class SprayingParticle extends Particle {
         //Particle move
         const currentVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
         let angleRadiant = this.getDirection() * (Math.PI / 180)
+
+        let horizontalMovement, verticalMovement
         if (this.isElevationManage) {
             const currentRiseRate = this._computeRiseRate(lifetimeProportion);
-            const horizontalMovement = currentVelocity * Math.pow((1 - Math.pow(currentRiseRate, 2)), 1 / 2) * dt / 1000
 
-            this.positionVibrationLess.x += Math.cos(angleRadiant) * horizontalMovement;
-            this.positionVibrationLess.y += Math.sin(angleRadiant) * horizontalMovement;
-            this.positionVibrationLess.z += currentVelocity * currentRiseRate * dt / 1000;
+            horizontalMovement = currentVelocity * Math.pow((1 - Math.pow(currentRiseRate, 2)), 1 / 2) * dt / 1000
+            verticalMovement = currentVelocity * currentRiseRate * dt / 1000
+
         } else {
-            this.positionVibrationLess.x += Math.cos(angleRadiant) * currentVelocity;
-            this.positionVibrationLess.y += Math.sin(angleRadiant) * currentVelocity;
+            horizontalMovement = currentVelocity * dt / 1000;
+            verticalMovement = 0;
         }
 
+        this.positionVibrationLess.x += Math.cos(angleRadiant) * horizontalMovement;
+        this.positionVibrationLess.y += Math.sin(angleRadiant) * horizontalMovement;
+        this.positionVibrationLess.z += verticalMovement;
 
         super._manageLifetime(dt, lifetimeProportion)
 

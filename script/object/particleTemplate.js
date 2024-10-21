@@ -258,7 +258,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         const mainParticle = super.generateParticles();
 
         if (mainParticle.target) {
-            const sourcePosition = { x: mainParticle.sprite.x, y: mainParticle.sprite.y, z: mainParticle.positionVibrationLess?.z ?? 0 } //TODO this.isElevationManage
+            const sourcePosition = { x: mainParticle.sprite.x, y: mainParticle.sprite.y, z: mainParticle.positionVibrationLess?.z ?? 0 }
             const targetPosition = Utils.getSourcePosition(mainParticle.target, this.isElevationManage)
 
             if ((sourcePosition.x === targetPosition.x && sourcePosition.y === targetPosition.y)) {
