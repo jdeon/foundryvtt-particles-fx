@@ -12,14 +12,14 @@ export default class ParticlesEmitter {
     static _EMISSION_CANVAS
 
     static INIT_EMISSION_CANVAS = () => {
-        if (canvas.app.stage.rendered.interface.moduleParticlesFx) {
-            canvas.app.stage.rendered.interface.moduleParticlesFx.destroy()
+        if (canvas.app.stage.rendered.environment.effects.moduleParticlesFx) {
+            canvas.app.stage.rendered.environment.effects.moduleParticlesFx.destroy()
         }
 
         const particleFxCanvas = new PIXI.Container();
         particleFxCanvas.zIndex = Particle.SORT_LAYER;
-        canvas.app.stage.rendered.interface.addChild(particleFxCanvas);
-        canvas.app.stage.rendered.interface.moduleParticlesFx = particleFxCanvas;
+        canvas.app.stage.rendered.environment.effects.addChild(particleFxCanvas);
+        canvas.app.stage.rendered.environment.effects.moduleParticlesFx = particleFxCanvas;
         ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
     }
 
