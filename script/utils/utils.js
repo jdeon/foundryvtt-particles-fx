@@ -134,14 +134,6 @@ export class Utils {
 
     static doubleSizeElevation;
 
-    static getDoubleSizeElevation() {
-        if (!Utils.doubleSizeElevation) {
-            Utils.doubleSizeElevation = game.settings.get(s_MODULE_ID, "doubleSizeElevation")
-        }
-
-        return Utils.doubleSizeElevation
-    };
-
     static pixelOfDistanceConvertor() {
         return canvas.scene.grid.size / canvas.scene.grid.distance
     }
@@ -351,13 +343,11 @@ export class Utils {
             return 1
         }
 
-        const doubleSizeElevation = Utils.getDoubleSizeElevation()
-
-        if (!doubleSizeElevation) {
+        if (!Utils.doubleSizeElevation) {
             return 1
         }
 
-        const factor = elevation / canvas.scene.grid.size / doubleSizeElevation //Size double every doubleSizeElevation grid space
+        const factor = elevation / canvas.scene.grid.size / Utils.doubleSizeElevation //Size double every doubleSizeElevation grid space
 
         return Math.pow(2, factor)
     }

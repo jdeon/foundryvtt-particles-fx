@@ -87,8 +87,10 @@ Hooks.on("setup", () => {
         scope: "world",
         config: true,
         type: Number,
-        requiresReload: true,
-        default: 10
+        default: 10,
+        onChange: value => {
+            Utils.doubleSizeElevation = value;
+        }
     });
 
     setupAutomation()
@@ -129,6 +131,8 @@ Hooks.on("setup", () => {
 
 Hooks.on("canvasReady", () => {
     ParticlesEmitter.INIT_EMISSION_CANVAS()
+
+    Utils.doubleSizeElevation = game.settings.get(s_MODULE_ID, "doubleSizeElevation")
 
     const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
 
