@@ -1,5 +1,6 @@
 import { motionTemplateDictionnary } from "../prefillMotionTemplate.js"
 import { colorTemplateDictionnary } from "../prefillColorTemplate.js"
+import { Particle } from "./particle.js"
 
 export default class ParticlesEmitter {
 
@@ -11,13 +12,14 @@ export default class ParticlesEmitter {
     static _EMISSION_CANVAS
 
     static INIT_EMISSION_CANVAS = () => {
-        if (canvas.app.stage.rendered.interface.moduleParticlesFx) {
-            canvas.app.stage.rendered.interface.moduleParticlesFx.destroy()
+        if (canvas.app.stage.rendered.environment.effects.moduleParticlesFx) {
+            canvas.app.stage.rendered.environment.effects.moduleParticlesFx.destroy()
         }
 
-        const particleFxCanvas = new PIXI.Container()
-        canvas.app.stage.rendered.interface.addChild(particleFxCanvas);
-        canvas.app.stage.rendered.interface.moduleParticlesFx = particleFxCanvas
+        const particleFxCanvas = new PIXI.Container();
+        particleFxCanvas.zIndex = Particle.SORT_LAYER;
+        canvas.app.stage.rendered.environment.effects.addChild(particleFxCanvas);
+        canvas.app.stage.rendered.environment.effects.moduleParticlesFx = particleFxCanvas;
         ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
     }
 
@@ -55,7 +57,10 @@ export default class ParticlesEmitter {
                 i--
             }
         }
-        canvas.primary.sortChildren()
+
+        if (this.particleTemplate?.isElevationManage) {
+            canvas.primary.sortChildren()
+        }
 
         //Decrease remainingTime of emmission if it has one
         if (this.remainingTime !== undefined) {
@@ -80,8 +85,11 @@ export default class ParticlesEmitter {
                     this.remainingTime = 0
                     break
                 }
+
                 ParticlesEmitter._EMISSION_CANVAS.addChild(particle.sprite);
-                canvas.primary.addChild(particle.sprite)
+                if (this.particleTemplate?.isElevationManage) {
+                    canvas.primary.addChild(particle.sprite)
+                }
                 this.particles.push(particle)
             }
 

@@ -1,5 +1,5 @@
 import { Particle, SprayingParticle, GravitingParticle } from './particle.js'
-import { Utils, Vector3 } from "../utils/utils.js"
+import { s_MODULE_ID, Utils, Vector3 } from "../utils/utils.js"
 import { generatePrefillTemplateForMeasured } from '../service/measuredTemplate.service.js'
 import { AdvancedVariable } from './advancedVariable.js'
 import { ParticleInput } from './particleInput.js'
@@ -29,6 +29,8 @@ export class ParticleTemplate {
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd,
         advanced
     ) {
+        const isElevationManage = game.settings.get(s_MODULE_ID, "activateElevation");
+
         this.source = ParticleTemplate._translatePlaceableObject(source);
         this.target = ParticleTemplate._translatePlaceableObject(target);
         this.sizeStart = Vector3.build(sizeStart);
@@ -41,19 +43,20 @@ export class ParticleTemplate {
         this.colorEnd = Vector3.build(colorEnd);
         this.alphaStart = alphaStart;
         this.alphaEnd = alphaEnd;
-        this.riseRateStart = riseRateStart;
-        this.riseRateEnd = riseRateEnd;
+        this.riseRateStart = isElevationManage ? riseRateStart : 0;
+        this.riseRateEnd = isElevationManage ? riseRateEnd : 0;
         this.vibrationAmplitudeStart = vibrationAmplitudeStart;
         this.vibrationAmplitudeEnd = vibrationAmplitudeEnd;
         this.vibrationFrequencyStart = vibrationFrequencyStart;
         this.vibrationFrequencyEnd = vibrationFrequencyEnd;
+        this.isElevationManage = isElevationManage
         this.advanced = advanced;
     }
 
     generateParticles() {
         let advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
 
-        let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable))
+        let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable), this.isElevationManage)
 
         let sprite = new PIXI.Sprite(this.particleTexture)
         sprite.x = sourcePosition.x;
@@ -62,7 +65,7 @@ export class ParticleTemplate {
 
         const startSizeInput = Utils.getRandomParticuleInputFrom(this.sizeStart, advancedVariable)
         let startSize = Vector3.build(startSizeInput)
-        const sizeFactor = Utils.handleElevationFactorForSize(sourcePosition.z)
+        const sizeFactor = Utils.handleElevationFactorForSize(this.isElevationManage ? sourcePosition.z : undefined)
         sprite.width = startSize.x * sizeFactor
         sprite.height = startSize.y * sizeFactor
 
@@ -90,7 +93,8 @@ export class ParticleTemplate {
             Utils.getRandomParticuleInputFrom(this.vibrationAmplitudeStart, advancedVariable),
             Utils.getRandomParticuleInputFrom(this.vibrationAmplitudeEnd, advancedVariable),
             Utils.getRandomParticuleInputFrom(this.vibrationFrequencyStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.vibrationFrequencyEnd, advancedVariable)
+            Utils.getRandomParticuleInputFrom(this.vibrationFrequencyEnd, advancedVariable),
+            this.isElevationManage
         )
     }
 }
@@ -146,7 +150,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
 
         let particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable, true)
 
-        let sourcePosition = Utils.getSourcePosition(particleProperties.source.getValue())
+        let sourcePosition = Utils.getSourcePosition(particleProperties.source.getValue(), this.isElevationManage)
         let target = particleProperties.target.getValue()
         let particleLifetime = particleProperties.particleLifetime.getValue()
         let positionSpawning = particleProperties.positionSpawning.getValue()
@@ -154,7 +158,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
         let targetAngleDirection
         if (target && (sourcePosition.x !== target.x || sourcePosition.y !== target.y)) {
             //Target exist and is different than source
-            let targetPosition = Utils.getSourcePosition(target)
+            let targetPosition = Utils.getSourcePosition(target, this.isElevationManage)
             targetAngleDirection = Math.atan2(targetPosition.y - sourcePosition.y, targetPosition.x - sourcePosition.x)
             const oldPositionSpawning = new Vector3(positionSpawning.x, positionSpawning.y, positionSpawning.z);
             positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
@@ -169,7 +173,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             particleProperties.riseRateEnd.add(targetRiseRate)
 
         } else if (this.source instanceof MeasuredTemplate) {
-            sourcePosition = { x: this.source.x, y: this.source.y, z: this.source.document?.elevation }//Don t use width and length
+            sourcePosition = Utils.getSourcePosition(this.source, this.isElevationManage)//Don t use width and length
             let measuredOverride = generatePrefillTemplateForMeasured(this.source.document, particleProperties.velocityStart.getValue(), particleProperties.velocityEnd.getValue())
             particleProperties = { ...particleProperties, ...measuredOverride }
             particleLifetime = particleProperties.particleLifetime.getValue()
@@ -219,6 +223,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             particleProperties.vibrationAmplitudeEnd,
             particleProperties.vibrationFrequencyStart,
             particleProperties.vibrationFrequencyEnd,
+            this.isElevationManage
         )
     }
 }
@@ -253,7 +258,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
         if (mainParticle.target) {
             const sourcePosition = { x: mainParticle.sprite.x, y: mainParticle.sprite.y, z: mainParticle.positionVibrationLess?.z ?? 0 }
-            const targetPosition = Utils.getSourcePosition(mainParticle.target)
+            const targetPosition = Utils.getSourcePosition(mainParticle.target, this.isElevationManage)
 
             if ((sourcePosition.x === targetPosition.x && sourcePosition.y === targetPosition.y)) {
                 //Target and source is at the same place
@@ -391,7 +396,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
 
         this.angleStart = angleStart;                        //Array of Number
-        this.axisElevationAngle = axisElevationAngle;
+        this.axisElevationAngle = this.isElevationManage ? axisElevationAngle : undefined;
         this.angularVelocityStart = angularVelocityStart;  //Number      
         this.angularVelocityEnd = angularVelocityEnd;      //Number
         this.radiusStart = radiusStart;                     //Number      
@@ -403,10 +408,10 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         const advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
 
         const source = Utils.getRandomValueFrom(this.source, advancedVariable)
-        const sourcePosition = Utils.getSourcePosition(source)
+        const sourcePosition = Utils.getSourcePosition(source, this.isElevationManage)
 
         const target = Utils.getRandomValueFrom(this.target, advancedVariable)
-        const targetPosition = Utils.getSourcePosition(target)
+        const targetPosition = Utils.getSourcePosition(target, this.isElevationManage)
 
         const riseRateStart = Utils.getRandomParticuleInputFrom(this.riseRateStart, advancedVariable)
         const riseRateEnd = Utils.getRandomParticuleInputFrom(this.riseRateEnd, advancedVariable)
@@ -490,7 +495,8 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             Utils.getRandomParticuleInputFrom(this.vibrationAmplitudeStart, advancedVariable),
             Utils.getRandomParticuleInputFrom(this.vibrationAmplitudeEnd, advancedVariable),
             Utils.getRandomParticuleInputFrom(this.vibrationFrequencyStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.vibrationFrequencyEnd, advancedVariable)
+            Utils.getRandomParticuleInputFrom(this.vibrationFrequencyEnd, advancedVariable),
+            this.isElevationManage
         )
     }
 }

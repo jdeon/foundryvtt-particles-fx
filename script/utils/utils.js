@@ -132,6 +132,8 @@ export class Vector3 {
 
 export class Utils {
 
+    static doubleSizeElevation;
+
     static pixelOfDistanceConvertor() {
         return canvas.scene.grid.size / canvas.scene.grid.distance
     }
@@ -301,14 +303,19 @@ export class Utils {
         return game.user.targets.ids.length > 0 ? game.user.targets.ids[0] : undefined
     }
 
-    static getSourcePosition(source) {
+    static getSourcePosition(source, isElevationManage = true) {
         if (source === undefined || source === null || source.destroyed || source.x === undefined || source.y === undefined) {
             return
         }
 
-        const sourceElevation = source.document?.elevation ?
-            source.document.elevation * Utils.pixelOfDistanceConvertor() :
-            source.z ?? 0
+        let sourceElevation = 0
+        if (isElevationManage) {
+            if (source.document?.elevation) {
+                sourceElevation = source.document.elevation * Utils.pixelOfDistanceConvertor()
+            } else if (source.z) {
+                sourceElevation = source.z
+            }
+        }
 
         let result = {
             x: source.x,
@@ -336,7 +343,11 @@ export class Utils {
             return 1
         }
 
-        const factor = elevation / canvas.scene.grid.size / 10 //Size double every 10 grid space
+        if (!Utils.doubleSizeElevation) {
+            return 1
+        }
+
+        const factor = elevation / canvas.scene.grid.size / Utils.doubleSizeElevation //Size double every doubleSizeElevation grid space
 
         return Math.pow(2, factor)
     }
