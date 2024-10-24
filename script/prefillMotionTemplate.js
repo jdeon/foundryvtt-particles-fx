@@ -221,15 +221,15 @@ const slashMotionTemplate = {
 }
 
 export const motionTemplateDictionnary = {
-    explosion: explosionMotionTemplate,
     breath: breathMotionTemplate,
+    explosion: explosionMotionTemplate,
     ray: rayMotionTemplate,
+    sonar: sonarMotionTemplate,
+    grow: growingMissileMotionTemlate,
     trail: trailMissileMotionTemlate,
     wave: waveMissileMotionTemlate,
-    grow: growingMissileMotionTemlate,
-    vortex: vortexMotionTemplate,
     aura: auraMotionTemplate,
     satellite: satelliteMotionTemplate,
     slash: slashMotionTemplate,
-    sonar: sonarMotionTemplate
+    vortex: vortexMotionTemplate,
 }
