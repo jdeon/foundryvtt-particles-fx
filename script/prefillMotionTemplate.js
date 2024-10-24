@@ -220,6 +220,18 @@ const slashMotionTemplate = {
     alphaStart: .5
 }
 
+const atomMotionTemplate = {
+    spawningFrequence: 25,
+    maxParticles: 250,
+    particleLifetime: 60000,
+    particleVelocityStart: 120,
+    particleRiseRateStart: [-Math.sqrt(2.75 / 4), 0, Math.sqrt(3.25 / 4)],
+    particleAngleStart: 0,
+    particleRadiusStart: '75%',
+    particleSizeStart: [2, 2, 2, 2, 2, [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 10]],
+    alphaStart: .9,
+}
+
 export const motionTemplateDictionnary = {
     breath: breathMotionTemplate,
     explosion: explosionMotionTemplate,
@@ -228,6 +240,7 @@ export const motionTemplateDictionnary = {
     grow: growingMissileMotionTemlate,
     trail: trailMissileMotionTemlate,
     wave: waveMissileMotionTemlate,
+    atom: atomMotionTemplate,
     aura: auraMotionTemplate,
     satellite: satelliteMotionTemplate,
     slash: slashMotionTemplate,
