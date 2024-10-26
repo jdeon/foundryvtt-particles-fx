@@ -137,7 +137,13 @@ export class Utils {
     }
 
     static getGridDistanceBetweenPoint(source, target) {
-        return canvas.grid.measurePath([source, target])?.spaces
+        const distance = canvas.grid.measurePath([source, target])?.distance
+
+        if (distance) {
+            return distance / canvas.scene.grid.distance
+        }
+
+        return 1
     }
 
     static getRandomValueFrom(inValue, advancedVariables) {
