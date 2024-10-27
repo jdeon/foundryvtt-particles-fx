@@ -72,9 +72,10 @@ export function getItemIdFromTemplate(template) {
     const originsTemplate = template?.flags?.dnd5e?.origin?.split('.') ?? []
 
     const itemIndex = originsTemplate.indexOf('Item') + 1
+    const activityIndex = originsTemplate.indexOf('Activity') + 1
 
-    if (itemIndex > 0) {
-        return originsTemplate[itemIndex]
+    if (itemIndex > 0 && activityIndex > 0) {
+        return originsTemplate[itemIndex] + "_" + originsTemplate[activityIndex]
     } else {
         return
     }
