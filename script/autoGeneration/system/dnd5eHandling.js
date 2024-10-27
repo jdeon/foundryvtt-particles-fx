@@ -32,7 +32,10 @@ export function automationInitialisation() {
     })
 
     Hooks.on("dnd5e.postUseActivity", async (activity) => {
-        if (!activity.damage?.parts?.length && activity.isSpell && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(activity.item.system.school)) {
+        if (
+            !(activity.damage?.parts?.length || activity.healing)
+            && activity.isSpell && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(activity.item.system.school)
+        ) {
             const controlledToken = canvas?.activeLayer?.controlled?.length ? canvas?.activeLayer?.controlled : [item.parent.token]
             activity
             if (activity?.target?.template?.count) {
