@@ -31,15 +31,15 @@ export function automationInitialisation() {
         emitParticle(emitDataArray, colors)
     })
 
-    Hooks.on("dnd5e.useItem", async (item) => {
-        if (!item.hasDamage && item.type === "spell" && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(item.system.school)) {
+    Hooks.on("dnd5e.postUseActivity", async (activity) => {
+        if (!activity.damage?.parts?.length && activity.isSpell && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(activity.item.system.school)) {
             const controlledToken = canvas?.activeLayer?.controlled?.length ? canvas?.activeLayer?.controlled : [item.parent.token]
-
-            if (item.hasAreaTarget) {
-                const aetc = AutoEmissionTemplateCache.findByItem(item.id)
+            activity
+            if (activity?.target?.template?.count) {
+                const aetc = AutoEmissionTemplateCache.findByItem(activity.item.id + "_" + activity.id)
                 aetc.setSources(controlledToken)
                 aetc.setColors([{
-                    id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school],
+                    id: MAGIC_SPELL_SCHOOL_COLOR[activity.item.system.school],
                     fraction: 1
                 }])
             } else {
@@ -48,14 +48,14 @@ export function automationInitialisation() {
                 const emitDataArray = controlledToken.flatMap((source) =>
                     targets.map((target) => {
                         const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                        const type = _findTypeEmission(item, false)
+                        const type = _findTypeEmission(activity, false)
                         return new EmitData(type, source, target, distance)
                     })
                 )
 
                 emitParticle(emitDataArray,
                     [{
-                        id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school],
+                        id: MAGIC_SPELL_SCHOOL_COLOR[activity.item.system.school],
                         fraction: 1
                     }]
                 )
