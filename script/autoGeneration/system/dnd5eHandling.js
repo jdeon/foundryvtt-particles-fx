@@ -11,7 +11,7 @@ export function automationInitialisation() {
 
         const controlledToken = canvas?.activeLayer?.controlled ?? []
 
-        if (activity?.target?.template?.count) {//
+        if (activity?.target?.template?.count) {
             const aetc = AutoEmissionTemplateCache.findByItem(activity.item.id + "_" + activity.id)
             aetc.setSources(controlledToken)
             aetc.setColors(colors)
@@ -24,7 +24,7 @@ export function automationInitialisation() {
         const emitDataArray = controlledToken.flatMap((source) =>
             targets.map((target) => {
                 const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                const type = _findTypeEmission(item, distance < itemRange + 1)
+                const type = _findTypeEmission(activity, distance < itemRange + 1)
                 return new EmitData(type, source, target, distance)
             })
         )
