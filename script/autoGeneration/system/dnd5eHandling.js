@@ -2,11 +2,11 @@ import { Utils } from "../../utils/utils.js"
 import { AutoEmissionTemplateCache } from "../autoEmissionTemplateCache.js"
 import { getColorsFromDamageRolls, EmitData, emitParticle, TYPE_EMISSION } from "../automaticGeneration.service.js"
 
-export function automationInitialisation(){
     Hooks.on("dnd5e.rollDamage", async (item, rolls) => {
         console.log('Particles FX automation', item, rolls)
         const itemRange = item?.system?.range?.value ? item?.system?.range?.value / canvas.scene.grid.distance : 1
 
+export function automationInitialisation() {
         const colors = getColorsFromDamageRolls(rolls)
 
         const controlledToken = canvas?.activeLayer?.controlled ?? []
@@ -21,7 +21,7 @@ export function automationInitialisation(){
 
         const targets = Array.from(game?.user?.targets ?? [])
 
-        const emitDataArray = controlledToken.flatMap((source) => 
+        const emitDataArray = controlledToken.flatMap((source) =>
             targets.map((target) => {
                 const distance = Utils.getGridDistanceBetweenPoint(source, target)
                 const type = _findTypeEmission(item, distance < itemRange + 1)
@@ -32,20 +32,20 @@ export function automationInitialisation(){
     })
 
     Hooks.on("dnd5e.useItem", async (item) => {
-        if(!item.hasDamage && item.type === "spell" && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(item.system.school)){
+        if (!item.hasDamage && item.type === "spell" && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(item.system.school)) {
             const controlledToken = canvas?.activeLayer?.controlled?.length ? canvas?.activeLayer?.controlled : [item.parent.token]
-            
-            if(item.hasAreaTarget){
+
+            if (item.hasAreaTarget) {
                 const aetc = AutoEmissionTemplateCache.findByItem(item.id)
                 aetc.setSources(controlledToken)
                 aetc.setColors([{
-                    id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school] , 
+                    id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school],
                     fraction: 1
-                    }])
+                }])
             } else {
                 const targets = Array.from(game?.user?.targets ?? [])
 
-                const emitDataArray = controlledToken.flatMap((source) => 
+                const emitDataArray = controlledToken.flatMap((source) =>
                     targets.map((target) => {
                         const distance = Utils.getGridDistanceBetweenPoint(source, target)
                         const type = _findTypeEmission(item, false)
@@ -54,9 +54,9 @@ export function automationInitialisation(){
                 )
 
                 emitParticle(emitDataArray,
-                     [{
-                    id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school] , 
-                    fraction: 1
+                    [{
+                        id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school],
+                        fraction: 1
                     }]
                 )
             }
