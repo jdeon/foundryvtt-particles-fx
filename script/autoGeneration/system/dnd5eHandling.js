@@ -88,7 +88,7 @@ function _findTypeEmission(activity, isMelee) {
     let emissionType
     if (activity.type === "attack" && activity.attack?.type?.value === "melee" && isMelee) {
         emissionType = TYPE_EMISSION.meleeAttack
-    } else if (["heal", "util"].includes(activity.type)) {
+    } else if (["heal", "utility"].includes(activity.type)) {
         emissionType = TYPE_EMISSION.bonusEffect
     } else if (activity.type === "save") {
         emissionType = TYPE_EMISSION.penaltyEffect
