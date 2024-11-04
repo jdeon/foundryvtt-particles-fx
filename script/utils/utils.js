@@ -329,7 +329,7 @@ export class Utils {
             r: 0
         }
 
-        if (!(source instanceof PIXI.Sprite)) {
+        if (!(source instanceof PIXI.Sprite || source instanceof MeasuredTemplate)) {
             //Don t use width and length) for Sprite because of anchor
             result.x += (source.w || source.width || 0) / 2
             result.y += (source.h || source.height || 0) / 2

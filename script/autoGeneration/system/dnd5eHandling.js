@@ -2,17 +2,17 @@ import { Utils } from "../../utils/utils.js"
 import { AutoEmissionTemplateCache } from "../autoEmissionTemplateCache.js"
 import { getColorsFromDamageRolls, EmitData, emitParticle, TYPE_EMISSION } from "../automaticGeneration.service.js"
 
-export function automationInitialisation(){
-    Hooks.on("dnd5e.rollDamage", async (item, rolls) => {
-        console.log('Particles FX automation', item, rolls)
-        const itemRange = item?.system?.range?.value ? item?.system?.range?.value / canvas.scene.grid.distance : 1
-
+export function automationInitialisation() {
+    Hooks.on("dnd5e.rollDamageV2", async (rolls, item) => {
+        console.log('Particles FX automation', rolls, item)
+        const activity = item?.subject
+        const itemRange = activity?.range?.value ? activity.range.value / canvas.scene.grid.distance : 1
         const colors = getColorsFromDamageRolls(rolls)
 
         const controlledToken = canvas?.activeLayer?.controlled ?? []
 
-        if(item.hasAreaTarget){
-            const aetc = AutoEmissionTemplateCache.findByItem(item.id)
+        if (activity?.target?.template?.count) {
+            const aetc = AutoEmissionTemplateCache.findByItem(activity.item.id + "_" + activity.id)
             aetc.setSources(controlledToken)
             aetc.setColors(colors)
             return
@@ -21,42 +21,45 @@ export function automationInitialisation(){
 
         const targets = Array.from(game?.user?.targets ?? [])
 
-        const emitDataArray = controlledToken.flatMap((source) => 
+        const emitDataArray = controlledToken.flatMap((source) =>
             targets.map((target) => {
                 const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                const type = _findTypeEmission(item, distance < itemRange + 1)
+                const type = _findTypeEmission(activity, distance < itemRange + 1)
                 return new EmitData(type, source, target, distance)
             })
         )
         emitParticle(emitDataArray, colors)
     })
 
-    Hooks.on("dnd5e.useItem", async (item) => {
-        if(!item.hasDamage && item.type === "spell" && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(item.system.school)){
+    Hooks.on("dnd5e.postUseActivity", async (activity) => {
+        if (
+            !(activity.damage?.parts?.length || activity.healing)
+            && activity.isSpell && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(activity.item.system.school)
+        ) {
             const controlledToken = canvas?.activeLayer?.controlled?.length ? canvas?.activeLayer?.controlled : [item.parent.token]
-            
-            if(item.hasAreaTarget){
-                const aetc = AutoEmissionTemplateCache.findByItem(item.id)
+            activity
+            if (activity?.target?.template?.count) {
+                const aetc = AutoEmissionTemplateCache.findByItem(activity.item.id + "_" + activity.id)
                 aetc.setSources(controlledToken)
                 aetc.setColors([{
-                    id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school] , 
+                    id: MAGIC_SPELL_SCHOOL_COLOR[activity.item.system.school],
                     fraction: 1
-                    }])
+                }])
             } else {
                 const targets = Array.from(game?.user?.targets ?? [])
 
-                const emitDataArray = controlledToken.flatMap((source) => 
+                const emitDataArray = controlledToken.flatMap((source) =>
                     targets.map((target) => {
                         const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                        const type = _findTypeEmission(item, false)
+                        const type = _findTypeEmission(activity, false)
                         return new EmitData(type, source, target, distance)
                     })
                 )
 
                 emitParticle(emitDataArray,
-                     [{
-                    id: MAGIC_SPELL_SCHOOL_COLOR[item.system.school] , 
-                    fraction: 1
+                    [{
+                        id: MAGIC_SPELL_SCHOOL_COLOR[activity.item.system.school],
+                        fraction: 1
                     }]
                 )
             }
@@ -64,29 +67,30 @@ export function automationInitialisation(){
     })
 }
 
-export function getColorFromDamageRolls(roll){
+export function getColorFromDamageRolls(roll) {
     return DAMAGE_COLOR[roll.options.type]
 }
 
-export function getItemIdFromTemplate(template){
+export function getItemIdFromTemplate(template) {
     const originsTemplate = template?.flags?.dnd5e?.origin?.split('.') ?? []
 
     const itemIndex = originsTemplate.indexOf('Item') + 1
+    const activityIndex = originsTemplate.indexOf('Activity') + 1
 
-    if(itemIndex>0){
-        return originsTemplate[itemIndex]
+    if (itemIndex > 0 && activityIndex > 0) {
+        return originsTemplate[itemIndex] + "_" + originsTemplate[activityIndex]
     } else {
         return
     }
 }
 
-function _findTypeEmission(item, isMelee){
+function _findTypeEmission(activity, isMelee) {
     let emissionType
-    if(["mwak", "msak"].includes(item?.system?.actionType) && isMelee){
+    if (activity.type === "attack" && activity.attack?.type?.value === "melee" && isMelee) {
         emissionType = TYPE_EMISSION.meleeAttack
-    } else if (["heal", "util"].includes(item?.system?.actionType)){
+    } else if (["heal", "utility"].includes(activity.type)) {
         emissionType = TYPE_EMISSION.bonusEffect
-    } else if ("save" === item?.system?.actionType){
+    } else if (activity.type === "save") {
         emissionType = TYPE_EMISSION.penaltyEffect
     } else {
         emissionType = TYPE_EMISSION.rangeAttack
