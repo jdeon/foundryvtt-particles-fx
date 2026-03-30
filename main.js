@@ -242,6 +242,8 @@ Hooks.on("chatMessage", function (chatlog, message, chatData) {
     if (resumeMessage) {
         ui.chat.processMessage("/w gm " + resumeMessage)
     }
+
+    return false
 })
 
 
