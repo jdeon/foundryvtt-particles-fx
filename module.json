@@ -29,10 +29,14 @@
 	],
 	"packs": [
 		{
-		  "name": "particles-fx-macros",
-		  "label": "Particle FX Macros",
-		  "path": "packs/particles-fx-macros.db",
-		  "type": "Macro"
+			"name": "particles-fx-macros",
+			"label": "Particle FX Macros",
+			"path": "packs/particles-fx-macros",
+			"type": "Macro",
+			"ownership": {
+				"PLAYER": "OBSERVER",
+				"ASSISTANT": "OWNER"
+			},
 		}
 	],
 	"socket": true,
