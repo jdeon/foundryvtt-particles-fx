@@ -80,8 +80,6 @@ export function missileParticles(...args) {
 }
 
 function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
-    const particleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/circle-sprite-particle.png`);
-
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
@@ -99,11 +97,11 @@ function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId
     if (finalInput.subParticles) {
         if (finalInput.subParticles.type === SprayingParticleTemplate.getType()) {
             //this is a spray particle
-            subParticleTemplate = SprayingParticleTemplate.build(finalInput.subParticles, particleTexture)
+            subParticleTemplate = SprayingParticleTemplate.build(finalInput.subParticles)
             subParticleTemplate.type = SprayingParticleTemplate.getType()
         } else if (finalInput.subParticles.type === GravitingParticleTemplate.getType()) {
             //this is a graviting particle
-            subParticleTemplate = GravitingParticleTemplate.build(finalInput.subParticles, particleTexture)
+            subParticleTemplate = GravitingParticleTemplate.build(finalInput.subParticles)
             subParticleTemplate.type = GravitingParticleTemplate.getType()
         }
     }
@@ -123,7 +121,7 @@ function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId
         finalInput.particleRotationStart,
         finalInput.particleRotationEnd,
         finalInput.particleLifetime,
-        particleTexture,
+        finalInput.particleShape,
         Vector3.build(finalInput.particleColorStart),
         Vector3.build(finalInput.particleColorEnd),
         finalInput.alphaStart,
