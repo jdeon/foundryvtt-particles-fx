@@ -2,6 +2,7 @@ import { sameStartKey } from "./utils/utils.js";
 
 export const defaultMotionTemplate = () => {
     return {
+        particleShape: "CIRCLE",
         spawningFrequence: 3,
         spawningNumber: 1,
         maxParticles: 1000,

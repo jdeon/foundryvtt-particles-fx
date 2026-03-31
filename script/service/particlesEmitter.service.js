@@ -64,12 +64,11 @@ export function sprayParticles(...args) {
 }
 
 function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
-    const particleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/circle-sprite-particle.png`);
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
-    const particleTemplate = SprayingParticleTemplate.build(finalInput, particleTexture)
+    const particleTemplate = SprayingParticleTemplate.build(finalInput)
 
     return _abstractInitParticles(inputObject, finalInput, particleTemplate, emitterId)
 }
@@ -150,13 +149,11 @@ export function gravitateParticles(...args) {
 }
 
 function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
-    const particleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/circle-sprite-particle.png`);
-
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
-    const particleTemplate = GravitingParticleTemplate.build(finalInput, particleTexture)
+    const particleTemplate = GravitingParticleTemplate.build(finalInput)
 
     return _abstractInitParticles(inputObject, finalInput, particleTemplate, emitterId)
 }
