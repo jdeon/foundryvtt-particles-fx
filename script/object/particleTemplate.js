@@ -58,7 +58,7 @@ export class ParticleTemplate {
 
         let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable), this.isElevationManage)
 
-        let sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(Utils.getRandomValueFrom(this.particleShape)))
+        let sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(this.particleShape))
         sprite.x = sourcePosition.x;
         sprite.y = sourcePosition.y;
         sprite.anchor.set(0.5);
@@ -185,7 +185,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
         }
 
-        let sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(Utils.getRandomValueFrom(this.particleShape)))
+        let sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(this.particleShape))
         sprite.x = sourcePosition.x + positionSpawning.x;
         sprite.y = sourcePosition.y + positionSpawning.y;
         sprite.anchor.set(0.5);
@@ -450,7 +450,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
 
         const riseRate = Utils.handleFraction(riseRateStart.getValue())
 
-        const sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(Utils.getRandomValueFrom(this.particleShape)))
+        const sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(this.particleShape))
         sprite.anchor.set(0.5);
         const particlePosition = GravitingParticle.computeParticlePosition(sourcePosition, radiusStart, angleStart * (Math.PI / 180), riseRate, axisElevationAngle)
         sprite.x = particlePosition.x;
