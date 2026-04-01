@@ -1,4 +1,4 @@
-import { s_MODULE_ID, s_EVENT_NAME, Vector3, Utils } from "../utils/utils.js"
+import { s_MODULE_ID, s_EVENT_NAME, Vector3, Utils, SPRITE_TEXTURE_MAPPING } from "../utils/utils.js"
 import { s_MESSAGE_TYPES } from "../utils/socketManager.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
 import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTemplate } from "../object/particleTemplate.js"
@@ -265,9 +265,10 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
 }
 
 function _orderInputArg(args) {
-    let inputObject
+    let inputObject = {}
     let motionTemplate
     let colorTemplate
+    let particleShape
     let emitterId
 
     for (let arg of args) {
@@ -279,7 +280,13 @@ function _orderInputArg(args) {
             motionTemplate = ParticlesEmitter.prefillMotionTemplate[arg]
         } else if (ParticlesEmitter.prefillColorTemplate[arg]) {
             colorTemplate = ParticlesEmitter.prefillColorTemplate[arg]
+        } else if (Object.keys(SPRITE_TEXTURE_MAPPING).includes(arg.toUpperCase())){
+            particleShape = arg.toUpperCase()
         }
+    }
+
+    if(particleShape) {
+        inputObject.particleShape = particleShape
     }
 
     return { colorTemplate, motionTemplate, inputObject, emitterId }

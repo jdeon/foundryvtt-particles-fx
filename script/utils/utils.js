@@ -15,7 +15,7 @@ export const s_MODULE_ID = 'particule-fx';
  */
 export const s_EVENT_NAME = `module.${s_MODULE_ID}`;
 
-const SPRITE_TEXTURE_MAPPING = {
+export const SPRITE_TEXTURE_MAPPING = {
     CIRCLE: PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/circle-sprite-particle.png`),
     TOR: PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/tor-sprite-particle.png`),
     STAR: PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/star-sprite-particle.png`),
