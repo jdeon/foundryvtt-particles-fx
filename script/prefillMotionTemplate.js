@@ -238,11 +238,8 @@ const flashMotionTemplate = {
     particleLifetime: [100, 250, 500],
     positionSpawning: { x: "-200%_200%", y: "-200%_200%", z: 0 },
     particleVelocityStart: '0',
-    //particleVelocityEnd: sameStartKey
     particleAngleStart: "0_360",
-    //particleAngleEnd: sameStartKey,
-    particleRadiusStart: '0%_200%',
-    //particleRadiusEnd: sameStartKey,
+    particleRadiusStart: '0%_200%'
 }
 
 export const motionTemplateDictionnary = {
