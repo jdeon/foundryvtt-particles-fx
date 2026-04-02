@@ -376,7 +376,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             input.particleRotationStart,
             input.particleRotationEnd,
             input.particleLifetime,
-            particleShape,
+            input.particleShape,
             input.particleColorStart,
             input.particleColorEnd,
             input.alphaStart,

@@ -233,6 +233,15 @@ const atomMotionTemplate = {
     alphaStart: .9,
 }
 
+const flashMotionTemplate = {
+    particleShape: "STAR",
+    particleLifetime: [100, 250, 500],
+    positionSpawning: { x: "-200%_200%", y: "-200%_200%", z: 0 },
+    particleVelocityStart: '0',
+    particleAngleStart: "0_360",
+    particleRadiusStart: '0%_200%'
+}
+
 export const motionTemplateDictionnary = {
     breath: breathMotionTemplate,
     explosion: explosionMotionTemplate,
@@ -246,4 +255,5 @@ export const motionTemplateDictionnary = {
     satellite: satelliteMotionTemplate,
     slash: slashMotionTemplate,
     vortex: vortexMotionTemplate,
+    flash: flashMotionTemplate
 }
