@@ -15,6 +15,14 @@ export const s_MODULE_ID = 'particule-fx';
  */
 export const s_EVENT_NAME = `module.${s_MODULE_ID}`;
 
+export const SPRITE_TEXTURE_MAPPING = {
+    CIRCLE: PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/circle-sprite-particle.png`),
+    TOR: PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/tor-sprite-particle.png`),
+    STAR: PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/star-sprite-particle.png`),
+    DIAMOND: PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/diamond-sprite-particle.png`)
+
+}
+
 export const sameStartKey = 'sameStart'
 
 export class Vector3 {
@@ -410,5 +418,25 @@ export class Utils {
         }
 
         return input
+    }
+
+    static getSpriteTextureFromId(id){
+        let result
+
+        if(id){
+            if(typeof id === "string"){
+                result = SPRITE_TEXTURE_MAPPING[id]
+            } else if (Array.isArray(id) && id.length > 0) {
+                const indexToRetrieve = Math.floor(Math.random() * id.length);
+                const randomId = id[indexToRetrieve]
+                result = SPRITE_TEXTURE_MAPPING[randomId]
+            }
+        }
+
+        if( result ) {
+            return result
+        }
+
+        return SPRITE_TEXTURE_MAPPING.CIRCLE
     }
 }

@@ -25,7 +25,7 @@ export class ParticleTemplate {
     }
 
     constructor(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd,
-        particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd,
+        particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd,
         advanced
     ) {
@@ -38,7 +38,7 @@ export class ParticleTemplate {
         this.particleRotationStart = particleRotationStart;
         this.particleRotationEnd = particleRotationEnd;
         this.particleLifetime = particleLifetime;
-        this.particleTexture = particleTexture;
+        this.particleShape = particleShape;
         this.colorStart = Vector3.build(colorStart);
         this.colorEnd = Vector3.build(colorEnd);
         this.alphaStart = alphaStart;
@@ -58,7 +58,7 @@ export class ParticleTemplate {
 
         let sourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable), this.isElevationManage)
 
-        let sprite = new PIXI.Sprite(this.particleTexture)
+        let sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(this.particleShape))
         sprite.x = sourcePosition.x;
         sprite.y = sourcePosition.y;
         sprite.anchor.set(0.5);
@@ -105,7 +105,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
         return "Spraying"
     }
 
-    static build(input, particleTexture) {
+    static build(input) {
         return new SprayingParticleTemplate(
             input.source,
             input.target,
@@ -121,7 +121,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             input.particleRotationStart,
             input.particleRotationEnd,
             input.particleLifetime,
-            particleTexture,
+            input.particleShape,
             input.particleColorStart,
             input.particleColorEnd,
             input.alphaStart,
@@ -135,9 +135,9 @@ export class SprayingParticleTemplate extends ParticleTemplate {
     }
 
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
-        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
+        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced) {
-        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
+        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
         this.positionSpawning = Vector3.build(positionSpawning);
         this.velocityStart = velocityStart;         //Array of Number      
         this.velocityEnd = velocityEnd;             //Array of Number
@@ -185,7 +185,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
         }
 
-        let sprite = new PIXI.Sprite(this.particleTexture)
+        let sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(this.particleShape))
         sprite.x = sourcePosition.x + positionSpawning.x;
         sprite.y = sourcePosition.y + positionSpawning.y;
         sprite.anchor.set(0.5);
@@ -236,10 +236,10 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
     }
 
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
-        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
+        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced, subParticleTemplate) {
         super(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
-            sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
+            sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
             vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
 
         this.mainParticle = this.generateMainParticles()
@@ -359,7 +359,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         return "Graviting"
     }
 
-    static build(input, particleTexture) {
+    static build(input) {
         return new GravitingParticleTemplate(
             input.source,
             input.target,
@@ -376,7 +376,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             input.particleRotationStart,
             input.particleRotationEnd,
             input.particleLifetime,
-            particleTexture,
+            particleShape,
             input.particleColorStart,
             input.particleColorEnd,
             input.alphaStart,
@@ -391,9 +391,9 @@ export class GravitingParticleTemplate extends ParticleTemplate {
     }
 
     constructor(source, target, angleStart, axisElevationAngle, angularVelocityStart, angularVelocityEnd, riseRateStart, riseRateEnd, radiusStart, radiusEnd,
-        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd,
+        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow, advanced) {
-        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleTexture, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
+        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
 
         this.angleStart = angleStart;                        //Array of Number
         this.axisElevationAngle = this.isElevationManage ? axisElevationAngle : undefined;
@@ -450,7 +450,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
 
         const riseRate = Utils.handleFraction(riseRateStart.getValue())
 
-        const sprite = new PIXI.Sprite(this.particleTexture)
+        const sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(this.particleShape))
         sprite.anchor.set(0.5);
         const particlePosition = GravitingParticle.computeParticlePosition(sourcePosition, radiusStart, angleStart * (Math.PI / 180), riseRate, axisElevationAngle)
         sprite.x = particlePosition.x;

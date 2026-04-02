@@ -1,4 +1,4 @@
-import { s_MODULE_ID, s_EVENT_NAME, Vector3, Utils } from "../utils/utils.js"
+import { s_MODULE_ID, s_EVENT_NAME, Vector3, Utils, SPRITE_TEXTURE_MAPPING } from "../utils/utils.js"
 import { s_MESSAGE_TYPES } from "../utils/socketManager.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
 import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTemplate } from "../object/particleTemplate.js"
@@ -64,12 +64,11 @@ export function sprayParticles(...args) {
 }
 
 function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
-    const particleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particle.png`);
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
-    const particleTemplate = SprayingParticleTemplate.build(finalInput, particleTexture)
+    const particleTemplate = SprayingParticleTemplate.build(finalInput)
 
     return _abstractInitParticles(inputObject, finalInput, particleTemplate, emitterId)
 }
@@ -81,8 +80,6 @@ export function missileParticles(...args) {
 }
 
 function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
-    const particleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particle.png`);
-
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
@@ -100,11 +97,11 @@ function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId
     if (finalInput.subParticles) {
         if (finalInput.subParticles.type === SprayingParticleTemplate.getType()) {
             //this is a spray particle
-            subParticleTemplate = SprayingParticleTemplate.build(finalInput.subParticles, particleTexture)
+            subParticleTemplate = SprayingParticleTemplate.build(finalInput.subParticles)
             subParticleTemplate.type = SprayingParticleTemplate.getType()
         } else if (finalInput.subParticles.type === GravitingParticleTemplate.getType()) {
             //this is a graviting particle
-            subParticleTemplate = GravitingParticleTemplate.build(finalInput.subParticles, particleTexture)
+            subParticleTemplate = GravitingParticleTemplate.build(finalInput.subParticles)
             subParticleTemplate.type = GravitingParticleTemplate.getType()
         }
     }
@@ -124,7 +121,7 @@ function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId
         finalInput.particleRotationStart,
         finalInput.particleRotationEnd,
         finalInput.particleLifetime,
-        particleTexture,
+        finalInput.particleShape,
         Vector3.build(finalInput.particleColorStart),
         Vector3.build(finalInput.particleColorEnd),
         finalInput.alphaStart,
@@ -150,13 +147,11 @@ export function gravitateParticles(...args) {
 }
 
 function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
-    const particleTexture = PIXI.Texture.from(`/modules/${s_MODULE_ID}/particle.png`);
-
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
-    const particleTemplate = GravitingParticleTemplate.build(finalInput, particleTexture)
+    const particleTemplate = GravitingParticleTemplate.build(finalInput)
 
     return _abstractInitParticles(inputObject, finalInput, particleTemplate, emitterId)
 }
@@ -270,9 +265,10 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
 }
 
 function _orderInputArg(args) {
-    let inputObject
+    let inputObject = {}
     let motionTemplate
     let colorTemplate
+    let particleShape
     let emitterId
 
     for (let arg of args) {
@@ -284,7 +280,13 @@ function _orderInputArg(args) {
             motionTemplate = ParticlesEmitter.prefillMotionTemplate[arg]
         } else if (ParticlesEmitter.prefillColorTemplate[arg]) {
             colorTemplate = ParticlesEmitter.prefillColorTemplate[arg]
+        } else if (Object.keys(SPRITE_TEXTURE_MAPPING).includes(arg.toUpperCase())){
+            particleShape = arg.toUpperCase()
         }
+    }
+
+    if(particleShape) {
+        inputObject.particleShape = particleShape
     }
 
     return { colorTemplate, motionTemplate, inputObject, emitterId }

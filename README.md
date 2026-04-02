@@ -58,9 +58,9 @@ It adds a message response in the chat.
 Commands:
 - `/pfx stopAll`
 - `/pfx stopById *id*`
-- `/pfx spray *prefillMotionTemplate* *prefillColorTemplate*`
-- `/pfx gravitate *prefillMotionTemplate* *prefillColorTemplate*`
-- `/pfx missile *prefillMotionTemplate* *prefillColorTemplate*`
+- `/pfx spray *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
+- `/pfx gravitate *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
+- `/pfx missile *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
 - `/pfx help`
 
 ```/pfx spray ray death```
@@ -69,9 +69,9 @@ Commands:
 
 ### Call by Script
 
-- To emit spray particles, you need to use a macro to call the method `particlesFx.sprayParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})`
-- To emit gravitating particles, you need to use a macro to call the method `particlesFx.gravitateParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})`
-- To emit missile particles, you need to use a macro to call the method `particlesFx.missileParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})`. Advanced options have the same input as Spray particles with a nested object `subParticles` containing another input (spray or gravitating) and type (equals to "Spraying" or "Graviting").
+- To emit spray particles, you need to use a macro to call the method `particlesFx.sprayParticles(prefillMotionTemplateName, prefillColorTemplate, particleShape, {Advanced options})`
+- To emit gravitating particles, you need to use a macro to call the method `particlesFx.gravitateParticles(prefillMotionTemplateName, prefillColorTemplate, particleShape, {Advanced options})`
+- To emit missile particles, you need to use a macro to call the method `particlesFx.missileParticles(prefillMotionTemplateName, prefillColorTemplate, particleShape, {Advanced options})`. Advanced options have the same input as Spray particles with a nested object `subParticles` containing another input (spray or gravitating) and type (equals to "Spraying" or "Graviting").
 - Write a message to describe the emitter and a button to stop it `particlesFx.writeMessageForEmissionById(emitterId, isVerbal)`. The `isVerbal` parameter also writes advanced input in the message.
 - To stop all emissions, you need to use a macro to call the method `particlesFx.stopAllEmission(instantDelete)`. `instantDelete` is a boolean parameter, if true, it deletes all particles already emitted, false to stop only the emission (living particles are not killed).
 - To stop a specific emission, you need to use a macro to call the method `particlesFx.stopEmissionById(id)`. ID is a number or a string:
@@ -113,7 +113,7 @@ The method emitting particles can be called with a prefill template. There are t
 *Example*
 ```particlesFx.missileParticles('wave', {source: token.id, target: target.id})```
 
-![Wave Animation](pfx-missile-wave-Animation.gif)
+![Wave Animation](doc/pfx-missile-wave-Animation.gif)
 
 **Prefill Color Template:**
 - ice
@@ -127,7 +127,20 @@ The method emitting particles can be called with a prefill template. There are t
 *Example*
 ```/pfx spray breath fire```
 
-![Fire Animation](pfx-fire-Animation.gif)
+![Fire Animation](doc/pfx-fire-Animation.gif)
+
+## Particle shape
+The particle shape property define the texture of the sprite for each particles.
+**Particle shapes:**
+- Circle (default)
+- Star
+- Tor
+- Diamond
+
+*Example*
+```/pfx spray breath star```
+
+![Fire Animation](doc/pfx-shape-star-Animation.gif)
 
 ## More Details in the Readme
 For more advanced functionality, please read the [WIKI](https://github.com/jdeon/foundryvtt-particles-fx/wiki) for more details:
