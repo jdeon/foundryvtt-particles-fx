@@ -109,6 +109,7 @@ The method emitting particles can be called with a prefill template. There are t
 - aura (designed for gravitate)
 - satellite (designed for gravitate)
 - slash (designed for gravitate)
+- flash (designed for spray (square zone) or gravitate (circle zone))
 
 *Example*
 ```particlesFx.missileParticles('wave', {source: token.id, target: target.id})```
