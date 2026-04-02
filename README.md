@@ -27,17 +27,17 @@ The emission methods are used to interpret the input and manage the particles du
 ### Spray Particles
 Spray particles are emitted from a source and move with a velocity in a direction defined by an angle.
 
-![Spray animation](pfx-spray-Animation.gif)
+![Spray animation](doc/pfx-spray-Animation.gif)
 
 ### Graviting Particles
 Gravitating particles turn around the source with a velocity at a distance defined by a radius.
 
-![Gravitate animation](pfx-gravitate-Animation.gif)
+![Gravitate animation](doc/pfx-gravitate-Animation.gif)
 
 ### Missile Particles
 The missile method emits spray particles that are used to emit sub-particles.
 
-![Missile animation](pfx-missile-Animation.gif)
+![Missile animation](doc/pfx-missile-Animation.gif)
 
 ### Stop All Emissions
 To stop all emissions in the scene and reset the particle emitter's IDs index.
