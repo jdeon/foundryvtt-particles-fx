@@ -67,7 +67,12 @@ export default class ParticlesEmitter {
             this.remainingTime -= dt;
         }
 
-        if (this.spawnedEnable && this.particles.length < this.maxParticles && (this.remainingTime === undefined || this.remainingTime > 0)) {
+        if (
+            this.spawnedEnable 
+            && this.particles.length < this.maxParticles 
+            && (this.remainingTime === undefined || this.remainingTime > 0)
+            && !(this.particleTemplate.isPausable && game.paused)
+            ) {
             //Spawned new particles
             let numberNewParticles = 1 + Math.floor(this.spawningNumber * dt / this.particleFrequence)
             let increaseTime = (this.spawningNumber * dt) % this.particleFrequence
