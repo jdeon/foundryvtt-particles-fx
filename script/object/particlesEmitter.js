@@ -45,6 +45,11 @@ export default class ParticlesEmitter {
         const dt = newDate - this.lastUpdate
         this.lastUpdate = newDate
 
+        if(this.particleTemplate.freezeOnPause && game.paused){
+            return
+        }
+
+
         for (let i = 0; i < this.particles.length; i++) {
             const particle = this.particles[i]
 
@@ -67,7 +72,11 @@ export default class ParticlesEmitter {
             this.remainingTime -= dt;
         }
 
-        if (this.spawnedEnable && this.particles.length < this.maxParticles && (this.remainingTime === undefined || this.remainingTime > 0)) {
+        if (
+            this.spawnedEnable 
+            && this.particles.length < this.maxParticles 
+            && (this.remainingTime === undefined || this.remainingTime > 0)
+            ) {
             //Spawned new particles
             let numberNewParticles = 1 + Math.floor(this.spawningNumber * dt / this.particleFrequence)
             let increaseTime = (this.spawningNumber * dt) % this.particleFrequence

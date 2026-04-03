@@ -26,7 +26,7 @@ export class ParticleTemplate {
 
     constructor(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd,
         particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd,
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause,
         advanced
     ) {
         const isElevationManage = game.settings.get(s_MODULE_ID, "activateElevation");
@@ -50,6 +50,7 @@ export class ParticleTemplate {
         this.vibrationFrequencyStart = vibrationFrequencyStart;
         this.vibrationFrequencyEnd = vibrationFrequencyEnd;
         this.isElevationManage = isElevationManage
+        this.freezeOnPause = freezeOnPause,
         this.advanced = advanced;
     }
 
@@ -130,14 +131,15 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             input.vibrationAmplitudeEnd,
             input.vibrationFrequencyStart,
             input.vibrationFrequencyEnd,
+            input.freezeOnPause,
             input.advanced,
         );
     }
 
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced) {
-        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, advanced) {
+        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, advanced)
         this.positionSpawning = Vector3.build(positionSpawning);
         this.velocityStart = velocityStart;         //Array of Number      
         this.velocityEnd = velocityEnd;             //Array of Number
@@ -237,10 +239,10 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced, subParticleTemplate) {
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, advanced, subParticleTemplate) {
         super(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
             sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
-            vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
+            vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, advanced)
 
         this.mainParticle = this.generateMainParticles()
         this.initGenerate = false
@@ -386,14 +388,15 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             input.vibrationFrequencyStart,
             input.vibrationFrequencyEnd,
             input.onlyEmitterFollow,
+            input.freezeOnPause,
             input.advanced
         );
     }
 
     constructor(source, target, angleStart, axisElevationAngle, angularVelocityStart, angularVelocityEnd, riseRateStart, riseRateEnd, radiusStart, radiusEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow, advanced) {
-        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, advanced)
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow, freezeOnPause, advanced) {
+        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, advanced)
 
         this.angleStart = angleStart;                        //Array of Number
         this.axisElevationAngle = this.isElevationManage ? axisElevationAngle : undefined;
