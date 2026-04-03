@@ -29,6 +29,7 @@ export const defaultMotionTemplate = () => {
         vibrationFrequencyStart: 0,
         vibrationFrequencyEnd: 0,
         onlyEmitterFollow: false,
+        isPausable: true,
         subParticles: {
             type: "Spraying",
             positionSpawning: { x: 0, y: 0, z: 0 },
