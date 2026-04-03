@@ -45,7 +45,7 @@ export default class ParticlesEmitter {
         const dt = newDate - this.lastUpdate
         this.lastUpdate = newDate
 
-        if(this.particleTemplate.isPausable && game.paused){
+        if(this.particleTemplate.freezeOnPause && game.paused){
             return
         }
 

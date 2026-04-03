@@ -130,7 +130,7 @@ function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId
         finalInput.vibrationAmplitudeEnd,
         finalInput.vibrationFrequencyStart,
         finalInput.vibrationFrequencyEnd,
-        finalInput.isPausable,
+        finalInput.freezeOnPause,
         finalInput.advanced,
         subParticleTemplate,
     );
