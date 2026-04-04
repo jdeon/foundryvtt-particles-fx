@@ -1,5 +1,12 @@
 import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTemplate } from "./particleTemplate.js"
+import { Utils } from "../utils/utils.js"
 import * as particlesEmitterService from "../service/particlesEmitter.service.js"
+
+const ENUM_CHAT_COMMAND_TEMPLATE_TYPE = {
+	'spray': SprayingParticleTemplate.getType(),
+    'missile': MissileParticleTemplate.getType(),
+    'gravitate': GravitingParticleTemplate.getType()
+}
 
 export class ParticleWorkflow {
 
@@ -75,8 +82,8 @@ export class ParticleWorkflow {
     		//Handle as a chat command
     		const commandArgs = particleInput.split(' ');
     		return {
-    			type: commandArgs[0], //TODO translate to emission type (spray become spraying)
-    			args: commandArgs.splice(0,1) //TODO check if ok
+    			type: ENUM_CHAT_COMMAND_TEMPLATE_TYPE[commandArgs[0]], //Get type by command
+    			args: [...commandArgs.toSpliced(0,1), { source:  Utils.getSelectedSource()?.id, target: Utils.getTargetId() }]
     		}
     	} else if (Array.isArray(particleInput)){
     		return {
