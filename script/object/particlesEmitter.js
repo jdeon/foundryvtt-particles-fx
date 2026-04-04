@@ -1,6 +1,7 @@
 import { motionTemplateDictionnary } from "../prefillMotionTemplate.js"
 import { colorTemplateDictionnary } from "../prefillColorTemplate.js"
 import { Particle } from "./particle.js"
+import { ParticleWorkflow } from"./particleWorkflow.js"
 
 export default class ParticlesEmitter {
 
@@ -111,8 +112,12 @@ export default class ParticlesEmitter {
         if (this.remainingTime !== undefined && this.remainingTime <= 0 && this.particles.length === 0) {
             //delete emission
             canvas.app.ticker.remove(this.callback);
-            const emitterIndex = ParticlesEmitter.emitters.findIndex((emitter) => emitter.id === this.id)
-            ParticlesEmitter.emitters.splice(emitterIndex, 1)
+            const emitterIndex = ParticlesEmitter.emitters.findIndex((emitter) => emitter.id === this.id);
+            ParticlesEmitter.emitters.splice(emitterIndex, 1);
+
+            const endEmissionWorkflows = this.particleTemplate.next.filter(( workflow ) => workflow.type === ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_END )
+
+            endEmissionWorkflows.forEach(( endEmissionWorkflow ) => ParticleWorkflow.generateWorkflow ( endEmissionWorkflow.type , endEmissionWorkflow.delay, endEmissionWorkflow.particleInputs, this.particleTemplate.freezeOnPause ))
         }
     }
 
