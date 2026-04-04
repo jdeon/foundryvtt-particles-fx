@@ -85,16 +85,25 @@ export class ParticleWorkflow {
     			type: ENUM_CHAT_COMMAND_TEMPLATE_TYPE[commandArgs[0]], //Get type by command
     			args: [...commandArgs.toSpliced(0,1), { source:  Utils.getSelectedSource()?.id, target: Utils.getTargetId() }]
     		}
+
     	} else if (Array.isArray(particleInput)){
+    		let type = ENUM_CHAT_COMMAND_TEMPLATE_TYPE[particleInput[0]];
+    		if( type ) {
+    			particleInput.splice(0,1);
+    		} else {
+    			type = particleInput.find((item) => item.type)?.type;
+    		}
     		return {
-    			type: SprayingParticleTemplate.getType(), //TODO
+    			type,
     			args: particleInput
     		}
+
     	} else if (particleInput.type){
     		return {
     			type: particleInput.type,
     			args: [particleInput]
     		}
+
     	}
 
     	return {
