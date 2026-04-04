@@ -27,7 +27,7 @@ export class ParticleWorkflow {
 
 	constructor (workflowType, delay, particleInputs, freezeOnPause) {
 		this.workflowType = workflowType;
-		this.delay = delay;
+		this.delay = delay ? delay * 1000 : 0;
 		this.particleInputs = particleInputs;
 		this.freezeOnPause = freezeOnPause;
 		this.lastUpdate = Date.now();
