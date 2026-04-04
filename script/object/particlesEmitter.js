@@ -50,6 +50,10 @@ export default class ParticlesEmitter {
             return
         }
 
+            const startEmissionWorkflows = this.particleTemplate.next.filter(( workflow ) => workflow.type === ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_START )
+
+            startEmissionWorkflows.forEach(( startEmissionWorkflow ) => ParticleWorkflow.generateWorkflow ( startEmissionWorkflow.type , startEmissionWorkflow.delay, startEmissionWorkflow.particleInputs, this.particleTemplate.freezeOnPause ))
+
 
         for (let i = 0; i < this.particles.length; i++) {
             const particle = this.particles[i]
