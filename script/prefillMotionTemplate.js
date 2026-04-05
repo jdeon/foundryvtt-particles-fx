@@ -52,8 +52,7 @@ export const defaultMotionTemplate = () => {
             vibrationAmplitudeStart: 0,
             vibrationAmplitudeEnd: 0,
             vibrationFrequencyStart: 0,
-            vibrationFrequencyEnd: 0,
-            next: []
+            vibrationFrequencyEnd: 0
         },
         next: []
     }

@@ -17,30 +17,31 @@ export class ParticleWorkflow {
 	    AT_PARTICLE_END: "atParticleEnd"
 	}
 
-	static triggerWorkflows (workflowType, particleTemplate) {
+	static triggerWorkflows (workflowType, particleTemplate, particle) {
 		const workflowsToTrigger = particleTemplate.next.filter(( workflow ) => workflow.type === workflowType )
 
-         workflowsToTrigger.forEach(( workflow ) => ParticleWorkflow.generateWorkflow ( workflow.type , workflow.delay, workflow.particleInputs, particleTemplate.freezeOnPause ))
+         workflowsToTrigger.forEach(( workflow ) => ParticleWorkflow.generateWorkflow ( workflow.type , workflow.delay, workflow.particleInputs, particleTemplate.freezeOnPause, particle ))
 	}
 
-	static generateWorkflow (workflowType, delay, particleInputs, freezeOnPause) {
+	static generateWorkflow (workflowType, delay, particleInputs, freezeOnPause, particle) {
 		if(!particleInputs) return
 
-
-		const particleWorkflow = new ParticleWorkflowStep (workflowType, delay, particleInputs);
+		const particleWorkflow = new ParticleWorkflowStep (workflowType, delay, particleInputs, freezeOnPause, particle);
 		particleWorkflow.computeStep()
 	}
 }
 
 class ParticleWorkflowStep {
 
-	constructor (workflowType, delay, particleInputs, freezeOnPause) {
+	constructor (workflowType, delay, particleInputs, freezeOnPause, particle) {
 		this.workflowType = workflowType;
 		this.delay = delay ? delay * 1000 : 0;
-		this.particleInputs = particleInputs;
+		this.particleInputs = JSON.parse(JSON.stringify(particleInputs));//Deep copy to not modify source and target for all
 		this.freezeOnPause = freezeOnPause;
+		this.particle = particle;
 		this.lastUpdate = Date.now();
 		this.delayCallback = this.handleDelay.bind(this)
+		this.source = particle?.getPosition(); //TODO handle case of moving particle (if sprite still exist it should be used)
 	}
 
     computeStep () {
@@ -86,12 +87,14 @@ class ParticleWorkflowStep {
     }
 
     buildEmissionArgsAndType (particleInput) {
+    	let result
+
     	if (typeof particleInput === "string"){
     		//Handle as a chat command
     		const commandArgs = particleInput.split(' ');
-    		return {
+    		result = {
     			type: ENUM_CHAT_COMMAND_TEMPLATE_TYPE[commandArgs[0]], //Get type by command
-    			args: [...commandArgs.toSpliced(0,1), { source:  Utils.getSelectedSource()?.id, target: Utils.getTargetId() }]
+    			args: [...commandArgs.toSpliced(0,1)]
     		}
 
     	} else if (Array.isArray(particleInput)){
@@ -101,23 +104,40 @@ class ParticleWorkflowStep {
     		} else {
     			type = particleInput.find((item) => item.type)?.type;
     		}
-    		return {
+    		result = {
     			type,
     			args: particleInput
     		}
 
     	} else if (particleInput.type){
-    		return {
+    		result = {
     			type: particleInput.type,
     			args: [particleInput]
     		}
 
+    	} else {
+    		result = {
+    			type: SprayingParticleTemplate.getType(),
+    			args: []
+    		}
     	}
 
-    	return {
-    		type: SprayingParticleTemplate.getType(),
-    		args: []
+    	const inputObject = result.args.find((item) => item instanceof Object)
+
+    	if( inputObject ) {
+    		
+    		if(! inputObject.source){
+    			inputObject.source = this.source;
+    		}
+
+    		if(! inputObject.target){
+    			inputObject.target = Utils.getTargetId();
+    		}
+    	} else {
+			result.args.push({ source: this.source, target: Utils.getTargetId() })
     	}
+
+    	return result;
     }
 	
 

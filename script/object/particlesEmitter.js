@@ -59,6 +59,7 @@ export default class ParticlesEmitter {
             particle.manageLifetime(dt)
 
             if (particle.remainingTime <= 0) {
+                ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_PARTICLE_END, this.particleTemplate, particle )
                 particle.sprite.destroy()
                 this.particles.splice(i, 1)
                 //Return to last particle
@@ -103,6 +104,7 @@ export default class ParticlesEmitter {
                     canvas.primary.addChild(particle.sprite)
                 }
                 this.particles.push(particle)
+                ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START, this.particleTemplate, particle )
             }
 
             this.spawnedEnable = false;

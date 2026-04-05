@@ -103,6 +103,10 @@ export class Particle {
     getLifetimeProportion() {
         return 1 - (this.remainingTime / this.particleLifetime)
     }
+
+    getPosition(){
+        return new Vector3( this.sprite.x, this.sprite.y, this.positionVibrationLess.z )
+    }
 }
 
 export class SprayingParticle extends Particle {
