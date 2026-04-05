@@ -41,7 +41,11 @@ class ParticleWorkflowStep {
 		this.particle = particle;
 		this.lastUpdate = Date.now();
 		this.delayCallback = this.handleDelay.bind(this)
-		this.source = particle?.getPosition(); //TODO handle case of moving particle (if sprite still exist it should be used)
+		this.source = this.getPosition()
+	}
+
+	getPosition () {
+		return this.particle?.getPosition() || this.source;
 	}
 
     computeStep () {
@@ -127,14 +131,14 @@ class ParticleWorkflowStep {
     	if( inputObject ) {
     		
     		if(! inputObject.source){
-    			inputObject.source = this.source;
+    			inputObject.source = this.getPosition();
     		}
 
     		if(! inputObject.target){
     			inputObject.target = Utils.getTargetId();
     		}
     	} else {
-			result.args.push({ source: this.source, target: Utils.getTargetId() })
+			result.args.push({ source: this.getPosition(), target: Utils.getTargetId() })
     	}
 
     	return result;
