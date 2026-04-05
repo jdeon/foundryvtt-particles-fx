@@ -17,13 +17,22 @@ export class ParticleWorkflow {
 	    AT_PARTICLE_END: "atParticleEnd"
 	}
 
+	static triggerWorkflows (workflowType, particleTemplate) {
+		const workflowsToTrigger = particleTemplate.next.filter(( workflow ) => workflow.type === workflowType )
+
+         workflowsToTrigger.forEach(( workflow ) => ParticleWorkflow.generateWorkflow ( workflow.type , workflow.delay, workflow.particleInputs, particleTemplate.freezeOnPause ))
+	}
+
 	static generateWorkflow (workflowType, delay, particleInputs, freezeOnPause) {
 		if(!particleInputs) return
 
 
-		const particleWorkflow = new ParticleWorkflow (workflowType, delay, particleInputs);
-		particleWorkflow.handleWorkflow()
+		const particleWorkflow = new ParticleWorkflowStep (workflowType, delay, particleInputs);
+		particleWorkflow.computeStep()
 	}
+}
+
+class ParticleWorkflowStep {
 
 	constructor (workflowType, delay, particleInputs, freezeOnPause) {
 		this.workflowType = workflowType;
@@ -34,11 +43,10 @@ export class ParticleWorkflow {
 		this.delayCallback = this.handleDelay.bind(this)
 	}
 
-    handleWorkflow () {
+    computeStep () {
 		// Listen for animate update
 
 		if(this.delay > 0) {
-
 	    	canvas.app.ticker.add(this.delayCallback)
 		} else {
 			this.executeEmissions();

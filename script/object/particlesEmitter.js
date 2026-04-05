@@ -50,9 +50,7 @@ export default class ParticlesEmitter {
             return
         }
 
-            const startEmissionWorkflows = this.particleTemplate.next.filter(( workflow ) => workflow.type === ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_START )
-
-            startEmissionWorkflows.forEach(( startEmissionWorkflow ) => ParticleWorkflow.generateWorkflow ( startEmissionWorkflow.type , startEmissionWorkflow.delay, startEmissionWorkflow.particleInputs, this.particleTemplate.freezeOnPause ))
+        ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.particleTemplate )
 
 
         for (let i = 0; i < this.particles.length; i++) {
@@ -119,9 +117,7 @@ export default class ParticlesEmitter {
             const emitterIndex = ParticlesEmitter.emitters.findIndex((emitter) => emitter.id === this.id);
             ParticlesEmitter.emitters.splice(emitterIndex, 1);
 
-            const endEmissionWorkflows = this.particleTemplate.next.filter(( workflow ) => workflow.type === ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_END )
-
-            endEmissionWorkflows.forEach(( endEmissionWorkflow ) => ParticleWorkflow.generateWorkflow ( endEmissionWorkflow.type , endEmissionWorkflow.delay, endEmissionWorkflow.particleInputs, this.particleTemplate.freezeOnPause ))
+            ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_END, this.particleTemplate )
         }
     }
 
