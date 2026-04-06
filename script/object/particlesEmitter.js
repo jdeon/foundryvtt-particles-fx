@@ -39,6 +39,8 @@ export default class ParticlesEmitter {
         if (!ParticlesEmitter._EMISSION_CANVAS) {
             ParticlesEmitter.INIT_EMISSION_CANVAS()
         }
+
+        ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.particleTemplate )
     }
 
     manageParticles() {
@@ -49,8 +51,6 @@ export default class ParticlesEmitter {
         if(this.particleTemplate.freezeOnPause && game.paused){
             return
         }
-
-        ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.particleTemplate )
 
 
         for (let i = 0; i < this.particles.length; i++) {

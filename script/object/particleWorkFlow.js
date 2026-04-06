@@ -20,28 +20,28 @@ export class ParticleWorkflow {
 	static triggerWorkflows (workflowType, particleTemplate, particle) {
 		const workflowsToTrigger = particleTemplate.next.filter(( workflow ) => workflow.type === workflowType )
 
-         workflowsToTrigger.forEach(( workflow ) => ParticleWorkflow.generateWorkflow ( workflow.type , workflow.delay, workflow.particleInputs, particleTemplate.freezeOnPause, particle ))
+         workflowsToTrigger.forEach(( workflow ) => ParticleWorkflow.generateWorkflow ( workflow.type , workflow.delay, workflow.particleInputs, particleTemplate, particle ))
 	}
 
-	static generateWorkflow (workflowType, delay, particleInputs, freezeOnPause, particle) {
+	static generateWorkflow (workflowType, delay, particleInputs, particleTemplate, particle) {
 		if(!particleInputs) return
 
-		const particleWorkflow = new ParticleWorkflowStep (workflowType, delay, particleInputs, freezeOnPause, particle);
+		const particleWorkflow = new ParticleWorkflowStep (workflowType, delay, particleInputs, particleTemplate, particle);
 		particleWorkflow.computeStep()
 	}
 }
 
 class ParticleWorkflowStep {
 
-	constructor (workflowType, delay, particleInputs, freezeOnPause, particle) {
+	constructor (workflowType, delay, particleInputs, particleTemplate, particle) {
 		this.workflowType = workflowType;
 		this.delay = delay ? delay * 1000 : 0;
 		this.particleInputs = JSON.parse(JSON.stringify(particleInputs));//Deep copy to not modify source and target for all
-		this.freezeOnPause = freezeOnPause;
+		this.freezeOnPause = particleTemplate.freezeOnPause;
 		this.particle = particle;
 		this.lastUpdate = Date.now();
 		this.delayCallback = this.handleDelay.bind(this)
-		this.source = this.getPosition()
+		this.source = this.particle ? this.getPosition() : particleTemplate.currentSourcePosition;
 	}
 
 	getPosition () {
