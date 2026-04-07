@@ -10,30 +10,48 @@ const ENUM_CHAT_COMMAND_TEMPLATE_TYPE = {
 
 export class ParticleWorkflow {
 
-	static  NEXT_WORKFLOW_TYPES = {
+	static NEXT_WORKFLOW_TYPES = {
 	    AT_EMISSION_START: "atEmissionStart",
 	    AT_PARTICLE_START: "atParticleStart",
 	    AT_EMISSION_END: "atEmissionEnd",
 	    AT_PARTICLE_END: "atParticleEnd"
 	}
 
-	static triggerWorkflows (workflowType, particleTemplate, particle) {
+	static WORKFLOWS_LIST = []
+
+	static triggerWorkflows (workflowType, emitterId, particleTemplate, particle) {
 		const workflowsToTrigger = particleTemplate.next.filter(( workflow ) => workflow.type === workflowType )
 
-         workflowsToTrigger.forEach(( workflow ) => ParticleWorkflow.generateWorkflow ( workflow.type , workflow.delay, workflow.particleInputs, particleTemplate, particle ))
+         workflowsToTrigger.forEach(( workflow ) => ParticleWorkflow.generateWorkflow ( workflow.type , workflow.delay, workflow.particleInputs, emitterId, particleTemplate, particle ))
 	}
 
-	static generateWorkflow (workflowType, delay, particleInputs, particleTemplate, particle) {
+	static generateWorkflow (workflowType, delay, particleInputs, emitterId, particleTemplate, particle) {
 		if(!particleInputs) return
 
-		const particleWorkflow = new ParticleWorkflowStep (workflowType, delay, particleInputs, particleTemplate, particle);
+		const particleWorkflow = new ParticleWorkflowStep (workflowType, delay, particleInputs, emitterId, particleTemplate, particle);
+		ParticleWorkflow.WORKFLOWS_LIST.push(particleWorkflow)
 		particleWorkflow.computeStep()
+	}
+
+	static getWorkflowsByEmitterId ( emitterId ) {
+		return ParticleWorkflow.WORKFLOWS_LIST.filter(( workflow ) => workflow.id.split(":")[0] === emitterId)
+	}
+
+	static stopAll( immediate ) {
+		let deletedIds = []
+		while (ParticleWorkflow.WORKFLOWS_LIST.length > 0) {
+            let workflow = ParticleWorkflow.WORKFLOWS_LIST[0]
+            deletedIds.push(workflow.id)
+
+  			workflow.destroy(immediate)
+        }
 	}
 }
 
 class ParticleWorkflowStep {
 
-	constructor (workflowType, delay, particleInputs, particleTemplate, particle) {
+	constructor (workflowType, delay, particleInputs, emitterId, particleTemplate, particle) {
+		this.id = `${emitterId}:${foundry.utils.randomID()}`
 		this.workflowType = workflowType;
 		this.delay = delay ? delay * 1000 : 0;
 		this.particleInputs = JSON.parse(JSON.stringify(particleInputs));//Deep copy to not modify source and target for all
@@ -42,6 +60,7 @@ class ParticleWorkflowStep {
 		this.lastUpdate = Date.now();
 		this.delayCallback = this.handleDelay.bind(this)
 		this.source = this.particle ? this.getPosition() : particleTemplate.currentSourcePosition;
+		this.handleEmitters = [];
 	}
 
 	getPosition () {
@@ -78,14 +97,19 @@ class ParticleWorkflowStep {
     executeEmissions(){
     	this.particleInputs.forEach( (particleInput ) => {
     		let { args, type } = this.buildEmissionArgsAndType(particleInput)
-    		let emitterId = { emitterId: particlesEmitterService.nextEmitterId() } //TODO does it need to be done only by GM ? Emitter id should be generated at start ?
+    		let emitter //TODO does it need to be done only by GM ? Emitter id should be generated at start ?
     
     		if (type === SprayingParticleTemplate.getType()) {
-	            particlesEmitterService.sprayParticles(...args, emitterId)
+	            emitter= particlesEmitterService.sprayParticles(...args)
 	        } else if (type === GravitingParticleTemplate.getType()) {
-	            particlesEmitterService.gravitateParticles(...args, emitterId)
+	            emitter = particlesEmitterService.gravitateParticles(...args)
 	        } else if (type === MissileParticleTemplate.getType()){
-	        	particlesEmitterService.missileParticles(...args, emitterId)
+	        	emitter = particlesEmitterService.missileParticles(...args)
+	        }
+
+	        if(emitter){
+	        	this.handleEmitters.push(emitter)
+	        	emitter.destroyHooks.push()
 	        }
     	})
     }
@@ -143,6 +167,33 @@ class ParticleWorkflowStep {
 
     	return result;
     }
-	
 
+    emitterEnded(emitterID){
+    	const emitterIndex = this.handleEmitters.findIndex((item) => item.id === emitterID);
+        this.handleEmitters.splice(emitterIndex, 1);
+
+        if(this.handleEmitters.length === 0){
+        	destroy (true)
+        }
+    }
+
+    destroy (withEmmiter) {
+    	if(this.delay !== undefined){
+        	canvas.app.ticker.remove(this.delayCallback);
+        }
+
+        if(withEmmiter){
+        	this.handleEmitters.forEach(( emitter ) => emitter.destroy())
+        } else {
+	    	this.handleEmitters.forEach(( emitter ) => {
+	    		emitter.remainingTime = -1
+	    		emitter.disableWorkflow()
+	    		ParticleWorkflow.getWorkflowsByEmitterId(emitter.id)
+	    			.forEach((workflow) => workflow.destroy(immediate))
+	    	})
+		}
+
+		const emitterIndex = ParticleWorkflow.WORKFLOWS_LIST.findIndex((workflow) => workflow.id === this.id);
+        ParticleWorkflow.WORKFLOWS_LIST.splice(emitterIndex, 1);
+    }
 }

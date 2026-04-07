@@ -13,19 +13,19 @@ export default {
 function sprayParticles(...args){
     let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
     emitForOtherClient(s_MESSAGE_TYPES.sprayParticles, args, emitterId); 
-    return particlesEmitterService.sprayParticles(...args, emitterId)
+    return particlesEmitterService.sprayParticles(...args, emitterId)?.id
 }
 
 function gravitateParticles(...args){
     let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
     emitForOtherClient(s_MESSAGE_TYPES.gravitateParticles, args, emitterId); 
-    return particlesEmitterService.gravitateParticles(...args, emitterId)
+    return particlesEmitterService.gravitateParticles(...args, emitterId)?.id
 }
   
 function missileParticles(...args){
     let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
     emitForOtherClient(s_MESSAGE_TYPES.missileParticles, args, emitterId); 
-    return particlesEmitterService.missileParticles(...args, emitterId)
+    return particlesEmitterService.missileParticles(...args, emitterId)?.id
 }
 
 function stopEmissionById(emitterId, immediate){
