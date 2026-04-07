@@ -205,18 +205,7 @@ export function stopAllEmission(immediate) {
 
 export function stopEmissionById(emitterId, immediate) {
 
-    let emitter
-    if (emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))) {
-        //Find last emitter
-        emitter = ParticlesEmitter.emitters[ParticlesEmitter.emitters.length - 1]
-    } else if (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'f' || emitterId.toLowerCase() === 'first')) {
-        //Find last emitter
-        emitter = ParticlesEmitter.emitters[0]
-    } else if (typeof emitterId === 'number') {
-        emitter = ParticlesEmitter.emitters.find(emitter => emitter.id === emitterId);
-    } else if (!isNaN(emitterId)) {
-        emitter = ParticlesEmitter.emitters.find(emitter => emitter.id === Number(emitterId));
-    }
+    const emitter = findEmitterById(emitterId)
 
     if (emitter) {
         const workflows = ParticleWorkflow.getWorkflowsByEmitterId(emitter.id)
@@ -230,6 +219,43 @@ export function stopEmissionById(emitterId, immediate) {
         }
 
         return emitter.id
+    }
+}
+
+export function stopWorkflow(emitterId, immediate, all){
+    if(all) {
+        ParticleWorkflow.stopAll(immediate);
+
+        ParticlesEmitter.emitters.forEach(emitter => {
+            emitter.disableWorkflow()
+        })
+
+        return
+    }
+
+    const emitter = findEmitterById(emitterId)
+
+    if (emitter) {
+        const workflows = ParticleWorkflow.getWorkflowsByEmitterId(emitter.id)
+        workflows.forEach((workflow) => workflow.destroy(immediate))
+
+        emitter.disableWorkflow()
+
+        return emitter.id
+    }
+}
+
+function findEmitterById(emitterId){
+    if (emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))) {
+        //Find last emitter
+        return ParticlesEmitter.emitters[ParticlesEmitter.emitters.length - 1]
+    } else if (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'f' || emitterId.toLowerCase() === 'first')) {
+        //Find last emitter
+        return ParticlesEmitter.emitters[0]
+    } else if (typeof emitterId === 'number') {
+        return ParticlesEmitter.emitters.find(emitter => emitter.id === emitterId);
+    } else if (!isNaN(emitterId)) {
+        return ParticlesEmitter.emitters.find(emitter => emitter.id === Number(emitterId));
     }
 }
 

@@ -15,6 +15,7 @@ let firstSceneEmittersQueries
 const Existing_chat_command = [
     'stopAll',
     'stopById',
+    'stopWorkflow',
     'spray',
     'missile',
     'gravitate',
@@ -188,7 +189,7 @@ Hooks.on("chatMessage", function (chatlog, message, chatData) {
 
     let functionName = messageArgs[1]
     let functionParam
-    let isImmediate = false
+    let isImmediate, all = false
     let otherParam = []
 
     for (let i = 2; i < messageArgs.length; i++) {
@@ -196,6 +197,8 @@ Hooks.on("chatMessage", function (chatlog, message, chatData) {
             functionParam = messageArgs[i];
         } else if (!isImmediate && messageArgs[i] === '--instant') {
             isImmediate = true
+        } else if (!all && messageArgs[i] === '--all') {
+            all = true
         } else {
             otherParam.push(messageArgs[i])
         }
@@ -214,6 +217,10 @@ Hooks.on("chatMessage", function (chatlog, message, chatData) {
             response = emitController.stop(functionParam, isImmediate)
             resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
             break
+        case 'stopWorkflow':
+            response = emitController.stopWorkflow(functionParam, isImmediate, all)
+            resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
+            break  
         case 'spray':
             emmissionMethod = emitController.spray
             break
@@ -222,7 +229,7 @@ Hooks.on("chatMessage", function (chatlog, message, chatData) {
             break
         case 'gravitate':
             emmissionMethod = emitController.gravit
-            break
+            break 
         case 'help':
             resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Existing_chat_command.join(',');
             break

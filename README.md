@@ -49,6 +49,15 @@ To stop a specific emission, you need to use a macro to call the method `particl
 - 'f' or 'first' for oldest emission
 And a boolean parameter, `true` for instant deletion of particles already emitted, `false` to stop only the emission (living particles are not killed).
 
+### Stop workflows
+To stop futur emission link by a workflow to a current one, you need to use a macro to call the method `particlesFx.stopWorkflow(id, isImmediate, all)`
+- idwith an ID parameter:
+  - ID of the emission (returned by the method)
+  - 'l' or 'last' for newest emission
+  - 'f' or 'first' for oldest emission
+- isImmediate is a boolean parameter, `true` for instant deletion of emitter already genereted, `false` to stop only disable workflow that has no begun.
+- all is a boolean to select workflow in all emitters
+
 ## How to Call It
 
 ### Call by Chat
@@ -58,6 +67,7 @@ It adds a message response in the chat.
 Commands:
 - `/pfx stopAll`
 - `/pfx stopById *id*`
+- `/pfx stopWorkflow *id*`
 - `/pfx spray *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
 - `/pfx gravitate *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
 - `/pfx missile *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
@@ -78,6 +88,7 @@ Commands:
   - ID of the emission (returned by the method)
   - 'l' or 'last' for the newest emission
   - 'f' or 'first' for the oldest emission
+- To stop futur emission link by a workflow to a current one, you need to use a macro to call the method `particlesFx.stopWorkflow(id, isImmediate, all)`. ID is like the one for stopEmissionById and all disable workflow for all current workflows
 
 > **Example**
 > To emit missile particles with gravitating sub particles that form a trail 
@@ -92,6 +103,7 @@ All these methods can also be called with the module's API `game.modules.get("pa
 - `xxx.api.emit.writeMessage(xxx)`
 - `xxx.api.emit.stopAll(xxx)`
 - `xxx.api.emit.stop(xxx)`
+- `xxx.api.emit.stopWorkflow(xxx)`
 
 ## Prefill Template
 

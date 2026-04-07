@@ -7,6 +7,7 @@ export default {
     missile : missileParticles,
     stop : stopEmissionById,
     stopAll : stopAllEmission,
+    stopWorkflow : stopWorkflow,
     writeMessage: particlesEmitterService.writeMessageForEmissionById,   //No need to emit to other client
   };
 
@@ -37,4 +38,9 @@ function stopAllEmission(immediate){
     particlesEmitterService.resetEmitterId()
     emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); 
     return particlesEmitterService.stopAllEmission(immediate)
+}
+
+function stopWorkflow(emitterId, immediate, all) {
+    emitForOtherClient(s_MESSAGE_TYPES.stopWorkflow, immediate, all); 
+    return particlesEmitterService.stopWorkflow(emitterId, immediate, all)
 }
