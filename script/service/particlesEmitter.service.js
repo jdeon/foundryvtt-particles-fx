@@ -252,11 +252,9 @@ function findEmitterById(emitterId){
     } else if (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'f' || emitterId.toLowerCase() === 'first')) {
         //Find last emitter
         return ParticlesEmitter.emitters[0]
-    } else if (typeof emitterId === 'number') {
-        return ParticlesEmitter.emitters.find(emitter => emitter.id === emitterId);
-    } else if (!isNaN(emitterId)) {
-        return ParticlesEmitter.emitters.find(emitter => emitter.id === Number(emitterId));
-    }
+    } else {
+        return ParticlesEmitter.emitters.find(emitter => emitter.id === String(emitterId));
+    } 
 }
 
 export async function writeMessageForEmissionById(emitterId, verbal) {

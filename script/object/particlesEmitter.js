@@ -26,7 +26,7 @@ export default class ParticlesEmitter {
 
 
     constructor(emitterId, particleTemplate, particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate) {
-        this.id = emitterId;
+        this.id = String(emitterId);
         this.spawnedEnable = true;
         this.particles = [];
         this.particleTemplate = particleTemplate;
@@ -37,6 +37,7 @@ export default class ParticlesEmitter {
         this.isGravitate = isGravitate
         this.lastUpdate = Date.now();
         this.destroyHooks = [];
+        this.maxParticleId = 0;
 
         if (!ParticlesEmitter._EMISSION_CANVAS) {
             ParticlesEmitter.INIT_EMISSION_CANVAS()
@@ -97,23 +98,24 @@ export default class ParticlesEmitter {
 
             for (let i = 0; i < numberNewParticles; i++) {
                 const particle = this.particleTemplate.generateParticles(this.particleTemplate);
+                particle.id = this.maxParticleId ++;
 
                 if (particle === undefined) {
-                    this.remainingTime = 0
+                    this.remainingTime = 0;
                     break
                 }
 
                 ParticlesEmitter._EMISSION_CANVAS.addChild(particle.sprite);
                 if (this.particleTemplate?.isElevationManage) {
-                    canvas.primary.addChild(particle.sprite)
+                    canvas.primary.addChild(particle.sprite);
                 }
-                this.particles.push(particle)
-                ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START, this.id, this.particleTemplate, particle )
+                this.particles.push(particle);
+                ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START, this.id, this.particleTemplate, particle );
             }
 
             this.spawnedEnable = false;
 
-            setTimeout(this.enableSpawning.bind(this), this.particleFrequence + increaseTime)
+            setTimeout(this.enableSpawning.bind(this), this.particleFrequence + increaseTime);
 
         }
 

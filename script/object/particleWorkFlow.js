@@ -17,18 +17,25 @@ export class ParticleWorkflow {
 	    AT_PARTICLE_END: "atParticleEnd"
 	}
 
-	static WORKFLOWS_LIST = []
-
-	static triggerWorkflows (workflowType, emitterId, particleTemplate, particle) {
-		const workflowsToTrigger = particleTemplate.next.filter(( workflow ) => workflow.type === workflowType )
-
-         workflowsToTrigger.forEach(( workflow ) => ParticleWorkflow.generateWorkflow ( workflow.type , workflow.delay, workflow.particleInputs, emitterId, particleTemplate, particle ))
+	static _minimizeType = {
+	    [ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_START]: "ES",
+	    [ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START]: "PS",
+	    [ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_END]: "EE",
+	    [ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_PARTICLE_END]: "PE"
 	}
 
-	static generateWorkflow (workflowType, delay, particleInputs, emitterId, particleTemplate, particle) {
+	static WORKFLOWS_LIST = []
+
+	static triggerWorkflows (workflowType, sourceEmitterId, particleTemplate, particle) {
+		const workflowsToTrigger = particleTemplate.next.filter(( workflow ) => workflow.type === workflowType )
+
+         workflowsToTrigger.forEach(( workflow, index ) => ParticleWorkflow.generateWorkflow ( workflow.type , workflow.delay, workflow.particleInputs, sourceEmitterId, particleTemplate, particle, index ))
+	}
+
+	static generateWorkflow (workflowType, delay, particleInputs, sourceEmitterId, particleTemplate, particle, workflowIndex) {
 		if(!particleInputs) return
 
-		const particleWorkflow = new ParticleWorkflowStep (workflowType, delay, particleInputs, emitterId, particleTemplate, particle);
+		const particleWorkflow = new ParticleWorkflowStep (workflowType, delay, particleInputs, sourceEmitterId, particleTemplate, particle, workflowIndex);
 		ParticleWorkflow.WORKFLOWS_LIST.push(particleWorkflow)
 		particleWorkflow.computeStep()
 	}
@@ -50,8 +57,9 @@ export class ParticleWorkflow {
 
 class ParticleWorkflowStep {
 
-	constructor (workflowType, delay, particleInputs, emitterId, particleTemplate, particle) {
-		this.id = `${emitterId}:${foundry.utils.randomID()}`
+	constructor (workflowType, delay, particleInputs, sourceEmitterId, particleTemplate, particle, workflowIndex) {
+		this.id = `${sourceEmitterId}:${foundry.utils.randomID()}`
+		this.prefixEmitterId = this.generatePrefixId(sourceEmitterId, workflowType, workflowIndex, particle)
 		this.workflowType = workflowType;
 		this.delay = delay ? delay * 1000 : 0;
 		this.particleInputs = JSON.parse(JSON.stringify(particleInputs));//Deep copy to not modify source and target for all
@@ -61,6 +69,21 @@ class ParticleWorkflowStep {
 		this.delayCallback = this.handleDelay.bind(this)
 		this.source = this.particle ? this.getPosition() : particleTemplate.currentSourcePosition;
 		this.handleEmitters = [];
+	}
+
+	//Format : {orginalEmitterId}-Step{nestedNextNumber}-{minimizeWorkflowType}{worflowTriggerIndex}(-particleId)-{particleInputIndex}
+	generatePrefixId(sourceEmitterId, workflowType, workflowIndex, particle) {
+
+		const sourceEmitterIdPart = sourceEmitterId.split('-') //incrise step
+		const stepNumber = sourceEmitterIdPart.length > 1 && sourceEmitterIdPart[1].startsWith('step') ? Number(sourceEmitterIdPart[1].replace('step', '')) : 0;
+
+		let prefix = `${sourceEmitterId[0]}-step${stepNumber+1}-${ParticleWorkflow._minimizeType[workflowType]}${workflowIndex}`
+
+		if(particle?.id){
+			prefix += `-${particle.id}`
+		}
+
+		return prefix
 	}
 
 	getPosition () {
@@ -95,16 +118,17 @@ class ParticleWorkflowStep {
     }
 
     executeEmissions(){
-    	this.particleInputs.forEach( (particleInput ) => {
-    		let { args, type } = this.buildEmissionArgsAndType(particleInput)
-    		let emitter //TODO does it need to be done only by GM ? Emitter id should be generated at start ?
+    	this.particleInputs.forEach( (particleInput, index ) => {
+    		const { args, type } = this.buildEmissionArgsAndType(particleInput)
+    		const emitterId = { emitterId: `${this.prefixEmitterId }-${index}` }
+    		let emitter 
     
     		if (type === SprayingParticleTemplate.getType()) {
-	            emitter= particlesEmitterService.sprayParticles(...args)
+	            emitter= particlesEmitterService.sprayParticles(...args, emitterId)
 	        } else if (type === GravitingParticleTemplate.getType()) {
-	            emitter = particlesEmitterService.gravitateParticles(...args)
+	            emitter = particlesEmitterService.gravitateParticles(...args, emitterId)
 	        } else if (type === MissileParticleTemplate.getType()){
-	        	emitter = particlesEmitterService.missileParticles(...args)
+	        	emitter = particlesEmitterService.missileParticles(...args, emitterId)
 	        }
 
 	        if(emitter){
@@ -196,4 +220,7 @@ class ParticleWorkflowStep {
 		const emitterIndex = ParticleWorkflow.WORKFLOWS_LIST.findIndex((workflow) => workflow.id === this.id);
         ParticleWorkflow.WORKFLOWS_LIST.splice(emitterIndex, 1);
     }
+
+    //TODO create an workflow multitarget: vortex, missile grow on first target, ray on three other target, explose on each target
+    //TODO create an workflow firework : default spray with only 20 particle, small explosion on particule end
 }
