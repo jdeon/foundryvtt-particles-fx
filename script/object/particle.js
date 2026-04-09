@@ -105,7 +105,11 @@ export class Particle {
     }
 
     getPosition(){
-        return new Vector3( this.sprite.x, this.sprite.y, this.positionVibrationLess.z )
+        if(this.sprite?.transform?.position){
+            return new Vector3( this.sprite.transform.position.x, this.sprite.transform.position.y, this.positionVibrationLess.z )
+        }
+
+        return new Vector3( this.positionVibrationLess.x, this.positionVibrationLess.y, this.positionVibrationLess.z )
     }
 }
 
