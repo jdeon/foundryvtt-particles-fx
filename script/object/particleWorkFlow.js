@@ -213,7 +213,7 @@ class ParticleWorkflowStep {
 	    		emitter.remainingTime = -1
 	    		emitter.disableWorkflow()
 	    		ParticleWorkflow.getWorkflowsByEmitterId(emitter.id)
-	    			.forEach((workflow) => workflow.destroy(immediate))
+	    			.forEach((workflow) => workflow.destroy(false))
 	    	})
 		}
 
