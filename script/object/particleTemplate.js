@@ -12,7 +12,7 @@ export class ParticleTemplate {
 
         if (Array.isArray(source)) {
             result = []
-            for (item of source) {
+            for (let item of source) {
                 result.push(ParticleTemplate._translatePlaceableObject(item))
             }
         } else if (typeof source === 'string' && isNaN(source) && !source.includes('_')) {
