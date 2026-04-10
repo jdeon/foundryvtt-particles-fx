@@ -24,12 +24,12 @@ const Existing_chat_command = [
 
 
 Hooks.on("init", () => {
-    ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
+    foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
 
     //pfx is added after invalid
-    let invalid = ChatLog.MESSAGE_PATTERNS["invalid"]
-    delete ChatLog.MESSAGE_PATTERNS["invalid"]
-    ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
+    let invalid = foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["invalid"]
+    delete foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["invalid"]
+    foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
 });
 
 Hooks.on("setup", () => {

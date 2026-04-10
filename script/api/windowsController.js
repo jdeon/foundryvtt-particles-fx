@@ -3,7 +3,7 @@ import templateController from "./templateController.js";
 import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
 
 export function subscribeApiToWindow(){
-    if(getProperty(window,'particlesFx.isInit')) return;
+    if(foundry.utils.getProperty(window,'particlesFx.isInit')) return;
             
     //On call, we call method localy and share data with other client
     window.particlesFx = {
