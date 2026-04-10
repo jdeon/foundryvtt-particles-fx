@@ -220,7 +220,4 @@ class ParticleWorkflowStep {
 		const emitterIndex = ParticleWorkflow.WORKFLOWS_LIST.findIndex((workflow) => workflow.id === this.id);
         ParticleWorkflow.WORKFLOWS_LIST.splice(emitterIndex, 1);
     }
-
-    //TODO create an workflow multitarget: vortex, missile grow on first target, ray on three other target, explose on each target
-    //TODO create an workflow firework : default spray with only 20 particle, small explosion on particule end
 }

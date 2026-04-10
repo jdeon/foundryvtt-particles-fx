@@ -1,3 +1,4 @@
 
-packs/particles-fx-macros
-packs/particule-fx-macros
+packs/particles-fx-macros/*
+!packs/particles-fx-macros/CURRENT
+!packs/particles-fx-macros/MANIFEST-*
