@@ -2,6 +2,7 @@ import { s_MODULE_ID, s_EVENT_NAME, Vector3, Utils, SPRITE_TEXTURE_MAPPING } fro
 import { s_MESSAGE_TYPES } from "../utils/socketManager.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
 import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTemplate } from "../object/particleTemplate.js"
+import { ParticleWorkflow } from "../object/particleWorkflow.js"
 import { defaultMotionTemplate } from "../prefillMotionTemplate.js"
 import { defaultColorTemplate } from "../prefillColorTemplate.js"
 import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
@@ -131,6 +132,7 @@ function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId
         finalInput.vibrationFrequencyStart,
         finalInput.vibrationFrequencyEnd,
         finalInput.freezeOnPause,
+        finalInput.next,
         finalInput.advanced,
         subParticleTemplate,
     );
@@ -181,15 +183,19 @@ export function persistEmitters() {
 export function stopAllEmission(immediate) {
     let deletedIds = []
 
+    ParticleWorkflow.stopAll(immediate);
+
     if (immediate) {
         while (ParticlesEmitter.emitters.length > 0) {
             let emitter = ParticlesEmitter.emitters[0]
-            emitter._immediatelyStopEmission()
+            emitter.disableWorkflow()
+            emitter.destroy()
             deletedIds.push(emitter.id)
         }
     } else {
         ParticlesEmitter.emitters.forEach(emitter => {
             emitter.remainingTime = 0
+            emitter.disableWorkflow()
             deletedIds.push(emitter.id)
         })
     }
@@ -198,28 +204,57 @@ export function stopAllEmission(immediate) {
 }
 
 export function stopEmissionById(emitterId, immediate) {
-    let emitter
-    if (emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))) {
-        //Find last emitter
-        emitter = ParticlesEmitter.emitters[ParticlesEmitter.emitters.length - 1]
-    } else if (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'f' || emitterId.toLowerCase() === 'first')) {
-        //Find last emitter
-        emitter = ParticlesEmitter.emitters[0]
-    } else if (typeof emitterId === 'number') {
-        emitter = ParticlesEmitter.emitters.find(emitter => emitter.id === emitterId);
-    } else if (!isNaN(emitterId)) {
-        emitter = ParticlesEmitter.emitters.find(emitter => emitter.id === Number(emitterId));
-    }
+
+    const emitter = findEmitterById(emitterId)
 
     if (emitter) {
+        const workflows = ParticleWorkflow.getWorkflowsByEmitterId(emitter.id)
+        workflows.forEach((workflow) => workflow.destroy(immediate))
+
+        emitter.disableWorkflow()
         if (immediate) {
-            emitter._immediatelyStopEmission()
+            emitter.destroy()
         } else {
             emitter.remainingTime = 0
         }
 
         return emitter.id
     }
+}
+
+export function stopWorkflow(emitterId, immediate, all){
+    if(all) {
+        ParticleWorkflow.stopAll(immediate);
+
+        ParticlesEmitter.emitters.forEach(emitter => {
+            emitter.disableWorkflow()
+        })
+
+        return
+    }
+
+    const emitter = findEmitterById(emitterId)
+
+    if (emitter) {
+        const workflows = ParticleWorkflow.getWorkflowsByEmitterId(emitter.id)
+        workflows.forEach((workflow) => workflow.destroy(immediate))
+
+        emitter.disableWorkflow()
+
+        return emitter.id
+    }
+}
+
+function findEmitterById(emitterId){
+    if (emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))) {
+        //Find last emitter
+        return ParticlesEmitter.emitters[ParticlesEmitter.emitters.length - 1]
+    } else if (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'f' || emitterId.toLowerCase() === 'first')) {
+        //Find last emitter
+        return ParticlesEmitter.emitters[0]
+    } else {
+        return ParticlesEmitter.emitters.find(emitter => emitter.id === String(emitterId));
+    } 
 }
 
 export async function writeMessageForEmissionById(emitterId, verbal) {
@@ -245,6 +280,7 @@ export async function writeMessageForEmissionById(emitterId, verbal) {
 
 function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitterId) {
     const particlesEmitter = new ParticlesEmitter(
+        emitterId || nextEmitterId(),
         particleTemplate,
         finalInput.spawningFrequence,
         finalInput.spawningNumber,
@@ -256,13 +292,12 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
     particlesEmitter.callback = particlesEmitter.manageParticles.bind(particlesEmitter)
     particlesEmitter.originalQuery = inputQuery
     particlesEmitter.finalQuery = finalInput
-    particlesEmitter.id = emitterId || nextEmitterId()
 
     canvas.app.ticker.add(particlesEmitter.callback)
 
     ParticlesEmitter.emitters.push(particlesEmitter)
 
-    return particlesEmitter.id
+    return particlesEmitter
 }
 
 function _orderInputArg(args) {
