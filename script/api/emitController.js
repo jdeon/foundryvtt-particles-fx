@@ -7,25 +7,26 @@ export default {
     missile : missileParticles,
     stop : stopEmissionById,
     stopAll : stopAllEmission,
+    stopWorkflow : stopWorkflow,
     writeMessage: particlesEmitterService.writeMessageForEmissionById,   //No need to emit to other client
   };
 
 function sprayParticles(...args){
     let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
     emitForOtherClient(s_MESSAGE_TYPES.sprayParticles, args, emitterId); 
-    return particlesEmitterService.sprayParticles(...args, emitterId)
+    return particlesEmitterService.sprayParticles(...args, emitterId)?.id
 }
 
 function gravitateParticles(...args){
     let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
     emitForOtherClient(s_MESSAGE_TYPES.gravitateParticles, args, emitterId); 
-    return particlesEmitterService.gravitateParticles(...args, emitterId)
+    return particlesEmitterService.gravitateParticles(...args, emitterId)?.id
 }
   
 function missileParticles(...args){
     let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
     emitForOtherClient(s_MESSAGE_TYPES.missileParticles, args, emitterId); 
-    return particlesEmitterService.missileParticles(...args, emitterId)
+    return particlesEmitterService.missileParticles(...args, emitterId)?.id
 }
 
 function stopEmissionById(emitterId, immediate){
@@ -37,4 +38,9 @@ function stopAllEmission(immediate){
     particlesEmitterService.resetEmitterId()
     emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate); 
     return particlesEmitterService.stopAllEmission(immediate)
+}
+
+function stopWorkflow(emitterId, immediate, all) {
+    emitForOtherClient(s_MESSAGE_TYPES.stopWorkflow, immediate, all); 
+    return particlesEmitterService.stopWorkflow(emitterId, immediate, all)
 }

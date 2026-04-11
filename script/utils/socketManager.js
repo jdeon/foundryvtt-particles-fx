@@ -12,6 +12,7 @@ export const s_MESSAGE_TYPES = {
     gravitateParticles: 'gravitateParticles',
     stopAllEmission: 'stopAllEmission',
     stopEmissionById: 'stopEmissionById',
+    stopWorkflow: 'stopWorkflow',
     updateMaxEmitterId: 'updateMaxEmitterId',
     updateCustomPrefillTemplate: 'updateCustomPrefillTemplate'
   };
@@ -44,6 +45,7 @@ export function listen() {
               case s_MESSAGE_TYPES.gravitateParticles: particlesEmitterService.gravitateParticles(...data.payload); break;
               case s_MESSAGE_TYPES.stopEmissionById: particlesEmitterService.stopEmissionById(data.payload.emitterId, data.payload.immediate); break;
               case s_MESSAGE_TYPES.stopAllEmission: particlesEmitterService.stopAllEmission(data.payload); break;
+              case s_MESSAGE_TYPES.stopWorkflow: particlesEmitterService.stopWorkflow(data.payload); break;
               case s_MESSAGE_TYPES.updateMaxEmitterId: updateMaxEmitterId(data.payload); break;
               case s_MESSAGE_TYPES.updateCustomPrefillTemplate: updateCustomPrefillTemplate(data.payload); break;
            }
