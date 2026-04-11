@@ -6,22 +6,20 @@ export class ParticleInput {
         let isTimedLinked = false
 
         if(typeof inputCmd === 'string'){
-            const usedVariables =  inputCmd.match(/(?<=\{\{).+?(?=\}\})/g) //Get all value inside {{}}
-             
-            if(usedVariables?.length > 0){
-                 for(let key of usedVariables){
-                     if(advancedVariables[key]?.isTimedLinked){
-                         isTimedLinked = true
-                         break
-                     }
+            isTimedLinked = ParticleInput._checkIsTimedLinked (inputCmd, advancedVariables)
+        } else if (inputCmd instanceof Vector3){
+            for(let key of Object.keys(inputCmd)){
+                 if(ParticleInput._checkIsTimedLinked (inputCmd[key], advancedVariables)){
+                     isTimedLinked = true
+                     break
                  }
-            }
-         }
+             }
+        }
          
          
          if(isTimedLinked){
             if(inputValue instanceof Vector3){
-                return new TimedParticleVectorInput(inputValue)
+                return new TimedParticleVectorInput(inputValue, inputCmd)
             } else {
                 return new TimedParticleInput (inputValue, inputCmd)
             }
@@ -30,6 +28,26 @@ export class ParticleInput {
          }else {
             return new ParticleInput(inputValue)
          }
+    }
+
+    static _checkIsTimedLinked (inputCmd, advancedVariables) {
+        if(typeof inputCmd !== "string") return false
+
+
+        let isTimedLinked = false
+
+        const usedVariables =  inputCmd.match(/(?<=\{\{).+?(?=\}\})/g) //Get all value inside {{}}
+             
+        if(usedVariables?.length > 0){
+             for(let key of usedVariables){
+                 if(advancedVariables[key]?.isTimedLinked){
+                     isTimedLinked = true
+                     break
+                 }
+             }
+        }
+
+        return isTimedLinked
     }
 
     constructor(inputValue){
@@ -117,9 +135,9 @@ export class TimedParticleInput  extends ParticleInput {
     }
 
     _computeTimeValue(advancedVariables){
-        let result = Number(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables))
+        let result = Utils._managePercent(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables));
 
-        if(isNaN(result)) return this.inputValue
+        if(isNaN(result)) return this.inputValue 
 
         for(let valueOperation of this._valueOperations){
             result = valueOperation.operation(result, valueOperation.value)

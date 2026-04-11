@@ -130,9 +130,9 @@ export class Vector3 {
     }
 
     toNumber() {
-        this.x = Number(this.x)
-        this.y = Number(this.y)
-        this.z = Number(this.z)
+        this.x = Utils._managePercent(this.x)
+        this.y = Utils._managePercent(this.y)
+        this.z = Utils._managePercent(this.z)
 
         return !(isNaN(this.x) || isNaN(this.y) || isNaN(this.z))
     }
@@ -206,16 +206,17 @@ export class Utils {
             return inValue
         }
 
-        let valueAdvancedSplit
-
         if (inValue instanceof Object) {
-            valueAdvancedSplit = {}
-            for (key of Object.keys(inValue)) {
-                valueAdvancedSplit[key] = Utils._replaceWithAdvanceVariable(inValue[key])
+            const result = {}
+            for (let key of Object.keys(inValue)) {
+                result[key] = Utils._replaceWithAdvanceVariable(inValue[key], advancedVariables)
             }
-        } else {
-            valueAdvancedSplit = inValue.split(/{{|}}/)
-        }
+            return result
+        } 
+
+        if(typeof inValue !== "string") return inValue
+
+        let valueAdvancedSplit = inValue.split(/{{|}}/)
 
         if (valueAdvancedSplit.length === 1) {
             return inValue
