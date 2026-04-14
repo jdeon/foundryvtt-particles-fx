@@ -1,5 +1,5 @@
 import { ParticleInput } from "../object/particleInput.js"
-import { Utils } from "../utils/utils.js"
+import { Utils, sameStartKey } from "../utils/utils.js"
 
 function generateTemplateForCircle(radius, velocity){
     let result
@@ -193,6 +193,8 @@ function generateTemplateForRay(length, width, directionAngle, velocity){
 
 export function generatePrefillTemplateForMeasured(measuredTemplate, velocityStart, velocityEnd){
     let result
+
+    velocityEnd = velocityEnd === sameStartKey ? velocityStart : velocityEnd ;
 
     const velocity = (velocityStart + velocityEnd)/2
 
