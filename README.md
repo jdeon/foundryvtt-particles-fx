@@ -161,6 +161,21 @@ For more advanced functionality, please read the [WIKI](https://github.com/jdeon
 - Add and manage custom prefill templates
 - Particular behavior of measured templates as a source
 - Customize all the parameters of the emitter to get exactly the animation you want
+- Synchronize multiple emitter with workflow
+
+* Example * 
+```compendium macro Hypnotize```
+![Hypnotize Animation](doc/Advance-variable-hypnotize.gif)
+
+```compendium macro Concentrate```
+![Concentrate Animation](doc/Advance-variable-concentrate.gif)
+
+```compendium macro firework```
+![Firework Animation](doc/Workfow-emission-firework.gif)
+
+```compendium macro rayball```
+![Rayball Animation](doc/Workfow-emission-rayball.gif)
+
 
 ## V2 Breaking Change
 
