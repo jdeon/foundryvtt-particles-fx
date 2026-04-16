@@ -15,6 +15,8 @@ The module contains several methods to generate particles without needing premad
 - **v2.4.0**: 
   - Choose between multiple particle shapes : circle (default and legacy), tor, star and diamond.
   - Properties next on customize input to link multiple emission in a workflow.
+  - Add flash prefill motion template
+  - Add property freezeOnPause to handle game pause in customized input 
 
 ## Settings
 1. Avoid showing particle from other client (useful for minimal configuration) (Client setting)
