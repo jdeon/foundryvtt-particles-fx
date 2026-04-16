@@ -167,18 +167,24 @@ For more advanced functionality, please read the [WIKI](https://github.com/jdeon
 - Synchronize multiple emitter with workflow
 
 * Example * 
+<div style="display: grid; grid-template-columns: 1fr 1fr">
+  <div>
 ```compendium macro Hypnotize```
 ![Hypnotize Animation](doc/Advance-variable-hypnotize.gif)
-
+  </div>
+  <div>
 ```compendium macro Concentrate```
 ![Concentrate Animation](doc/Advance-variable-concentrate.gif)
-
+  </div>
+  <div>
 ```compendium macro firework```
 ![Firework Animation](doc/Workfow-emission-firework.gif)
-
+  </div>
+  <div>
 ```compendium macro rayball```
 ![Rayball Animation](doc/Workfow-emission-rayball.gif)
-
+  </div>
+</div>
 
 ## V2 Breaking Change
 
