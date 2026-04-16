@@ -2,10 +2,10 @@
 	"id": "particule-fx",
 	"title": "Particles FX",
 	"description": "Emit particles using chat message commands or api calls.",
-	"version": "2.3.0",
+	"version": "2.4.0",
 	"compatibility": {
-		"minimum": "12",
-		"verified": "12.331"
+		"minimum": "13",
+		"verified": "13.351"
 	},
 	"authors": [
 		{
@@ -42,5 +42,5 @@
 	"socket": true,
 	"url": "https://github.com/jdeon/foundryvtt-particles-fx",
 	"manifest": "https://github.com/jdeon/foundryvtt-particles-fx/releases/latest/download/module.json",
-	"download": "https://github.com/jdeon/foundryvtt-particles-fx/archive/refs/tags/VERSION_PATHHOLDER.zip"
+	"download": "https://github.com/jdeon/foundryvtt-particles-fx/releases/download/VERSION_PATHHOLDER/module.zip"
 }

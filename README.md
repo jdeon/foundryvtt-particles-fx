@@ -11,7 +11,10 @@ The module contains several methods to generate particles without needing premad
 - **v2.3.0**: 
   - We added elevation to particles.
   - We improved the particle texture.
-  - We migrate to foundry v12 (mandatory) and dnd5e v4 (optionnal) 
+  - We migrate to foundry v12 (mandatory) and dnd5e v4 (optionnal).
+- **v2.4.0**: 
+  - Choose between multiple particle shapes : circle (default and legacy), tor, star and diamond.
+  - Properties next on customize input to link multiple emission in a workflow.
 
 ## Settings
 1. Avoid showing particle from other client (useful for minimal configuration) (Client setting)
