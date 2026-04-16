@@ -11,7 +11,12 @@ The module contains several methods to generate particles without needing premad
 - **v2.3.0**: 
   - We added elevation to particles.
   - We improved the particle texture.
-  - We migrate to foundry v12 (mandatory) and dnd5e v4 (optionnal) 
+  - We migrate to foundry v12 (mandatory) and dnd5e v4 (optionnal).
+- **v2.4.0**: 
+  - Choose between multiple particle shapes : circle (default and legacy), tor, star and diamond.
+  - Properties next on customize input to link multiple emission in a workflow.
+  - Add flash prefill motion template
+  - Add property freezeOnPause to handle game pause in customized input 
 
 ## Settings
 1. Avoid showing particle from other client (useful for minimal configuration) (Client setting)
@@ -161,6 +166,14 @@ For more advanced functionality, please read the [WIKI](https://github.com/jdeon
 - Add and manage custom prefill templates
 - Particular behavior of measured templates as a source
 - Customize all the parameters of the emitter to get exactly the animation you want
+- Synchronize multiple emitter with workflow
+
+**Example** 
+| ```compendium macro Hypnotize``` | ```compendium macro Concentrate``` |
+| :--------------- |:---------------:|
+| ![Hypnotize Animation](doc/Advance-variable-hypnotize.gif) | ![Concentrate Animation](doc/Advance-timed-variable-concentrate.gif) |
+| ```compendium macro firework``` | ```compendium macro rayball``` |
+| ![Firework Animation](doc/Workfow-emission-firework.gif) | ![Rayball Animation](doc/Workfow-emission-rayball.gif) |
 
 ## V2 Breaking Change
 
