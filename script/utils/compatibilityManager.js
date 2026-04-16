@@ -13,7 +13,7 @@ export class CompatibiltyV2Manager {
     }
 
     static manageDeprecatedWindowCall(){
-        if(getProperty(window,'particlesFx.particuleEmitter')) return;
+        if(foundry.utils.getProperty(window,'particlesFx.particuleEmitter')) return;
 
         //On call, we call method localy and share data with other client
         Object.defineProperty(window,'particuleEmitter',{

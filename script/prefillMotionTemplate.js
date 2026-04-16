@@ -2,6 +2,7 @@ import { sameStartKey } from "./utils/utils.js";
 
 export const defaultMotionTemplate = () => {
     return {
+        particleShape: "CIRCLE",
         spawningFrequence: 3,
         spawningNumber: 1,
         maxParticles: 1000,
@@ -28,6 +29,7 @@ export const defaultMotionTemplate = () => {
         vibrationFrequencyStart: 0,
         vibrationFrequencyEnd: 0,
         onlyEmitterFollow: false,
+        freezeOnPause: true,
         subParticles: {
             type: "Spraying",
             positionSpawning: { x: 0, y: 0, z: 0 },
@@ -50,8 +52,9 @@ export const defaultMotionTemplate = () => {
             vibrationAmplitudeStart: 0,
             vibrationAmplitudeEnd: 0,
             vibrationFrequencyStart: 0,
-            vibrationFrequencyEnd: 0,
-        }
+            vibrationFrequencyEnd: 0
+        },
+        next: []
     }
 }
 
@@ -232,6 +235,15 @@ const atomMotionTemplate = {
     alphaStart: .9,
 }
 
+const flashMotionTemplate = {
+    particleShape: "STAR",
+    particleLifetime: [100, 250, 500],
+    positionSpawning: { x: "-200%_200%", y: "-200%_200%", z: 0 },
+    particleVelocityStart: '0',
+    particleAngleStart: "0_360",
+    particleRadiusStart: '0%_200%'
+}
+
 export const motionTemplateDictionnary = {
     breath: breathMotionTemplate,
     explosion: explosionMotionTemplate,
@@ -245,4 +257,5 @@ export const motionTemplateDictionnary = {
     satellite: satelliteMotionTemplate,
     slash: slashMotionTemplate,
     vortex: vortexMotionTemplate,
+    flash: flashMotionTemplate
 }

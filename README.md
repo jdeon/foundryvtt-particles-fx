@@ -7,13 +7,24 @@ The module contains several methods to generate particles without needing premad
 
 ## What's New
 - **v2.1.0**: We added advanced mode to link multiple inputs together and change the static value with dynamic functions.
-- **v2.2.0**: We added automatic emission settings. Particles can be generate on items usage (Only existing on DnD 5e)
+- **v2.2.0**: We added automatic emission settings. Particles can be generate on items usage (Only existing on DnD 5e).
+- **v2.3.0**: 
+  - We added elevation to particles.
+  - We improved the particle texture.
+  - We migrate to foundry v12 (mandatory) and dnd5e v4 (optionnal).
+- **v2.4.0**: 
+  - Choose between multiple particle shapes : circle (default and legacy), tor, star and diamond.
+  - Properties next on customize input to link multiple emission in a workflow.
+  - Add flash prefill motion template
+  - Add property freezeOnPause to handle game pause in customized input 
 
 ## Settings
 1. Avoid showing particle from other client (useful for minimal configuration) (Client setting)
 2. Save emitters when changing scene and retrieve when returning (World setting)
 3. Define minimal user role to manage the custom prefill templates (World setting)
 4. Automatic generate emission when using items (Client setting) (Only existing on DnD 5e)
+5. Activate elevation management for particle (useful for minimal configuration) (Client setting)
+6. Elevation to double the size of a particle in grid number (World setting)
 
 ## Emission Methods
 The emission methods are used to interpret the input and manage the particles during their lifetime. The method returns its ID.
@@ -21,17 +32,17 @@ The emission methods are used to interpret the input and manage the particles du
 ### Spray Particles
 Spray particles are emitted from a source and move with a velocity in a direction defined by an angle.
 
-![Spray animation](pfx-spray-Animation.gif)
+![Spray animation](doc/pfx-spray-Animation.gif)
 
 ### Graviting Particles
 Gravitating particles turn around the source with a velocity at a distance defined by a radius.
 
-![Gravitate animation](pfx-gravitate-Animation.gif)
+![Gravitate animation](doc/pfx-gravitate-Animation.gif)
 
 ### Missile Particles
 The missile method emits spray particles that are used to emit sub-particles.
 
-![Missile animation](pfx-missile-Animation.gif)
+![Missile animation](doc/pfx-missile-Animation.gif)
 
 ### Stop All Emissions
 To stop all emissions in the scene and reset the particle emitter's IDs index.
@@ -43,6 +54,15 @@ To stop a specific emission, you need to use a macro to call the method `particl
 - 'f' or 'first' for oldest emission
 And a boolean parameter, `true` for instant deletion of particles already emitted, `false` to stop only the emission (living particles are not killed).
 
+### Stop workflows
+To stop futur emission link by a workflow to a current one, you need to use a macro to call the method `particlesFx.stopWorkflow(id, isImmediate, all)`
+- idwith an ID parameter:
+  - ID of the emission (returned by the method)
+  - 'l' or 'last' for newest emission
+  - 'f' or 'first' for oldest emission
+- isImmediate is a boolean parameter, `true` for instant deletion of emitter already genereted, `false` to stop only disable workflow that has no begun.
+- all is a boolean to select workflow in all emitters
+
 ## How to Call It
 
 ### Call by Chat
@@ -52,9 +72,10 @@ It adds a message response in the chat.
 Commands:
 - `/pfx stopAll`
 - `/pfx stopById *id*`
-- `/pfx spray *prefillMotionTemplate* *prefillColorTemplate*`
-- `/pfx gravitate *prefillMotionTemplate* *prefillColorTemplate*`
-- `/pfx missile *prefillMotionTemplate* *prefillColorTemplate*`
+- `/pfx stopWorkflow *id*`
+- `/pfx spray *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
+- `/pfx gravitate *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
+- `/pfx missile *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
 - `/pfx help`
 
 ```/pfx spray ray death```
@@ -63,15 +84,16 @@ Commands:
 
 ### Call by Script
 
-- To emit spray particles, you need to use a macro to call the method `particlesFx.sprayParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})`
-- To emit gravitating particles, you need to use a macro to call the method `particlesFx.gravitateParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})`
-- To emit missile particles, you need to use a macro to call the method `particlesFx.missileParticles(prefillMotionTemplateName, prefillColorTemplate, {Advanced options})`. Advanced options have the same input as Spray particles with a nested object `subParticles` containing another input (spray or gravitating) and type (equals to "Spraying" or "Graviting").
+- To emit spray particles, you need to use a macro to call the method `particlesFx.sprayParticles(prefillMotionTemplateName, prefillColorTemplate, particleShape, {Advanced options})`
+- To emit gravitating particles, you need to use a macro to call the method `particlesFx.gravitateParticles(prefillMotionTemplateName, prefillColorTemplate, particleShape, {Advanced options})`
+- To emit missile particles, you need to use a macro to call the method `particlesFx.missileParticles(prefillMotionTemplateName, prefillColorTemplate, particleShape, {Advanced options})`. Advanced options have the same input as Spray particles with a nested object `subParticles` containing another input (spray or gravitating) and type (equals to "Spraying" or "Graviting").
 - Write a message to describe the emitter and a button to stop it `particlesFx.writeMessageForEmissionById(emitterId, isVerbal)`. The `isVerbal` parameter also writes advanced input in the message.
 - To stop all emissions, you need to use a macro to call the method `particlesFx.stopAllEmission(instantDelete)`. `instantDelete` is a boolean parameter, if true, it deletes all particles already emitted, false to stop only the emission (living particles are not killed).
 - To stop a specific emission, you need to use a macro to call the method `particlesFx.stopEmissionById(id)`. ID is a number or a string:
   - ID of the emission (returned by the method)
   - 'l' or 'last' for the newest emission
   - 'f' or 'first' for the oldest emission
+- To stop futur emission link by a workflow to a current one, you need to use a macro to call the method `particlesFx.stopWorkflow(id, isImmediate, all)`. ID is like the one for stopEmissionById and all disable workflow for all current workflows
 
 > **Example**
 > To emit missile particles with gravitating sub particles that form a trail 
@@ -85,7 +107,8 @@ All these methods can also be called with the module's API `game.modules.get("pa
 - `xxx.api.emit.missile(xxx)`
 - `xxx.api.emit.writeMessage(xxx)`
 - `xxx.api.emit.stopAll(xxx)`
-- `xxx.api.emit.stop(xxx)
+- `xxx.api.emit.stop(xxx)`
+- `xxx.api.emit.stopWorkflow(xxx)`
 
 ## Prefill Template
 
@@ -103,11 +126,12 @@ The method emitting particles can be called with a prefill template. There are t
 - aura (designed for gravitate)
 - satellite (designed for gravitate)
 - slash (designed for gravitate)
+- flash (designed for spray (square zone) or gravitate (circle zone))
 
 *Example*
 ```particlesFx.missileParticles('wave', {source: token.id, target: target.id})```
 
-![Wave Animation](pfx-missile-wave-Animation.gif)
+![Wave Animation](doc/pfx-missile-wave-Animation.gif)
 
 **Prefill Color Template:**
 - ice
@@ -121,7 +145,20 @@ The method emitting particles can be called with a prefill template. There are t
 *Example*
 ```/pfx spray breath fire```
 
-![Fire Animation](pfx-fire-Animation.gif)
+![Fire Animation](doc/pfx-fire-Animation.gif)
+
+## Particle shape
+The particle shape property define the texture of the sprite for each particles.
+**Particle shapes:**
+- Circle (default)
+- Star
+- Tor
+- Diamond
+
+*Example*
+```/pfx spray breath star```
+
+![Fire Animation](doc/pfx-shape-star-Animation.gif)
 
 ## More Details in the Readme
 For more advanced functionality, please read the [WIKI](https://github.com/jdeon/foundryvtt-particles-fx/wiki) for more details:
@@ -129,6 +166,14 @@ For more advanced functionality, please read the [WIKI](https://github.com/jdeon
 - Add and manage custom prefill templates
 - Particular behavior of measured templates as a source
 - Customize all the parameters of the emitter to get exactly the animation you want
+- Synchronize multiple emitter with workflow
+
+**Example** 
+| ```compendium macro Hypnotize``` | ```compendium macro Concentrate``` |
+| :--------------- |:---------------:|
+| ![Hypnotize Animation](doc/Advance-variable-hypnotize.gif) | ![Concentrate Animation](doc/Advance-timed-variable-concentrate.gif) |
+| ```compendium macro firework``` | ```compendium macro rayball``` |
+| ![Firework Animation](doc/Workfow-emission-firework.gif) | ![Rayball Animation](doc/Workfow-emission-rayball.gif) |
 
 ## V2 Breaking Change
 
