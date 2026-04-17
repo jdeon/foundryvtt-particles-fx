@@ -1,0 +1,24 @@
+name: Concentring
+type: script
+command: "// Example of timed advanced variable\n// Link particle angle and sprite rotation needle point to source. And make size grow in one direction  befor shrink again to make think of mini rays.\n\nif (canvas.tokens.controlled.length === 0){\n  return ui.notifications.error(\"Please select a token first\");\n}\n\nfor (let source of canvas.tokens.controlled) {\n\n\tlet idEmitter = game.modules.get(\"particule-fx\").api.emit.gravit(\"silver\", {\n    source :source.id,\n    spawningFrequence: 1,\n    maxParticles: 20,\n    emissionDuration: 500,\n    particleLifetime: [500, 750],\n    particleVelocityStart : 0,\n    particleRadiusStart : \"100%\",\n    particleRadiusEnd : 0,\n    particleSizeStart : {x : \"{{a}}%\", y: \"2%\"},\n    particleAngleStart : \"{{b}}\",\n    particleRotationStart : \"{{b}}\",\n    alphaEnd: 1,\n    advanced: {\n        variables : {\n            a : ({tp}) => {if(tp < 5/10){ return tp * 98 + 2 } else { return 196 * (1 - tp) + 2}},\n           b : \"0_360\"\n        }\n    }\n})\n\nawait particlesFx.writeMessageForEmissionById(idEmitter, true)\n\n}"
+img: icons/magic/holy/projectiles-blades-salvo-yellow.webp
+author: sLwoTjtfykXvWNpR
+scope: global
+folder: null
+ownership:
+  default: 0
+  sLwoTjtfykXvWNpR: 3
+flags: {}
+_stats:
+  compendiumSource: null
+  duplicateSource: null
+  exportSource: null
+  coreVersion: '13.351'
+  systemId: dnd5e
+  systemVersion: 5.2.4
+  createdTime: 1775945414149
+  modifiedTime: 1775945414149
+  lastModifiedBy: sLwoTjtfykXvWNpR
+_id: jijFh6euOfgChPOI
+sort: 0
+_key: '!macros!jijFh6euOfgChPOI'

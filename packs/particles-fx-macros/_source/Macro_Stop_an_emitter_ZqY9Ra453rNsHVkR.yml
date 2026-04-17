@@ -1,0 +1,30 @@
+name: Stop an emitter
+type: script
+scope: global
+author: 3O50UvUzfcD8GFZo
+img: icons/svg/light-off.svg
+command: |-
+  //Id of emission or 'l'/'last' or 'f'/'first'
+  particlesFx.stopEmissionById('l')
+flags:
+  combat-utility-belt:
+    macroTrigger: ''
+  core: {}
+_stats:
+  systemId: dnd5e
+  systemVersion: 2.2.2
+  coreVersion: '13.351'
+  createdTime: 1680369329818
+  modifiedTime: 1775857215442
+  lastModifiedBy: sLwoTjtfykXvWNpR
+  compendiumSource: Macro.UelAUx6YkLKhzHz7
+  duplicateSource: null
+  exportSource: null
+ownership:
+  default: 0
+  GbqHPYzg1VzJn1ff: 3
+  3O50UvUzfcD8GFZo: 3
+folder: null
+sort: 500000
+_id: ZqY9Ra453rNsHVkR
+_key: '!macros!ZqY9Ra453rNsHVkR'

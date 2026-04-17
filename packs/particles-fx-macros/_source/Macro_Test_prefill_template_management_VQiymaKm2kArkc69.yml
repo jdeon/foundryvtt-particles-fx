@@ -1,0 +1,59 @@
+name: Test prefill template management
+type: script
+scope: global
+author: 3O50UvUzfcD8GFZo
+img: icons/svg/book.svg
+command: >-
+  /*game.modules.get("particule-fx").api.template.motion.add('rain', {
+      particleLifetime: [500,1500],
+      particleVelocityStart: 0,
+      particleRadiusStart: '0_100',
+      particleSizeStart: 1,
+      particleSizeEnd: '10_25'
+  })*/ //Use this wis graviate
+
+
+  //console.log(game.modules.get("particule-fx").api.template.motion.get('rain'))
+
+
+  //console.log(game.modules.get("particule-fx").api.template.motion.get())
+
+
+  //game.modules.get("particule-fx").api.template.motion.remove('rain')
+
+
+  /*
+
+  game.modules.get("particule-fx").api.template.color.add('brown', {
+      particleColorStart: {x:100,y:50, z: 0},
+      particleColorEnd: {x:200,y:'100_150', z: 0},
+  })*/
+
+
+
+  //console.log(game.modules.get("particule-fx").api.template.color.get('brown'))
+
+
+  //console.log(game.modules.get("particule-fx").api.template.color.get())
+
+
+  game.modules.get("particule-fx").api.template.color.remove('brown')
+ownership:
+  default: 0
+  3O50UvUzfcD8GFZo: 3
+flags:
+  core: {}
+_stats:
+  systemId: dnd5e
+  systemVersion: 2.2.2
+  coreVersion: '13.351'
+  createdTime: 1692830976138
+  modifiedTime: 1775945680800
+  lastModifiedBy: sLwoTjtfykXvWNpR
+  compendiumSource: Macro.WYdYkkNjKeYWwUwr
+  duplicateSource: null
+  exportSource: null
+folder: null
+sort: 400000
+_id: VQiymaKm2kArkc69
+_key: '!macros!VQiymaKm2kArkc69'

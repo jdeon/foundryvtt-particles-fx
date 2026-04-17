@@ -1,0 +1,49 @@
+name: Firework
+type: script
+command: |-
+  if (canvas.tokens.controlled.length === 0){
+    return ui.notifications.error("Please select a token first");
+  }
+
+  for (let source of canvas.tokens.controlled) {
+
+    let idEmitter = game.modules.get("particule-fx").api.emit.spray("fire",{
+      source:source.id,
+      spawningFrequence: 1,
+      maxParticles: 20,
+      emissionDuration: 2500,
+      particleLifetime: [500, 750],
+      particleVelocityStart: '500%',
+      particleVelocityEnd: '100%',
+      next: [{
+        delay: 1,
+        type: "atParticleEnd",
+        particleInputs: [
+          ["spray", "explosion", {maxParticles: 20, particleVelocityStart: "50%", particleLifetime:250}]
+        ]
+      }]
+  })
+    
+  await particlesFx.writeMessageForEmissionById(idEmitter, true)
+  }
+img: icons/magic/fire/projectile-meteor-salvo-light-purple.webp
+author: sLwoTjtfykXvWNpR
+scope: global
+folder: null
+ownership:
+  default: 0
+  sLwoTjtfykXvWNpR: 3
+flags: {}
+_stats:
+  compendiumSource: null
+  duplicateSource: null
+  exportSource: null
+  coreVersion: '13.351'
+  systemId: dnd5e
+  systemVersion: 5.2.4
+  createdTime: 1775857217610
+  modifiedTime: 1775857217610
+  lastModifiedBy: sLwoTjtfykXvWNpR
+_id: 5ycBoNWO0layDda5
+sort: 0
+_key: '!macros!5ycBoNWO0layDda5'
