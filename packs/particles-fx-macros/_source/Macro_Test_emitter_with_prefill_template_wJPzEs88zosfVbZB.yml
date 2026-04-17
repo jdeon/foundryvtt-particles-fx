@@ -1,0 +1,28 @@
+name: Test emitter with prefill template
+type: script
+scope: global
+author: 3O50UvUzfcD8GFZo
+img: icons/svg/book.svg
+command: "if (canvas.tokens.controlled.length === 0){\n  return ui.notifications.error(\"Please select a token first\");\n}\n\nfor (let target of canvas.tokens.controlled) {\nconst position = {x:target.x + target.w /2, y:target.position.y + target.h /2}\n\n\t//let idEmitter = game.modules.get(\"particule-fx\").api.emit.spray(\"fire\", \"explosion\", {source:position})\n\t//let idEmitter = game.modules.get(\"particule-fx\").api.emit.spray(\"breath\", \"poison\", {source:position})\n\t//let idEmitter = game.modules.get(\"particule-fx\").api.emit.spray(\"ray\", \"ice\", {source:position})\n\t//let idEmitter = game.modules.get(\"particule-fx\").api.emit.gravit(\"vortex\", \"death\",{source:position})\n\t//let idEmitter = game.modules.get(\"particule-fx\").api.emit.gravit(\"aura\", \"light\", {source:position})\n\t//let idEmitter = game.modules.get(\"particule-fx\").api.emit.gravit(\"satellite\",{source:position})\n\n\tlet idEmitter = game.modules.get(\"particule-fx\").api.emit.gravit(\"vortex\", \"death\", {source:position, particleColorStart:{x:'100_150', y:'200_225', z:250}, particleColorEnd:{x:'150_220', y:'220_250', z:250}})\n\n\t //let idEmitter = game.modules.get(\"particule-fx\").api.emit.gravit(\"vortex\", \"death\",{source:position, particleColorStart:{x:0, y:0, z:0}, partiuleColorEnd:{x:'0_90', y:'0_40', z:'50_140'}})\n    \n\nawait game.modules.get(\"particule-fx\").api.emit.writeMessage(idEmitter, true)\n\n}"
+flags:
+  combat-utility-belt:
+    macroTrigger: ''
+  core: {}
+_stats:
+  systemId: dnd5e
+  systemVersion: 2.2.2
+  coreVersion: '13.351'
+  createdTime: 1680953987735
+  modifiedTime: 1775857215442
+  lastModifiedBy: sLwoTjtfykXvWNpR
+  compendiumSource: Macro.08nfkaKe05uQHGYQ
+  duplicateSource: null
+  exportSource: null
+ownership:
+  default: 0
+  GbqHPYzg1VzJn1ff: 3
+  3O50UvUzfcD8GFZo: 3
+folder: null
+sort: 800000
+_id: wJPzEs88zosfVbZB
+_key: '!macros!wJPzEs88zosfVbZB'

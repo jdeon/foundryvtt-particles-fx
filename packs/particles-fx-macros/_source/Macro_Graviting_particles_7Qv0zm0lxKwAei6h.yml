@@ -1,0 +1,38 @@
+name: Graviting particles
+type: script
+scope: global
+author: 3O50UvUzfcD8GFZo
+img: icons/svg/daze.svg
+command: |-
+  if (canvas.tokens.controlled.length === 0){
+    return ui.notifications.error("Please select a token first");
+  }
+
+  for (let target of canvas.tokens.controlled) {
+
+  let idEmitter = particlesFx.gravitateParticles({source:target.id})
+
+  await particlesFx.writeMessageForEmissionById(idEmitter, true)
+  }
+flags:
+  combat-utility-belt:
+    macroTrigger: ''
+  core: {}
+_stats:
+  systemId: dnd5e
+  systemVersion: 2.2.2
+  coreVersion: '13.351'
+  createdTime: 1680644857116
+  modifiedTime: 1775857215442
+  lastModifiedBy: sLwoTjtfykXvWNpR
+  compendiumSource: Macro.Npe8Fy0CSDhafzbl
+  duplicateSource: null
+  exportSource: null
+ownership:
+  default: 0
+  GbqHPYzg1VzJn1ff: 3
+  3O50UvUzfcD8GFZo: 3
+folder: null
+sort: 100000
+_id: 7Qv0zm0lxKwAei6h
+_key: '!macros!7Qv0zm0lxKwAei6h'

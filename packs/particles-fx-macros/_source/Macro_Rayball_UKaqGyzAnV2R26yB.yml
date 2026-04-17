@@ -1,0 +1,106 @@
+name: Rayball
+type: script
+command: >-
+  // Example of workflow with the next property usage
+
+  // Focus energy, send missile to first target that will emit a ray on other
+  target which will explose
+
+
+  if (canvas.tokens.controlled.length === 0){
+    return ui.notifications.error("Please select a token first");
+  }
+
+
+  if(game.user.targets.ids.length === 0) return
+
+  const mainTargetID = game.user.targets.ids[0]; //Target of the missile
+
+  const secondaryTargetID = game.user.targets.ids.toSpliced(0,1); // Target of
+  the rays
+
+
+  for (let source of canvas.tokens.controlled) {
+
+    let idEmitter = game.modules.get("particule-fx").api.emit.gravit({
+      source:source.id,
+      spawningFrequence: 3,
+      maxParticles: 1000,
+      emissionDuration: 1000,
+      particleLifetime: [1000, 1500],
+      particleVelocityStart: 150,
+      particleVelocityEnd: 50,
+      particleAngleStart: '0_360',
+      particleRadiusStart: '100%',
+      particleRadiusEnd: '25%',
+      particleSizeStart: 10,
+      particleSizeEnd: '1_10',
+      alphaStart: 1,
+      alphaEnd: 0,
+      next: [{
+        delay: 1,
+        type: "atEmissionEnd",
+        particleInputs: [
+          {
+            source: source.id,
+            target: mainTargetID,
+            type: "Missile",
+            particleColorStart: [{x:250, y:250, z:50}, {x:'100_150', y:'200_225', z:250}],
+            particleColorEnd: [{x:250, y:'50_100', z:0}, {x:'150_220', y:'220_250', z:250}],
+            subParticles: {
+                type: "Graviting",
+                particleLifetime: 2000,
+                particleAngleStart: '0_360',
+                particleRadiusStart: '10%',
+                particleRadiusEnd: '50%',
+            },
+            next:[{
+              type: "atEmissionEnd",
+              particleInputs: secondaryTargetID.map((targetId) =>[{
+                source:mainTargetID,
+                target: targetId,
+                type: "Spraying",
+                emissionDuration: 1000,
+                next:[{
+                  type: "atEmissionStart",
+                  delay: 1,
+                  particleInputs: [[
+                    { source:targetId, type: "Spraying" },
+                    "explosion",
+                    "charm"
+                  ]]
+                }]  
+              },
+                'ray',
+                'light'
+              ])
+            }]
+          }
+        ]
+      }]
+  })
+    
+  await particlesFx.writeMessageForEmissionById(idEmitter, true)
+
+  }
+img: icons/magic/light/explosion-impact-purple.webp
+author: sLwoTjtfykXvWNpR
+scope: global
+folder: null
+ownership:
+  default: 0
+  sLwoTjtfykXvWNpR: 3
+flags: {}
+_stats:
+  compendiumSource: null
+  duplicateSource: null
+  exportSource: null
+  coreVersion: '13.351'
+  systemId: dnd5e
+  systemVersion: 5.2.4
+  createdTime: 1775857215392
+  modifiedTime: 1775857215442
+  lastModifiedBy: sLwoTjtfykXvWNpR
+_id: UKaqGyzAnV2R26yB
+sort: 200000
+_key: '!macros!UKaqGyzAnV2R26yB'
