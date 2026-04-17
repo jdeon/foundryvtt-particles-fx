@@ -10,6 +10,12 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Build Packs
+      run: npm run pack --if-present
+
     # Get the version from 'module.json'
     - name: Get Version
       shell: bash
