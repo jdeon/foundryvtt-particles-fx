@@ -1,0 +1,22 @@
+{
+  "name": "particule-fx",
+  "version": "1.0.0",
+  "description": "Package to handle packs on release",
+  "bugs": {
+    "url": "https://github.com/jdeon/foundryvtt-particles-fx/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jdeon/foundryvtt-particles-fx.git"
+  },
+  "license": "ISC",
+  "author": "jdeon",
+  "type": "commonjs",
+  "scripts": {
+    "unpack": "node ./ci/unpackLdb.mjs",
+    "pack": "node ./ci/packLdb.mjs"
+  },
+  "devDependencies": {
+    "@foundryvtt/foundryvtt-cli": "^3.0.3"
+  }
+}
