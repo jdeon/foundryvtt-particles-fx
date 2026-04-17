@@ -1,5 +1,4 @@
 
 packs/particles-fx-macros/*
-!packs/particles-fx-macros/CURRENT
-!packs/particles-fx-macros/MANIFEST-*
+!packs/particles-fx-macros/_source
 node_modules/*

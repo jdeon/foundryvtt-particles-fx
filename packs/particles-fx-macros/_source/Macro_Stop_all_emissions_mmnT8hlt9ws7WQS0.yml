@@ -1,0 +1,28 @@
+name: Stop all emissions
+type: script
+scope: global
+author: 3O50UvUzfcD8GFZo
+img: icons/svg/cancel.svg
+command: particlesFx.stopAllEmission(true)
+flags:
+  combat-utility-belt:
+    macroTrigger: ''
+  core: {}
+_stats:
+  systemId: dnd5e
+  systemVersion: 2.2.2
+  coreVersion: '13.351'
+  createdTime: 1680367905101
+  modifiedTime: 1775857215442
+  lastModifiedBy: sLwoTjtfykXvWNpR
+  compendiumSource: Macro.tiHUvCNZoXbTjRQK
+  duplicateSource: null
+  exportSource: null
+ownership:
+  default: 0
+  GbqHPYzg1VzJn1ff: 3
+  3O50UvUzfcD8GFZo: 3
+folder: null
+sort: 700000
+_id: mmnT8hlt9ws7WQS0
+_key: '!macros!mmnT8hlt9ws7WQS0'
