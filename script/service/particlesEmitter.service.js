@@ -2,7 +2,7 @@ import { s_MODULE_ID, s_EVENT_NAME, Vector3, Utils, SPRITE_TEXTURE_MAPPING } fro
 import { s_MESSAGE_TYPES } from "../utils/socketManager.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
 import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTemplate } from "../object/particleTemplate.js"
-import { ParticleWorkflow } from "../object/particleWorkflow.js"
+import { ParticleWorkFlowManager } from "../object/particleWorkFlow.js"
 import { defaultMotionTemplate } from "../prefillMotionTemplate.js"
 import { defaultColorTemplate } from "../prefillColorTemplate.js"
 import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
@@ -183,7 +183,7 @@ export function persistEmitters() {
 export function stopAllEmission(immediate) {
     let deletedIds = []
 
-    ParticleWorkflow.stopAll(immediate);
+    ParticleWorkFlowManager.stopAll(immediate);
 
     if (immediate) {
         while (ParticlesEmitter.emitters.length > 0) {
@@ -208,7 +208,7 @@ export function stopEmissionById(emitterId, immediate) {
     const emitter = findEmitterById(emitterId)
 
     if (emitter) {
-        const workflows = ParticleWorkflow.getWorkflowsByEmitterId(emitter.id)
+        const workflows = ParticleWorkFlowManager.getWorkflowsByEmitterId(emitter.id)
         workflows.forEach((workflow) => workflow.destroy(immediate))
 
         emitter.disableWorkflow()
@@ -224,7 +224,7 @@ export function stopEmissionById(emitterId, immediate) {
 
 export function stopWorkflow(emitterId, immediate, all){
     if(all) {
-        ParticleWorkflow.stopAll(immediate);
+        ParticleWorkFlowManager.stopAll(immediate);
 
         ParticlesEmitter.emitters.forEach(emitter => {
             emitter.disableWorkflow()
@@ -236,7 +236,7 @@ export function stopWorkflow(emitterId, immediate, all){
     const emitter = findEmitterById(emitterId)
 
     if (emitter) {
-        const workflows = ParticleWorkflow.getWorkflowsByEmitterId(emitter.id)
+        const workflows = ParticleWorkFlowManager.getWorkflowsByEmitterId(emitter.id)
         workflows.forEach((workflow) => workflow.destroy(immediate))
 
         emitter.disableWorkflow()
