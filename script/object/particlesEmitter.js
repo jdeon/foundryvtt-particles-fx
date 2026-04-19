@@ -1,7 +1,7 @@
 import { motionTemplateDictionnary } from "../prefillMotionTemplate.js"
 import { colorTemplateDictionnary } from "../prefillColorTemplate.js"
 import { Particle } from "./particle.js"
-import { ParticleWorkflow } from"./particleWorkflow.js"
+import { ParticleWorkFlowManager } from"./ParticleWorkFlowManager.js"
 
 export default class ParticlesEmitter {
 
@@ -43,7 +43,7 @@ export default class ParticlesEmitter {
             ParticlesEmitter.INIT_EMISSION_CANVAS()
         }
 
-        ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.id, this.particleTemplate )
+        ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.id, this.particleTemplate )
     }
 
     manageParticles() {
@@ -63,7 +63,7 @@ export default class ParticlesEmitter {
             particle.manageLifetime(dt)
 
             if (particle.remainingTime <= 0) {
-                ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_PARTICLE_END, this.id, this.particleTemplate, particle )
+                ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_PARTICLE_END, this.id, this.particleTemplate, particle )
                 particle.sprite.destroy()
                 this.particles.splice(i, 1)
                 //Return to last particle
@@ -110,7 +110,7 @@ export default class ParticlesEmitter {
                     canvas.primary.addChild(particle.sprite);
                 }
                 this.particles.push(particle);
-                ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START, this.id, this.particleTemplate, particle );
+                ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START, this.id, this.particleTemplate, particle );
             }
 
             this.spawnedEnable = false;
@@ -138,7 +138,7 @@ export default class ParticlesEmitter {
         const emitterIndex = ParticlesEmitter.emitters.findIndex((emitter) => emitter.id === this.id);
         ParticlesEmitter.emitters.splice(emitterIndex, 1);
 
-        ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_END, this.id, this.particleTemplate )
+        ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_END, this.id, this.particleTemplate )
 
         if(this.destroyHooks.length > 0){
             this.destroyHooks.forEach((destroyHook) => destroyHook(this.id) )
