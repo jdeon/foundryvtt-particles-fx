@@ -2,7 +2,7 @@ import { s_MODULE_ID, s_EVENT_NAME, Vector3, Utils, SPRITE_TEXTURE_MAPPING } fro
 import { s_MESSAGE_TYPES } from "../utils/socketManager.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
 import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTemplate } from "../object/particleTemplate.js"
-import { ParticleWorkFlowManager } from "../object/ParticleWorkFlowManager.js"
+import { ParticleWorkFlowManager } from "../object/particleWorkFlow.js"
 import { defaultMotionTemplate } from "../prefillMotionTemplate.js"
 import { defaultColorTemplate } from "../prefillColorTemplate.js"
 import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"

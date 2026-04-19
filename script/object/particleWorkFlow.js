@@ -35,9 +35,9 @@ export class ParticleWorkFlowManager {
 	static generateWorkflow (workflowType, delay, particleInputs, sourceEmitterId, particleTemplate, particle, workflowIndex) {
 		if(!particleInputs) return
 
-		const ParticleWorkFlowManager = new ParticleWorkFlowStep (workflowType, delay, particleInputs, sourceEmitterId, particleTemplate, particle, workflowIndex);
-		ParticleWorkFlowManager.WORKFLOWS_LIST.push(ParticleWorkFlowManager)
-		ParticleWorkFlowManager.computeStep()
+		const particleWorkFlowStep = new ParticleWorkFlowStep (workflowType, delay, particleInputs, sourceEmitterId, particleTemplate, particle, workflowIndex);
+		ParticleWorkFlowManager.WORKFLOWS_LIST.push(particleWorkFlowStep)
+		particleWorkFlowStep.computeStep()
 	}
 
 	static getWorkflowsByEmitterId ( emitterId ) {

@@ -1,7 +1,7 @@
 import { motionTemplateDictionnary } from "../prefillMotionTemplate.js"
 import { colorTemplateDictionnary } from "../prefillColorTemplate.js"
 import { Particle } from "./particle.js"
-import { ParticleWorkFlowManager } from"./ParticleWorkFlowManager.js"
+import { ParticleWorkFlowManager } from"./particleWorkFlow.js"
 
 export default class ParticlesEmitter {
 
