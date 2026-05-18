@@ -254,6 +254,38 @@ export class Utils {
         return result
     }
 
+    /**
+     * Handle the cas where it should return an array
+     * If there is nested array, it mean we choose randomly a index and handle the nested array item as random object
+     */
+    static getArrayRandomValueFrom(inArray, advancedVariables, inputMode) {
+        if (!Array.isArray(inArray)) return
+
+        const containSubArray = inArray.filter((item) => Array.isArray(item));
+        let arrayToHandle
+
+        if(containSubArray.length){ 
+            const randomItem = inArray[Math.floor(Math.random() * inArray.length)];
+            if(Array.isArray(randomItem)){
+                arrayToHandle = randomItem;
+            } else {
+                arrayToHandle = [randomItem]
+            }
+        } else {
+            arrayToHandle = inArray;
+        }
+
+        let result = arrayToHandle.map((item) =>  Utils.getRandomValueFrom(item, advancedVariables));
+
+        if (inputMode) {
+            for (let i = 0; i < result.length; i++) {
+                result[i] = ParticleInput.build(result[i], arrayToHandle[i], advancedVariables);
+            }
+        }
+
+        return result
+    }
+
 
     static includingRandom() {
         if (Math.random() == 0) {

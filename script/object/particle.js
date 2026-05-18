@@ -171,6 +171,47 @@ export class SprayingParticle extends Particle {
     }
 }
 
+export class PathParticle extends Particle {
+    constructor(advancedVariables, sprite, path, particleLifetime, elevationStart, riseRateStart, riseRateEnd, velocityStart, velocityEnd,
+        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage) {
+        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage)
+
+        this.path = path;
+        this.velocityStart = velocityStart;                                                             //ParticleInput<Number>      
+        this.velocityEnd = velocityEnd.getValue() === sameStartKey ? velocityStart : velocityEnd;        //ParticleInput<Number>
+        this.lengthPosition = 0;
+    }
+
+    manageLifetime(dt) {
+        let lifetimeProportion = this.getLifetimeProportion();
+
+        if (this.timedParticule) {
+            const lifetime = this.particleLifetime - this.remainingTime
+            AdvancedVariable.generateAll(this.advancedVariables, dt, lifetime, lifetimeProportion);
+        }
+
+        //Particle move
+        const currentVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
+        this.lengthPosition += currentVelocity * dt / 1000;
+        this.positionVibrationLess = this.path.getPointAtProportion(this.lengthPosition / this.path.totalLenght);
+
+        super._manageLifetime(dt, lifetimeProportion)
+
+        if (this.vibrationCurrent) {
+            this.sprite.x = this.positionVibrationLess.x + this.vibrationCurrent * Math.cos(angleRadiant - (Math.PI / 2))
+            this.sprite.y = this.positionVibrationLess.y + this.vibrationCurrent * Math.sin(angleRadiant - (Math.PI / 2))
+        } else {
+            this.sprite.x = this.positionVibrationLess.x
+            this.sprite.y = this.positionVibrationLess.y
+        }
+    }
+
+    getDirection() {
+        return 0 //TODO get direction from path
+    }
+}
+
 export class GravitingParticle extends Particle {
 
     static computeParticlePosition(source, radius, angleOnTrack, riseRate, trackRotation) {
