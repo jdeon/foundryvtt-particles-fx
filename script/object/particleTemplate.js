@@ -200,19 +200,12 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
         }
 
-        let sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(this.particleShape))
-        sprite.x = this.currentSourcePosition.x + positionSpawning.x;
-        sprite.y = this.currentSourcePosition.y + positionSpawning.y;
-        sprite.anchor.set(0.5);
-
-        let startSize = particleProperties.sizeStart.getValue();
-        const sizeFactor = Utils.handleElevationFactorForSize(this.currentSourcePosition.z);
-        sprite.width = startSize.x * sizeFactor;
-        sprite.height = startSize.y * sizeFactor;
-        sprite.angle = particleProperties.particleRotationStart.getValue() + targetAngleDirection * 180 / Math.PI
-
-        let colorStart = Vector3.build(particleProperties.colorStart.getValue())
-        sprite.tint = Color.fromRGB([Math.floor(colorStart.x) / 255, Math.floor(colorStart.y) / 255, Math.floor(colorStart.z) / 255])
+        let sprite = this.initSprite(
+            {... Vector3.build(this.currentSourcePosition).add(positionSpawning), r:this.currentSourcePosition.r},
+            particleProperties.sizeStart,
+            particleProperties.particleRotationStart,
+            particleProperties.colorStart
+        )
 
         return new SprayingParticle(
             advancedVariable,
@@ -513,13 +506,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
 
         const riseRate = Utils.handleFraction(riseRateStart.getValue())
 
-        const sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(this.particleShape))
-        sprite.anchor.set(0.5);
-        const particlePosition = GravitingParticle.computeParticlePosition(this.currentSourcePosition, radiusStart, angleStart * (Math.PI / 180), riseRate, axisElevationAngle)
-        sprite.x = particlePosition.x;
-        sprite.y = particlePosition.y;
-        let elevation = particlePosition.z;
-
+        const particlePosition = GravitingParticle.computeParticlePosition(this.currentSourcePosition, radiusStart, angleStart * (Math.PI / 180), riseRate, axisElevationAngle);
         const startSizeInput = Utils.getRandomParticuleInputFrom(this.sizeStart, advancedVariable)
         let startSize = startSizeInput.getValue();
         const sizeFactor = Utils.handleElevationFactorForSize(elevation);
@@ -530,15 +517,20 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         sprite.angle = rotationStartInput.add(angleOriginValue).getValue()
 
         const colorStartInput = Utils.getRandomParticuleInputFrom(this.colorStart, advancedVariable)
-        let colorStart = colorStartInput.getValue()
-        sprite.tint = Color.fromRGB([Math.floor(colorStart.x) / 255, Math.floor(colorStart.y) / 255, Math.floor(colorStart.z) / 255])
+
+        const sprite = this.initSprite(
+            particlePosition,
+            startSizeInput,
+            particleProperties.particleRotationStart,
+            particleProperties.colorStart
+        )
 
         return new GravitingParticle(
             advancedVariable,
             sprite,
             this.onlyEmitterFollow ? this.currentSourcePosition : source,
             Utils.getRandomParticuleInputFrom(this.particleLifetime, advancedVariable).getValue(),
-            elevation,
+            particlePosition.z,
             axisElevationAngle,
             riseRateStart,
             riseRateEnd,
