@@ -345,6 +345,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         }
     }
 
+    
     generateParticles() {
         if (!this.initGenerate) {
             //First init the main particles

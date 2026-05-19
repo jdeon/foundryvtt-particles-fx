@@ -59,7 +59,7 @@ export class Vector3 {
 
     static replaceSameAsStart(startVector, endVector) {
         if (endVector.x === sameStartKey && endVector.y === sameStartKey && endVector.z === sameStartKey) {
-            return startVector
+            return Vector3.build(startVector);
         }
 
         for (let coord of ['x', 'y', 'z']) {
@@ -474,5 +474,9 @@ export class Utils {
         }
 
         return SPRITE_TEXTURE_MAPPING.CIRCLE
+    }
+
+    static computeSameAsStart(particleInputStart, particleInputEnd){
+        return particleInputEnd.getValue() === sameStartKey ? particleInputStart.clone() : particleInputEnd;
     }
 }
