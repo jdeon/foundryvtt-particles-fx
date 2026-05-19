@@ -1,10 +1,15 @@
 import { Vector3 } from './utils.js'
 
 export class Path {
-	constructor(stepArray){
-		this.pathStep = stepArray.map((step) => Vector3.build(step));
+	constructor(stepPosition){
+		this.stepPosition = stepPosition.map((step) => Vector3.build(step));
 
-		const magnitudeArray = this.pathStep.map((step) => step.magnitude());
+		this.stepPath = [];
+		for(let i = 0; i < this.stepPosition.length - 1; i++ ){
+			this.stepPath.push(this.stepPosition[i + 1].minus(this.stepPosition[i]))
+		}
+
+		const magnitudeArray = this.stepPath.map((step) => step.magnitude());
 		
 		
 		this.totalLenght = magnitudeArray.reduce((acc, magnitude) => acc + magnitude, 0);
@@ -15,19 +20,19 @@ export class Path {
 
 	getPointAtProportion(pathProportion) {
 		const currentStepProportion = this.computeStepProportion(pathProportion);
-		if(currentStepProportion<=0 || this.currentStep === this.pathStep.length - 1){
-			return this.pathStep[this.currentStep];
+		if(currentStepProportion<=0){
+			return this.stepPosition[this.currentStep];
 		}
 
 		if (currentStepProportion > 1){
-			return this.pathStep[this.currentStep + 1];
+			return this.stepPosition[this.currentStep + 1];
 		}
 
-		return this.pathStep[this.currentStep].multiply((1 - currentStepProportion))
-			.add(this.pathStep[this.currentStep + 1].multiply(currentStepProportion));
+		return this.stepPosition[this.currentStep].multiply((1 - currentStepProportion))
+			.add(this.stepPosition[this.currentStep + 1].multiply(currentStepProportion));
 	}
 
-	computeStepProportion(pathProportion){
+	computeStepProportion(pathProportion) {
 		this.pathProportion = pathProportion;
 
 		let remainingProportion = pathProportion;
@@ -42,5 +47,6 @@ export class Path {
 
 		this.currentStep = this.stepsProportion.length - 1;
 		return 0;
+		return 1;
 	}
 }
