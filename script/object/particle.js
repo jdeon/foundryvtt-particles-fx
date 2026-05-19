@@ -208,7 +208,7 @@ export class PathParticle extends Particle {
     }
 
     getDirection() {
-        return 0 //TODO get direction from path
+        return this.path.getDirection();
     }
 }
 

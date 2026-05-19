@@ -46,7 +46,15 @@ export class Path {
 		}
 
 		this.currentStep = this.stepsProportion.length - 1;
-		return 0;
 		return 1;
+	}
+
+	/**
+	 * Direction in degree at current step
+	 */
+	getDirection() {
+		const vectorDirection = this.stepPath[this.currentStep];
+
+		return Math.atan2(vectorDirection.y, vectorDirection.x) * 180 / Math.PI;
 	}
 }
