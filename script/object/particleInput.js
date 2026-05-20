@@ -77,6 +77,10 @@ export class ParticleInput {
     _isInvalidOperation(value){
         return isNaN(value) || this.inputValue === sameStartKey
     }
+
+    clone(){
+        return new ParticleInput(this.inputValue);
+    }
 }
 
 export class ParticleVectorInput extends ParticleInput {
@@ -97,6 +101,10 @@ export class ParticleVectorInput extends ParticleInput {
     add(value){
         this.inputValue = this.inputValue.add(value)
         return this
+    }
+
+    clone(){
+        return new ParticleVectorInput(Vector3.build(this.inputValue));
     }
 }
 
@@ -132,6 +140,12 @@ export class TimedParticleInput  extends ParticleInput {
         this._valueOperations.push({value, operation:(a,b) => a + b})
 
         return this
+    }
+
+    clone(){
+        const result = new TimedParticleInput(this.inputValue, this.inputCmd);
+        result._valueOperations.push(...this._valueOperations)
+        return result;
     }
 
     _computeTimeValue(advancedVariables){
@@ -176,6 +190,12 @@ export class TimedParticleVectorInput  extends TimedParticleInput {
         this._valueOperations.push({value, operation:(a,b) => a.add(b)})
 
         return this
+    }
+
+    clone(){
+        const result = new TimedParticleVectorInput(Vector3.build(this.inputValue), this.inputCmd);
+        result._valueOperations.push(...this._valueOperations)
+        return result;
     }
 
     _computeTimeValue(advancedVariables){

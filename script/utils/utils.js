@@ -59,7 +59,7 @@ export class Vector3 {
 
     static replaceSameAsStart(startVector, endVector) {
         if (endVector.x === sameStartKey && endVector.y === sameStartKey && endVector.z === sameStartKey) {
-            return startVector
+            return Vector3.build(startVector);
         }
 
         for (let coord of ['x', 'y', 'z']) {
@@ -135,6 +135,9 @@ export class Vector3 {
         this.z = Utils._managePercent(this.z)
 
         return !(isNaN(this.x) || isNaN(this.y) || isNaN(this.z))
+    }
+    magnitude() {
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
     }
 }
 
@@ -248,6 +251,38 @@ export class Utils {
         if (inputMode) {
             for (const key of inKey) {
                 result[key] = ParticleInput.build(result[key], inValue[key], advancedVariables);
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Handle the cas where it should return an array
+     * If there is nested array, it mean we choose randomly a index and handle the nested array item as random object
+     */
+    static getArrayRandomValueFrom(inArray, advancedVariables, inputMode) {
+        if (!Array.isArray(inArray)) return
+
+        const containSubArray = inArray.filter((item) => Array.isArray(item));
+        let arrayToHandle
+
+        if(containSubArray.length){ 
+            const randomItem = inArray[Math.floor(Math.random() * inArray.length)];
+            if(Array.isArray(randomItem)){
+                arrayToHandle = randomItem;
+            } else {
+                arrayToHandle = [randomItem]
+            }
+        } else {
+            arrayToHandle = inArray;
+        }
+
+        let result = arrayToHandle.map((item) =>  Utils.getRandomValueFrom(item, advancedVariables));
+
+        if (inputMode) {
+            for (let i = 0; i < result.length; i++) {
+                result[i] = ParticleInput.build(result[i], arrayToHandle[i], advancedVariables);
             }
         }
 
@@ -439,5 +474,9 @@ export class Utils {
         }
 
         return SPRITE_TEXTURE_MAPPING.CIRCLE
+    }
+
+    static computeSameAsStart(particleInputStart, particleInputEnd){
+        return particleInputEnd.getValue() === sameStartKey ? particleInputStart.clone() : particleInputEnd;
     }
 }

@@ -30,19 +30,19 @@ export class Particle {
         this.remainingTime = particleLifetime;                                              //Number
         this.particleLifetime = particleLifetime;                                             //Number
         this.riseRateStart = riseRateStart;                                                        //ParticuleInput<Number>
-        this.riseRateEnd = riseRateEnd.getValue() === sameStartKey ? riseRateStart : riseRateEnd;   //ParticuleInput<Number>
+        this.riseRateEnd = Utils.computeSameAsStart(riseRateStart, riseRateEnd)   //ParticuleInput<Number>
         this.sizeStart = sizeStart;                                                        //ParticuleInput<Vector3>
-        this.sizeEnd = sizeEnd.getValue() === sameStartKey ? sizeStart : sizeEnd;                     //ParticuleInput<Vector3>
+        this.sizeEnd = Utils.computeSameAsStart(sizeStart, sizeEnd);                     //ParticuleInput<Vector3>
         this.particleRotationStart = particleRotationStart;
-        this.particleRotationEnd = particleRotationEnd.getValue() === sameStartKey ? particleRotationStart : particleRotationEnd;
+        this.particleRotationEnd = Utils.computeSameAsStart(particleRotationStart, particleRotationEnd);
         this.colorStart = colorStart;                                                       //ParticuleInput<Vector3>
-        this.colorEnd = colorEnd.getValue() === sameStartKey ? colorStart : colorEnd;                 //ParticuleInput<Vector3>
+        this.colorEnd = Utils.computeSameAsStart(colorStart, colorEnd);                 //ParticuleInput<Vector3>
         this.alphaStart = alphaStart;                                                       //ParticuleInput<Number>
-        this.alphaEnd = alphaEnd.getValue() === sameStartKey ? alphaStart : alphaEnd;                 //ParticuleInput<Number>
+        this.alphaEnd = Utils.computeSameAsStart(alphaStart, alphaEnd);                 //ParticuleInput<Number>
         this.vibrationAmplitudeStart = vibrationAmplitudeStart
-        this.vibrationAmplitudeEnd = vibrationAmplitudeEnd.getValue() === sameStartKey ? vibrationAmplitudeStart : vibrationAmplitudeEnd
+        this.vibrationAmplitudeEnd = Utils.computeSameAsStart(vibrationAmplitudeStart, vibrationAmplitudeEnd);
         this.vibrationFrequencyStart = vibrationFrequencyStart
-        this.vibrationFrequencyEnd = vibrationFrequencyEnd.getValue() === sameStartKey ? vibrationFrequencyStart : vibrationFrequencyEnd
+        this.vibrationFrequencyEnd = Utils.computeSameAsStart(vibrationFrequencyStart, vibrationFrequencyEnd);
         this.timedParticule = this.advancedVariables && !!Object.values(this.advancedVariables).filter((item) => item.isTimedLinked).length
         this.isElevationManage = isElevationManage;
 
@@ -121,10 +121,10 @@ export class SprayingParticle extends Particle {
         super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage)
 
         this.target = target;
-        this.velocityStart = velocityStart;                                                             //ParticleInput<Number>      
-        this.velocityEnd = velocityEnd.getValue() === sameStartKey ? velocityStart : velocityEnd;      //ParticleInput<Number>
-        this.angleStart = angleStart;                                                                   //ParticleInput<Number>     
-        this.angleEnd = angleEnd.getValue() === sameStartKey ? angleStart : angleEnd;                  //ParticleInput<Number>
+        this.velocityStart = velocityStart;                                         //ParticleInput<Number>      
+        this.velocityEnd = Utils.computeSameAsStart(velocityStart, velocityEnd);    //ParticleInput<Number>
+        this.angleStart = angleStart;                                               //ParticleInput<Number>     
+        this.angleEnd = Utils.computeSameAsStart(angleStart, angleEnd);             //ParticleInput<Number>
     }
 
     manageLifetime(dt) {
@@ -171,6 +171,47 @@ export class SprayingParticle extends Particle {
     }
 }
 
+export class PathParticle extends Particle {
+    constructor(advancedVariables, sprite, path, particleLifetime, elevationStart, riseRateStart, riseRateEnd, velocityStart, velocityEnd,
+        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage) {
+        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage)
+
+        this.path = path;
+        this.velocityStart = velocityStart;                                             //ParticleInput<Number>      
+        this.velocityEnd = Utils.computeSameAsStart(velocityStart, velocityEnd);        //ParticleInput<Number>
+        this.lengthPosition = 0;
+    }
+
+    manageLifetime(dt) {
+        let lifetimeProportion = this.getLifetimeProportion();
+
+        if (this.timedParticule) {
+            const lifetime = this.particleLifetime - this.remainingTime
+            AdvancedVariable.generateAll(this.advancedVariables, dt, lifetime, lifetimeProportion);
+        }
+
+        //Particle move
+        const currentVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
+        this.lengthPosition += currentVelocity * dt / 1000;
+        this.positionVibrationLess = this.path.getPointAtProportion(this.lengthPosition / this.path.totalLenght);
+
+        super._manageLifetime(dt, lifetimeProportion)
+
+        if (this.vibrationCurrent) {
+            this.sprite.x = this.positionVibrationLess.x + this.vibrationCurrent * Math.cos(angleRadiant - (Math.PI / 2))
+            this.sprite.y = this.positionVibrationLess.y + this.vibrationCurrent * Math.sin(angleRadiant - (Math.PI / 2))
+        } else {
+            this.sprite.x = this.positionVibrationLess.x
+            this.sprite.y = this.positionVibrationLess.y
+        }
+    }
+
+    getDirection() {
+        return this.path.getDirection();
+    }
+}
+
 export class GravitingParticle extends Particle {
 
     static computeParticlePosition(source, radius, angleOnTrack, riseRate, trackRotation) {
@@ -199,12 +240,12 @@ export class GravitingParticle extends Particle {
         super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage)
 
         this.source = source
-        this.angle = angleStart                                                     //Number 
+        this.angle = angleStart                                                                         //Number 
         this.axisElevationAngle = axisElevationAngle
-        this.angularVelocityStart = angularVelocityStart;                           //ParticleInput<Number>
-        this.angularVelocityEnd = angularVelocityEnd.getValue() === sameStartKey ? angularVelocityStart : angularVelocityEnd;                               //ParticleInput<Number>
-        this.radiusStart = radiusStart;                                             //ParticleInput<Number>
-        this.radiusEnd = radiusEnd.getValue() === sameStartKey ? radiusStart : radiusEnd;      //ParticleInput<Number>
+        this.angularVelocityStart = angularVelocityStart;                                               //ParticleInput<Number>
+        this.angularVelocityEnd = Utils.computeSameAsStart(angularVelocityStart, angularVelocityEnd);   //ParticleInput<Number>
+        this.radiusStart = radiusStart;                                                                 //ParticleInput<Number>
+        this.radiusEnd = Utils.computeSameAsStart(radiusStart, radiusEnd);                              //ParticleInput<Number>
     }
 
     manageLifetime(dt) {
