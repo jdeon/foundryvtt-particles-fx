@@ -515,8 +515,8 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         const sprite = this.initSprite(
             particlePosition,
             startSizeInput,
-            particleProperties.particleRotationStart,
-            particleProperties.colorStart
+            colorStartInput,
+            colorStartInput
         )
 
         return new GravitingParticle(
