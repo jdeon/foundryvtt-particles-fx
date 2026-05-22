@@ -1,4 +1,4 @@
-import { Vector3, sameStartKey } from './utils.js'
+import { Vector3, sameStartKey, Utils } from './utils.js' //TODO remove Utils
 import { Matrix2D } from './matrix.js'
 
 export class Path {
@@ -122,10 +122,19 @@ export class CurvePath extends Path {
 	static _generateC2CountinuityMatrix (nbPoint) {
 		if(nbPoint <= 2) return
 
-		const result = new Matrix2D (nbPoint *2 - 4, nbPoint *2 - 4);
+		const nbPointWithoutEnds = nbPoint - 2
+		const result = new Matrix2D (nbPointWithoutEnds * 2, nbPointWithoutEnds*2);
 			
-		for (let numLig=0; numLig < nbPoint *2 - 4; numLig++) {
-			if (numLig % 2 == 0) {
+		for (let numLig=0; numLig < nbPointWithoutEnds * 2; numLig++) {
+			if (numLig == 0) {
+				result.data [numLig][nbPointWithoutEnds *2 - 1] = 1;
+				result.data [numLig][0] = 1;
+				numLig ++;
+				result.data [numLig][nbPointWithoutEnds *2 -2] = -2;
+				result.data [numLig][nbPointWithoutEnds *2 -1] = 4;
+				result.data [numLig][0] = -4;
+				result.data [numLig][1] = 2;
+			} else if (numLig % 2 == 0) {
 				result.data [numLig][numLig - 1] = 1;
 				result.data [numLig][numLig] = 1;
 			} else {
@@ -218,17 +227,17 @@ export class CurvePath extends Path {
 			if (rowIdx == 0 ){
 				controlPoint1 = firstControlPoint;
 				controlPoint2 = new Vector3 (controlPointMatrix.data [rowIdx][0], controlPointMatrix.data [rowIdx][1], controlPointMatrix.data [rowIdx][2]);
-				result.push(new BezierCurve(stepPositions[0], firstControlPoint, lastControlPoint, stepPositions[1] ));
+				result.push(new BezierCurve(stepPositions[0], controlPoint1, controlPoint2, stepPositions[1] ));
 			} else if (rowIdx == controlPointMatrix.rowCount - 1){
 				controlPoint1 = new Vector3 (controlPointMatrix.data [rowIdx][0], controlPointMatrix.data [rowIdx][1], controlPointMatrix.data [rowIdx][2]);
 				controlPoint2 = lastControlPoint;
-				result.push(new BezierCurve(stepPositions[stepPositions.length-2], firstControlPoint, lastControlPoint, stepPositions[stepPositions.length-1] ));
+				result.push(new BezierCurve(stepPositions[stepPositions.length-2], controlPoint1, controlPoint2, stepPositions[stepPositions.length-1] ));
 			} else {
 				controlPoint1 = new Vector3 (controlPointMatrix.data [rowIdx][0], controlPointMatrix.data [rowIdx][1], controlPointMatrix.data [rowIdx][2]);
 				controlPoint2 = new Vector3 (controlPointMatrix.data [rowIdx+1][0], controlPointMatrix.data [rowIdx+1][1], controlPointMatrix.data [rowIdx+1][2]);
 
 				const stepIdx = (rowIdx+1)/2;
-				result.push(new BezierCurve(stepPositions[stepIdx], firstControlPoint, lastControlPoint, stepPositions[stepIdx+1] ));
+				result.push(new BezierCurve(stepPositions[stepIdx], controlPoint1, controlPoint2, stepPositions[stepIdx+1] ));
 				rowIdx++; //We use two point of the matrix
 			}
 		}
