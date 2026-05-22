@@ -136,8 +136,25 @@ export class Vector3 {
 
         return !(isNaN(this.x) || isNaN(this.y) || isNaN(this.z))
     }
+
+    cross(other) {
+        if (other instanceof Vector3) {
+            return new Vector3(
+                (this.y * other.z) - (this.z * other.y),
+                (this.z * other.x) - (this.x * other.z),
+                (this.x * other.y) - (this.y * other.x)
+            )
+        }
+
+        return this
+    }
+
     magnitude() {
         return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+    }
+
+    normalized() {
+        return this.divide(this.magnitude());
     }
 }
 
