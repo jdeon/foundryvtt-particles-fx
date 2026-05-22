@@ -253,6 +253,26 @@ class BezierCurve {
 		this.controlPoint1= controlPoint1; 	//Vector3
 		this.controlPoint2= controlPoint2; 	//Vector3
 		this.endPoint = endPoint; 			//Vector3
+
+		let spriteFcp = new PIXI.Sprite(Utils.getSpriteTextureFromId("CIRCLE"))
+        spriteFcp.x = controlPoint1.x;
+        spriteFcp.y = controlPoint1.y;
+        spriteFcp.anchor.set(0.5);
+        spriteFcp.width = 25
+        spriteFcp.height = 25
+        spriteFcp.tint = Color.fromRGB([0, 1, 0])
+        spriteFcp.layer = 950
+        canvas.primary.addChild(spriteFcp);
+
+        let spriteLcp = new PIXI.Sprite(Utils.getSpriteTextureFromId("CIRCLE"))
+        spriteLcp.x = controlPoint2.x;
+        spriteLcp.y = controlPoint2.y;
+        spriteLcp.anchor.set(0.5);
+        spriteLcp.width = 25
+        spriteLcp.height = 25
+        spriteLcp.tint = Color.fromRGB([1, 0, 0])
+        spriteLcp.layer = 950
+        canvas.primary.addChild(spriteLcp);
 	}
 
 	getPointForProportion(p){
