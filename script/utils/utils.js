@@ -129,7 +129,7 @@ export class Vector3 {
         }
     }
 
-    toNumber() {
+    computeVariable() {
         this.x = Utils._managePercent(this.x)
         this.y = Utils._managePercent(this.y)
         this.z = Utils._managePercent(this.z)

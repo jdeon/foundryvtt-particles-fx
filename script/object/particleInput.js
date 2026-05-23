@@ -201,7 +201,7 @@ export class TimedParticleVectorInput  extends TimedParticleInput {
     _computeTimeValue(advancedVariables){
         let result = Vector3.build(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables))
 
-        if(!result.toNumber()) return this.inputValue
+        if(!result.computeVariable()) return this.inputValue
 
         for(let valueOperation of this._valueOperations){
             result = valueOperation.operation(result, valueOperation.value)
