@@ -175,80 +175,106 @@ export class CurvePath extends Path {
 	}
 
 	/**
-	* Calculates the control points for a single dimension (X or Y)
-	* with the first and last control points imposed.
+	* Calculates the control points for 3D points (X, Y, Z) simultaneously.
+	* Using Thomas algorithm.
 	*/
-	computeControlPoints1D(K, p1_start, p2_end) {
+	computeControlPoints3D(K, p1_start, p2_end) {
 	    const S = K.length - 1; // Number of segments
 	    const p1 = new Array(S);
 	    const p2 = new Array(S);
 
 	    // Special case: only 1 segment (2 points)
 	    if (S === 1) {
-	        p1[0] = p1_start;
-	        p2[0] = p2_end;
+	        p1[0] = { x: p1_start.x, y: p1_start.y, z: p1_start.z };
+	        p2[0] = { x: p2_end.x, y: p2_end.y, z: p2_end.z };
 	        return { p1, p2 };
 	    }
 
-	    const M = S - 1; // Number of unknowns (P1_1 to P1_S-1)
-	    const b = new Array(M); // Main diagonal
-	    const c = new Array(M); // Upper diagonal
-	    const r = new Array(M); // Right-hand side
-	    const X = new Array(M); // Will store our unknowns
+	    const M = S - 1; 
+	    
+	    // b and c are scalars (matrix coefficients)
+	    const b = new Array(M); 
+	    const c = new Array(M); 
+	    
+	    // r and X are 3D vectors
+	    const r = new Array(M); 
+	    const X = new Array(M); 
 
-	    // Construction of the simplified system of equations
+	    // 1. Construction of the simplified system of equations
 	    for (let i = 0; i < M; i++) {
-	        let knotIdx = i + 1; // Index of the corresponding knot (passage point)
+	        let knotIdx = i + 1; 
+	        r[i] = { x: 0, y: 0, z: 0 }; // Initialize 3D vector
 	        
 	        if (M === 1) { 
-	            // If there are only 2 segments, the unique equation absorbs p1_start and p2_end
 	            b[0] = 4;
 	            c[0] = 0;
-	            r[0] = 4 * K[1] - p1_start + p2_end;
+	            r[0].x = 4 * K[1].x - p1_start.x + p2_end.x;
+	            r[0].y = 4 * K[1].y - p1_start.y + p2_end.y;
+	            r[0].z = 4 * K[1].z - p1_start.z + p2_end.z;
 	        } else {
 	            if (i === 0) {
-	                // First internal point (absorbs p1_start)
 	                b[i] = 4;
 	                c[i] = 1;
-	                r[i] = 4 * K[1] + 2 * K[2] - p1_start;
+	                r[i].x = 4 * K[1].x + 2 * K[2].x - p1_start.x;
+	                r[i].y = 4 * K[1].y + 2 * K[2].y - p1_start.y;
+	                r[i].z = 4 * K[1].z + 2 * K[2].z - p1_start.z;
 	            } else if (i === M - 1) {
-	                // Last internal point (absorbs p2_end)
 	                b[i] = 4;
 	                c[i] = 0;
-	                r[i] = 4 * K[knotIdx] + p2_end;
+	                r[i].x = 4 * K[knotIdx].x + p2_end.x;
+	                r[i].y = 4 * K[knotIdx].y + p2_end.y;
+	                r[i].z = 4 * K[knotIdx].z + p2_end.z;
 	            } else {
-	                // Standard internal points
 	                b[i] = 4;
 	                c[i] = 1;
-	                r[i] = 4 * K[knotIdx] + 2 * K[knotIdx + 1];
+	                r[i].x = 4 * K[knotIdx].x + 2 * K[knotIdx + 1].x;
+	                r[i].y = 4 * K[knotIdx].y + 2 * K[knotIdx + 1].y;
+	                r[i].z = 4 * K[knotIdx].z + 2 * K[knotIdx + 1].z;
 	            }
 	        }
 	    }
 
-	    // Forward sweep
+	    // 2. Forward sweep (matrix elimination)
 	    for (let i = 1; i < M; i++) {
-	        let m = 1 / b[i - 1]; // a[i] is always 1 in this system
+	        let m = 1 / b[i - 1]; // m is a scalar
 	        b[i] = b[i] - m * c[i - 1];
-	        r[i] = r[i] - m * r[i - 1];
+	        
+	        // Apply to X, Y, Z simultaneously
+	        r[i].x = r[i].x - m * r[i - 1].x;
+	        r[i].y = r[i].y - m * r[i - 1].y;
+	        r[i].z = r[i].z - m * r[i - 1].z;
 	    }
 
-	    // Back substitution
-	    X[M - 1] = r[M - 1] / b[M - 1];
+	    // 3. Back substitution
+	    X[M - 1] = {
+	        x: r[M - 1].x / b[M - 1],
+	        y: r[M - 1].y / b[M - 1],
+	        z: r[M - 1].z / b[M - 1]
+	    };
+	    
 	    for (let i = M - 2; i >= 0; i--) {
-	        X[i] = (r[i] - c[i] * X[i + 1]) / b[i];
+	        X[i] = {
+	            x: (r[i].x - c[i] * X[i + 1].x) / b[i],
+	            y: (r[i].y - c[i] * X[i + 1].y) / b[i],
+	            z: (r[i].z - c[i] * X[i + 1].z) / b[i]
+	        };
 	    }
 
-	    // Final assembly of control points
-	    p1[0] = p1_start;
+	    // 4. Final assembly of control points
+	    p1[0] = { x: p1_start.x, y: p1_start.y, z: p1_start.z };
 	    for (let i = 1; i < S; i++) {
-	        p1[i] = X[i - 1]; // P1 is solved
+	        p1[i] = X[i - 1];
 	    }
 
 	    // P2 is derived from P1 due to C1 continuity
 	    for (let i = 0; i < S - 1; i++) {
-	        p2[i] = 2 * K[i + 1] - p1[i + 1];
+	        p2[i] = {
+	            x: 2 * K[i + 1].x - p1[i + 1].x,
+	            y: 2 * K[i + 1].y - p1[i + 1].y,
+	            z: 2 * K[i + 1].z - p1[i + 1].z
+	        };
 	    }
-	    p2[S - 1] = p2_end;
+	    p2[S - 1] = { x: p2_end.x, y: p2_end.y, z: p2_end.z };
 
 	    return { p1, p2 };
 	}
@@ -258,22 +284,17 @@ export class CurvePath extends Path {
 	        return [];
 	    }
 
-	    // Extration of coordinates X et Y
-	    const x = points.map(p => p.x);
-	    const y = points.map(p => p.y);
-
-	    const cpX = this.computeControlPoints1D(x, startCtrl.x, endCtrl.x);
-	    const cpY = this.computeControlPoints1D(y, startCtrl.y, endCtrl.y);
-
-	    const n = points.length - 1;
+	    const cps = this.computeControlPoints3D(points, startCtrl, endCtrl);
 
 	    const curveSteps = []
-	    for (let i = 0; i < n; i++) {
-	        curveSteps.push(new BezierCurve( new Vector3(x[i], y[i]),
-	            new Vector3(cpX.p1[i], cpY.p1[i]),
-	            new Vector3(cpX.p2[i], cpY.p2[i]),
-	            new Vector3(x[i + 1],  y[i + 1])
-	            )                  
+	    for (let i = 0; i < points.length - 1; i++) {
+	        curveSteps.push(
+	        	new BezierCurve(
+		        	points[i],
+		            Vector3.build(cps.p1[i]),
+		            Vector3.build(cps.p2[i]),
+		            points[i + 1]  
+	            )          
 	        );
 	    }
 
