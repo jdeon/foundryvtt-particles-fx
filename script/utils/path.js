@@ -283,12 +283,12 @@ export class CurvePath extends Path {
 	}
 
 	_computeEndsControlPoint(pathStep, angle){
-		const length = pathStep.magnitude() * 0.1;
+		const length = pathStep.magnitude() * .4;
 
 		return new Vector3(
 				length * Math.cos(angle * Math.PI / 180),
 				length * Math.sin(angle * Math.PI / 180),
-				pathStep.z * -.1
+				pathStep.z * .4
 			)
 	}
 
