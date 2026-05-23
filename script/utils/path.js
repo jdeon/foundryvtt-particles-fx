@@ -101,7 +101,8 @@ export class CurvePath extends Path {
 		const firstControlPoint = this.stepPositions[0].add(this._computeEndsControlPoint(this.stepPath[0],  angleStart));
 		const lastControlPoint = this.stepPositions[this.stepPositions.length - 1].minus(this._computeEndsControlPoint(this.stepPath[this.stepPath.length - 1],  angleEnd));
 		
-		this.curveSteps = this.positionToCurves(this.stepPositions, firstControlPoint, lastControlPoint)
+		this.curveSteps = this.positionToCurves(this.stepPositions, firstControlPoint, lastControlPoint);
+		this.direction = this.curveSteps[0].getDirectionForProportion(0);
 	}
 
 	positionToCurves(points, startCtrl, endCtrl) {
@@ -126,14 +127,16 @@ export class CurvePath extends Path {
 	    return curveSteps;
 	}
 
-	getPointAtProportion(time) {
-		const proportion = this.computeStepProportion(time);
+	getPointAtProportion(pathProportion) {
+		const currentStepProportion = this.computeStepProportion(pathProportion);
 
-		return this.curveSteps[this.currentStep].getPointForProportion(proportion);
+		this.direction = this.curveSteps[this.currentStep].getDirectionForProportion(currentStepProportion);
+
+		return this.curveSteps[this.currentStep].getPointForProportion(currentStepProportion);
 	}
 
 	getDirection() {
-		//TODO get the point 0.01 proportion before
+		return Math.atan2(this.direction.y, this.direction.x) * 180 / Math.PI;
 	}
 
 	/**
@@ -249,11 +252,24 @@ class BezierCurve {
 		} else if (p > 1){
 			return this.endPoint
 		}
-
+		//Start * (1-p)^3 + p1 * 3 * p * (1-p)^2 + p2 * 3 * p^2 * (1-p) + end * p^3
 		return this.startPoint.multiply(Math.pow((1 - p),3))
 			.add(this.controlPoint1.multiply(3*p*Math.pow((1 - p),2)))
 			.add(this.controlPoint2.multiply(3*Math.pow(p,2)*(1 - p)))
 			.add(this.endPoint.multiply(Math.pow(p,3)));
+	}
+
+	getDirectionForProportion(p){
+		if(p < 0 ){
+			p = 0;
+		} else if (p > 1){
+			p = 1;
+		}
+
+		return this.startPoint.multiply(-3*Math.pow((1 - p),2))
+			.add(this.controlPoint1.multiply(3*(1-p)*(1 - 3*p)))
+			.add(this.controlPoint2.multiply(3*p*(2-3*p)))
+			.add(this.endPoint.multiply(3*Math.pow(p,2)));
 	}
 
 	_showControlPoint(){
