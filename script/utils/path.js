@@ -1,5 +1,4 @@
-import { Vector3, sameStartKey, Utils } from './utils.js' //TODO remove Utils
-import { Matrix2D } from './matrix.js'
+import { Vector3, sameStartKey, Utils } from './utils.js'
 
 export class Path {
 	static build(pathType, stepPositions, angleStart, angleEnd){
@@ -95,90 +94,53 @@ export class LinearPath extends Path {
 export class CurvePath extends Path {
 	static PATH_TYPE = "CURVE";
 
- 	/**
-	 * Compute the control point by finding the angle of the first or last point 
-	 */
-	static _computeMissingControlPoint(knownPoint, firstNeighbor, secondNeighbor){
-		const vector01 = new Vector3 ((firstNeighbor.x - knownPoint.x), (firstNeighbor.y - knownPoint.y), (firstNeighbor.z - knownPoint.z));
-		const vector21 = new Vector3 ((firstNeighbor.x - secondNeighbor.x), (firstNeighbor.y - secondNeighbor.y), (firstNeighbor.z - secondNeighbor.z));
-		const perpendicularVector = vector01.cross(vector21);
-		const vectorNormal = perpendicularVector.cross(vector01);
-		const unitTangeantVector = vector01.normalized();
-		const unitNormalVector = vectorNormal.normalized();
-
-		//O2 = a*Normal+b*Tangent
-		//b = (O2.y-a*normal.y)/ Tangent.y
-		//O2.x = a*normal.x + b * Tangent.x
-		const a = ((secondNeighbor.x - knownPoint.x) * unitTangeantVector.y - (secondNeighbor.y - knownPoint.y) * unitTangeantVector.x) / (unitNormalVector.x * unitTangeantVector.y - unitNormalVector.y * unitTangeantVector.x);
-		const b = ((secondNeighbor.y - knownPoint.y)- a * unitNormalVector.y)/unitTangeantVector.y;
-		const normalizingVector = new Vector3 (a, b, 0);
-		//Angle between normal and control pointe
-		const alpha = (Math.PI / 8) - normalizingVector.normalized.x * (Math.PI / 8);
-
-		//Calcul of controlPoint
-		return knownPoint + (Math.Cos (alpha) * unitNormalVector + Math.Sin (alpha) * unitTangeantVector) * vector01.magnitude();
-	}
-
-	static _generateC2CountinuityMatrix (nbPoint) {
-		if(nbPoint <= 2) return
-
-		const nbPointWithoutEnds = nbPoint - 2
-		const result = new Matrix2D (nbPointWithoutEnds * 2, nbPointWithoutEnds*2);
-			
-		for (let numLig=0; numLig < nbPointWithoutEnds * 2; numLig++) {
-			if (numLig == 0) {
-				result.data [numLig][nbPointWithoutEnds *2 - 1] = 1;
-				result.data [numLig][0] = 1;
-				numLig ++;
-				result.data [numLig][nbPointWithoutEnds *2 -2] = -2;
-				result.data [numLig][nbPointWithoutEnds *2 -1] = 4;
-				result.data [numLig][0] = -4;
-				result.data [numLig][1] = 2;
-			} else if (numLig % 2 == 0) {
-				result.data [numLig][numLig - 1] = 1;
-				result.data [numLig][numLig] = 1;
-			} else {
-				result.data [numLig][numLig - 3] = -2;
-				result.data [numLig][numLig - 2] = 4;
-				result.data [numLig][numLig - 1] = -4;
-				result.data [numLig][numLig] = 2;
-			}
-		}
-		return result;
-	}
-
-
-	constructor(stepPositions, angleStart, angleEnd){
+ 	constructor(stepPositions, angleStart, angleEnd){
 		super(stepPositions);
 
 		const nbPoint = stepPositions.length;
 		const firstControlPoint = this.stepPositions[0].add(this._computeEndsControlPoint(this.stepPath[0],  angleStart));
 		const lastControlPoint = this.stepPositions[this.stepPositions.length - 1].minus(this._computeEndsControlPoint(this.stepPath[this.stepPath.length - 1],  angleEnd));
-
-
-		//TODO handle first and lastcontrol point with 10% of pathLengh with the angleStart and angleEnd
 		
-		//lastControlPoint = CurvePath._computeMissingControlPoint (stepPositions [nbPoint - 1], stepPositions [nbPoint - 2], stepPositions [nbPoint - 3]); //TODO use endAngle ??
-	
-		/*
-			pointPremierControle = (pointPremierControle + 2 * listEtapeTransform [0].position) / 3;
-
-			//Coefficiant 1/3 dans fonction pour bezier cubique
-			pointDernierControle = (pointDernierControle + 2 * listEtapeTransform [nbPointParcours - 1].position) / 3;
-		*/
-
-		//const stepMatrix = this._mapStepsToC2Matrix(this.stepPositions, firstControlPoint, lastControlPoint)
-		
-		//this.curveSteps = this._mapStepMatrixToStepCurve(stepMatrix, this.stepPositions, firstControlPoint, lastControlPoint)
-
 		this.curveSteps = this.positionToCurves(this.stepPositions, firstControlPoint, lastControlPoint)
+	}
+
+	positionToCurves(points, startCtrl, endCtrl) {
+	    if (!points || points.length < 2) {
+	        return [];
+	    }
+
+	    const cps = this._computeControlPoints3D(points, startCtrl, endCtrl);
+
+	    const curveSteps = []
+	    for (let i = 0; i < points.length - 1; i++) {
+	        curveSteps.push(
+	        	new BezierCurve(
+		        	points[i],
+		            Vector3.build(cps.p1[i]),
+		            Vector3.build(cps.p2[i]),
+		            points[i + 1]  
+	            )          
+	        );
+	    }
+
+	    return curveSteps;
+	}
+
+	getPointAtProportion(time) {
+		const proportion = this.computeStepProportion(time);
+
+		return this.curveSteps[this.currentStep].getPointForProportion(proportion);
+	}
+
+	getDirection() {
+		//TODO get the point 0.01 proportion before
 	}
 
 	/**
 	* Calculates the control points to have a C2 continuity curve on position.
 	* Using Thomas algorithm.
 	*/
-	computeControlPoints3D(K, p1_start, p2_end) {
+	_computeControlPoints3D(K, p1_start, p2_end) {
 	    const S = K.length - 1; // Number of segments
 	    const p1 = new Array(S);
 	    const p2 = new Array(S);
@@ -260,28 +222,6 @@ export class CurvePath extends Path {
 	    return { p1, p2 };
 	}
 
-	positionToCurves(points, startCtrl, endCtrl) {
-	    if (!points || points.length < 2) {
-	        return [];
-	    }
-
-	    const cps = this.computeControlPoints3D(points, startCtrl, endCtrl);
-
-	    const curveSteps = []
-	    for (let i = 0; i < points.length - 1; i++) {
-	        curveSteps.push(
-	        	new BezierCurve(
-		        	points[i],
-		            Vector3.build(cps.p1[i]),
-		            Vector3.build(cps.p2[i]),
-		            points[i + 1]  
-	            )          
-	        );
-	    }
-
-	    return curveSteps;
-	}
-
 	_computeEndsControlPoint(pathStep, angle){
 		const length = pathStep.magnitude() * .4;
 
@@ -290,79 +230,6 @@ export class CurvePath extends Path {
 				length * Math.sin(angle * Math.PI / 180),
 				pathStep.z * .4
 			)
-	}
-
-	_mapStepsToC2Matrix (steps, firstControlPoint, lastControlPoint){
-		if(steps.length <= 2) return
-
-		const result = new Matrix2D (steps.length *2 - 4,3);
-		
-		let stepNumber = 1
-		for (let rowIdx=0; rowIdx < result.rowCount; rowIdx++) {
-
-			if (rowIdx%2 == 0){
-				result.data [rowIdx][0] = 2*steps[stepNumber].x;
-				result.data [rowIdx][1] = 2*steps[stepNumber].y;
-				result.data [rowIdx][2] = 2*steps[stepNumber].z;
-				stepNumber++;
-			} else {
-				result.data [rowIdx][0] = 0;
-				result.data [rowIdx][1] = 0;
-				result.data [rowIdx][2] = 0;
-			}
-		}
-
-		result.data [1][0] = 2 * firstControlPoint.x;
-		result.data [1][1] = 2 * firstControlPoint.y;
-		result.data [1][2] = 2 * firstControlPoint.z;
-
-		result.data [result.rowCount - 1][0] = -2 * lastControlPoint.x;
-		result.data [result.rowCount - 1][1] = -2 * lastControlPoint.y;
-		result.data [result.rowCount - 1][2] = -2 * lastControlPoint.z;
-
-		return result;
-	}
-
-	_mapStepMatrixToStepCurve(stepMatrix, stepPositions, firstControlPoint, lastControlPoint){
-		const c2Matrix = CurvePath._generateC2CountinuityMatrix (stepPositions.length);
-		c2Matrix.invert ();
-		const controlPointMatrix = c2Matrix.multiply (stepMatrix);
-
-		const result = [];
-
-		//TODO one besier is missing
-		//Creation de la liste des courbe de bezier
-		for (let rowIdx=0; rowIdx< controlPointMatrix.rowCount; rowIdx++) {
-			let controlPoint1, controlPoint2;
-			if (rowIdx == 0 ){
-				controlPoint1 = firstControlPoint;
-				controlPoint2 = new Vector3 (controlPointMatrix.data [rowIdx][0], controlPointMatrix.data [rowIdx][1], controlPointMatrix.data [rowIdx][2]);
-				result.push(new BezierCurve(stepPositions[0], controlPoint1, controlPoint2, stepPositions[1] ));
-			} else if (rowIdx == controlPointMatrix.rowCount - 1){
-				controlPoint1 = new Vector3 (controlPointMatrix.data [rowIdx][0], controlPointMatrix.data [rowIdx][1], controlPointMatrix.data [rowIdx][2]);
-				controlPoint2 = lastControlPoint;
-				result.push(new BezierCurve(stepPositions[stepPositions.length-2], controlPoint1, controlPoint2, stepPositions[stepPositions.length-1] ));
-			} else {
-				controlPoint1 = new Vector3 (controlPointMatrix.data [rowIdx][0], controlPointMatrix.data [rowIdx][1], controlPointMatrix.data [rowIdx][2]);
-				controlPoint2 = new Vector3 (controlPointMatrix.data [rowIdx+1][0], controlPointMatrix.data [rowIdx+1][1], controlPointMatrix.data [rowIdx+1][2]);
-
-				const stepIdx = (rowIdx+1)/2;
-				result.push(new BezierCurve(stepPositions[stepIdx], controlPoint1, controlPoint2, stepPositions[stepIdx+1] ));
-				rowIdx++; //We use two point of the matrix
-			}
-		}
-
-		return result;
-	}
-
-	getPointAtProportion(time) {
-		const proportion = this.computeStepProportion(time);
-
-		return this.curveSteps[this.currentStep].getPointForProportion(proportion);
-	}
-
-	getDirection() {
-		//TODO get the point 0.01 proportion before
 	}
 }
 
@@ -373,25 +240,7 @@ class BezierCurve {
 		this.controlPoint2= controlPoint2; 	//Vector3
 		this.endPoint = endPoint; 			//Vector3
 
-		let spriteFcp = new PIXI.Sprite(Utils.getSpriteTextureFromId("CIRCLE"))
-        spriteFcp.x = controlPoint1.x;
-        spriteFcp.y = controlPoint1.y;
-        spriteFcp.anchor.set(0.5);
-        spriteFcp.width = 25
-        spriteFcp.height = 25
-        spriteFcp.tint = Color.fromRGB([0, 1, 0])
-        spriteFcp.layer = 950
-        canvas.primary.addChild(spriteFcp);
-
-        let spriteLcp = new PIXI.Sprite(Utils.getSpriteTextureFromId("CIRCLE"))
-        spriteLcp.x = controlPoint2.x;
-        spriteLcp.y = controlPoint2.y;
-        spriteLcp.anchor.set(0.5);
-        spriteLcp.width = 25
-        spriteLcp.height = 25
-        spriteLcp.tint = Color.fromRGB([1, 0, 0])
-        spriteLcp.layer = 950
-        canvas.primary.addChild(spriteLcp);
+		//this._showControlPoint();
 	}
 
 	getPointForProportion(p){
@@ -405,5 +254,27 @@ class BezierCurve {
 			.add(this.controlPoint1.multiply(3*p*Math.pow((1 - p),2)))
 			.add(this.controlPoint2.multiply(3*Math.pow(p,2)*(1 - p)))
 			.add(this.endPoint.multiply(Math.pow(p,3)));
+	}
+
+	_showControlPoint(){
+		let spriteFcp = new PIXI.Sprite(Utils.getSpriteTextureFromId("CIRCLE"))
+        spriteFcp.x = this.controlPoint1.x;
+        spriteFcp.y = this.controlPoint1.y;
+        spriteFcp.anchor.set(0.5);
+        spriteFcp.width = 25
+        spriteFcp.height = 25
+        spriteFcp.tint = Color.fromRGB([0, 1, 0])
+        spriteFcp.layer = 950
+        canvas.primary.addChild(spriteFcp);
+
+        let spriteLcp = new PIXI.Sprite(Utils.getSpriteTextureFromId("CIRCLE"))
+        spriteLcp.x = this.controlPoint2.x;
+        spriteLcp.y = this.controlPoint2.y;
+        spriteLcp.anchor.set(0.5);
+        spriteLcp.width = 25
+        spriteLcp.height = 25
+        spriteLcp.tint = Color.fromRGB([1, 0, 0])
+        spriteLcp.layer = 950
+        canvas.primary.addChild(spriteLcp);
 	}
  }
