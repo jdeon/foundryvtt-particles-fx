@@ -243,7 +243,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         return "Missile"
     }
 
-    constructor(source, targets, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
+    constructor(source, targets, pathType, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced, subParticleTemplate) {
         super(source, targets?.[0], positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
@@ -256,6 +256,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             this.targets = [targets]
         }
 
+        this.pathType = pathType;
         this.mainParticle = this.generateMainParticles()
         this.initGenerate = false
 
@@ -280,10 +281,15 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         let targetsPosition = Utils.getArrayRandomValueFrom(this.targets)
             .map((item) => Utils.getSourcePosition(item, this.isElevationManage));
 
-        const pathSteps = [this.currentSourcePosition, ...targetsPosition];
-        const path = new Path (pathSteps)
+        const pathPositions = [this.currentSourcePosition, ...targetsPosition];
+        const path = Path.build(
+            this.pathType, 
+            pathPositions,
+            particleProperties.angleStart, 
+            particleProperties.angleEnd
+        );
 
-        if( path.totalLenght === 0 ){
+        if( path === undefined || path.totalLenght === 0 ){
             return  super.generateParticles();
         }
 

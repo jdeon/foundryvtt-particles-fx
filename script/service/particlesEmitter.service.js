@@ -110,6 +110,7 @@ function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId
     const particleTemplate = new MissileParticleTemplate(
         finalInput.source,
         finalInput.target,
+        finalInput.pathType,
         Vector3.build(finalInput.positionSpawning),
         finalInput.particleVelocityStart,
         finalInput.particleVelocityEnd,
