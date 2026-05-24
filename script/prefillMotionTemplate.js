@@ -28,6 +28,7 @@ export const defaultMotionTemplate = () => {
         vibrationAmplitudeEnd: 0,
         vibrationFrequencyStart: 0,
         vibrationFrequencyEnd: 0,
+        pathType: "LINEAR",
         onlyEmitterFollow: false,
         freezeOnPause: true,
         subParticles: {

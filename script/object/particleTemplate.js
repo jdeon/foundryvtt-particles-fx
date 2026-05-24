@@ -243,7 +243,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         return "Missile"
     }
 
-    constructor(source, targets, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
+    constructor(source, targets, pathType, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
         vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced, subParticleTemplate) {
         super(source, targets?.[0], positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
@@ -256,7 +256,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             this.targets = [targets]
         }
 
-        this.pathType = "CURVE"; //TODO put in construtor
+        this.pathType = pathType;
         this.mainParticle = this.generateMainParticles()
         this.initGenerate = false
 
