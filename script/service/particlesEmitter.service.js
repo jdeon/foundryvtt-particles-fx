@@ -247,7 +247,16 @@ export function stopWorkflow(emitterId, immediate, all){
 }
 
 function findEmitterById(emitterId){
-    if (emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))) {
+    if(Array.isArray(emitterId)){
+        for(let i = 0; i < emitterId.length; i++){
+            const possibleEmitter = findEmitterById(emitterId[i])
+            if(possibleEmitter){
+                return possibleEmitter;
+            }
+        }
+
+        return ParticlesEmitter.emitters[ParticlesEmitter.emitters.length - 1];
+    } else if (emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))) {
         //Find last emitter
         return ParticlesEmitter.emitters[ParticlesEmitter.emitters.length - 1]
     } else if (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'f' || emitterId.toLowerCase() === 'first')) {

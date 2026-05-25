@@ -1,16 +1,16 @@
-import { writeMessageForEmissionById } from "./script/service/particlesEmitter.service.js"
-import { s_MODULE_ID, Utils } from "./script/utils/utils.js"
-import emitController from "./script/api/emitController.js"
+import { writeMessageForEmissionById } from "../service/particlesEmitter.service.js"
+import { s_MODULE_ID, Utils } from "../utils/utils.js"
+import emitController from "./emitController.js"
 
-const EXISTING_CHAT_COMMAND = [
-    'stopAll',
-    'stopById',
-    'stopWorkflow',
-    'spray',
-    'missile',
-    'gravitate',
-    'help'
-]
+const EXISTING_CHAT_COMMAND = {
+    'stopAll': (args) => handleStopAll(args),
+    'stopById': (args) => handleStopById(args),
+    'stopWorkflow': (args) => handleStopWorkflow(args),
+    'spray' : (args) => handleEmission(args, emitController.spray),
+    'missile': (args) => handleEmission(args, emitController.missile),
+    'gravitate': (args) => handleEmission(args, emitController.gravit),
+    'help': () => game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + EXISTING_CHAT_COMMAND.keys.join(',')
+}
 
 export function initChatController() {
 
@@ -28,76 +28,26 @@ export function initChatController() {
 	    let messageArgs = message.split(' ')
 
 	    //No function
-	    if (messageArgs.length <= 1) {
+	    if (messageArgs.length < 2) {
 	        return
 	    }
 
-	    let functionName = messageArgs[1]
-	    let functionParam
-	    let isImmediate, all = false
-	    let otherParam = []
+	    const functionName = messageArgs[1];
+	    const handler = EXISTING_CHAT_COMMAND[functionName];
 
-	    for (let i = 2; i < messageArgs.length; i++) {
-	        if (functionParam === undefined && !isNaN(messageArgs[i])) {
-	            functionParam = messageArgs[i];
-	        } else if (!isImmediate && messageArgs[i] === '--instant') {
-	            isImmediate = true
-	        } else if (!all && messageArgs[i] === '--all') {
-	            all = true
-	        } else {
-	            otherParam.push(messageArgs[i])
-	        }
+	    if(handler){
+	    	messageArgs.splice(0, 2);
+	    	const returnMessage = handler(messageArgs);
+	    	if (returnMessage) {
+	        	ui.chat.processMessage("/w gm " + returnMessage);
+	    	}
+	    } else {
+	    	 ui.notifications.error(game.i18n.localize("PARTICULE-FX.Chat-Command.Unrecognized"));
 	    }
 
-	    let resumeMessage
-	    let response
-	    let emmissionMethod
-
-	    switch (functionName) {
-	        case 'stopAll':
-	            response = emitController.stopAll(isImmediate)
-	            resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-All.return") + JSON.stringify(response)
-	            break
-	        case 'stopById':
-	            response = emitController.stop(functionParam, isImmediate)
-	            resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
-	            break
-	        case 'stopWorkflow':
-	            response = emitController.stopWorkflow(functionParam, isImmediate, all)
-	            resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
-	            break  
-	        case 'spray':
-	            emmissionMethod = emitController.spray
-	            break
-	        case 'missile':
-	            emmissionMethod = emitController.missile
-	            break
-	        case 'gravitate':
-	            emmissionMethod = emitController.gravit
-	            break 
-	        case 'help':
-	            resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + EXISTING_CHAT_COMMAND.join(',');
-	            break
-	        default:
-	            ui.notifications.error(game.i18n.localize("PARTICULE-FX.Chat-Command.Unrecognized"));
-	    }
-
-	    if (emmissionMethod) {
-	        const source = Utils.getSelectedSource()
-	        if (source) {
-	            const idEmitter = emmissionMethod({ source: source.id, target: Utils.getTargetId() }, ...otherParam)
-	            writeMessageForEmissionById(idEmitter)
-	        }
-	    }
-
-	    //EXISTING_CHAT_COMMAND
-	    if (resumeMessage) {
-	        ui.chat.processMessage("/w gm " + resumeMessage)
-	    }
-
-	    return false
+	    //To not display the empty message of the commands
+	    return false;
 	})
-
 
 	Hooks.on("renderChatMessage", function (chatlog, html, data) {
 	    const buttons = html.find('button[name="button.delete-emitter"]');
@@ -113,4 +63,36 @@ export function initChatController() {
 	        }
 	    })
 	});
+}
+
+function handleEmission (args, emmissionMethod){
+	const source = Utils.getSelectedSource();
+    if (source) {
+        const idEmitter = emmissionMethod({ source: source.id, target: Utils.getTargetId() }, ...args);
+        writeMessageForEmissionById(idEmitter);
+    }
+}
+
+function handleStopById(args){
+	const isImmediate = hasOption(args, ['--instant', '-i']);
+	const stoppedEmitters = emitController.stop(args, isImmediate);
+    return game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(stoppedEmitters);
+}
+
+function handleStopWorkflow(args){
+	const isImmediate = hasOption(args, ['--instant', '-i']);
+	const all = hasOption(args, ['--all', '-a']);
+	const stoppedEmitters = emitController.stopWorkflow(args, isImmediate, all);
+    return game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(stoppedEmitters);
+}
+
+function handleStopAll(args){
+	const isImmediate = hasOption(args, ['--instant', '-i']);
+	const stoppedEmitters = emitController.stopAll(isImmediate);
+    return game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-All.return") + JSON.stringify(stoppedEmitters);      
+}
+
+function hasOption(givenOptions, matchOptions){
+	const intersections = givenOptions.filter(x => matchOptions.includes(x));
+	return intersections.length > 0;
 }
