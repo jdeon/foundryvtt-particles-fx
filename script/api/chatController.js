@@ -75,14 +75,14 @@ function handleEmission (args, emmissionMethod){
 
 function handleStopById(args){
 	const isImmediate = hasOption(args, ['--instant', '-i']);
-	const stoppedEmitters = emitController.stop(args, isImmediate);
+	const stoppedEmitters = emitController.stop(getEmittersId(args), isImmediate);
     return game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(stoppedEmitters);
 }
 
 function handleStopWorkflow(args){
 	const isImmediate = hasOption(args, ['--instant', '-i']);
 	const all = hasOption(args, ['--all', '-a']);
-	const stoppedEmitters = emitController.stopWorkflow(args, isImmediate, all);
+	const stoppedEmitters = emitController.stopWorkflow(getEmittersId(args), isImmediate, all);
     return game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(stoppedEmitters);
 }
 
@@ -95,4 +95,16 @@ function handleStopAll(args){
 function hasOption(givenOptions, matchOptions){
 	const intersections = givenOptions.filter(x => matchOptions.includes(x));
 	return intersections.length > 0;
+}
+
+function getEmittersId(args){
+	const numbers = args.filter((item) => !Number.isNaN(item));
+
+	if(numbers.length > 0){
+		return numbers[0]
+	} else if (args.includes("first") || args.includes("f")){
+		return "f"
+	}
+
+	return "l"
 }
