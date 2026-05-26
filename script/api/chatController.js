@@ -9,7 +9,7 @@ const EXISTING_CHAT_COMMAND = {
     'spray' : (args) => handleEmission(args, emitController.spray),
     'missile': (args) => handleEmission(args, emitController.missile),
     'gravitate': (args) => handleEmission(args, emitController.gravit),
-    'help': () => game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + EXISTING_CHAT_COMMAND.keys.join(',')
+    'help': () => game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Object.keys(EXISTING_CHAT_COMMAND).join(',')
 }
 
 export function initChatController() {
