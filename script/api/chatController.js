@@ -13,7 +13,7 @@ const EXISTING_CHAT_COMMAND = {
 	'help': () => game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Object.keys(EXISTING_CHAT_COMMAND).join(', ')
 }
 
-let EXISTING_PREFILL_MOTION_TEMPLATE, EXISTING_PREFILL_COLOR_TEMPLATE
+const COMMON_OPTIONS = {};
 
 export function initChatController() {
 
@@ -24,8 +24,14 @@ export function initChatController() {
 	delete foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["invalid"]
 	foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
 
-	EXISTING_PREFILL_MOTION_TEMPLATE = Object.keys(ParticlesEmitter.prefillMotionTemplate).join(', ')
-    EXISTING_PREFILL_COLOR_TEMPLATE = Object.keys(ParticlesEmitter.prefillColorTemplate).join(', ')
+	Hooks.on("ready", function () {
+		COMMON_OPTIONS.help= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.help");
+		COMMON_OPTIONS.instant= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.instant");
+		COMMON_OPTIONS.first= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.first");
+		COMMON_OPTIONS.last= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.last");
+		COMMON_OPTIONS.prefillMotionTemplate = game.i18n.format("PARTICULE-FX.Chat-Command.Options.prefillMotionTemplate" ,{prefillMotionTemplateValues: Object.keys(ParticlesEmitter.prefillMotionTemplate).join(', ')});
+	    COMMON_OPTIONS.prefillColorTemplate = game.i18n.format("PARTICULE-FX.Chat-Command.Options.prefillColorTemplate" ,{prefillColorTemplateValues: Object.keys(ParticlesEmitter.prefillColorTemplate).join(', ')});
+	})
 
 	// Chat message hooks
 	Hooks.on("chatMessage", function (chatlog, message, chatData) {
@@ -46,7 +52,7 @@ export function initChatController() {
 
 			if (hasOption(messageArgs, ['--help', '-h'])) {
 				const helpKey = `PARTICULE-FX.Chat-Command.${functionName}.help`;
-				const helpMessage = game.i18n.format(helpKey, {prefillMotionTemplateValues: EXISTING_PREFILL_MOTION_TEMPLATE, prefillColorTemplateValues: EXISTING_PREFILL_COLOR_TEMPLATE});
+				const helpMessage = game.i18n.format(helpKey, COMMON_OPTIONS);
 				
 				ui.chat.processMessage(`/w ${game.user.name} ${helpMessage}`);
 				return false;
