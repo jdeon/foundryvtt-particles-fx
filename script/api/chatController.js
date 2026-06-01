@@ -128,6 +128,10 @@ function handleEmission (args, emmissionMethod, input = {}){
 function handleMissile(args, input = {}){
 	input.type = 'Missile';
 
+	if( hasOption(args, ['--curve', '-c'])){
+		input.pathType = "CURVE"
+	}
+
 	if( ! hasOption(args, ['--multiple', '-m'])){
 		input.target= game.user.targets.ids.length > 0 ? game.user.targets.ids : undefined
 	}
