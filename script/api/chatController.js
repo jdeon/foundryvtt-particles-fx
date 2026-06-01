@@ -31,6 +31,7 @@ export function initChatController() {
 		COMMON_OPTIONS.last= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.last");
 		COMMON_OPTIONS.prefillMotionTemplate = game.i18n.format("PARTICULE-FX.Chat-Command.Options.prefillMotionTemplate" ,{prefillMotionTemplateValues: Object.keys(ParticlesEmitter.prefillMotionTemplate).join(', ')});
 	    COMMON_OPTIONS.prefillColorTemplate = game.i18n.format("PARTICULE-FX.Chat-Command.Options.prefillColorTemplate" ,{prefillColorTemplateValues: Object.keys(ParticlesEmitter.prefillColorTemplate).join(', ')});
+	    COMMON_OPTIONS.multiple= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.multiple");
 	})
 
 	// Chat message hooks
