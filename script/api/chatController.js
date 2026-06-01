@@ -1,5 +1,5 @@
 import { writeMessageForEmissionById } from "../service/particlesEmitter.service.js"
-import { s_MODULE_ID, Utils } from "../utils/utils.js"
+import { s_MODULE_ID, Utils, Vector3 } from "../utils/utils.js"
 import emitController from "./emitController.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
 
@@ -7,9 +7,9 @@ const EXISTING_CHAT_COMMAND = {
 	'stopAll': (args) => handleStopAll(args),
 	'stopById': (args) => handleStopById(args),
 	'stopWorkflow': (args) => handleStopWorkflow(args),
-	'spray' : (args) => handleEmission(args, emitController.spray),
-	'missile': (args) => handleEmission(args, emitController.missile),
-	'gravitate': (args) => handleEmission(args, emitController.gravit),
+	'spray' : (args) => handleEmission(args, emitController.spray, { type : 'Spraying'}),
+	'missile': (args) => handleMissile(args),
+	'gravitate': (args) => handleEmission(args, emitController.gravit, { type : 'Graviting'}),
 	'help': () => game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Object.keys(EXISTING_CHAT_COMMAND).join(', ')
 }
 
@@ -86,12 +86,54 @@ export function initChatController() {
 	});
 }
 
-function handleEmission (args, emmissionMethod){
-	const source = Utils.getSelectedSource();
-	if (source) {
-		const idEmitter = emmissionMethod({ source: source.id, target: Utils.getTargetId() }, ...args);
+function handleEmission (args, emmissionMethod, input = {}){
+	const multipleEmission = hasOption(args, ['--multiple', '-m']);
+	if(multipleEmission){
+		input.source = new Vector3(0,0,0);
+		input.emissionDuration = 0;
+		input.maxParticles = 0;
+		input.next = []
+
+		const particleInputs = [];
+		input.next.push({
+			type: "atEmissionEnd",
+			delay: 0,
+			particleInputs
+		})
+
+		canvas.activeLayer.controlled.forEach((source) =>{
+			game.user.targets.ids.forEach((targetId) => {
+				particleInputs.push([{
+					source: source.id,
+					target: targetId,
+					type: input.type
+				}, ...args])
+			})
+		})
+	} else {
+		if(input.target === undefined){
+			input.target= Utils.getTargetId();
+		}
+		if(input.source === undefined){
+			input.source= Utils.getSelectedSource()?.id;
+		}
+		
+	}
+
+	if (input.source) {
+		const idEmitter = emmissionMethod(input, ...args);
 		writeMessageForEmissionById(idEmitter);
 	}
+}
+
+function handleMissile(args, input = {}){
+	input.type = 'Missile';
+
+	if( ! hasOption(args, ['--multiple', '-m'])){
+		input.target= game.user.targets.ids.length > 0 ? game.user.targets.ids : undefined
+	}
+
+	handleEmission(args, emitController.missile, input)
 }
 
 function handleStopById(args){
