@@ -90,13 +90,12 @@ function handleEmission (args, emmissionMethod, input = {}){
 	const multipleEmission = hasOption(args, ['--multiple', '-m']);
 	if(multipleEmission){
 		input.source = new Vector3(0,0,0);
-		input.emissionDuration = 0;
 		input.maxParticles = 0;
 		input.next = []
 
 		const particleInputs = [];
 		input.next.push({
-			type: "atEmissionEnd",
+			type: "atEmissionStart",
 			delay: 0,
 			particleInputs
 		})
