@@ -133,7 +133,7 @@ class ParticleWorkFlowStep {
 
 	        if(emitter){
 	        	this.handleEmitters.push(emitter)
-	        	emitter.destroyHooks.push()
+	        	emitter.destroyHooks.push(this.emitterEnded.bind(this))
 	        }
     	})
     }
@@ -197,7 +197,7 @@ class ParticleWorkFlowStep {
         this.handleEmitters.splice(emitterIndex, 1);
 
         if(this.handleEmitters.length === 0){
-        	destroy (true)
+        	this.destroy (true)
         }
     }
 
