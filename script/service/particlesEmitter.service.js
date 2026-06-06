@@ -158,7 +158,7 @@ export function buildInputForParentEmitter(childsInputs) {
     return {
             source: new Vector3(0,0,0),
             maxParticles: 0,
-            emissionDuration: "untilChildEnd", //TODO untilChildEnd as constant
+            emissionDuration: ParticlesEmitter.UNTIL_CHILD_END_DURATION,
             next: [{
                 type: "atEmissionStart",
                 delay: 0,

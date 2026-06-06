@@ -24,6 +24,8 @@ export default class ParticlesEmitter {
         ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
     }
 
+    static UNTIL_CHILD_END_DURATION = 'untilChildEnd'
+
     constructor(emitterId, particleTemplate, particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate) {
         this.id = String(emitterId);
         this.spawnedEnable = true;
@@ -157,7 +159,7 @@ export default class ParticlesEmitter {
             if( this.remainingTime <= 0 && this.particles.length === 0 ) {
                 return true
             }
-        } else if (this.remainingTime === "untilChildEnd" ) {
+        } else if (this.remainingTime === ParticlesEmitter.UNTIL_CHILD_END_DURATION ) {
             const childsEmission = ParticleWorkFlowManager.getWorkflowsByEmitterId(this.id) ?? []
             return childsEmission.length === 0;
         }
