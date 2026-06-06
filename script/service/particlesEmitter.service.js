@@ -154,6 +154,19 @@ function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitter
     return _abstractInitParticles(inputObject, finalInput, particleTemplate, emitterId)
 }
 
+export function buildInputForParentEmitter(childsInputs) {
+    return {
+            source: new Vector3(0,0,0),
+            maxParticles: 0,
+            emissionDuration: "untilChildEnd", //TODO untilChildEnd as constant
+            next: [{
+                type: "atEmissionStart",
+                delay: 0,
+                particleInputs: childsInputs
+            }]
+        }
+}
+
 export function persistEmitters() {
     const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
 
@@ -326,21 +339,12 @@ function _orderInputArg(args, callback) {
         for(let motion of motionSafeArray){
             for(let color of colorSafeArray){
                 for(let shape of shapeSafeArray){
-                    particleInputs.push([inputObject, motion, color, shape].filter((item) => item !== null))
+                    particleInputs.push([inputObject, motion, color, shape].filter((item) => item !== null)); //TODO divide particleMax and particles spawning
                 }
             }
         }
 
-        computedInput = {
-            source: new Vector3(0,0,0),
-            maxParticles: 0,
-            emissionDuration: "untilChildEnd", //TODO untilChildEnd as constant
-            next: [{
-                type: "atEmissionStart",
-                delay: 0,
-                particleInputs
-            }]
-        }
+        computedInput = buildInputForParentEmitter(particleInputs);
     } else {
         motionTemplate = motionTemplates.length === 1 ? ParticlesEmitter.prefillMotionTemplate[motionTemplates[0]] : undefined;
         colorTemplate = colorTemplates.length === 1 ? ParticlesEmitter.prefillColorTemplate[colorTemplates[0]] : undefined;

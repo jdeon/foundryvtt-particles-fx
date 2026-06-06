@@ -1,4 +1,4 @@
-import { writeMessageForEmissionById } from "../service/particlesEmitter.service.js"
+import { buildInputForParentEmitter, writeMessageForEmissionById } from "../service/particlesEmitter.service.js"
 import { s_MODULE_ID, Utils, Vector3 } from "../utils/utils.js"
 import emitController from "./emitController.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
@@ -89,39 +89,36 @@ export function initChatController() {
 
 function handleEmission (args, emmissionMethod, input = {}){
 	const multipleEmission = hasOption(args, ['--multiple', '-m']);
+	let computedInput;
+
 	if(multipleEmission){
-		input.source = new Vector3(0,0,0);
-		input.maxParticles = 0;
-		input.next = []
-
-		const particleInputs = [];
-		input.next.push({
-			type: "atEmissionStart",
-			delay: 0,
-			particleInputs
-		})
-
+		const subparticleInputs = [];
 		canvas.activeLayer.controlled.forEach((source) =>{
 			game.user.targets.ids.forEach((targetId) => {
-				particleInputs.push([{
+				subparticleInputs.push([{
 					source: source.id,
 					target: targetId,
 					type: input.type
 				}, ...args])
 			})
 		})
+
+		computedInput = buildInputForParentEmitter(subparticleInputs);
+		
 	} else {
+		computedInput = input;
+
 		if(input.target === undefined){
-			input.target= Utils.getTargetId();
+			computedInput.target= Utils.getTargetId();
 		}
 		if(input.source === undefined){
-			input.source= Utils.getSelectedSource()?.id;
+			computedInput.source = Utils.getSelectedSource()?.id;
 		}
 		
 	}
 
-	if (input.source) {
-		const idEmitter = emmissionMethod(input, ...args);
+	if (computedInput.source) {
+		const idEmitter = emmissionMethod(computedInput, ...args);
 		writeMessageForEmissionById(idEmitter);
 	}
 }

@@ -24,7 +24,6 @@ export default class ParticlesEmitter {
         ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
     }
 
-
     constructor(emitterId, particleTemplate, particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate) {
         this.id = String(emitterId);
         this.spawnedEnable = true;
