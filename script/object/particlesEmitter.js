@@ -75,8 +75,8 @@ export default class ParticlesEmitter {
             canvas.primary.sortChildren()
         }
 
-        //Decrease remainingTime of emmission if it has one
-        if (this.remainingTime !== undefined) {
+        //Decrease remainingTime of emmission if it has one and it s a number
+        if (! isNaN(this.remainingTime)) {
             this.remainingTime -= dt;
         }
 
@@ -84,7 +84,7 @@ export default class ParticlesEmitter {
         if (
             this.spawnedEnable 
             && this.particles.length < this.maxParticles 
-            && (this.remainingTime === undefined || this.remainingTime > 0)
+            && (isNaN(this.remainingTime) || this.remainingTime > 0)
             ) {
             //Spawned new particles
             let numberNewParticles = 1 + Math.floor(this.spawningNumber * dt / this.particleFrequence)
@@ -120,7 +120,7 @@ export default class ParticlesEmitter {
         }
 
         //Delete emission
-        if (this.remainingTime !== undefined && this.remainingTime <= 0 && this.particles.length === 0) {
+        if (this._shouldEnd()) {
            this.destroy()
         }
     }
@@ -151,5 +151,16 @@ export default class ParticlesEmitter {
 
     disableWorkflow(){
         this.particleTemplate.next = [];
+    }
+
+    _shouldEnd(){
+        if (! isNaN(this.remainingTime) ){
+            if( this.remainingTime <= 0 && this.particles.length === 0 ) {
+                return true
+            }
+        } else if (this.remainingTime === "untilChildEnd" ) {
+            const childsEmission = ParticleWorkFlowManager.getWorkflowsByEmitterId(this.id) ?? []
+            return childsEmission.length === 0;
+        }
     }
 }

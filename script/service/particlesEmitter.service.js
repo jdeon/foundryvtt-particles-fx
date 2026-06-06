@@ -330,9 +330,11 @@ function _orderInputArg(args, callback) {
                 }
             }
         }
+
         computedInput = {
             source: new Vector3(0,0,0),
             maxParticles: 0,
+            emissionDuration: "untilChildEnd", //TODO untilChildEnd as constant
             next: [{
                 type: "atEmissionStart",
                 delay: 0,
