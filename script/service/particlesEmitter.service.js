@@ -344,7 +344,7 @@ function _orderInputArg(args, callback) {
         for(let motion of motionSafeArray){
             for(let color of colorSafeArray){
                 for(let shape of shapeSafeArray){
-                    particleInputs.push([{...inputObject, _nbEmitterSibling: nbEmitterSibling}, motion, color, shape].filter((item) => item !== null)); //TODO divide particleMax and particles spawning use advanced variable ?
+                    particleInputs.push([{...inputObject, _nbEmitterSibling: nbEmitterSibling}, motion, color, shape].filter((item) => item !== null));
                 }
             }
         }
