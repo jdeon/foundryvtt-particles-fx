@@ -44,9 +44,10 @@ export default class ParticlesEmitter {
             this.spawningNumber = emitterProperty.spawningNumber;
             this.maxParticles = emitterProperty.maxParticles;
         } else {
+            //TODO mix this.spawningFrequence and this.spawningNumber with nbSibling division to handle low particle tempate (ex: satellite)
             this.particleFrequence = emitterProperty.spawningFrequence * nbSibling;
             this.spawningNumber = emitterProperty.spawningNumber;
-            this.maxParticles = Math.floor(emitterProperty.maxParticles / nbSibling);
+            this.maxParticles = Math.ceil(emitterProperty.maxParticles / nbSibling);
         }
         
         this.remainingTime = emitterProperty.emissionDuration
@@ -103,12 +104,12 @@ export default class ParticlesEmitter {
             && (isNaN(this.remainingTime) || this.remainingTime > 0)
             ) {
             //Spawned new particles
-            let numberNewParticles = 1 + Math.floor(this.spawningNumber * dt / this.particleFrequence)
+            let numberNewParticles = Math.ceil(this.spawningNumber * dt / this.particleFrequence)
             let increaseTime = (this.spawningNumber * dt) % this.particleFrequence
 
             //Don t overload the server during low framerate
             if (numberNewParticles * 10 > this.maxParticles) {
-                numberNewParticles = Math.floor(this.maxParticles / 10) + 1
+                numberNewParticles = Math.ceil(this.maxParticles / 10);
                 increaseTime = 0;
             }
 
