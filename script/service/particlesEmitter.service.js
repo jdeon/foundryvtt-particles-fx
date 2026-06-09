@@ -290,10 +290,13 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
     const particlesEmitter = new ParticlesEmitter(
         emitterId || nextEmitterId(),
         particleTemplate,
-        finalInput.spawningFrequence,
-        finalInput.spawningNumber,
-        finalInput.maxParticles,
-        finalInput.emissionDuration
+        {
+            spawningFrequence: finalInput.spawningFrequence,
+            spawningNumber:  finalInput.spawningNumber,
+            maxParticles: finalInput.maxParticles,
+            emissionDuration: finalInput.emissionDuration,
+        },
+        finalInput._nbEmitterSibling
     );
 
     // Listen for animate update
@@ -336,10 +339,12 @@ function _orderInputArg(args, callback) {
         const shapeSafeArray = particleShapes.length > 0 ? particleShapes : [null];
         const particleInputs = [];
 
+        const nbEmitterSibling = colorSafeArray.length * shapeSafeArray.length //Lower generated particles number depending of the number of emmitter generated
+
         for(let motion of motionSafeArray){
             for(let color of colorSafeArray){
                 for(let shape of shapeSafeArray){
-                    particleInputs.push([inputObject, motion, color, shape].filter((item) => item !== null)); //TODO divide particleMax and particles spawning
+                    particleInputs.push([{...inputObject, _nbEmitterSibling: nbEmitterSibling}, motion, color, shape].filter((item) => item !== null)); //TODO divide particleMax and particles spawning use advanced variable ?
                 }
             }
         }

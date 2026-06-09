@@ -26,16 +26,31 @@ export default class ParticlesEmitter {
 
     static UNTIL_CHILD_END_DURATION = 'untilChildEnd'
 
-    constructor(emitterId, particleTemplate, particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate) {
+    /**
+     * Construtor of a particle emitter
+     * @param {Number | String} emitterId 
+     * @param {ParticleTemplate} particleTemplate
+     * @param {{particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate} emitterProperty 
+     * @param {Number} nbSibling (default 1)
+     * */
+    constructor(emitterId, particleTemplate, emitterProperty, nbSibling = 1) {
         this.id = String(emitterId);
         this.spawnedEnable = true;
         this.particles = [];
         this.particleTemplate = particleTemplate;
-        this.particleFrequence = particleFrequence;
-        this.spawningNumber = spawningNumber;
-        this.maxParticles = maxParticles;
-        this.remainingTime = emissionDuration
-        this.isGravitate = isGravitate
+
+        if(nbSibling === 1 ){
+            this.particleFrequence = emitterProperty.spawningFrequence;
+            this.spawningNumber = emitterProperty.spawningNumber;
+            this.maxParticles = emitterProperty.maxParticles;
+        } else {
+            this.particleFrequence = emitterProperty.spawningFrequence * nbSibling;
+            this.spawningNumber = emitterProperty.spawningNumber;
+            this.maxParticles = Math.floor(emitterProperty.maxParticles / nbSibling);
+        }
+        
+        this.remainingTime = emitterProperty.emissionDuration
+        this.isGravitate = emitterProperty.isGravitate
         this.lastUpdate = Date.now();
         this.destroyHooks = [];
         this.maxParticleId = 0;
