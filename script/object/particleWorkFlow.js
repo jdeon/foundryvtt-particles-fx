@@ -77,7 +77,7 @@ class ParticleWorkFlowStep {
 		const sourceEmitterIdPart = sourceEmitterId.split('-') //incrise step
 		const stepNumber = sourceEmitterIdPart.length > 1 && sourceEmitterIdPart[1].startsWith('step') ? Number(sourceEmitterIdPart[1].replace('step', '')) : 0;
 
-		let prefix = `${sourceEmitterId[0]}-step${stepNumber+1}-${ParticleWorkFlowManager._minimizeType[workflowType]}${workflowIndex}`
+		let prefix = `${sourceEmitterIdPart[0]}-step${stepNumber+1}-${ParticleWorkFlowManager._minimizeType[workflowType]}${workflowIndex}`
 
 		if(particle?.id){
 			prefix += `-${particle.id}`
