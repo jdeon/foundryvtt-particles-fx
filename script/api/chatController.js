@@ -89,7 +89,7 @@ export function initChatController() {
 
 function handleEmission (args, emmissionMethod, input = {}){
 	const multipleEmission = hasOption(args, ['--multiple', '-m']);
-	let computedInput;
+	let computedInput, computedArgs;
 
 	if(multipleEmission){
 		const subparticleInputs = [];
@@ -104,9 +104,11 @@ function handleEmission (args, emmissionMethod, input = {}){
 		})
 
 		computedInput = buildInputForParentEmitter(subparticleInputs);
+		computedArgs = [];
 		
 	} else {
 		computedInput = input;
+		computedArgs = args
 
 		if(input.target === undefined){
 			computedInput.target= Utils.getTargetId();
@@ -118,7 +120,7 @@ function handleEmission (args, emmissionMethod, input = {}){
 	}
 
 	if (computedInput.source) {
-		const idEmitter = emmissionMethod(computedInput, ...args);
+		const idEmitter = emmissionMethod(computedInput, ...computedArgs);
 		writeMessageForEmissionById(idEmitter);
 	}
 }
