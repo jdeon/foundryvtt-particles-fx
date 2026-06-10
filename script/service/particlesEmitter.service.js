@@ -88,6 +88,10 @@ function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId
         } else if (!finalInput.subParticles.particleColorEnd) {
             finalInput.subParticles.particleColorEnd = finalInput.subParticles.particleColorStart
         }
+
+         if (!finalInput.subParticles.particleShape) {
+            finalInput.subParticles.particleShape = finalInput.particleShape;
+         }
     }
 
     let subParticleTemplate
