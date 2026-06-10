@@ -59,9 +59,7 @@ export function initEmitters(emittersQueries) {
 }
 
 export function sprayParticles(...args) {
-    const orderInputArg = _orderInputArg(args);
-
-    return _sprayParticles(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject, orderInputArg.emitterId)
+    return _orderInputArg([...args, { type : 'Spraying'}], _sprayParticles);
 }
 
 function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
@@ -75,9 +73,7 @@ function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) 
 }
 
 export function missileParticles(...args) {
-    const orderInputArg = _orderInputArg(args);
-
-    return _missileParticles(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject, orderInputArg.emitterId)
+    return _orderInputArg([...args, { type : 'Missile'}], _missileParticles);
 }
 
 function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
@@ -145,9 +141,7 @@ function _missileParticles(colorTemplate, motionTemplate, inputObject, emitterId
 }
 
 export function gravitateParticles(...args) {
-    const orderInputArg = _orderInputArg(args);
-
-    return _gravitateParticles(orderInputArg.colorTemplate, orderInputArg.motionTemplate, orderInputArg.inputObject, orderInputArg.emitterId)
+    return _orderInputArg([...args, {type : 'Graviting'}], _gravitateParticles);
 }
 
 function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
@@ -158,6 +152,19 @@ function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitter
     const particleTemplate = GravitingParticleTemplate.build(finalInput)
 
     return _abstractInitParticles(inputObject, finalInput, particleTemplate, emitterId)
+}
+
+export function buildInputForParentEmitter(childsInputs) {
+    return {
+            source: new Vector3(0,0,0),
+            maxParticles: 0,
+            emissionDuration: ParticlesEmitter.UNTIL_CHILD_END_DURATION,
+            next: [{
+                type: "atEmissionStart",
+                delay: 0,
+                particleInputs: childsInputs
+            }]
+        }
 }
 
 export function persistEmitters() {
@@ -283,10 +290,13 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
     const particlesEmitter = new ParticlesEmitter(
         emitterId || nextEmitterId(),
         particleTemplate,
-        finalInput.spawningFrequence,
-        finalInput.spawningNumber,
-        finalInput.maxParticles,
-        finalInput.emissionDuration
+        {
+            spawningFrequence: finalInput.spawningFrequence,
+            spawningNumber:  finalInput.spawningNumber,
+            maxParticles: finalInput.maxParticles,
+            emissionDuration: finalInput.emissionDuration,
+        },
+        finalInput._nbEmitterSibling
     );
 
     // Listen for animate update
@@ -301,32 +311,56 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
     return particlesEmitter
 }
 
-function _orderInputArg(args) {
+function _orderInputArg(args, callback) {
     let inputObject = {}
-    let motionTemplate
-    let colorTemplate
-    let particleShape
+    let motionTemplates = []
+    let colorTemplates = []
+    let particleShapes = []
     let emitterId
 
     for (let arg of args) {
         if (arg.emitterId) {
             emitterId = arg.emitterId
         } else if (arg instanceof Object) {
-            inputObject = arg
+            inputObject = {...inputObject, ...arg}
         } else if (ParticlesEmitter.prefillMotionTemplate[arg]) {
-            motionTemplate = ParticlesEmitter.prefillMotionTemplate[arg]
+            motionTemplates.push(arg)
         } else if (ParticlesEmitter.prefillColorTemplate[arg]) {
-            colorTemplate = ParticlesEmitter.prefillColorTemplate[arg]
+            colorTemplates.push(arg)
         } else if (Object.keys(SPRITE_TEXTURE_MAPPING).includes(arg.toUpperCase())){
-            particleShape = arg.toUpperCase()
+            particleShapes.push(arg.toUpperCase());
         }
     }
 
-    if(particleShape) {
-        inputObject.particleShape = particleShape
+    let computedInput, motionTemplate, colorTemplate
+    if(motionTemplates.length > 1 || colorTemplates.length > 1 || particleShapes.length > 1 ){
+        const motionSafeArray = motionTemplates.length > 0 ? motionTemplates : [null];
+        const colorSafeArray = colorTemplates.length > 0 ? colorTemplates : [null];
+        const shapeSafeArray = particleShapes.length > 0 ? particleShapes : [null];
+        const particleInputs = [];
+
+        const nbEmitterSibling = colorSafeArray.length * shapeSafeArray.length //Lower generated particles number depending of the number of emmitter generated
+
+        for(let motion of motionSafeArray){
+            for(let color of colorSafeArray){
+                for(let shape of shapeSafeArray){
+                    particleInputs.push([{...inputObject, _nbEmitterSibling: nbEmitterSibling}, motion, color, shape].filter((item) => item !== null));
+                }
+            }
+        }
+
+        computedInput = buildInputForParentEmitter(particleInputs);
+    } else {
+        motionTemplate = motionTemplates.length === 1 ? ParticlesEmitter.prefillMotionTemplate[motionTemplates[0]] : undefined;
+        colorTemplate = colorTemplates.length === 1 ? ParticlesEmitter.prefillColorTemplate[colorTemplates[0]] : undefined;
+        computedInput = inputObject;
+        
+        if (particleShapes.length === 1){
+            computedInput.particleShape = particleShapes[0]
+        }
     }
 
-    return { colorTemplate, motionTemplate, inputObject, emitterId }
+    return callback(colorTemplate, motionTemplate, computedInput, emitterId)
 }
 
 function _mergeTemplate(colorTemplate, motionTemplate, inputObject) {

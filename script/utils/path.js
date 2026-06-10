@@ -46,18 +46,7 @@ export class Path {
 		return 1;
 	}
 
-	/*TODO keep this ?
-	private void appliquerRotation (float t, Transform target, int etapeEnCours)
-	{
-		if (etapeEnCours == 0) {
-			target.rotation = Quaternion.Slerp (target.rotation, this.listEtapeTransform [etapeEnCours].rotation, t / this.listTempsPourProchaineEtape [etapeEnCours]);
-		} else if (this.modeDeBouclage == "Boucle" && etapeEnCours == this.listEtape.Count-1) {
-			target.rotation = Quaternion.Slerp (this.listEtapeTransform [etapeEnCours].rotation, this.listEtapeTransform [0].rotation, t/this.listTempsPourProchaineEtape [0]);
-		} else if ( etapeEnCours  < this.listEtapeTransform .Count && this.listTempsPourProchaineEtape [etapeEnCours] != 0){
-			target.rotation = Quaternion.Slerp (this.listEtapeTransform [etapeEnCours - 1].rotation, this.listEtapeTransform [etapeEnCours].rotation, t/this.listTempsPourProchaineEtape [etapeEnCours]);
-		}
-	}
-	*/
+	//TODO what to do with rotation during path
 }
 
 export class LinearPath extends Path {
