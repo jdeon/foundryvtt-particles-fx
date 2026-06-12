@@ -115,12 +115,13 @@ export default class ParticlesEmitter {
 
             for (let i = 0; i < numberNewParticles; i++) {
                 const particle = this.particleTemplate.generateParticles(this.particleTemplate);
-                particle.id = this.maxParticleId ++;
 
                 if (particle === undefined) {
                     this.remainingTime = 0;
                     break
                 }
+
+                particle.id = this.maxParticleId ++;
 
                 ParticlesEmitter._EMISSION_CANVAS.addChild(particle.sprite);
                 if (this.particleTemplate?.isElevationManage) {
