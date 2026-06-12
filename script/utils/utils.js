@@ -176,6 +176,11 @@ export class Utils {
         return 1
     }
 
+    static retrieveRandomElementFromArray(array){
+        const indexToRetrieve = Math.floor(Math.random() * array.length);
+        return array[indexToRetrieve]
+    }
+
     static getRandomValueFrom(inValue, advancedVariables) {
         if (!isNaN(inValue)) {
             return Number(inValue);
@@ -208,8 +213,8 @@ export class Utils {
             return new Vector3(x, y, z);
 
         } else if (Array.isArray(inValue) && inValue.length > 0) {
-            const indexToRetrieve = Math.floor(Math.random() * inValue.length);
-            return Utils.getRandomValueFrom(inValue[indexToRetrieve], advancedVariables);
+            const inElement = Utils.retrieveRandomElementFromArray(inValue);
+            return Utils.getRandomValueFrom(inElement, advancedVariables);
         } else {
             return inValue
         }
@@ -285,7 +290,7 @@ export class Utils {
         let arrayToHandle
 
         if(containSubArray.length){ 
-            const randomItem = inArray[Math.floor(Math.random() * inArray.length)];
+            const randomItem = Utils.retrieveRandomElementFromArray(inArray);
             if(Array.isArray(randomItem)){
                 arrayToHandle = randomItem;
             } else {
@@ -480,8 +485,7 @@ export class Utils {
             if(typeof id === "string"){
                 result = SPRITE_TEXTURE_MAPPING[id]
             } else if (Array.isArray(id) && id.length > 0) {
-                const indexToRetrieve = Math.floor(Math.random() * id.length);
-                const randomId = id[indexToRetrieve]
+                const randomId = Utils.retrieveRandomElementFromArray(id);
                 result = SPRITE_TEXTURE_MAPPING[randomId]
             }
         }

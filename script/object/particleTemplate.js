@@ -245,7 +245,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
     constructor(source, targets, pathType, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced, subParticleTemplate) {
+        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced, subParticleTemplates) {
         super(source, targets?.[0], positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
             sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
             vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced)
@@ -260,12 +260,12 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         this.mainParticle = this.generateMainParticles()
         this.initGenerate = false
 
-        this.subParticleTemplate = subParticleTemplate
+        this.subParticleTemplates = subParticleTemplates ?? []
 
-        if (this.subParticleTemplate) {
-            this.subParticleTemplate.source = this.mainParticle.sprite
-            this.subParticleTemplate.target = undefined
-        }
+        this.subParticleTemplates.forEach((item) => {
+            item.source = this.mainParticle.sprite
+            item.target = undefined
+        })
     }
 
     generateMainParticles() {
@@ -359,7 +359,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             return this.mainParticle
         }
 
-        if (!this.subParticleTemplate) {
+        if (this.subParticleTemplates.length === 0) {
             //No template for sub particles
             return
         }
@@ -374,10 +374,11 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         const sourceDirection = this.mainParticle.getDirection()
         const sourceDirectionRadian = sourceDirection * Math.PI / 180
 
-        let generatedParticle
+        const usedSubParticleTemplate = Utils.retrieveRandomElementFromArray(this.subParticleTemplates)
 
-        if (this.subParticleTemplate instanceof SprayingParticleTemplate) {
-            generatedParticle = this.subParticleTemplate.generateParticles()
+        let generatedParticle
+        if (usedSubParticleTemplate instanceof SprayingParticleTemplate) {
+            generatedParticle = usedSubParticleTemplate.generateParticles()
 
             //The x axis is the backward direction of the main particle
             const dircetionXFactor = {
@@ -405,8 +406,8 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             //We change the angle to be the trail of the direction by default
             generatedParticle.angleStart.add(sourceDirection + 180)
             generatedParticle.angleEnd.add(sourceDirection + 180)
-        } else if (this.subParticleTemplate instanceof GravitingParticleTemplate) {
-            generatedParticle = this.subParticleTemplate.generateParticles()
+        } else if (usedSubParticleTemplate instanceof GravitingParticleTemplate) {
+            generatedParticle = usedSubParticleTemplate.generateParticles()
             generatedParticle.angle += sourceDirection + 180
         }
 
