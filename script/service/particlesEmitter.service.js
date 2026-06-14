@@ -77,7 +77,9 @@ export function missileParticles(...args) {
     const orderedInputs = _orderInputArg([...args, { type : 'Missile'}]);
 
     if(orderedInputs.motionNameTemplates.length > 1){
-        //TODO to implements
+        const particleInputs = orderedInputs.motionNameTemplates.map((motionName) => [orderedInputs.inputObject, motionName, ...orderedInputs.colorNameTemplates, ...orderedInputs.particleShapes]);
+        const parentInput = buildInputForParentEmitter(particleInputs);
+        return _sprayParticles(undefined, undefined, parentInput, orderedInputs.emitterId) //Simpler for a spray to handle a parent workflow
     } else {
         const motionTemplate = ParticlesEmitter.prefillMotionTemplate[orderedInputs.motionNameTemplates[0]];
         const colorTemplates = orderedInputs.colorNameTemplates.map((templateName) => ParticlesEmitter.prefillColorTemplate[templateName]);
