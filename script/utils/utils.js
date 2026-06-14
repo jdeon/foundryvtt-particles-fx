@@ -177,6 +177,8 @@ export class Utils {
     }
 
     static retrieveRandomElementFromArray(array){
+        if(array === undefined || ! Array.isArray(array)) return undefined;
+
         const indexToRetrieve = Math.floor(Math.random() * array.length);
         return array[indexToRetrieve]
     }
