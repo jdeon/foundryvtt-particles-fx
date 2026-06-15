@@ -44,6 +44,10 @@ export class ParticleWorkFlowManager {
 		return ParticleWorkFlowManager.WORKFLOWS_LIST.filter(( workflow ) => workflow.id.split(":")[0] === emitterId)
 	}
 
+	static getWorkflowsByGereratedEmitter ( emitterId ) {
+		return ParticleWorkFlowManager.WORKFLOWS_LIST.find(( workflow ) => String(emitterId).match(new RegExp(`^${workflow.prefixEmitterId}`)))
+	}
+
 	static stopAll( immediate ) {
 		let deletedIds = []
 		while (ParticleWorkFlowManager.WORKFLOWS_LIST.length > 0) {

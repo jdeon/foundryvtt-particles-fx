@@ -297,16 +297,36 @@ export function stopWorkflow(emitterId, immediate, all){
     }
 }
 
+//if found emitter has parent workflow return it
 function findEmitterById(emitterId){
     if (emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))) {
         //Find last emitter
-        return ParticlesEmitter.emitters[ParticlesEmitter.emitters.length - 1]
+        return findParentEmitterIdAlive(ParticlesEmitter.emitters[ParticlesEmitter.emitters.length - 1])
     } else if (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'f' || emitterId.toLowerCase() === 'first')) {
-        //Find last emitter
-        return ParticlesEmitter.emitters[0]
+        //Find first emitter
+        return findParentEmitterIdAlive(ParticlesEmitter.emitters[0])
     } else {
         return ParticlesEmitter.emitters.find(emitter => emitter.id === String(emitterId));
     } 
+}
+
+function findParentEmitterIdAlive(emitter){
+    let parent = emitter;
+    let current;
+    while (parent){
+        current = parent;
+        const workflow = ParticleWorkFlowManager.getWorkflowsByGereratedEmitter(parent.id);
+
+        if(workflow){
+            const workflowEmitterId = workflow.id.split(":")[0];
+            parent = ParticlesEmitter.emitters.find(emitter => emitter.id === workflowEmitterId);
+        } else {
+            parent = undefined;
+        }
+        
+    }
+
+    return current
 }
 
 export async function writeMessageForEmissionById(emitterId, verbal) {
@@ -322,7 +342,7 @@ export async function writeMessageForEmissionById(emitterId, verbal) {
         originalQuery: verbal ? JSON.stringify(emitter.originalQuery) : undefined
     }
 
-    let htmlMessage = await renderTemplate(`modules/${s_MODULE_ID}/template/message-particle_state.hbs`, dataExport)
+    let htmlMessage = await renderTemplate(`modules/${s_MODULE_ID}/template/message-particle_state.hbs`, dataExport) //TODO rename foundry.applications.handlebars.renderTemplate
 
     ui.chat.processMessage("/w gm " + htmlMessage);
 
