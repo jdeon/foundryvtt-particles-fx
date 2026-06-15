@@ -44,10 +44,6 @@ export class ParticleWorkFlowManager {
 		return ParticleWorkFlowManager.WORKFLOWS_LIST.filter(( workflow ) => workflow.id.split(":")[0] === emitterId)
 	}
 
-	static getWorkflowsByGereratedEmitter ( emitterId ) {
-		return ParticleWorkFlowManager.WORKFLOWS_LIST.find(( workflow ) => String(emitterId).match(new RegExp(`^${workflow.prefixEmitterId}`)))
-	}
-
 	static stopAll( immediate ) {
 		let deletedIds = []
 		while (ParticleWorkFlowManager.WORKFLOWS_LIST.length > 0) {
@@ -124,7 +120,7 @@ class ParticleWorkFlowStep {
     executeEmissions(){
     	this.particleInputs.forEach( (particleInput, index ) => {
     		const { args, type } = this.buildEmissionArgsAndType(particleInput)
-    		const emitterId = { emitterId: `${this.prefixEmitterId }-${index}` }
+    		const emitterId = { emitterId: `${this.prefixEmitterId }-${index}`, parentWorkflowId: this.id }
     		let emitter 
     
     		if (type === SprayingParticleTemplate.getType()) {

@@ -33,8 +33,9 @@ export default class ParticlesEmitter {
      * @param {{particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate} emitterProperty 
      * @param {Number} nbSibling (default 1)
      * */
-    constructor(emitterId, particleTemplate, emitterProperty, nbSibling = 1) {
+    constructor(emitterId, particleTemplate, emitterProperty, parentWorkflowId, nbSibling = 1) {
         this.id = String(emitterId);
+        this.parentWorkflowId = parentWorkflowId;
         this.spawnedEnable = true;
         this.particles = [];
         this.particleTemplate = particleTemplate;

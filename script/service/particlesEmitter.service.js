@@ -315,10 +315,10 @@ function findParentEmitterIdAlive(emitter){
     let current;
     while (parent){
         current = parent;
-        const workflow = ParticleWorkFlowManager.getWorkflowsByGereratedEmitter(parent.id);
+        const workflowId = current.parentWorkflowId;
 
-        if(workflow){
-            const workflowEmitterId = workflow.id.split(":")[0];
+        if(workflowId){
+            const workflowEmitterId = workflowId.split(":")[0];
             parent = ParticlesEmitter.emitters.find(emitter => emitter.id === workflowEmitterId);
         } else {
             parent = undefined;
@@ -350,9 +350,9 @@ export async function writeMessageForEmissionById(emitterId, verbal) {
 }
 
 
-function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitterId) {
+function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitterIds) {
     const particlesEmitter = new ParticlesEmitter(
-        emitterId || nextEmitterId(),
+        emitterIds.emitterId || nextEmitterId(),
         particleTemplate,
         {
             spawningFrequence: finalInput.spawningFrequence,
@@ -360,6 +360,7 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
             maxParticles: finalInput.maxParticles,
             emissionDuration: finalInput.emissionDuration,
         },
+        emitterIds.parentWorkflowId,
         finalInput._nbEmitterSibling
     );
 
@@ -384,7 +385,7 @@ function _orderInputArg(args) {
 
     for (let arg of args) {
         if (arg.emitterId) {
-            emitterId = arg.emitterId
+            emitterId = arg
         } else if (arg instanceof Object) {
             inputObject = {...inputObject, ...arg}
         } else if (ParticlesEmitter.prefillMotionTemplate[arg]) {
