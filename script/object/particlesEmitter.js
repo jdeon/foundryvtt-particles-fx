@@ -155,8 +155,10 @@ export default class ParticlesEmitter {
         }
 
         const emitterIndex = ParticlesEmitter.emitters.findIndex((emitter) => emitter.id === this.id);
-        ParticlesEmitter.emitters.splice(emitterIndex, 1);
-
+        if( emitterIndex >= 0 ){
+            ParticlesEmitter.emitters.splice(emitterIndex, 1);
+        }
+        
         ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_END, this.id, this.particleTemplate )
 
         if(this.destroyHooks.length > 0){

@@ -194,7 +194,10 @@ class ParticleWorkFlowStep {
 
     emitterEnded(emitterID){
     	const emitterIndex = this.handleEmitters.findIndex((item) => item.id === emitterID);
-        this.handleEmitters.splice(emitterIndex, 1);
+
+    	if( emitterIndex >= 0 ){
+        	this.handleEmitters.splice(emitterIndex, 1);
+        }
 
         if(this.handleEmitters.length === 0){
         	this.destroy (true)
@@ -221,7 +224,9 @@ class ParticleWorkFlowStep {
         	}
 		}
 
-		const emitterIndex = ParticleWorkFlowManager.WORKFLOWS_LIST.findIndex((workflow) => workflow.id === this.id);
-        ParticleWorkFlowManager.WORKFLOWS_LIST.splice(emitterIndex, 1);
+		const workflowIndex = ParticleWorkFlowManager.WORKFLOWS_LIST.findIndex((workflow) => workflow.id === this.id);
+		if( workflowIndex >= 0 ){
+        	ParticleWorkFlowManager.WORKFLOWS_LIST.splice(workflowIndex, 1);
+    	}
     }
 }
