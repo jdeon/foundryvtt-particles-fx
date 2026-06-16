@@ -164,7 +164,7 @@ function hasOption(givenOptions, matchOptions){
 }
 
 function getEmittersId(args){
-	const numbers = args.filter((item) => !Number.isNaN(item));
+	const numbers = args.filter((item) => ! isNaN(item));
 
 	if(numbers.length > 0){
 		return numbers[0]

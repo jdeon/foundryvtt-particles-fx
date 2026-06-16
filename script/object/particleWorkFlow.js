@@ -71,7 +71,7 @@ class ParticleWorkFlowStep {
 		this.handleEmitters = [];
 	}
 
-	//Format : {orginalEmitterId}-Step{nestedNextNumber}-{minimizeWorkflowType}{worflowTriggerIndex}(-particleId)-{particleInputIndex}
+	//Format : {orginalEmitterId}-step{nestedNextNumber}-{minimizeWorkflowType}{worflowTriggerIndex}(-particleId)-{particleInputIndex}
 	generatePrefixId(sourceEmitterId, workflowType, workflowIndex, particle) {
 
 		const sourceEmitterIdPart = sourceEmitterId.split('-') //incrise step
@@ -120,7 +120,7 @@ class ParticleWorkFlowStep {
     executeEmissions(){
     	this.particleInputs.forEach( (particleInput, index ) => {
     		const { args, type } = this.buildEmissionArgsAndType(particleInput)
-    		const emitterId = { emitterId: `${this.prefixEmitterId }-${index}` }
+    		const emitterId = { emitterId: `${this.prefixEmitterId }-${index}`, parentWorkflowId: this.id }
     		let emitter 
     
     		if (type === SprayingParticleTemplate.getType()) {
@@ -194,7 +194,10 @@ class ParticleWorkFlowStep {
 
     emitterEnded(emitterID){
     	const emitterIndex = this.handleEmitters.findIndex((item) => item.id === emitterID);
-        this.handleEmitters.splice(emitterIndex, 1);
+
+    	if( emitterIndex >= 0 ){
+        	this.handleEmitters.splice(emitterIndex, 1);
+        }
 
         if(this.handleEmitters.length === 0){
         	this.destroy (true)
@@ -207,17 +210,23 @@ class ParticleWorkFlowStep {
         }
 
         if(withEmmiter){
-        	this.handleEmitters.forEach(( emitter ) => emitter.destroy())
+        	for (let i = this.handleEmitters.length - 1; i >= 0; i--) {
+        		//We look througt the list backward to avoid error from deleting an item that shift the whole array
+        		this.handleEmitters[i].destroy();
+        	}
         } else {
-	    	this.handleEmitters.forEach(( emitter ) => {
-	    		emitter.remainingTime = -1
-	    		emitter.disableWorkflow()
+        	for (let i = this.handleEmitters.length - 1; i >= 0; i--) {
+        		const emitter = this.handleEmitters[i];
+        		emitter.remainingTime = -1;
+	    		emitter.disableWorkflow();
 	    		ParticleWorkFlowManager.getWorkflowsByEmitterId(emitter.id)
-	    			.forEach((workflow) => workflow.destroy(false))
-	    	})
+	    			.forEach((workflow) => workflow.destroy(false));
+        	}
 		}
 
-		const emitterIndex = ParticleWorkFlowManager.WORKFLOWS_LIST.findIndex((workflow) => workflow.id === this.id);
-        ParticleWorkFlowManager.WORKFLOWS_LIST.splice(emitterIndex, 1);
+		const workflowIndex = ParticleWorkFlowManager.WORKFLOWS_LIST.findIndex((workflow) => workflow.id === this.id);
+		if( workflowIndex >= 0 ){
+        	ParticleWorkFlowManager.WORKFLOWS_LIST.splice(workflowIndex, 1);
+    	}
     }
 }

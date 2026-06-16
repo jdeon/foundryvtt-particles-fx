@@ -33,8 +33,9 @@ export default class ParticlesEmitter {
      * @param {{particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate} emitterProperty 
      * @param {Number} nbSibling (default 1)
      * */
-    constructor(emitterId, particleTemplate, emitterProperty, nbSibling = 1) {
+    constructor(emitterId, particleTemplate, emitterProperty, parentWorkflowId, nbSibling = 1) {
         this.id = String(emitterId);
+        this.parentWorkflowId = parentWorkflowId;
         this.spawnedEnable = true;
         this.particles = [];
         this.particleTemplate = particleTemplate;
@@ -115,12 +116,13 @@ export default class ParticlesEmitter {
 
             for (let i = 0; i < numberNewParticles; i++) {
                 const particle = this.particleTemplate.generateParticles(this.particleTemplate);
-                particle.id = this.maxParticleId ++;
 
                 if (particle === undefined) {
                     this.remainingTime = 0;
                     break
                 }
+
+                particle.id = this.maxParticleId ++;
 
                 ParticlesEmitter._EMISSION_CANVAS.addChild(particle.sprite);
                 if (this.particleTemplate?.isElevationManage) {
@@ -153,8 +155,10 @@ export default class ParticlesEmitter {
         }
 
         const emitterIndex = ParticlesEmitter.emitters.findIndex((emitter) => emitter.id === this.id);
-        ParticlesEmitter.emitters.splice(emitterIndex, 1);
-
+        if( emitterIndex >= 0 ){
+            ParticlesEmitter.emitters.splice(emitterIndex, 1);
+        }
+        
         ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_END, this.id, this.particleTemplate )
 
         if(this.destroyHooks.length > 0){
