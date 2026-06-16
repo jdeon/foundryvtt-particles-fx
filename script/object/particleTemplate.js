@@ -187,7 +187,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             particleProperties.riseRateStart.add(targetRiseRate)
             particleProperties.riseRateEnd.add(targetRiseRate)
 
-        } else if (this.source instanceof MeasuredTemplate) {
+        } else if (this.source instanceof foundry.canvas.placeables.MeasuredTemplate) {
             this.currentSourcePosition = Utils.getSourcePosition(this.source, this.isElevationManage)//Don t use width and length
             let measuredOverride = generatePrefillTemplateForMeasured(this.source.document, particleProperties.velocityStart.getValue(), particleProperties.velocityEnd.getValue())
             particleProperties = { ...particleProperties, ...measuredOverride }
