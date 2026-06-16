@@ -1,5 +1,5 @@
 import { buildInputForParentEmitter, writeMessageForEmissionById } from "../service/particlesEmitter.service.js"
-import { s_MODULE_ID, Utils, Vector3 } from "../utils/utils.js"
+import { s_MODULE_ID, Utils, Vector3, SPRITE_TEXTURE_MAPPING } from "../utils/utils.js"
 import emitController from "./emitController.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
 
@@ -29,8 +29,9 @@ export function initChatController() {
 		COMMON_OPTIONS.instant= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.instant");
 		COMMON_OPTIONS.first= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.first");
 		COMMON_OPTIONS.last= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.last");
-		COMMON_OPTIONS.prefillMotionTemplate = game.i18n.format("PARTICULE-FX.Chat-Command.Options.prefillMotionTemplate" ,{prefillMotionTemplateValues: Object.keys(ParticlesEmitter.prefillMotionTemplate).join(', ')});
-	    COMMON_OPTIONS.prefillColorTemplate = game.i18n.format("PARTICULE-FX.Chat-Command.Options.prefillColorTemplate" ,{prefillColorTemplateValues: Object.keys(ParticlesEmitter.prefillColorTemplate).join(', ')});
+		COMMON_OPTIONS.prefillMotionTemplates = game.i18n.format("PARTICULE-FX.Chat-Command.Options.prefillMotionTemplates" ,{prefillMotionTemplateValues: Object.keys(ParticlesEmitter.prefillMotionTemplate).join(', ')});
+	    COMMON_OPTIONS.prefillColorTemplates = game.i18n.format("PARTICULE-FX.Chat-Command.Options.prefillColorTemplates" ,{prefillColorTemplateValues: Object.keys(ParticlesEmitter.prefillColorTemplate).join(', ')});
+	    COMMON_OPTIONS.particleShapes = game.i18n.format("PARTICULE-FX.Chat-Command.Options.particleShapes" ,{particleShapeValues: Object.keys(SPRITE_TEXTURE_MAPPING).join(', ')});
 	    COMMON_OPTIONS.multiple= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.multiple");
 	})
 
