@@ -342,7 +342,7 @@ export async function writeMessageForEmissionById(emitterId, verbal) {
         originalQuery: verbal ? JSON.stringify(emitter.originalQuery) : undefined
     }
 
-    let htmlMessage = await renderTemplate(`modules/${s_MODULE_ID}/template/message-particle_state.hbs`, dataExport) //TODO rename foundry.applications.handlebars.renderTemplate
+    let htmlMessage = await foundry.applications.handlebars.renderTemplate(`modules/${s_MODULE_ID}/template/message-particle_state.hbs`, dataExport)
 
     ui.chat.processMessage("/w gm " + htmlMessage);
 
