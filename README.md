@@ -15,8 +15,13 @@ The module contains several methods to generate particles without needing premad
 - **v2.4.0**: 
   - Choose between multiple particle shapes : circle (default and legacy), tor, star and diamond.
   - Properties next on customize input to link multiple emission in a workflow.
-  - Add flash prefill motion template
-  - Add property freezeOnPause to handle game pause in customized input 
+  - Add flash prefill motion template.
+  - Add property freezeOnPause to handle game pause in customized input.
+- **v2.5.0**: 
+  - Missile can follow path through multiple target. It can be linear or curve path.
+  - Allow calling emission with multiple prefill template at once.
+  - Emission can be trigger for multiple target with `-m` or `--multiple`.
+  - Add description to chat command with `-h` or `-help` like `/pfx spray -h`.
 
 ## Settings
 1. Avoid showing particle from other client (useful for minimal configuration) (Client setting)
