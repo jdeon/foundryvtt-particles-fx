@@ -73,20 +73,20 @@ Commands:
 - `/pfx stopAll`
 - `/pfx stopById *id*`
 - `/pfx stopWorkflow *id*`
-- `/pfx spray *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
-- `/pfx gravitate *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
-- `/pfx missile *prefillMotionTemplate* *prefillColorTemplate* *particleShape*`
+- `/pfx spray *prefillMotionTemplates* *prefillColorTemplates* *particleShapes*`
+- `/pfx gravitate *prefillMotionTemplates* *prefillColorTemplates* *particleShapes*`
+- `/pfx missile *prefillMotionTemplates* *prefillColorTemplates* *particleShapes*`
 - `/pfx help`
 
-```/pfx spray ray death```
+```/pfx spray ray death ice```
 
 > To stop a command, you can add the param *--instant* to not have to wait the end of the particles lifetime.
 
 ### Call by Script
 
-- To emit spray particles, you need to use a macro to call the method `particlesFx.sprayParticles(prefillMotionTemplateName, prefillColorTemplate, particleShape, {Advanced options})`
-- To emit gravitating particles, you need to use a macro to call the method `particlesFx.gravitateParticles(prefillMotionTemplateName, prefillColorTemplate, particleShape, {Advanced options})`
-- To emit missile particles, you need to use a macro to call the method `particlesFx.missileParticles(prefillMotionTemplateName, prefillColorTemplate, particleShape, {Advanced options})`. Advanced options have the same input as Spray particles with a nested object `subParticles` containing another input (spray or gravitating) and type (equals to "Spraying" or "Graviting").
+- To emit spray particles, you need to use a macro to call the method `particlesFx.sprayParticles(prefillMotionTemplates, prefillColorTemplates, particleShapes, {Advanced options})`
+- To emit gravitating particles, you need to use a macro to call the method `particlesFx.gravitateParticles(prefillMotionTemplates, prefillColorTemplates, particleShapes, {Advanced options})`
+- To emit missile particles, you need to use a macro to call the method `particlesFx.missileParticles(prefillMotionTemplates, prefillColorTemplates, particleShapes, {Advanced options})`. Advanced options have the same input as Spray particles with a nested object `subParticles` containing another input (spray or gravitating) and type (equals to "Spraying" or "Graviting").
 - Write a message to describe the emitter and a button to stop it `particlesFx.writeMessageForEmissionById(emitterId, isVerbal)`. The `isVerbal` parameter also writes advanced input in the message.
 - To stop all emissions, you need to use a macro to call the method `particlesFx.stopAllEmission(instantDelete)`. `instantDelete` is a boolean parameter, if true, it deletes all particles already emitted, false to stop only the emission (living particles are not killed).
 - To stop a specific emission, you need to use a macro to call the method `particlesFx.stopEmissionById(id)`. ID is a number or a string:
@@ -112,7 +112,7 @@ All these methods can also be called with the module's API `game.modules.get("pa
 
 ## Prefill Template
 
-The method emitting particles can be called with a prefill template. There are two kinds of templates: **prefillMotionTemplate** and **prefillColorTemplate**, which can be combined. You can add an input to override some attributes of the prefill template. The order of the parameters is not important.
+The method emitting particles can be called with multiple prefill templates or none. There are two kinds of templates: **prefillMotionTemplates** and **prefillColorTemplates**, which can be combined. You can add an input to override some attributes of the prefill template. The order of the parameters is not important.
 
 **Prefill Motion Template:**
 - explosion (designed for spray)
