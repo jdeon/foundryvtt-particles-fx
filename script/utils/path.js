@@ -6,7 +6,7 @@ export class Path {
 			return
 		}
 		
-		if(pathType === CurvePath.PATH_TYPE && stepPositions.length > 2){
+		if(pathType === CurvePath.PATH_TYPE){
 			return new CurvePath(stepPositions, angleStart.getValue(), angleEnd.getValue() === sameStartKey ? angleStart.getValue() : angleEnd.getValue())
 		}
 

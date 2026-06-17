@@ -270,7 +270,10 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
     generateMainParticles() {
         if( this.targets === undefined ){
-            return  super.generateParticles();
+            const mainParticle = super.generateParticles();
+            mainParticle.particleRotationStart.add(mainParticle.angleStart.getValue())
+            mainParticle.particleRotationEnd.add(mainParticle.angleEnd.getValue())
+            return mainParticle 
         }
 
         let advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
