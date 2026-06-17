@@ -75,12 +75,12 @@ You can start or stop emission by chat with the command "/pfx".
 It adds a message response in the chat.
 
 Commands:
-- `/pfx stopAll`
-- `/pfx stopById *id*`
-- `/pfx stopWorkflow *id*`
-- `/pfx spray *prefillMotionTemplates* *prefillColorTemplates* *particleShapes*`
-- `/pfx gravitate *prefillMotionTemplates* *prefillColorTemplates* *particleShapes*`
-- `/pfx missile *prefillMotionTemplates* *prefillColorTemplates* *particleShapes*`
+- `/pfx stopAll (--instant) (--help)`
+- `/pfx stopById *id* (--instant) (--help)`
+- `/pfx stopWorkflow *id* (--instant) (--all) (--help)`
+- `/pfx spray *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* (--multiple) (--help)`
+- `/pfx gravitate *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* (--multiple) (--help)`
+- `/pfx missile *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* (--curve) (--multiple) (--help)`
 - `/pfx help`
 
 ```/pfx spray ray death ice```
