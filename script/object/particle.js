@@ -205,6 +205,8 @@ export class PathParticle extends Particle {
             this.sprite.x = this.positionVibrationLess.x
             this.sprite.y = this.positionVibrationLess.y
         }
+
+         this.sprite.angle += this.getDirection()
     }
 
     getDirection() {
