@@ -45,8 +45,6 @@ export class Path {
 		this.currentStep = this.stepsProportion.length - 1;
 		return 1;
 	}
-
-	//TODO what to do with rotation during path
 }
 
 export class LinearPath extends Path {
