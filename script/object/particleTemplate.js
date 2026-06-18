@@ -519,7 +519,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
 
         const particlePosition = GravitingParticle.computeParticlePosition(this.currentSourcePosition, radiusStart, angleStart * (Math.PI / 180), riseRate, axisElevationAngle);
         const startSizeInput = Utils.getRandomParticuleInputFrom(this.sizeStart, advancedVariable)
-        const rotationStartInput = Utils.getRandomParticuleInputFrom(this.particleRotationStart, advancedVariable)
+        const rotationStartInput = Utils.getRandomParticuleInputFrom(this.particleRotationStart, advancedVariable).add(angleOriginValue)
         const colorStartInput = Utils.getRandomParticuleInputFrom(this.colorStart, advancedVariable)
 
         const sprite = this.initSprite(
