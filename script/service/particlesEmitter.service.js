@@ -352,7 +352,7 @@ export async function writeMessageForEmissionById(emitterId, verbal) {
 
 function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitterIds) {
     const particlesEmitter = new ParticlesEmitter(
-        emitterIds.emitterId || nextEmitterId(),
+        emitterIds?.emitterId || nextEmitterId(),
         particleTemplate,
         {
             spawningFrequence: finalInput.spawningFrequence,
@@ -360,7 +360,7 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
             maxParticles: finalInput.maxParticles,
             emissionDuration: finalInput.emissionDuration,
         },
-        emitterIds.parentWorkflowId,
+        emitterIds?.parentWorkflowId,
         finalInput._nbEmitterSibling
     );
 
