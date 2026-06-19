@@ -1,36 +1,19 @@
 import { listen } from "./script/utils/socketManager.js"
-import { initEmitters, persistEmitters, stopAllEmission, writeMessageForEmissionById } from "./script/service/particlesEmitter.service.js"
+import { initEmitters, persistEmitters, stopAllEmission } from "./script/service/particlesEmitter.service.js"
 import { addCustomPrefillMotionTemplate, addCustomPrefillColorTemplate } from "./script/service/prefillTemplate.service.js"
 import { s_MODULE_ID, Utils } from "./script/utils/utils.js"
 import { CompatibiltyV2Manager } from "./script/utils/compatibilityManager.js"
-import emitController from "./script/api/emitController.js"
 import apiController from "./script/api/apiController.js"
 import { subscribeApiToWindow } from "./script/api/windowsController.js"
+import { initChatController } from "./script/api/chatController.js"
 import ParticlesEmitter from "./script/object/particlesEmitter.js"
 import { setupAutomation, automationInitialisation } from "./script/autoGeneration/automaticGeneration.service.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 let firstSceneEmittersQueries
 
-const Existing_chat_command = [
-    'stopAll',
-    'stopById',
-    'stopWorkflow',
-    'spray',
-    'missile',
-    'gravitate',
-    'help'
-]
-
-
-
 Hooks.on("init", () => {
-    foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
-
-    //pfx is added after invalid
-    let invalid = foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["invalid"]
-    delete foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["invalid"]
-    foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
+    initChatController();
 });
 
 Hooks.on("setup", () => {
@@ -174,97 +157,4 @@ Hooks.once('ready', function () {
 Hooks.on("canvasTearDown", () => {
     persistEmitters()
     return stopAllEmission(true)
-});
-
-//Chat message hooks
-Hooks.on("chatMessage", function (chatlog, message, chatData) {
-    if (!message.startsWith('/pfx')) return;
-
-    let messageArgs = message.split(' ')
-
-    //No function
-    if (messageArgs.length <= 1) {
-        return
-    }
-
-    let functionName = messageArgs[1]
-    let functionParam
-    let isImmediate, all = false
-    let otherParam = []
-
-    for (let i = 2; i < messageArgs.length; i++) {
-        if (functionParam === undefined && !isNaN(messageArgs[i])) {
-            functionParam = messageArgs[i];
-        } else if (!isImmediate && messageArgs[i] === '--instant') {
-            isImmediate = true
-        } else if (!all && messageArgs[i] === '--all') {
-            all = true
-        } else {
-            otherParam.push(messageArgs[i])
-        }
-    }
-
-    let resumeMessage
-    let response
-    let emmissionMethod
-
-    switch (functionName) {
-        case 'stopAll':
-            response = emitController.stopAll(isImmediate)
-            resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-All.return") + JSON.stringify(response)
-            break
-        case 'stopById':
-            response = emitController.stop(functionParam, isImmediate)
-            resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
-            break
-        case 'stopWorkflow':
-            response = emitController.stopWorkflow(functionParam, isImmediate, all)
-            resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.Stop-Id.return") + JSON.stringify(response)
-            break  
-        case 'spray':
-            emmissionMethod = emitController.spray
-            break
-        case 'missile':
-            emmissionMethod = emitController.missile
-            break
-        case 'gravitate':
-            emmissionMethod = emitController.gravit
-            break 
-        case 'help':
-            resumeMessage = game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Existing_chat_command.join(',');
-            break
-        default:
-            ui.notifications.error(game.i18n.localize("PARTICULE-FX.Chat-Command.Unrecognized"));
-    }
-
-    if (emmissionMethod) {
-        const source = Utils.getSelectedSource()
-        if (source) {
-            const idEmitter = emmissionMethod({ source: source.id, target: Utils.getTargetId() }, ...otherParam)
-            writeMessageForEmissionById(idEmitter)
-        }
-    }
-
-    //Existing_chat_command
-    if (resumeMessage) {
-        ui.chat.processMessage("/w gm " + resumeMessage)
-    }
-
-    return false
-})
-
-
-Hooks.on("renderChatMessage", function (chatlog, html, data) {
-    const buttons = html.find('button[name="button.delete-emitter"]');
-
-    if (buttons === undefined || buttons.length === 0) return
-
-    console.log(`main | renderChatMessage with ${s_MODULE_ID}`);
-
-    buttons.on("click", (event) => {
-        let button = event.currentTarget
-        if (button.dataset.action === "delete") {
-            emitController.stop(button.dataset.emitterId);
-        }
-    })
 });

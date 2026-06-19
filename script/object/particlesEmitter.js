@@ -1,7 +1,7 @@
 import { motionTemplateDictionnary } from "../prefillMotionTemplate.js"
 import { colorTemplateDictionnary } from "../prefillColorTemplate.js"
 import { Particle } from "./particle.js"
-import { ParticleWorkflow } from"./particleWorkflow.js"
+import { ParticleWorkFlowManager } from"./particleWorkFlow.js"
 
 export default class ParticlesEmitter {
 
@@ -24,17 +24,35 @@ export default class ParticlesEmitter {
         ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
     }
 
+    static UNTIL_CHILD_END_DURATION = 'untilChildEnd'
 
-    constructor(emitterId, particleTemplate, particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate) {
+    /**
+     * Construtor of a particle emitter
+     * @param {Number | String} emitterId 
+     * @param {ParticleTemplate} particleTemplate
+     * @param {{particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate} emitterProperty 
+     * @param {Number} nbSibling (default 1)
+     * */
+    constructor(emitterId, particleTemplate, emitterProperty, parentWorkflowId, nbSibling = 1) {
         this.id = String(emitterId);
+        this.parentWorkflowId = parentWorkflowId;
         this.spawnedEnable = true;
         this.particles = [];
         this.particleTemplate = particleTemplate;
-        this.particleFrequence = particleFrequence;
-        this.spawningNumber = spawningNumber;
-        this.maxParticles = maxParticles;
-        this.remainingTime = emissionDuration
-        this.isGravitate = isGravitate
+
+        if(nbSibling === 1 ){
+            this.particleFrequence = emitterProperty.spawningFrequence;
+            this.spawningNumber = emitterProperty.spawningNumber;
+            this.maxParticles = emitterProperty.maxParticles;
+        } else {
+            //TODO mix this.spawningFrequence and this.spawningNumber with nbSibling division to handle low particle tempate (ex: satellite)
+            this.particleFrequence = emitterProperty.spawningFrequence * nbSibling;
+            this.spawningNumber = emitterProperty.spawningNumber;
+            this.maxParticles = Math.ceil(emitterProperty.maxParticles / nbSibling);
+        }
+        
+        this.remainingTime = emitterProperty.emissionDuration
+        this.isGravitate = emitterProperty.isGravitate
         this.lastUpdate = Date.now();
         this.destroyHooks = [];
         this.maxParticleId = 0;
@@ -43,7 +61,7 @@ export default class ParticlesEmitter {
             ParticlesEmitter.INIT_EMISSION_CANVAS()
         }
 
-        ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.id, this.particleTemplate )
+        ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.id, this.particleTemplate )
     }
 
     manageParticles() {
@@ -63,7 +81,7 @@ export default class ParticlesEmitter {
             particle.manageLifetime(dt)
 
             if (particle.remainingTime <= 0) {
-                ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_PARTICLE_END, this.id, this.particleTemplate, particle )
+                ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_PARTICLE_END, this.id, this.particleTemplate, particle )
                 particle.sprite.destroy()
                 this.particles.splice(i, 1)
                 //Return to last particle
@@ -75,8 +93,8 @@ export default class ParticlesEmitter {
             canvas.primary.sortChildren()
         }
 
-        //Decrease remainingTime of emmission if it has one
-        if (this.remainingTime !== undefined) {
+        //Decrease remainingTime of emmission if it has one and it s a number
+        if (! isNaN(this.remainingTime)) {
             this.remainingTime -= dt;
         }
 
@@ -84,33 +102,34 @@ export default class ParticlesEmitter {
         if (
             this.spawnedEnable 
             && this.particles.length < this.maxParticles 
-            && (this.remainingTime === undefined || this.remainingTime > 0)
+            && (isNaN(this.remainingTime) || this.remainingTime > 0)
             ) {
             //Spawned new particles
-            let numberNewParticles = 1 + Math.floor(this.spawningNumber * dt / this.particleFrequence)
+            let numberNewParticles = Math.ceil(this.spawningNumber * dt / this.particleFrequence)
             let increaseTime = (this.spawningNumber * dt) % this.particleFrequence
 
             //Don t overload the server during low framerate
             if (numberNewParticles * 10 > this.maxParticles) {
-                numberNewParticles = Math.floor(this.maxParticles / 10) + 1
+                numberNewParticles = Math.ceil(this.maxParticles / 10);
                 increaseTime = 0;
             }
 
             for (let i = 0; i < numberNewParticles; i++) {
                 const particle = this.particleTemplate.generateParticles(this.particleTemplate);
-                particle.id = this.maxParticleId ++;
 
                 if (particle === undefined) {
                     this.remainingTime = 0;
                     break
                 }
 
+                particle.id = this.maxParticleId ++;
+
                 ParticlesEmitter._EMISSION_CANVAS.addChild(particle.sprite);
                 if (this.particleTemplate?.isElevationManage) {
                     canvas.primary.addChild(particle.sprite);
                 }
                 this.particles.push(particle);
-                ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START, this.id, this.particleTemplate, particle );
+                ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START, this.id, this.particleTemplate, particle );
             }
 
             this.spawnedEnable = false;
@@ -120,7 +139,7 @@ export default class ParticlesEmitter {
         }
 
         //Delete emission
-        if (this.remainingTime !== undefined && this.remainingTime <= 0 && this.particles.length === 0) {
+        if (this._shouldEnd()) {
            this.destroy()
         }
     }
@@ -136,9 +155,11 @@ export default class ParticlesEmitter {
         }
 
         const emitterIndex = ParticlesEmitter.emitters.findIndex((emitter) => emitter.id === this.id);
-        ParticlesEmitter.emitters.splice(emitterIndex, 1);
-
-        ParticleWorkflow.triggerWorkflows ( ParticleWorkflow.NEXT_WORKFLOW_TYPES.AT_EMISSION_END, this.id, this.particleTemplate )
+        if( emitterIndex >= 0 ){
+            ParticlesEmitter.emitters.splice(emitterIndex, 1);
+        }
+        
+        ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_END, this.id, this.particleTemplate )
 
         if(this.destroyHooks.length > 0){
             this.destroyHooks.forEach((destroyHook) => destroyHook(this.id) )
@@ -151,5 +172,16 @@ export default class ParticlesEmitter {
 
     disableWorkflow(){
         this.particleTemplate.next = [];
+    }
+
+    _shouldEnd(){
+        if (! isNaN(this.remainingTime) ){
+            if( this.remainingTime <= 0 && this.particles.length === 0 ) {
+                return true
+            }
+        } else if (this.remainingTime === ParticlesEmitter.UNTIL_CHILD_END_DURATION ) {
+            const childsEmission = ParticleWorkFlowManager.getWorkflowsByEmitterId(this.id) ?? []
+            return childsEmission.length === 0;
+        }
     }
 }

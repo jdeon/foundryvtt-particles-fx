@@ -59,7 +59,7 @@ export class Vector3 {
 
     static replaceSameAsStart(startVector, endVector) {
         if (endVector.x === sameStartKey && endVector.y === sameStartKey && endVector.z === sameStartKey) {
-            return startVector
+            return Vector3.build(startVector);
         }
 
         for (let coord of ['x', 'y', 'z']) {
@@ -129,12 +129,32 @@ export class Vector3 {
         }
     }
 
-    toNumber() {
+    computeVariable() {
         this.x = Utils._managePercent(this.x)
         this.y = Utils._managePercent(this.y)
         this.z = Utils._managePercent(this.z)
 
         return !(isNaN(this.x) || isNaN(this.y) || isNaN(this.z))
+    }
+
+    cross(other) {
+        if (other instanceof Vector3) {
+            return new Vector3(
+                (this.y * other.z) - (this.z * other.y),
+                (this.z * other.x) - (this.x * other.z),
+                (this.x * other.y) - (this.y * other.x)
+            )
+        }
+
+        return this
+    }
+
+    magnitude() {
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+    }
+
+    normalized() {
+        return this.divide(this.magnitude());
     }
 }
 
@@ -154,6 +174,13 @@ export class Utils {
         }
 
         return 1
+    }
+
+    static retrieveRandomElementFromArray(array){
+        if(array === undefined || ! Array.isArray(array)) return undefined;
+
+        const indexToRetrieve = Math.floor(Math.random() * array.length);
+        return array[indexToRetrieve]
     }
 
     static getRandomValueFrom(inValue, advancedVariables) {
@@ -188,8 +215,8 @@ export class Utils {
             return new Vector3(x, y, z);
 
         } else if (Array.isArray(inValue) && inValue.length > 0) {
-            const indexToRetrieve = Math.floor(Math.random() * inValue.length);
-            return Utils.getRandomValueFrom(inValue[indexToRetrieve], advancedVariables);
+            const inElement = Utils.retrieveRandomElementFromArray(inValue);
+            return Utils.getRandomValueFrom(inElement, advancedVariables);
         } else {
             return inValue
         }
@@ -248,6 +275,38 @@ export class Utils {
         if (inputMode) {
             for (const key of inKey) {
                 result[key] = ParticleInput.build(result[key], inValue[key], advancedVariables);
+            }
+        }
+
+        return result
+    }
+
+    /**
+     * Handle the cas where it should return an array
+     * If there is nested array, it mean we choose randomly a index and handle the nested array item as random object
+     */
+    static getArrayRandomValueFrom(inArray, advancedVariables, inputMode) {
+        if (!Array.isArray(inArray)) return
+
+        const containSubArray = inArray.filter((item) => Array.isArray(item));
+        let arrayToHandle
+
+        if(containSubArray.length){ 
+            const randomItem = Utils.retrieveRandomElementFromArray(inArray);
+            if(Array.isArray(randomItem)){
+                arrayToHandle = randomItem;
+            } else {
+                arrayToHandle = [randomItem]
+            }
+        } else {
+            arrayToHandle = inArray;
+        }
+
+        let result = arrayToHandle.map((item) =>  Utils.getRandomValueFrom(item, advancedVariables));
+
+        if (inputMode) {
+            for (let i = 0; i < result.length; i++) {
+                result[i] = ParticleInput.build(result[i], arrayToHandle[i], advancedVariables);
             }
         }
 
@@ -338,7 +397,7 @@ export class Utils {
             r: 0
         }
 
-        if (!(source instanceof PIXI.Sprite || source instanceof MeasuredTemplate)) {
+        if (!(source instanceof PIXI.Sprite || source instanceof foundry.canvas.placeables.MeasuredTemplate)) {
             //Don t use width and length) for Sprite because of anchor
             result.x += (source.w || source.width || 0) / 2
             result.y += (source.h || source.height || 0) / 2
@@ -428,8 +487,7 @@ export class Utils {
             if(typeof id === "string"){
                 result = SPRITE_TEXTURE_MAPPING[id]
             } else if (Array.isArray(id) && id.length > 0) {
-                const indexToRetrieve = Math.floor(Math.random() * id.length);
-                const randomId = id[indexToRetrieve]
+                const randomId = Utils.retrieveRandomElementFromArray(id);
                 result = SPRITE_TEXTURE_MAPPING[randomId]
             }
         }
@@ -439,5 +497,9 @@ export class Utils {
         }
 
         return SPRITE_TEXTURE_MAPPING.CIRCLE
+    }
+
+    static computeSameAsStart(particleInputStart, particleInputEnd){
+        return particleInputEnd.getValue() === sameStartKey ? particleInputStart.clone() : particleInputEnd;
     }
 }
