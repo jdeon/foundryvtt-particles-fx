@@ -9,9 +9,25 @@ export function automationInitialisation() {
         if(!chatMessageData?.isDamageRoll) return
         debugger;//pf2e.flags.traits 
         
-        const usedItem = chatMessageData.item;
-        const itemRange = usedItem?.range?.max ? usedItem.range.value / canvas.scene.grid.distance : 1
-        const colors = getColorsFromDamageRolls(chatMessageData.rolls[0].terms[0].rolls) //TODO confirm how to have multiple terms
+        let colors;
+
+        if(isHealing){
+            colors = [{
+                id: undefined, //Default value
+                fraction: 1
+            }]; 
+        } else if (damageRolls) {
+            colors = getColorsFromDamageRolls(damageRolls);
+        } else if ( isSpell ) {
+            const spellTraditions = usedItem?.system?.traits?.traditions ?? [];
+            colors = spellTraditions.map((tradition) => ({
+                    id:MAGIC_SPELL_TRADITION_COLOR[tradition],
+                    fraction: 1 / spellTraditions.length
+                })
+            );
+        } else {
+            colors = [];
+        }
 
         const controlledToken = canvas?.activeLayer?.controlled ?? []
 
@@ -32,42 +48,6 @@ export function automationInitialisation() {
             })
         )
         emitParticle(emitDataArray, colors)
-    })
-
-//TODO how to handle undamage things
-    Hooks.on("dnd5e.postUseActivity", async (activity) => {
-        if (
-            !(activity.damage?.parts?.length || activity.healing)
-            && activity.isSpell && Object.keys(MAGIC_SPELL_SCHOOL_COLOR).includes(activity.item.system.school)
-        ) {
-            const controlledToken = canvas?.activeLayer?.controlled?.length ? canvas?.activeLayer?.controlled : [item.parent.token]
-            activity
-            if (activity?.target?.template?.count) {
-                const aetc = AutoEmissionTemplateCache.findByItem(activity.item.id + "_" + activity.id)
-                aetc.setSources(controlledToken)
-                aetc.setColors([{
-                    id: MAGIC_SPELL_SCHOOL_COLOR[activity.item.system.school],
-                    fraction: 1
-                }])
-            } else {
-                const targets = Array.from(game?.user?.targets ?? [])
-
-                const emitDataArray = controlledToken.flatMap((source) =>
-                    targets.map((target) => {
-                        const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                        const type = _findTypeEmission(activity, false)
-                        return new EmitData(type, source, target, distance)
-                    })
-                )
-
-                emitParticle(emitDataArray,
-                    [{
-                        id: MAGIC_SPELL_SCHOOL_COLOR[activity.item.system.school],
-                        fraction: 1
-                    }]
-                )
-            }
-        }
     })
 }
 
@@ -127,16 +107,11 @@ const DAMAGE_COLOR = {
     spirit: "charm"
 }
 
-//TODO
-const MAGIC_SPELL_SCHOOL_COLOR = {
-    abj: "silver",
-    con: "cyber",
-    div: "light",
-    enc: "charm",
-    evo: "fire",
-    ill: "ice",
-    nec: "death",
-    trs: "poison",
+const MAGIC_SPELL_TRADITION_COLOR = {
+    arcane: "silver",
+    divine: "light",
+    occult: "death",
+    primal: "poison"
 }
 
 //TODO test ok for range attack and area attack
