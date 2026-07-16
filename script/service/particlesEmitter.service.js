@@ -384,7 +384,9 @@ function _orderInputArg(args) {
     let emitterId
 
     for (let arg of args) {
-        if (arg.emitterId) {
+        if (arg === undefined){
+            continue;
+        } else if (arg.emitterId) {
             emitterId = arg
         } else if (arg instanceof Object) {
             inputObject = {...inputObject, ...arg}
