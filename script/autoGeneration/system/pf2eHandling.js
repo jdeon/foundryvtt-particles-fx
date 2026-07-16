@@ -3,11 +3,19 @@ import { AutoEmissionTemplateCache } from "../autoEmissionTemplateCache.js"
 import { getColorsFromDamageRolls, EmitData, emitParticle, TYPE_EMISSION } from "../automaticGeneration.service.js"
 
 export function automationInitialisation() {
-    //Hook dnd5e.rollDamageV2 has too low data
+    //Hook pf2e.rollDamageV2 has too low data
     Hooks.on("renderChatMessage", async (chatMessageData) => {
+        const usedItem = chatMessageData.item;
+        const isSpell = usedItem?.type === 'spell';
+        const isHealing = usedItem?.traits?.has('healing') ?? false;
+        
+        if(!( isHealing || isSpell || chatMessageData?.isDamageRoll)) return
+
+        const damageRolls = chatMessageData?.rolls[0]?.terms[0]?.rolls; //TODO confirm how to have multiple terms
+    
         console.log('Particles FX automation', chatMessageData)
-        if(!chatMessageData?.isDamageRoll) return
-        debugger;//pf2e.flags.traits 
+
+        const itemRange = usedItem?.range?.max ? usedItem.range.value / canvas.scene.grid.distance : 1;
         
         let colors;
 
@@ -43,7 +51,7 @@ export function automationInitialisation() {
         const emitDataArray = controlledToken.flatMap((source) =>
             targets.map((target) => {
                 const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                const type = _findTypeEmission(usedItem, distance < itemRange + 1)
+                const type = _findTypeEmission(usedItem, isHealing, distance < itemRange + 1)
                 return new EmitData(type, source, target, distance)
             })
         )
@@ -69,17 +77,18 @@ export function getItemIdFromTemplate(template) {
     }
 }
 
-//TODO
-function _findTypeEmission(item, isMelee) {
+function _findTypeEmission(item, isHealing, isMeleeRange) {
     let emissionType
-    if (item.isAttack && item.isMelee && isMelee) {
-        emissionType = TYPE_EMISSION.meleeAttack
-    } else if (["heal", "utility"].includes(item.type)) {
+    if( isHealing ) {
         emissionType = TYPE_EMISSION.bonusEffect
-    } else if (item.type === "save") {
+    } else if (item.isAttack && item.isMelee && isMelee) {
+        emissionType = TYPE_EMISSION.meleeAttack
+    } else if (item.isAttack) {
+        emissionType = TYPE_EMISSION.rangeAttack
+    } else if (item.system.defense) {
         emissionType = TYPE_EMISSION.penaltyEffect
     } else {
-        emissionType = TYPE_EMISSION.rangeAttack
+        emissionType = TYPE_EMISSION.bonusEffect
     }
 
     return emissionType
@@ -114,4 +123,4 @@ const MAGIC_SPELL_TRADITION_COLOR = {
     primal: "poison"
 }
 
-//TODO test ok for range attack and area attack
+//TODO test ok for range attack, area attack and save (still need bonus)
