@@ -105,22 +105,26 @@ function _findTypeEmission(item, isMelee) {
     return emissionType
 }
 
-//TODO
 const DAMAGE_COLOR = {
+    //Energy
     acid: "cyber",
-    bludgeoning: "silver",
-    fire: "fire",
-    force: "charm",
-    healing: undefined,
-    lightning: "ice",
     cold: "ice",
-    necrotic: "death",
+    electricity: "ice",
+    fire: "fire",
+    healing: undefined,
+    sonic: "silver",
+    force: "charm",
+    vitality: "light",
+    void: "death",
+    //Physic
+    bludgeoning: "silver",
     piercing: "silver",
+    slashing: "silver",
+    bleed: "fire",
+    //Other
+    mental:"death",
     poison: "poison",
-    psychic: "death",
-    radiant: "light",
-    thunder: "silver",
-    slashing: "silver"
+    spirit: "charm"
 }
 
 //TODO
