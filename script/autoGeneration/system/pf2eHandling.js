@@ -13,6 +13,8 @@ export function automationInitialisation() {
 
         const damageRolls = chatMessageData?.rolls[0]?.terms[0]?.rolls; //TODO confirm how to have multiple terms
     
+        if(usedItem?.system?.damage && ! damageRolls) return //Damage item but without damage rolls
+        
         console.log('Particles FX automation', chatMessageData)
 
         const itemRange = usedItem?.range?.max ? usedItem.range.value / canvas.scene.grid.distance : 1;
