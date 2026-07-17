@@ -85,9 +85,9 @@ function _findTypeEmission(item, isHealing, isMeleeRange) {
     let emissionType
     if( isHealing ) {
         emissionType = TYPE_EMISSION.bonusEffect
-    } else if (item.isAttack && item.isMelee && isMelee) {
+    } else if (_isAttack(item) && item.isMelee && isMeleeRange) {
         emissionType = TYPE_EMISSION.meleeAttack
-    } else if (item.isAttack) {
+    } else if (_isAttack(item)) {
         emissionType = TYPE_EMISSION.rangeAttack
     } else if (item.system.defense) {
         emissionType = TYPE_EMISSION.penaltyEffect
@@ -96,6 +96,10 @@ function _findTypeEmission(item, isHealing, isMeleeRange) {
     }
 
     return emissionType
+}
+
+function _isAttack(item){
+    return item.isAttack || item.type === 'weapon'
 }
 
 const DAMAGE_COLOR = {
