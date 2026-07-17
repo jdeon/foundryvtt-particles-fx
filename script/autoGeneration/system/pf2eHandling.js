@@ -11,9 +11,11 @@ export function automationInitialisation() {
         
         if(!( isHealing || isSpell || chatMessageData?.isDamageRoll)) return
 
-        const damageRolls = chatMessageData?.rolls[0]?.terms[0]?.rolls; //TODO confirm how to have multiple terms
+        const damageRolls = chatMessageData?.rolls.flatMap((roll) => 
+            roll?.terms?.flatMap((term) => term?.rolls)
+        ).filter((roll) => roll !== undefined)
     
-        if(usedItem?.system?.damage && ! damageRolls) return //Damage item but without damage rolls
+        if((usedItem?.system?.damage && Object.keys(usedItem.system.damage).length > 0) && ! damageRolls.length) return //Damage item but without damage rolls
         
         console.log('Particles FX automation', chatMessageData)
 
@@ -26,7 +28,7 @@ export function automationInitialisation() {
                 id: undefined, //Default value
                 fraction: 1
             }]; 
-        } else if (damageRolls) {
+        } else if (!! damageRolls?.length) {
             colors = getColorsFromDamageRolls(damageRolls);
         } else if ( isSpell ) {
             const spellTraditions = usedItem?.system?.traits?.traditions ?? [];
