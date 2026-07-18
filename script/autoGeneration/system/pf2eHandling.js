@@ -14,8 +14,9 @@ export function automationInitialisation() {
         const damageRolls = chatMessageData?.rolls.flatMap((roll) => 
             roll?.terms?.flatMap((term) => term?.rolls)
         ).filter((roll) => roll !== undefined)
+        const hasDammage = !! damageRolls
     
-        if((usedItem?.system?.damage && Object.keys(usedItem.system.damage).length > 0) && ! damageRolls.length) return //Damage item but without damage rolls
+        if((usedItem?.system?.damage && Object.keys(usedItem.system.damage).length > 0) && ! hasDammage) return //Damage item but without damage rolls
         
         console.log('Particles FX automation', chatMessageData)
 
@@ -23,12 +24,12 @@ export function automationInitialisation() {
         
         let colors;
 
-        if(isHealing){
+        if( isHealing ){
             colors = [{
                 id: undefined, //Default value
                 fraction: 1
             }]; 
-        } else if (!! damageRolls?.length) {
+        } else if ( hasDammage ) {
             colors = getColorsFromDamageRolls(damageRolls);
         } else if ( isSpell ) {
             const spellTraditions = usedItem?.system?.traits?.traditions ?? [];
@@ -55,7 +56,7 @@ export function automationInitialisation() {
         const emitDataArray = controlledToken.flatMap((source) =>
             targets.map((target) => {
                 const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                const type = _findTypeEmission(usedItem, isHealing, distance < itemRange + 1)
+                const type = _findTypeEmission(usedItem, hasDammage, isHealing, distance < itemRange + 1)
                 return new EmitData(type, source, target, distance)
             })
         )
@@ -81,16 +82,18 @@ export function getItemIdFromTemplate(template) {
     }
 }
 
-function _findTypeEmission(item, isHealing, isMeleeRange) {
+function _findTypeEmission(item, hasDammage, isHealing, isMeleeRange) {
     let emissionType
     if( isHealing ) {
         emissionType = TYPE_EMISSION.bonusEffect
-    } else if (_isAttack(item) && item.isMelee && isMeleeRange) {
-        emissionType = TYPE_EMISSION.meleeAttack
-    } else if (_isAttack(item)) {
-        emissionType = TYPE_EMISSION.rangeAttack
     } else if (item.system.defense) {
         emissionType = TYPE_EMISSION.penaltyEffect
+    } else if (hasDammage) {
+        if(isMelee(item) && isMeleeRange) {
+            emissionType = TYPE_EMISSION.meleeAttack
+        } else {
+             emissionType = TYPE_EMISSION.rangeAttack
+        }
     } else {
         emissionType = TYPE_EMISSION.bonusEffect
     }
@@ -98,8 +101,10 @@ function _findTypeEmission(item, isHealing, isMeleeRange) {
     return emissionType
 }
 
-function _isAttack(item){
-    return item.isAttack || item.type === 'weapon'
+function isMelee(item){
+    if(item.isMelee !== undefined) return item.isMelee
+
+    return item.system.reach <= canvas.scene.grid.distance
 }
 
 const DAMAGE_COLOR = {
@@ -131,4 +136,4 @@ const MAGIC_SPELL_TRADITION_COLOR = {
     primal: "poison"
 }
 
-//TODO test ok for range attack, area attack and save (still need bonus)
+//TODO handle mele with big monster
