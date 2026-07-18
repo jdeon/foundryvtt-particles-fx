@@ -55,9 +55,9 @@ export function automationInitialisation() {
 
         const emitDataArray = controlledToken.flatMap((source) =>
             targets.map((target) => {
-                const distance = Utils.getGridDistanceBetweenPoint(source, target)
-                const type = _findTypeEmission(usedItem, hasDammage, isHealing, distance < itemRange + 1)
-                return new EmitData(type, source, target, distance)
+                const gridDistance = source.distanceTo(target) / canvas.scene.grid.distance
+                const type = _findTypeEmission(usedItem, hasDammage, isHealing, gridDistance < itemRange + 1)
+                return new EmitData(type, source, target, gridDistance)
             })
         )
         emitParticle(emitDataArray, colors)
@@ -135,5 +135,3 @@ const MAGIC_SPELL_TRADITION_COLOR = {
     occult: "death",
     primal: "poison"
 }
-
-//TODO handle mele with big monster
