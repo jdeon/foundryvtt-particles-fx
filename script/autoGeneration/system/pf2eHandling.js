@@ -14,7 +14,7 @@ export function automationInitialisation() {
         const damageRolls = chatMessageData?.rolls.flatMap((roll) => 
             roll?.terms?.flatMap((term) => term?.rolls)
         ).filter((roll) => roll !== undefined)
-        const hasDammage = !! damageRolls
+        const hasDammage = !! damageRolls.length
     
         if((usedItem?.system?.damage && Object.keys(usedItem.system.damage).length > 0) && ! hasDammage) return //Damage item but without damage rolls
         
@@ -86,7 +86,7 @@ function _findTypeEmission(item, hasDammage, isHealing, isMeleeRange) {
     let emissionType
     if( isHealing ) {
         emissionType = TYPE_EMISSION.bonusEffect
-    } else if (item.system.defense) {
+    } else if (item.system?.defense?.save) {
         emissionType = TYPE_EMISSION.penaltyEffect
     } else if (hasDammage) {
         if(isMelee(item) && isMeleeRange) {
