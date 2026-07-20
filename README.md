@@ -22,6 +22,8 @@ The module contains several methods to generate particles without needing premad
   - Allow calling emission with multiple prefill templates at once.
   - Emission can be triggered for multiple targets with `-m` or `--multiple`.
   - Add description to chat command with `-h` or `-help` like `/pfx spray -h`.
+- **v2.6.0**: 
+  - Add pf2e system for automatic emission settings on item usage.
 
 ## Settings
 1. Avoid showing particles from other clients (useful for minimal configuration) (Client setting)
