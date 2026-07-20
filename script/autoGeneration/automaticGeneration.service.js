@@ -2,10 +2,12 @@ import emitController from "../api/emitController.js"
 import { s_MODULE_ID } from "../utils/utils.js"
 import { AutoEmissionTemplateCache } from "./autoEmissionTemplateCache.js"
 import * as dnd5e from "./system/dnd5eHandling.js"
+import * as pf2e from "./system/pf2eHandling.js"
 
 //Suported system script need to have automationInitialisation, getColorsFromDamageRolls and getItemIdFromTemplate methods
 const SUPPORTED_SYSTEM = {
-    dnd5e: dnd5e
+    dnd5e: dnd5e,
+    pf2e: pf2e
 }
 
 let systemMethods
