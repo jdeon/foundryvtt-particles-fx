@@ -37,9 +37,10 @@ export function initChatController() {
 
 	// Chat message hooks
 	Hooks.on("chatMessage", function (chatlog, message, chatData) {
-		if (!message.startsWith('/pfx')) return;
+		const tagLessMessage = message.replace(/^<p>|<\/p>$/g, "")
+		if (!tagLessMessage.startsWith('/pfx')) return;
 
-		let messageArgs = message.split(' ')
+		let messageArgs = tagLessMessage.split(' ')
 
 		// No function
 		if (messageArgs.length < 2) {
