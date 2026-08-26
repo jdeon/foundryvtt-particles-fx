@@ -2,14 +2,22 @@ import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTem
 import { Utils } from "../utils/utils.js"
 import * as particlesEmitterService from "../service/particlesEmitter.service.js"
 
+/**
+ * Mapping of chat command names to particle template type strings.
+ * @type {Record<string, string>}
+ */
 const ENUM_CHAT_COMMAND_TEMPLATE_TYPE = {
 	'spray': SprayingParticleTemplate.getType(),
     'missile': MissileParticleTemplate.getType(),
     'gravitate': GravitingParticleTemplate.getType()
 }
 
+/**
+ * Manager class responsible for managing lifecycle and execution of chained particle workflows.
+ */
 export class ParticleWorkFlowManager {
 
+	/** Constants defining workflow trigger events. */
 	static NEXT_WORKFLOW_TYPES = {
 	    AT_EMISSION_START: "atEmissionStart",
 	    AT_PARTICLE_START: "atParticleStart",
@@ -17,6 +25,7 @@ export class ParticleWorkFlowManager {
 	    AT_PARTICLE_END: "atParticleEnd"
 	}
 
+	/** Shortened workflow type codes used in emitter ID prefixes. */
 	static _minimizeType = {
 	    [ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_START]: "ES",
 	    [ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START]: "PS",
@@ -24,14 +33,34 @@ export class ParticleWorkFlowManager {
 	    [ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_PARTICLE_END]: "PE"
 	}
 
+	/** Global registry list of active workflow steps. */
 	static WORKFLOWS_LIST = []
 
+	/**
+	 * Triggers matching workflow steps attached to a particle template.
+	 * @param {string} workflowType - Event type triggering the workflow.
+	 * @param {string} sourceEmitterId - Identifier of parent emitter.
+	 * @param {ParticleTemplate} particleTemplate - Source particle template instance.
+	 * @param {Particle} [particle] - Specific particle instance triggering event.
+	 * @returns {void}
+	 */
 	static triggerWorkflows (workflowType, sourceEmitterId, particleTemplate, particle) {
 		const workflowsToTrigger = particleTemplate.next.filter(( workflow ) => workflow.type === workflowType )
 
          workflowsToTrigger.forEach(( workflow, index ) => ParticleWorkFlowManager.generateWorkflow ( workflow.type , workflow.delay, workflow.particleInputs, sourceEmitterId, particleTemplate, particle, index ))
 	}
 
+	/**
+	 * Instantiates and computes a single workflow step.
+	 * @param {string} workflowType - Event type.
+	 * @param {number} delay - Delay in seconds before execution.
+	 * @param {Array<Object>} particleInputs - Array of input definitions for child emissions.
+	 * @param {string} sourceEmitterId - Source emitter ID.
+	 * @param {ParticleTemplate} particleTemplate - Template instance.
+	 * @param {Particle} particle - Triggering particle.
+	 * @param {number} workflowIndex - Index of workflow in template list.
+	 * @returns {void}
+	 */
 	static generateWorkflow (workflowType, delay, particleInputs, sourceEmitterId, particleTemplate, particle, workflowIndex) {
 		if(!particleInputs) return
 
@@ -40,10 +69,20 @@ export class ParticleWorkFlowManager {
 		particleWorkFlowStep.computeStep()
 	}
 
+	/**
+	 * Retrieves active workflow steps belonging to a specific emitter ID.
+	 * @param {string} emitterId - Target emitter ID prefix.
+	 * @returns {Array<ParticleWorkFlowStep>} Matching workflow step instances.
+	 */
 	static getWorkflowsByEmitterId ( emitterId ) {
 		return ParticleWorkFlowManager.WORKFLOWS_LIST.filter(( workflow ) => workflow.id.split(":")[0] === emitterId)
 	}
 
+	/**
+	 * Stops and destroys all active workflow steps.
+	 * @param {boolean} immediate - Whether to terminate immediately without fade.
+	 * @returns {void}
+	 */
 	static stopAll( immediate ) {
 		let deletedIds = []
 		while (ParticleWorkFlowManager.WORKFLOWS_LIST.length > 0) {
@@ -55,8 +94,21 @@ export class ParticleWorkFlowManager {
 	}
 }
 
+/**
+ * Individual workflow execution step managing delayed execution and child particle emissions.
+ */
 class ParticleWorkFlowStep {
 
+	/**
+	 * Constructs a ParticleWorkFlowStep instance.
+	 * @param {string} workflowType - Event type.
+	 * @param {number} delay - Delay in seconds.
+	 * @param {Array<Object>} particleInputs - Array of particle emission input configs.
+	 * @param {string} sourceEmitterId - Source emitter ID.
+	 * @param {ParticleTemplate} particleTemplate - Source particle template.
+	 * @param {Particle} particle - Associated particle instance.
+	 * @param {number} workflowIndex - Index in list.
+	 */
 	constructor (workflowType, delay, particleInputs, sourceEmitterId, particleTemplate, particle, workflowIndex) {
 		this.id = `${sourceEmitterId}:${foundry.utils.randomID()}`
 		this.prefixEmitterId = this.generatePrefixId(sourceEmitterId, workflowType, workflowIndex, particle)
@@ -72,6 +124,14 @@ class ParticleWorkFlowStep {
 	}
 
 	//Format : {orginalEmitterId}-step{nestedNextNumber}-{minimizeWorkflowType}{worflowTriggerIndex}(-particleId)-{particleInputIndex}
+	/**
+	 * Generates unique prefix ID for child emitters produced by this workflow step.
+	 * @param {string} sourceEmitterId - Source emitter ID.
+	 * @param {string} workflowType - Event type.
+	 * @param {number} workflowIndex - Index of workflow.
+	 * @param {Particle} particle - Associated particle.
+	 * @returns {string} Generated prefix string.
+	 */
 	generatePrefixId(sourceEmitterId, workflowType, workflowIndex, particle) {
 
 		const sourceEmitterIdPart = sourceEmitterId.split('-') //incrise step
@@ -86,10 +146,18 @@ class ParticleWorkFlowStep {
 		return prefix
 	}
 
+	/**
+	 * Gets current 3D position vector of triggering particle or source.
+	 * @returns {Vector3} Position vector or coordinates.
+	 */
 	getPosition () {
 		return this.particle?.getPosition() || this.source;
 	}
 
+	/**
+	 * Starts delay timer or directly executes child emissions if delay is zero.
+	 * @returns {void}
+	 */
     computeStep () {
 		// Listen for animate update
 
@@ -100,6 +168,10 @@ class ParticleWorkFlowStep {
 		}
     }
 
+    /**
+     * Ticker callback decrementing delay time per frame.
+     * @returns {void}
+     */
     handleDelay () {
     	let newDate = Date.now();
         const dt = newDate - this.lastUpdate
@@ -117,6 +189,10 @@ class ParticleWorkFlowStep {
         }
     }
 
+    /**
+     * Spawns child emitters defined in particleInputs.
+     * @returns {void}
+     */
     executeEmissions(){
     	this.particleInputs.forEach( (particleInput, index ) => {
     		const { args, type } = this.buildEmissionArgsAndType(particleInput)
@@ -138,6 +214,11 @@ class ParticleWorkFlowStep {
     	})
     }
 
+    /**
+     * Parses arguments and determines template type for a child emission definition.
+     * @param {string|Object|Array} particleInput - String, array, or object input config.
+     * @returns {{type: string, args: Array<Object>}} Object containing emission type and arguments array.
+     */
     buildEmissionArgsAndType (particleInput) {
     	let result
 
@@ -192,6 +273,11 @@ class ParticleWorkFlowStep {
     	return result;
     }
 
+    /**
+     * Callback triggered when a child emitter finishes emission.
+     * @param {string|number} emitterID - Identifier of completed child emitter.
+     * @returns {void}
+     */
     emitterEnded(emitterID){
     	const emitterIndex = this.handleEmitters.findIndex((item) => item.id === emitterID);
 
@@ -204,6 +290,11 @@ class ParticleWorkFlowStep {
         }
     }
 
+    /**
+     * Destroys this workflow step and cleans up child emitters.
+     * @param {boolean} withEmmiter - If true, destroys child emitters immediately.
+     * @returns {void}
+     */
     destroy (withEmmiter) {
     	if(this.delay !== undefined){
         	canvas.app.ticker.remove(this.delayCallback);

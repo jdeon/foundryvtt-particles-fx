@@ -3,15 +3,26 @@ import { colorTemplateDictionnary } from "../prefillColorTemplate.js"
 import { Particle } from "./particle.js"
 import { ParticleWorkFlowManager } from"./particleWorkFlow.js"
 
+/**
+ * Controller class managing a group of particles spawned by a particle template.
+ */
 export default class ParticlesEmitter {
 
+    /** Default dictionary of motion prefill templates. */
     static prefillMotionTemplate = motionTemplateDictionnary
+    /** Default dictionary of color prefill templates. */
     static prefillColorTemplate = colorTemplateDictionnary
 
+    /** Global registry array of active ParticlesEmitter instances. */
     static emitters = []
 
+    /** PIXI.Container serving as the emission canvas container layer. */
     static _EMISSION_CANVAS
 
+    /**
+     * Initializes or resets the PIXI container for particle emissions on canvas.
+     * @returns {void}
+     */
     static INIT_EMISSION_CANVAS = () => {
         let effectsCanvas
         
@@ -33,15 +44,17 @@ export default class ParticlesEmitter {
         ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
     }
 
+    /** Constant key specifying duration until child workflow emissions complete. */
     static UNTIL_CHILD_END_DURATION = 'untilChildEnd'
 
     /**
-     * Construtor of a particle emitter
-     * @param {Number | String} emitterId 
-     * @param {ParticleTemplate} particleTemplate
-     * @param {{particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate} emitterProperty 
-     * @param {Number} nbSibling (default 1)
-     * */
+     * Constructs a ParticlesEmitter instance.
+     * @param {number|string} emitterId - Unique identifier for the emitter.
+     * @param {TODO type} particleTemplate - Template defining particle generation rules.
+     * @param {TODO type} emitterProperty - Emission frequency, max count, and duration settings.
+     * @param {string} [parentWorkflowId] - ID of parent workflow step if spawned from workflow.
+     * @param {number} [nbSibling=1] - Number of sibling emitters sharing particle quota.
+     */
     constructor(emitterId, particleTemplate, emitterProperty, parentWorkflowId, nbSibling = 1) {
         this.id = String(emitterId);
         this.parentWorkflowId = parentWorkflowId;
@@ -73,6 +86,10 @@ export default class ParticlesEmitter {
         ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.id, this.particleTemplate )
     }
 
+    /**
+     * Per-frame ticker callback updating particle positions and spawning new particles.
+     * @returns {void}
+     */
     manageParticles() {
         let newDate = Date.now()
         const dt = newDate - this.lastUpdate
@@ -154,6 +171,10 @@ export default class ParticlesEmitter {
     }
 
     //Delete immediatly emission without waiting for each particle's end
+    /**
+     * Immediately destroys this emitter, destroys all active particles, and triggers end hooks.
+     * @returns {void}
+     */
     destroy(){
         canvas.app.ticker.remove(this.callback);
 
@@ -175,14 +196,26 @@ export default class ParticlesEmitter {
         }
     }
 
+    /**
+     * Enables spawning flag after cooldown delay.
+     * @returns {void}
+     */
     enableSpawning() {
         this.spawnedEnable = true;
     }
 
+    /**
+     * Disables chained workflow steps for this emitter.
+     * @returns {void}
+     */
     disableWorkflow(){
         this.particleTemplate.next = [];
     }
 
+    /**
+     * Evaluates whether this emitter has completed its active lifetime and should be destroyed.
+     * @returns {boolean} True if emitter should terminate.
+     */
     _shouldEnd(){
         if (! isNaN(this.remainingTime) ){
             if( this.remainingTime <= 0 && this.particles.length === 0 ) {
