@@ -20,7 +20,7 @@ export default {
 /**
  * Adds a custom prefill motion template to world settings or syncs it via sockets.
  * @param {string} key - Unique key identifier for the motion template.
- * @param {TODO type} customPrefillMotionTemplate - Motion template configuration.
+ * @param {import("../prefillMotionTemplate.js").MotionTemplate} customPrefillMotionTemplate - Motion template configuration.
  * @returns {void}
  */
 function addCustomPrefillMotionTemplate(key, customPrefillMotionTemplate){
@@ -73,7 +73,7 @@ function removeCustomPrefillMotionTemplate(key){
 /**
  * Retrieves a custom prefill motion template by key, or all templates if key is omitted.
  * @param {string} [key] - Optional key of the motion template.
- * @returns {TODO type} The requested motion template or all templates.
+ * @returns {import("../prefillMotionTemplate.js").MotionTemplate|Record<string, import("../prefillMotionTemplate.js").MotionTemplate>} The requested motion template or all templates.
  */
 function getCustomPrefillMotionTemplate(key){
     const prefillMotionTemplate = game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate")
@@ -88,7 +88,7 @@ function getCustomPrefillMotionTemplate(key){
 /**
  * Adds a custom prefill color template to world settings or syncs it via sockets.
  * @param {string} key - Unique key identifier for the color template.
- * @param {TODO type} customPrefillColorTemplate - Color template configuration.
+ * @param {import("../prefillColorTemplate.js").ColorTemplateQuery} customPrefillColorTemplate - Color template configuration.
  * @returns {void}
  */
 function addCustomPrefillColorTemplate(key, customPrefillColorTemplate){
@@ -141,7 +141,7 @@ function removeCustomPrefillColorTemplate(key){
 /**
  * Retrieves a custom prefill color template by key, or all templates if key is omitted.
  * @param {string} [key] - Optional key of the color template.
- * @returns {TODO type} The requested color template or all templates.
+ * @returns {import("../prefillColorTemplate.js").ColorTemplateQuery|Record<string, import("../prefillColorTemplate.js").ColorTemplateQuery>} The requested color template or all templates.
  */
 function getCustomPrefillColorTemplate(key){
     const prefillColorTemplate = game.settings.get(s_MODULE_ID, "customPrefillColorTemplate")

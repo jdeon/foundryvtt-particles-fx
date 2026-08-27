@@ -1,8 +1,14 @@
 import { Vector3 } from "./utils/utils.js"
 
 /**
+ * @typedef {Object} ColorTemplateQuery
+ * @property {Vector3|Array<Vector3>|{x: number|string, y: number|string, z: number|string}|Array<Vector3|{x: number|string, y: number|string, z: number|string}>} [particleColorStart] Starting particle color (RGB vector or array of vectors).
+ * @property {Vector3|Array<Vector3>|{x: number|string, y: number|string, z: number|string}|Array<Vector3|{x: number|string, y: number|string, z: number|string}>} [particleColorEnd] Ending particle color (RGB vector or array of vectors).
+ */
+
+/**
  * Returns default color template configuration.
- * @returns {{particleColorStart: Vector3, particleColorEnd: Vector3}} Object containing start and end colors as Vector3.
+ * @returns {ColorTemplateQuery} Object containing default particle color properties.
  */
 export const defaultColorTemplate = () =>  {
     return {
@@ -61,7 +67,7 @@ const charmColorTemplate = {
 
 /**
  * Dictionary of built-in color templates.
- * @type {Record<string, TODO type>}
+ * @type {Record<string, ColorTemplateQuery>}
  */
 export const colorTemplateDictionnary = {
     charm: charmColorTemplate,

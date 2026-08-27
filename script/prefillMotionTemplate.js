@@ -1,8 +1,44 @@
 import { sameStartKey } from "./utils/utils.js";
 
 /**
+ * @typedef {Object} MotionTemplateQuery
+ * @property {string|Array<string>} [particleShape] Particle shape identifier (e.g., "CIRCLE", "STAR", "TOR", "DIAMOND").
+ * @property {number|string|Array<number|string>} [spawningFrequence] Frequency of particle spawning.
+ * @property {number|string|Array<number|string>} [spawningNumber] Number of particles spawned per cycle.
+ * @property {number} [maxParticles] Maximum allowable active particles for this emitter.
+ * @property {number|string} [emissionDuration] Duration of particle emission in milliseconds.
+ * @property {{x: number|string, y: number|string, z: number|string}} [source] Emission source coordinate offset.
+ * @property {{x: number|string, y: number|string, z: number|string}} [positionSpawning] Spawning position offset.
+ * @property {number|string|Array<number|string>} [particleLifetime] Particle lifetime range or fixed value in milliseconds.
+ * @property {number|string|Array<number|string>} [particleVelocityStart] Starting velocity percentage or value.
+ * @property {number|string|Array<number|string>} [particleVelocityEnd] Ending velocity percentage or value.
+ * @property {number|string|Array<number|string>} [particleAxisElevationAngle] Axis elevation angle in degrees.
+ * @property {number|string|Array<number|string>} [particleRiseRateStart] Starting elevation rise rate.
+ * @property {number|string|Array<number|string>} [particleRiseRateEnd] Ending elevation rise rate.
+ * @property {number|string|Array<number|string>} [particleAngleStart] Starting emission angle in degrees.
+ * @property {number|string|Array<number|string>} [particleAngleEnd] Ending emission angle in degrees or sameStartKey.
+ * @property {number|string|Array<number|string>} [particleRadiusStart] Starting orbital radius.
+ * @property {number|string|Array<number|string>} [particleRadiusEnd] Ending orbital radius.
+ * @property {number|string|{x: number|string, y: number|string}|Array} [particleSizeStart] Starting particle size.
+ * @property {number|string|{x: number|string, y: number|string}|Array} [particleSizeEnd] Ending particle size.
+ * @property {number|string|Array<number|string>} [particleRotationStart] Starting particle rotation angle in degrees.
+ * @property {number|string|Array<number|string>} [particleRotationEnd] Ending particle rotation angle in degrees.
+ * @property {number|string|Array<number|string>} [alphaStart] Starting opacity alpha value (0 to 1).
+ * @property {number|string|Array<number|string>} [alphaEnd] Ending opacity alpha value (0 to 1).
+ * @property {number|string|Array<number|string>} [vibrationAmplitudeStart] Starting vibration amplitude.
+ * @property {number|string|Array<number|string>} [vibrationAmplitudeEnd] Ending vibration amplitude.
+ * @property {number|string|Array<number|string>} [vibrationFrequencyStart] Starting vibration frequency.
+ * @property {number|string|Array<number|string>} [vibrationFrequencyEnd] Ending vibration frequency.
+ * @property {string} [pathType] Trajectory path type (e.g., "LINEAR", "CURVE").
+ * @property {boolean} [onlyEmitterFollow] Whether particles only follow the emitter object.
+ * @property {boolean} [freezeOnPause] Whether particle motion freezes when the game is paused.
+ * @property {MotionTemplateQuery} [subParticles] Configuration options for trailing sub-particles.
+ * @property {Array<MotionTemplateQuery|string>} [next] Chained motion template definitions.
+ */
+
+/**
  * Returns default motion template configuration.
- * @returns {TODO type} Object containing default particle motion properties.
+ * @returns {MotionTemplateQuery} Object containing default particle motion properties.
  */
 export const defaultMotionTemplate = () => {
     return {
@@ -264,7 +300,7 @@ const flashMotionTemplate = {
 
 /**
  * Dictionary of built-in motion templates.
- * @type {Record<string, TODO type>}
+ * @type {Record<string, MotionTemplate>}
  */
 export const motionTemplateDictionnary = {
     breath: breathMotionTemplate,
