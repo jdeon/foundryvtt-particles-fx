@@ -156,7 +156,7 @@ function getCustomPrefillColorTemplate(key){
 /**
  * Validates parameters for adding custom prefill templates.
  * @param {string} key - Template key to validate.
- * @param {TODO type} customPrefillTemplate - Template configuration to validate.
+ * @param {(import("./script/prefillMotionTemplate.js").MotionTemplateQuery & import("./script/prefillColorTemplate.js").ColorTemplateQuery)} customPrefillTemplate - Template configuration to validate.
  * @returns {boolean} True if key and template are valid.
  */
 function isCustomPrefillTemplateParamValid(key, customPrefillTemplate){

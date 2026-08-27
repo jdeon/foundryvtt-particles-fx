@@ -12,7 +12,7 @@ import { setupAutomation, automationInitialisation } from "./script/autoGenerati
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 /**
  * Temporarily stores the first scene emitters queries if canvas is ready before game ready hook.
- * @type {Array<TODO type>|undefined}
+ * @type {Array<import("./script/prefillMotionTemplate.js").MotionTemplateQuery & import("./script/prefillColorTemplate.js").ColorTemplateQuery>}
  */
 let firstSceneEmittersQueries
 
@@ -115,10 +115,6 @@ Hooks.on("setup", () => {
         type: Object,
         scope: 'world',
         config: false,
-        /**
-         * Triggers when the custom prefill motion template setting changes.
-         * @param {TODO type} value - Map of custom prefill motion templates.
-         */
         onChange: value => {
             addCustomPrefillMotionTemplate(value)
         }
@@ -131,10 +127,6 @@ Hooks.on("setup", () => {
         type: Object,
         scope: 'world',
         config: false,
-        /**
-         * Triggers when the custom prefill color template setting changes.
-         * @param {TODO type} value - Map of custom prefill color templates.
-         */
         onChange: value => {
             addCustomPrefillColorTemplate(value)
         }
@@ -190,7 +182,7 @@ Hooks.once('ready', function () {
 //Closing canvas hooks
 /**
  * Handles the 'canvasTearDown' hook to persist active emitters and stop all particle emissions.
- * @returns {Array<TODO type>} List of stopped emitters.
+ * @returns {Array<number|string>} List of stopped emitters.
  */
 Hooks.on("canvasTearDown", () => {
     persistEmitters()

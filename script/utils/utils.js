@@ -270,7 +270,7 @@ export class Utils {
     /**
      * Evaluates random numbers, ranges (e.g. "10_25"), percentages, and advanced variables.
      * @param {number|string|Vector3|Object|Array} inValue - Raw input value or range expression.
-     * @param {Record<string, TODO type>} [advancedVariables] - Active advanced variables.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} [advancedVariables] - Active advanced variables.
      * @returns {number|string|Vector3|Object|Array|foundry.canvas.placeables.PlaceableObject} Resolved random or evaluated value.
      */
     static getRandomValueFrom(inValue, advancedVariables) {
@@ -314,8 +314,8 @@ export class Utils {
 
     /**
      * Evaluates random input and wraps it in a ParticleInput instance.
-     * @param {TODO type} inValue - Raw input property.
-     * @param {Record<string, TODO type>} advancedVariables - Active advanced variables.
+     * @param {number|string|Object|Array} inValue - Raw input property.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined>} advancedVariables - Active advanced variables.
      * @returns {ParticleInput} Built ParticleInput instance.
      */
     static getRandomParticuleInputFrom(inValue, advancedVariables) {
@@ -328,6 +328,7 @@ export class Utils {
      * Replaces variable mustache tags `{{varName}}` in strings with calculated values.
      * @param {string|Object} inValue - String or object containing variable tags.
      * @param {Record<string, TODO type>} advancedVariables - Map of evaluated advanced variables.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined>} advancedVariables - Map of evaluated advanced variables.
      * @returns {string|Object} Replaced string or object.
      */
     static _replaceWithAdvanceVariable(inValue, advancedVariables) {
@@ -367,7 +368,7 @@ export class Utils {
     /**
      * Evaluates random property values for all fields in an object.
      * @param {Object} inValue - Raw configuration object.
-     * @param {Record<string, TODO type>} advancedVariables - Active advanced variables map.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} advancedVariables - Active advanced variables map.
      * @param {boolean} [inputMode] - If true, wraps values into ParticleInput instances.
      * @returns {Record<string, TODO type>} Resolved object.
      */
@@ -392,10 +393,10 @@ export class Utils {
 
     /**
      * Handles nested array selection and resolves random element values.
-     * @param {Array<TODO type>} inArray - Array of values or sub-arrays.
-     * @param {Record<string, TODO type>} advancedVariables - Advanced variables map.
+     * @param {Array<number|string|Vector3|Object|Array>} inArray - Array of values or sub-arrays.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} advancedVariables - Advanced variables map.
      * @param {boolean} [inputMode] - If true, wraps values in ParticleInputs.
-     * @returns {Array<TODO type>} Resolved array of values.
+     * @returns {Array<number|string|Vector3|Object>} Resolved array of values.
      */
     static getArrayRandomValueFrom(inArray, advancedVariables, inputMode) {
         if (!Array.isArray(inArray)) return

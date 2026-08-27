@@ -217,7 +217,7 @@ function _initGlobalHooks(){
     /**
      * Hook triggered when a measured template is created.
      * @param {foundry.canvas.placeables.MeasuredTemplate} template - Created measured template.
-     * @param {TODO type} data - Template data.
+     * @param {Object} data - Template data.
      * @param {string} userId - ID of the creating user.
      */
     Hooks.on("createMeasuredTemplate", async (template, data, userId) => {

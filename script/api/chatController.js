@@ -118,7 +118,7 @@ export function initChatController() {
  * Handles particle emission requested via chat command arguments.
  * @param {Array<string>} args - Command line arguments passed in chat.
  * @param {Function} emmissionMethod - The emission method to invoke.
- * @param {TODO type} [input={}] - Input options for the emission.
+ * @param {import("./script/object/particleInput.js").MotionTemplateQuery & import("./script/object/particleInput.js").ColorTemplateQuery} [input={}] - Input options for the emission.
  * @returns {void}
  */
 function handleEmission (args, emmissionMethod, input = {}){
@@ -162,7 +162,7 @@ function handleEmission (args, emmissionMethod, input = {}){
 /**
  * Handles missile particle emission requested via chat arguments.
  * @param {Array<string>} args - Command arguments.
- * @param {TODO type} [input={}] - Input options object.
+ * @param {Array<import("./script/prefillMotionTemplate.js").MotionTemplateQuery & import("./script/prefillColorTemplate.js").ColorTemplateQuery>} [input={}] - Input options object.
  * @returns {void}
  */
 function handleMissile(args, input = {}){

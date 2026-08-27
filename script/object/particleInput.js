@@ -9,7 +9,7 @@ export class ParticleInput {
      * Factory method creating appropriate ParticleInput subclass based on input command and variables.
      * @param {number|Vector3} inputValue - Constant initial scalar or vector value.
      * @param {string|Vector3} inputCmd - Input command string or command vector.
-     * @param {Record<string, TODO type>} advancedVariables - Active advanced variables.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables.
      * @returns {ParticleInput} Instantiated ParticleInput instance.
      */
     static build(inputValue, inputCmd, advancedVariables){
@@ -195,7 +195,7 @@ export class TimedParticleInput  extends ParticleInput {
 
     /**
      * Evaluates dynamic timed value using active advanced variables.
-     * @param {Record<string, TODO type>} [advancedVariables] - Active advanced variables.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>>} [advancedVariables] - Active advanced variables.
      * @returns {number|string|symbol} Calculated timed scalar value.
      */
     getValue(advancedVariables){
@@ -245,7 +245,7 @@ export class TimedParticleInput  extends ParticleInput {
 
     /**
      * Evaluates timed value expression for current frame.
-     * @param {Record<string, TODO type>} advancedVariables - Active advanced variables map.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables map.
      * @returns {number} Evaluated frame result.
      */
     _computeTimeValue(advancedVariables){

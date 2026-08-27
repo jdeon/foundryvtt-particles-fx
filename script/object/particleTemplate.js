@@ -55,7 +55,7 @@ export class ParticleTemplate {
      * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
      * @param {boolean} freezeOnPause - Freeze state on game pause.
      * @param {Array<TODO type>} next - Array of chained template definitions.
-     * @param {TODO type} advanced - Advanced variables configuration object.
+     * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables configuration object.
      */
     constructor(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd,
         particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd,
@@ -232,7 +232,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
      * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
      * @param {boolean} freezeOnPause - Freeze state on game pause.
      * @param {Array<TODO type>} next - Array of next template steps.
-     * @param {TODO type} advanced - Advanced variables configuration.
+     * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables configuration.
      */
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
@@ -367,7 +367,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
      * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
      * @param {boolean} freezeOnPause - Freeze state on game pause.
      * @param {Array<TODO type>} next - Array of next steps.
-     * @param {TODO type} advanced - Advanced variables.
+     * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables.
      * @param {Array<ParticleTemplate>} subParticleTemplates - Templates for sub-particles trailing the missile.
      */
     constructor(source, targets, pathType, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
@@ -610,38 +610,38 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         );
     }
 
-/**
-     * Constructs a MissileParticleTemplate.
-     * @param {foundry.canvas.placeables.PlaceableObject | string} source - Source position or object.
-     * @param {Array<foundry.canvas.placeables.PlaceableObject | string>|foundry.canvas.placeables.PlaceableObject | string} targets - Target object(s).
-     * @param {string} pathType - Trajectory path type (LINEAR, CURVE).
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} positionSpawning - Spawning position offset.
-     * @param {number | string | Array<number|string>} velocityStart - Starting velocity.
-     * @param {number | string | Array<number|string>} velocityEnd - Ending velocity.
-     * @param {number | string | Array<number|string>} riseRateStart - Starting rise rate.
-     * @param {number | string | Array<number|string>} riseRateEnd - Ending rise rate.
-     * @param {number | string | Array<number|string>} angleStart - Starting angle.
-     * @param {number | string | Array<number|string>} angleEnd - Ending angle.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeStart - Starting size.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeEnd - Ending size.
-     * @param {number | string | Array<number|string>} particleRotationStart - Starting rotation.
-     * @param {number | string | Array<number|string>} particleRotationEnd - Ending rotation.
-     * @param {number | string | Array<number|string>} particleLifetime - Lifetime in ms.
-     * @param {string} particleShape - Shape key name.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} colorStart - Starting color.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} colorEnd - Ending color.
-     * @param {number | string | Array<number|string>} alphaStart - Starting alpha.
-     * @param {number | string | Array<number|string>} alphaEnd - Ending alpha.
-     * @param {number | string | Array<number|string>} vibrationAmplitudeStart - Starting vibration amplitude.
-     * @param {number | string | Array<number|string>} vibrationAmplitudeEnd - Ending vibration amplitude.
-     * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
-     * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
-     * @param {boolean} freezeOnPause - Freeze state on game pause.
-     * @param {Array<TODO type>} next - Array of next steps.
-     * @param {TODO type} advanced - Advanced variables.
-     * @param {Array<ParticleTemplate>} subParticleTemplates - Templates for sub-particles trailing the missile.
-     */
-    
+    /**
+         * Constructs a MissileParticleTemplate.
+         * @param {foundry.canvas.placeables.PlaceableObject | string} source - Source position or object.
+         * @param {Array<foundry.canvas.placeables.PlaceableObject | string>|foundry.canvas.placeables.PlaceableObject | string} targets - Target object(s).
+         * @param {string} pathType - Trajectory path type (LINEAR, CURVE).
+         * @param {number | string | Vector3 | Array<number|string|Vector3>} positionSpawning - Spawning position offset.
+         * @param {number | string | Array<number|string>} velocityStart - Starting velocity.
+         * @param {number | string | Array<number|string>} velocityEnd - Ending velocity.
+         * @param {number | string | Array<number|string>} riseRateStart - Starting rise rate.
+         * @param {number | string | Array<number|string>} riseRateEnd - Ending rise rate.
+         * @param {number | string | Array<number|string>} angleStart - Starting angle.
+         * @param {number | string | Array<number|string>} angleEnd - Ending angle.
+         * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeStart - Starting size.
+         * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeEnd - Ending size.
+         * @param {number | string | Array<number|string>} particleRotationStart - Starting rotation.
+         * @param {number | string | Array<number|string>} particleRotationEnd - Ending rotation.
+         * @param {number | string | Array<number|string>} particleLifetime - Lifetime in ms.
+         * @param {string} particleShape - Shape key name.
+         * @param {number | string | Vector3 | Array<number|string|Vector3>} colorStart - Starting color.
+         * @param {number | string | Vector3 | Array<number|string|Vector3>} colorEnd - Ending color.
+         * @param {number | string | Array<number|string>} alphaStart - Starting alpha.
+         * @param {number | string | Array<number|string>} alphaEnd - Ending alpha.
+         * @param {number | string | Array<number|string>} vibrationAmplitudeStart - Starting vibration amplitude.
+         * @param {number | string | Array<number|string>} vibrationAmplitudeEnd - Ending vibration amplitude.
+         * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
+         * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
+         * @param {boolean} freezeOnPause - Freeze state on game pause.
+         * @param {Array<TODO type>} next - Array of next steps.
+         * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables.
+         * @param {Array<ParticleTemplate>} subParticleTemplates - Templates for sub-particles trailing the missile.
+         */
+
 
     /**
      * Constructs a GravitingParticleTemplate.
@@ -672,7 +672,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
      * @param {boolean} onlyEmitterFollow - Whether particle only follows emitter.
      * @param {boolean} freezeOnPause - Freeze state on game pause.
      * @param {Array<TODO type>} next - Array of next steps.
-     * @param {TODO type} advanced - Advanced variables.
+     * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables.
      */
     constructor(source, target, angleStart, axisElevationAngle, angularVelocityStart, angularVelocityEnd, riseRateStart, riseRateEnd, radiusStart, radiusEnd,
         sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
