@@ -1,20 +1,22 @@
 import { ParticleInput } from "../object/particleInput.js";
 
 /**
- * Defines the event name to send all messages to over  `game.socket`.
- *
+ * Module identifier string.
  * @type {string}
  */
 export const s_MODULE_ID = 'particule-fx';
 
 
 /**
- * Defines the event name to send all messages to over  `game.socket`.
- *
+ * Defines the event name to send all messages to over `game.socket`.
  * @type {string}
  */
 export const s_EVENT_NAME = `module.${s_MODULE_ID}`;
 
+/**
+ * Mapping of particle shape identifiers to PIXI.Texture instances.
+ * @type {Record<string, PIXI.Texture>}
+ */
 export const SPRITE_TEXTURE_MAPPING = {
     CIRCLE: PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/circle-sprite-particle.png`),
     TOR: PIXI.Texture.from(`/modules/${s_MODULE_ID}/sprite/tor-sprite-particle.png`),
@@ -23,10 +25,19 @@ export const SPRITE_TEXTURE_MAPPING = {
 
 }
 
+/** Key constant indicating value should be copied from start property. */
 export const sameStartKey = 'sameStart'
 
+/**
+ * Representation of a 3D vector containing x, y, z coordinates and vector math operations.
+ */
 export class Vector3 {
 
+    /**
+     * Constructs or converts a number, string, array, or object into a Vector3 instance.
+     * @param {number|string|Array|{x?: number, y?: number, z?: number}|ParticleInput} object - Source data.
+     * @returns {Vector3|Array<Vector3>|undefined} Constructed Vector3 instance or array of instances.
+     */
     static build(object) {
         if (!object) {
             return undefined
@@ -57,6 +68,12 @@ export class Vector3 {
         return result
     }
 
+    /**
+     * Replaces sameStartKey sentinel strings in endVector with corresponding values from startVector.
+     * @param {Vector3} startVector - Reference start vector.
+     * @param {Vector3} endVector - Target end vector.
+     * @returns {Vector3} Updated end vector.
+     */
     static replaceSameAsStart(startVector, endVector) {
         if (endVector.x === sameStartKey && endVector.y === sameStartKey && endVector.z === sameStartKey) {
             return Vector3.build(startVector);
@@ -71,12 +88,23 @@ export class Vector3 {
         return endVector
     }
 
+    /**
+     * Constructs a Vector3 instance.
+     * @param {number|string} x - X coordinate or expression.
+     * @param {number|string} y - Y coordinate or expression.
+     * @param {number|string} z - Z coordinate or expression.
+     */
     constructor(x, y, z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
+    /**
+     * Adds scalar or Vector3 term to this vector.
+     * @param {number|Vector3} other - Scalar or vector to add.
+     * @returns {Vector3} New Vector3 result.
+     */
     add(other) {
         if (!isNaN(other)) {
             return new Vector3(this.x + other, this.y + other, this.z + other)
@@ -87,6 +115,11 @@ export class Vector3 {
         return this
     }
 
+    /**
+     * Subtracts scalar or Vector3 term from this vector.
+     * @param {number|Vector3} other - Scalar or vector to subtract.
+     * @returns {Vector3} New Vector3 result.
+     */
     minus(other) {
         if (!isNaN(other)) {
             return new Vector3(this.x - other, this.y - other, this.z - other)
@@ -97,6 +130,11 @@ export class Vector3 {
         return this
     }
 
+    /**
+     * Multiplies vector by scalar or vector component-wise.
+     * @param {number|Vector3} other - Scalar or vector factor.
+     * @returns {Vector3} New Vector3 result.
+     */
     multiply(other) {
         if (!isNaN(other)) {
             return new Vector3(this.x * other, this.y * other, this.z * other)
@@ -107,6 +145,11 @@ export class Vector3 {
         return this
     }
 
+    /**
+     * Divides vector by scalar or vector component-wise.
+     * @param {number|Vector3} other - Scalar divisor or vector divisor.
+     * @returns {Vector3} New Vector3 result.
+     */
     divide(other) {
         if (!isNaN(other) && other !== 0) {
             return new Vector3(this.x / other, this.y / other, this.z / other)
@@ -121,6 +164,11 @@ export class Vector3 {
         return this
     }
 
+    /**
+     * Rotates vector coordinates around Z axis by angle in radians.
+     * @param {number} zAngleRadiant - Angle in radians.
+     * @returns {{x: number, y: number, z: number}} Rotated coordinates object.
+     */
     rotateZVector(zAngleRadiant) {
         return {
             x: this.x * Math.cos(zAngleRadiant) - this.y * Math.sin(zAngleRadiant),
@@ -129,6 +177,10 @@ export class Vector3 {
         }
     }
 
+    /**
+     * Evaluates percent expressions on coordinates.
+     * @returns {boolean} True if all coordinates evaluated to valid numbers.
+     */
     computeVariable() {
         this.x = Utils._managePercent(this.x)
         this.y = Utils._managePercent(this.y)
@@ -137,6 +189,11 @@ export class Vector3 {
         return !(isNaN(this.x) || isNaN(this.y) || isNaN(this.z))
     }
 
+    /**
+     * Computes cross product with another vector.
+     * @param {Vector3} other - Other vector.
+     * @returns {Vector3} Cross product Vector3.
+     */
     cross(other) {
         if (other instanceof Vector3) {
             return new Vector3(
@@ -149,23 +206,45 @@ export class Vector3 {
         return this
     }
 
+    /**
+     * Computes 3D magnitude (length) of vector.
+     * @returns {number} Vector length.
+     */
     magnitude() {
         return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
     }
 
+    /**
+     * Returns unit vector in same direction.
+     * @returns {Vector3} Normalized Vector3.
+     */
     normalized() {
         return this.divide(this.magnitude());
     }
 }
 
+/**
+ * Utility class providing math, canvas grid conversion, and object resolution helpers.
+ */
 export class Utils {
 
+    /** Global elevation scaling factor setting value. */
     static doubleSizeElevation;
 
+    /**
+     * Calculates pixel-to-grid-distance conversion ratio.
+     * @returns {number} Pixels per grid unit.
+     */
     static pixelOfDistanceConvertor() {
         return canvas.scene.grid.size / canvas.scene.grid.distance
     }
 
+    /**
+     * Measures grid distance between two canvas points or placeable objects.
+     * @param {foundry.canvas.placeables.PlaceableObject|Vector3} source - Source point or object.
+     * @param {foundry.canvas.placeables.PlaceableObject|Vector3} target - Target point or object.
+     * @returns {number} Distance in grid units.
+     */
     static getGridDistanceBetweenPoint(source, target) {
         const distance = canvas.grid.measurePath([source, target])?.distance
 
@@ -176,6 +255,11 @@ export class Utils {
         return 1
     }
 
+    /**
+     * Retrieves a random element from an array.
+     * @param {Array<T>} array - Array of elements.
+     * @returns {T} Selected element or undefined.
+     */
     static retrieveRandomElementFromArray(array){
         if(array === undefined || ! Array.isArray(array)) return undefined;
 
@@ -183,6 +267,12 @@ export class Utils {
         return array[indexToRetrieve]
     }
 
+    /**
+     * Evaluates random numbers, ranges (e.g. "10_25"), percentages, and advanced variables.
+     * @param {number|string|Vector3|Object|Array} inValue - Raw input value or range expression.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} [advancedVariables] - Active advanced variables.
+     * @returns {number|string|Vector3|Object|Array|foundry.canvas.placeables.PlaceableObject} Resolved random or evaluated value.
+     */
     static getRandomValueFrom(inValue, advancedVariables) {
         if (!isNaN(inValue)) {
             return Number(inValue);
@@ -222,12 +312,25 @@ export class Utils {
         }
     }
 
+    /**
+     * Evaluates random input and wraps it in a ParticleInput instance.
+     * @param {number|string|Object|Array} inValue - Raw input property.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined>} advancedVariables - Active advanced variables.
+     * @returns {ParticleInput} Built ParticleInput instance.
+     */
     static getRandomParticuleInputFrom(inValue, advancedVariables) {
         const computeValue = Utils.getRandomValueFrom(inValue, advancedVariables)
 
         return ParticleInput.build(computeValue, inValue, advancedVariables)
     }
 
+    /**
+     * Replaces variable mustache tags `{{varName}}` in strings with calculated values.
+     * @param {string|Object} inValue - String or object containing variable tags.
+     * @param {Record<string, TODO type>} advancedVariables - Map of evaluated advanced variables.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined>} advancedVariables - Map of evaluated advanced variables.
+     * @returns {string|Object} Replaced string or object.
+     */
     static _replaceWithAdvanceVariable(inValue, advancedVariables) {
         if (!advancedVariables) {
             return inValue
@@ -262,6 +365,13 @@ export class Utils {
         return result
     }
 
+    /**
+     * Evaluates random property values for all fields in an object.
+     * @param {Object} inValue - Raw configuration object.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} advancedVariables - Active advanced variables map.
+     * @param {boolean} [inputMode] - If true, wraps values into ParticleInput instances.
+     * @returns {Record<string, TODO type>} Resolved object.
+     */
     static getObjectRandomValueFrom(inValue, advancedVariables, inputMode) {
         if (!inValue) return
 
@@ -282,8 +392,11 @@ export class Utils {
     }
 
     /**
-     * Handle the cas where it should return an array
-     * If there is nested array, it mean we choose randomly a index and handle the nested array item as random object
+     * Handles nested array selection and resolves random element values.
+     * @param {Array<number|string|Vector3|Object|Array>} inArray - Array of values or sub-arrays.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} advancedVariables - Advanced variables map.
+     * @param {boolean} [inputMode] - If true, wraps values in ParticleInputs.
+     * @returns {Array<number|string|Vector3|Object>} Resolved array of values.
      */
     static getArrayRandomValueFrom(inArray, advancedVariables, inputMode) {
         if (!Array.isArray(inArray)) return
@@ -314,6 +427,10 @@ export class Utils {
     }
 
 
+    /**
+     * Generates a random number in range (0, 1] inclusive of 1.
+     * @returns {number} Pseudo-random float between 0 (exclusive) and 1 (inclusive).
+     */
     static includingRandom() {
         if (Math.random() == 0) {
             return 1;
@@ -322,6 +439,12 @@ export class Utils {
         }
     }
 
+    /**
+     * Deep-merges input property templates with fallback default templates.
+     * @param {Object} prioritizeInput - Primary input object.
+     * @param {Object} defaultInput - Fallback default object.
+     * @returns {Object} Merged result object.
+     */
     static mergeInputTemplate(prioritizeInput, defaultInput) {
 
         if (!defaultInput) {
@@ -363,6 +486,10 @@ export class Utils {
         return result;
     }
 
+    /**
+     * Returns currently controlled token/placeable object on active canvas layer.
+     * @returns {foundry.canvas.placeables.PlaceableObject|undefined} Selected token placeable object.
+     */
     static getSelectedSource() {
         if (canvas.activeLayer.controlled.length === 0) {
             ui.notifications.error(game.i18n.localize("PARTICULE-FX.No-Token-selected"));
@@ -372,10 +499,20 @@ export class Utils {
         return canvas.activeLayer.controlled[0];
     }
 
+    /**
+     * Returns target token ID currently targeted by the active user.
+     * @returns {string|undefined} First targeted token ID or undefined.
+     */
     static getTargetId() {
         return game.user.targets.ids.length > 0 ? game.user.targets.ids[0] : undefined
     }
 
+    /**
+     * Calculates 3D center position vector `{x, y, z, r}` for a placeable object or coordinate point.
+     * @param {foundry.canvas.placeables.PlaceableObject|Vector3} source - Placeable token/template object or position object.
+     * @param {boolean} [isElevationManage=true] - Whether to incorporate elevation into Z coordinate.
+     * @returns {{x: number, y: number, z: number, r: number}|undefined} Center position object.
+     */
     static getSourcePosition(source, isElevationManage = true) {
         if (source === undefined || source === null || source.destroyed || source.x === undefined || source.y === undefined) {
             return
@@ -411,6 +548,11 @@ export class Utils {
         return result
     }
 
+    /**
+     * Computes sprite size multiplier based on elevation height.
+     * @param {number} elevation - Elevation height in pixels.
+     * @returns {number} Scale factor for width and height.
+     */
     static handleElevationFactorForSize(elevation) {
         if (!elevation || Number.isNaN(elevation)) {
             return 1
@@ -425,6 +567,11 @@ export class Utils {
         return Math.pow(2, factor)
     }
 
+    /**
+     * Searches all active canvas layers for a placeable object matching the given ID.
+     * @param {string} id - Placeable object ID.
+     * @returns {foundry.canvas.placeables.PlaceableObject|undefined} Matching placeable object or undefined.
+     */
     static getPlaceableObjectById(id) {
         if (!id) {
             return
@@ -444,6 +591,11 @@ export class Utils {
         return result
     }
 
+    /**
+     * Converts grid percentage string (e.g. "50%") into pixel value, or parses number.
+     * @param {number|string} input - Percentage string or number.
+     * @returns {number|undefined} Converted value in pixels or undefined.
+     */
     static _managePercent(input) {
         if (input === undefined) {
             return
@@ -462,6 +614,12 @@ export class Utils {
         }
     }
 
+    /**
+     * Computes array intersection between two arrays.
+     * @param {Array} array1 - First array.
+     * @param {Array} array2 - Second array.
+     * @returns {Array} Intersection array of elements present in both.
+     */
     static intersectionArray(array1, array2) {
         if (Array.isArray(array1) && array1?.length && Array.isArray(array2) && array2?.length) {
             return array1.filter(value => array2.includes(value));
@@ -470,6 +628,11 @@ export class Utils {
         return []
     }
 
+    /**
+     * Clamps a fraction value between -1 and 1.
+     * @param {number} input - Value to clamp.
+     * @returns {number} Clamped value between -1 and 1.
+     */
     static handleFraction(input) {
         if (input > 1) {
             return 1 //Fraction can t be more than 1
@@ -480,6 +643,11 @@ export class Utils {
         return input
     }
 
+    /**
+     * Retrieves PIXI.Texture matching a shape identifier or array of shape identifiers.
+     * @param {string|Array<string>} id - Shape key name or array of keys.
+     * @returns {PIXI.Texture} Corresponding PIXI.Texture instance.
+     */
     static getSpriteTextureFromId(id){
         let result
 
@@ -499,6 +667,12 @@ export class Utils {
         return SPRITE_TEXTURE_MAPPING.CIRCLE
     }
 
+    /**
+     * Replaces sameStartKey with start input value clone if present.
+     * @param {ParticleInput} particleInputStart - Reference start input.
+     * @param {ParticleInput} particleInputEnd - End input to check.
+     * @returns {ParticleInput} Final ParticleInput instance.
+     */
     static computeSameAsStart(particleInputStart, particleInputEnd){
         return particleInputEnd.getValue() === sameStartKey ? particleInputStart.clone() : particleInputEnd;
     }

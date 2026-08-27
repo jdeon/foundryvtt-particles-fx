@@ -7,7 +7,10 @@ import { defaultMotionTemplate } from "../prefillMotionTemplate.js"
 import { defaultColorTemplate } from "../prefillColorTemplate.js"
 import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
 
-
+/**
+ * Increments and returns the next emitter ID from world settings or via socket.
+ * @returns {number} The next unique numeric emitter ID.
+ */
 export function nextEmitterId() {
     let lastId = game.settings.get(s_MODULE_ID, "maxEmitterId");
     lastId++
@@ -25,6 +28,10 @@ export function nextEmitterId() {
     return lastId
 }
 
+/**
+ * Resets the max emitter ID setting back to zero.
+ * @returns {void}
+ */
 export function resetEmitterId() {
     if (game.user.isGM) {
         game.settings.set(s_MODULE_ID, "maxEmitterId", 0);
@@ -36,7 +43,11 @@ export function resetEmitterId() {
     }
 }
 
-
+/**
+ * Initializes and restarts persisted scene emitters upon canvas load.
+ * @param {Array<Object>} emittersQueries - Array of persisted emitter query configurations.
+ * @returns {void}
+ */
 export function initEmitters(emittersQueries) {
     const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
     if (isSaveAllowed && emittersQueries && Array.isArray(emittersQueries)) {
@@ -58,11 +69,24 @@ export function initEmitters(emittersQueries) {
     }
 }
 
+/**
+ * Triggers spray particle emission with provided templates or config arguments.
+ * @param {...Object} args - Variadic arguments containing motion/color templates and config objects.
+ * @returns {ParticlesEmitter} Created ParticlesEmitter instance.
+ */
 export function sprayParticles(...args) {
     const orderedInputs = _orderInputArg([...args, { type : 'Spraying'}]);
     return _handleMultipleEmission(orderedInputs, _sprayParticles)
 }
 
+/**
+ * Internal worker creating spray particle emitter instance.
+ * @param {Object} colorTemplate - Color template object.
+ * @param {Object} motionTemplate - Motion template object.
+ * @param {Object} inputObject - Input configuration parameters.
+ * @param {number|string} emitterId - Emitter ID metadata.
+ * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
+ */
 function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
@@ -73,6 +97,11 @@ function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) 
     return _abstractInitParticles(inputObject, finalInput, particleTemplate, emitterId)
 }
 
+/**
+ * Triggers missile particle emission along a trajectory path.
+ * @param {...Object} args - Variadic input arguments for missile particle emission.
+ * @returns {ParticlesEmitter} Created ParticlesEmitter instance.
+ */
 export function missileParticles(...args) {
     const orderedInputs = _orderInputArg([...args, { type : 'Missile'}]);
 
@@ -93,6 +122,11 @@ export function missileParticles(...args) {
     }
 }
 
+/**
+ * Internal worker constructing missile particle template and emitter.
+ * @param {{emitterId:number|string, inputObject:Object, motionTemplate:Object, colorTemplates:Object, particleShapes:string}} options - Missile emission configuration options.
+ * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
+ */
 function _missileParticles({ emitterId, inputObject, motionTemplate, colorTemplates, particleShapes}) {
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
@@ -183,11 +217,24 @@ function _missileParticles({ emitterId, inputObject, motionTemplate, colorTempla
     return _abstractInitParticles(inputObject, finalInput, particleTemplate, emitterId)
 }
 
+/**
+ * Triggers gravitating/orbital particle emission.
+ * @param {...Object} args - Variadic input arguments.
+ * @returns {ParticlesEmitter} Created ParticlesEmitter instance.
+ */
 export function gravitateParticles(...args) {
     const orderedInputs = _orderInputArg([...args, { type : 'Graviting'}]);
     return _handleMultipleEmission(orderedInputs, _gravitateParticles)
 }
 
+/**
+ * Internal worker creating gravitating particle emitter instance.
+ * @param {Object} colorTemplate - Color template object.
+ * @param {Object} motionTemplate - Motion template object.
+ * @param {Object} inputObject - Input configuration parameters.
+ * @param {number|string} emitterId - Emitter ID metadata.
+ * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
+ */
 function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
@@ -198,6 +245,11 @@ function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitter
     return _abstractInitParticles(inputObject, finalInput, particleTemplate, emitterId)
 }
 
+/**
+ * Constructs a parent dummy input object that coordinates chained child emission workflows.
+ * @param {Array<Object>} childsInputs - Array of child emission input definitions.
+ * @returns {Object>} Parent input object.
+ */
 export function buildInputForParentEmitter(childsInputs) {
     return {
             source: new Vector3(0,0,0),
@@ -211,6 +263,10 @@ export function buildInputForParentEmitter(childsInputs) {
         }
 }
 
+/**
+ * Persists active scene emitters into scene flags if saveEmitters setting is enabled.
+ * @returns {void}
+ */
 export function persistEmitters() {
     const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
 
@@ -232,6 +288,11 @@ export function persistEmitters() {
     }
 }
 
+/**
+ * Stops all active particle emissions across the scene.
+ * @param {boolean} immediate - If true, stops immediately without fade.
+ * @returns {Array<string>} Array of stopped emitter IDs.
+ */
 export function stopAllEmission(immediate) {
     let deletedIds = []
 
@@ -255,6 +316,12 @@ export function stopAllEmission(immediate) {
     return deletedIds
 }
 
+/**
+ * Stops a specific particle emitter by its ID.
+ * @param {number|string} emitterId - Emitter ID to stop.
+ * @param {boolean} [immediate] - If true, stops immediately.
+ * @returns {string|undefined} Stopped emitter ID or undefined if not found.
+ */
 export function stopEmissionById(emitterId, immediate) {
 
     const emitter = findEmitterById(emitterId)
@@ -274,6 +341,13 @@ export function stopEmissionById(emitterId, immediate) {
     }
 }
 
+/**
+ * Stops an emitter workflow or all workflows.
+ * @param {number|string} emitterId - Target emitter ID.
+ * @param {boolean} [immediate] - Stop immediately.
+ * @param {boolean} [all] - Stop all active workflows.
+ * @returns {string|undefined} Stopped emitter ID.
+ */
 export function stopWorkflow(emitterId, immediate, all){
     if(all) {
         ParticleWorkFlowManager.stopAll(immediate);
@@ -297,7 +371,11 @@ export function stopWorkflow(emitterId, immediate, all){
     }
 }
 
-//if found emitter has parent workflow return it
+/**
+ * Looks up an emitter instance by ID, supporting shortcuts "f"/"first" and "l"/"last".
+ * @param {number|string} emitterId - Emitter ID or shortcut.
+ * @returns {ParticlesEmitter|undefined} Found emitter instance.
+ */
 function findEmitterById(emitterId){
     if (emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))) {
         //Find last emitter
@@ -310,6 +388,11 @@ function findEmitterById(emitterId){
     } 
 }
 
+/**
+ * Finds top-level parent emitter for a nested workflow emitter.
+ * @param {ParticlesEmitter} emitter - Emitter instance.
+ * @returns {ParticlesEmitter} Top-level parent emitter instance.
+ */
 function findParentEmitterIdAlive(emitter){
     let parent = emitter;
     let current;
@@ -329,6 +412,12 @@ function findParentEmitterIdAlive(emitter){
     return current
 }
 
+/**
+ * Renders and posts a whisper chat message summarizing emission state.
+ * @param {number|string} emitterId - Target emitter ID.
+ * @param {boolean} [verbal] - Whether to include raw original query.
+ * @returns {Promise<string>} Rendered HTML message content.
+ */
 export async function writeMessageForEmissionById(emitterId, verbal) {
     let emitter = ParticlesEmitter.emitters.find(emitter => emitter.id === emitterId);
 
@@ -350,6 +439,14 @@ export async function writeMessageForEmissionById(emitterId, verbal) {
 }
 
 
+/**
+ * Helper to construct ParticlesEmitter and attach ticker callback.
+ * @param {Object} inputQuery - Raw query parameters.
+ * @param {Object} finalInput - Merged template input parameters.
+ * @param {Object} particleTemplate - Template instance.
+ * @param {number|string} emitterIds - Emitter ID object.
+ * @returns {ParticlesEmitter} Created emitter instance.
+ */
 function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitterIds) {
     const particlesEmitter = new ParticlesEmitter(
         emitterIds?.emitterId || nextEmitterId(),
@@ -376,6 +473,11 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
     return particlesEmitter
 }
 
+/**
+ * Categorizes argument inputs into config object, motion templates, color templates, and shapes.
+ * @param {Array<Object|string>} args - Raw argument list.
+ * @returns {{emitterId: number|string, inputObject: Object, motionNameTemplates: Array<string>, colorNameTemplates: Array<string>, particleShapes: Array<string>}} Sorted args object.
+ */
 function _orderInputArg(args) {
     let inputObject = {}
     let motionNameTemplates = []
@@ -402,6 +504,12 @@ function _orderInputArg(args) {
     return { emitterId, inputObject, motionNameTemplates, colorNameTemplates, particleShapes}
 }
 
+/**
+ * Handles multi-template or multi-shape combinations by building parent workflow emitters.
+ * @param {{ emitterId: string|number|undefined, inputObject:import("../prefillMotionTemplate.js").MotionTemplateQuery & import("../prefillColorTemplate.js").ColorTemplateQuery, motionNameTemplates: string | undefined, colorNameTemplates: string | undefined, particleShapes: string | undefined}} options - Parsed arguments options.
+ * @param {Function} callback - Worker emission callback.
+ * @returns {ParticlesEmitter} Instantiated emitter.
+ */
 function _handleMultipleEmission({ emitterId, inputObject, motionNameTemplates, colorNameTemplates, particleShapes} , callback) {
     let computedInput, motionTemplate, colorTemplate
     if(motionNameTemplates.length > 1 || colorNameTemplates.length > 1 || particleShapes.length > 1 ){
@@ -434,6 +542,13 @@ function _handleMultipleEmission({ emitterId, inputObject, motionNameTemplates, 
     return callback(colorTemplate, motionTemplate, computedInput, emitterId)
 }
 
+/**
+ * Merges color template, motion template, user input, and defaults into a complete configuration object.
+ * @param {Object} colorTemplate - Prefill color template.
+ * @param {Object} motionTemplate - Prefill motion template.
+ * @param {Object} inputObject - User input parameters.
+ * @returns {Object} Merged final input configuration.
+ */
 function _mergeTemplate(colorTemplate, motionTemplate, inputObject) {
     const inputMergeMotionTemplate = Utils.mergeInputTemplate(inputObject, motionTemplate)
     const inputMergeColorTemplate = Utils.mergeInputTemplate(inputMergeMotionTemplate, colorTemplate)

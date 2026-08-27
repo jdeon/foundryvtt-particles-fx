@@ -2,8 +2,16 @@ import { Utils } from "../../utils/utils.js"
 import { AutoEmissionTemplateCache } from "../autoEmissionTemplateCache.js"
 import { getColorsFromDamageRolls, EmitData, emitParticle, TYPE_EMISSION } from "../automaticGeneration.service.js"
 
+/**
+ * Initializes PF2e system hooks for automated particle generation.
+ * @returns {void}
+ */
 export function automationInitialisation() {
     //Hook pf2e.rollDamageV2 has too low data
+    /**
+     * Intercepts rendered PF2e chat messages to trigger particle effects on spell use or damage rolls.
+     * @param {documents.ChatMessage} chatMessageData - Chat message data object.
+     */
     Hooks.on("renderChatMessage", async (chatMessageData) => {
         const usedItem = chatMessageData.item;
         const isSpell = usedItem?.type === 'spell';
@@ -64,10 +72,20 @@ export function automationInitialisation() {
     })
 }
 
+/**
+ * Maps a PF2e damage roll to a color template identifier.
+ * @param {foundry.dice.Roll} roll - PF2e damage roll instance.
+ * @returns {string|undefined} Color template ID or undefined.
+ */
 export function getColorFromDamageRolls(roll) {
     return DAMAGE_COLOR[roll.type]
 }
 
+/**
+ * Extracts a composite item ID from a PF2e measured template or message origin.
+ * @param {Template} template - Template or message object.
+ * @returns {string|undefined} Composite ID in format `actorId_itemId` or undefined.
+ */
 export function getItemIdFromTemplate(template) {
     const originsTemplate = template?.flags?.pf2e?.origin?.uuid?.split('.') ?? []
 
@@ -82,6 +100,14 @@ export function getItemIdFromTemplate(template) {
     }
 }
 
+/**
+ * Determines particle emission type based on PF2e item traits and range.
+ * @param {Item} item - The PF2e item.
+ * @param {boolean} hasDammage - Whether action inflicts damage.
+ * @param {boolean} isHealing - Whether action is healing.
+ * @param {boolean} isMeleeRange - Whether target is within melee range.
+ * @returns {number} Numeric emission type value from TYPE_EMISSION.
+ */
 function _findTypeEmission(item, hasDammage, isHealing, isMeleeRange) {
     let emissionType
     if( isHealing ) {
@@ -101,12 +127,18 @@ function _findTypeEmission(item, hasDammage, isHealing, isMeleeRange) {
     return emissionType
 }
 
+/**
+ * Checks whether a PF2e item is considered a melee attack/reach.
+ * @param {Item} item - Item to check.
+ * @returns {boolean} True if melee, false otherwise.
+ */
 function isMelee(item){
     if(item.isMelee !== undefined) return item.isMelee
 
     return item.system.reach <= canvas.scene.grid.distance
 }
 
+/** Map of PF2e damage types to particle color template keys. */
 const DAMAGE_COLOR = {
     //Energy
     acid: "cyber",
@@ -129,6 +161,7 @@ const DAMAGE_COLOR = {
     spirit: "charm"
 }
 
+/** Map of PF2e spell traditions to particle color template keys. */
 const MAGIC_SPELL_TRADITION_COLOR = {
     arcane: "silver",
     divine: "light",

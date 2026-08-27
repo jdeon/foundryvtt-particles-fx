@@ -13,6 +13,10 @@ const SUPPORTED_SYSTEM = {
 let systemMethods
 let isInit = false
 
+/**
+ * Enumeration of automatic particle emission types.
+ * @type {Record<string, number>}
+ */
 export const TYPE_EMISSION = {
     meleeAttack: 1,
     rangeAttack: 2,
@@ -20,22 +24,42 @@ export const TYPE_EMISSION = {
     penaltyEffect: 4,
 }
 
+/**
+ * Data structure holding configuration for an automated particle emission.
+ */
 export class EmitData {
+    /**
+     * @param {TYPE_EMISSION} type - Emission type from TYPE_EMISSION.
+     * @param {foundry.canvas.placeables.PlaceableObject} source - Source placeable canvas object.
+     * @param {foundry.canvas.placeables.PlaceableObject} target - Target placeable canvas object.
+     * @param {number} distance - Grid distance between source and target.
+     */
     constructor (type, source, target, distance){
-        this.type = type //TYPE_EMISSION
-        this.source = source //Placeable object
-        this.target = target //Placeable object
-        this.distance = distance //number
+        this.type = type
+        this.source = source
+        this.target = target 
+        this.distance = distance
     }
 }
 
+/**
+ * Data structure holding color ID and fraction proportion for damage rolls.
+ */
 export class ColorData {
+    /**
+     * @param {string|undefined} id - Color template key or undefined for default.
+     * @param {number} fraction - Proportion ratio between 0 and 1.
+     */
     constructor (id, fraction){
         this.id = id //string
         this.fraction = fraction //number
     }
 }
 
+/**
+ * Sets up module settings for system automation.
+ * @returns {void}
+ */
 export function setupAutomation(){
     systemMethods = SUPPORTED_SYSTEM[game.system.id]
 
@@ -52,6 +76,10 @@ export function setupAutomation(){
     }
 }
 
+/**
+ * Initializes system-specific automation handlers if enabled in settings.
+ * @returns {void}
+ */
 export function automationInitialisation(){
     if(!isInit && systemMethods && game.settings.get(s_MODULE_ID, "autoEmission")){
         systemMethods.automationInitialisation()
@@ -61,9 +89,10 @@ export function automationInitialisation(){
 }
 
 /**
- * 
- * @param {[EmitData]} emitDataArray 
- * @param {[ColorData]} colors 
+ * Triggers particle emissions for an array of emission data and color specifications.
+ * @param {Array<EmitData>} emitDataArray - Array of EmitData instances.
+ * @param {Array<ColorData>} colors - Array of ColorData instances.
+ * @returns {void}
  */
 export function emitParticle (emitDataArray, colors){
     if(! game.settings.get(s_MODULE_ID, "autoEmission")){
@@ -138,6 +167,11 @@ export function emitParticle (emitDataArray, colors){
     );
 }
 
+/**
+ * Calculates color proportions from system damage rolls.
+ * @param {Array<foundry.dice.Roll>|foundry.dice.Roll} rolls - Damage roll(s).
+ * @returns {Array<ColorData>} Computed array of ColorData instances.
+ */
 export function getColorsFromDamageRolls (rolls) {
     if(!Array.isArray(rolls)){
         rolls = [rolls]
@@ -175,7 +209,17 @@ export function getColorsFromDamageRolls (rolls) {
         .filter((finalColor) => finalColor.fraction > 0)
 }
 
+/**
+ * Registers global hooks for measured template creation.
+ * @returns {void}
+ */
 function _initGlobalHooks(){
+    /**
+     * Hook triggered when a measured template is created.
+     * @param {foundry.canvas.placeables.MeasuredTemplate} template - Created measured template.
+     * @param {Object} data - Template data.
+     * @param {string} userId - ID of the creating user.
+     */
     Hooks.on("createMeasuredTemplate", async (template, data, userId) => {
         if (userId !== game.user.id && ! systemMethods) return
 

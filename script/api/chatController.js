@@ -3,6 +3,10 @@ import { s_MODULE_ID, Utils, Vector3, SPRITE_TEXTURE_MAPPING } from "../utils/ut
 import emitController from "./emitController.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
 
+/**
+ * Mapping of '/pfx' chat commands associated with their handler functions.
+ * @type {Record<string, Function>}
+ */
 const EXISTING_CHAT_COMMAND = {
 	'stopAll': (args) => handleStopAll(args),
 	'stopById': (args) => handleStopById(args),
@@ -13,8 +17,16 @@ const EXISTING_CHAT_COMMAND = {
 	'help': () => game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Object.keys(EXISTING_CHAT_COMMAND).join(', ')
 }
 
+/**
+ * Dictionary containing localized option descriptions for chat command help.
+ * @type {Record<string, string>}
+ */
 const COMMON_OPTIONS = {};
 
+/**
+ * Initializes the chat controller by registering message patterns and hook listeners.
+ * @returns {void}
+ */
 export function initChatController() {
 
 	foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["pfx"] = new RegExp("^(/pfx )([^]*)", "i");
@@ -24,6 +36,7 @@ export function initChatController() {
 	delete foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["invalid"]
 	foundry.applications.sidebar.tabs.ChatLog.MESSAGE_PATTERNS["invalid"] = invalid
 
+	// Populates common option help messages when Foundry VTT is ready.
 	Hooks.on("ready", function () {
 		COMMON_OPTIONS.help= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.help");
 		COMMON_OPTIONS.instant= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.instant");
@@ -35,7 +48,13 @@ export function initChatController() {
 	    COMMON_OPTIONS.multiple= game.i18n.localize("PARTICULE-FX.Chat-Command.Options.multiple");
 	})
 
-	// Chat message hooks
+	/**
+	 * Hook listener to intercept chat messages starting with /pfx.
+	 * @param {ChatLog} chatlog - The ChatLog application instance.
+	 * @param {string} message - The raw chat message text.
+	 * @param {{ speaker: ChatSpeakerData; user: string }} chatData - Associated chat message data.
+	 * @returns {boolean|undefined} Returns false to prevent rendering the command text in chat.
+	 */
 	Hooks.on("chatMessage", function (chatlog, message, chatData) {
 		const tagLessMessage = message.replace(/^<p>|<\/p>$/g, "")
 		if (!tagLessMessage.startsWith('/pfx')) return;
@@ -73,6 +92,12 @@ export function initChatController() {
 		return false;
 	})
 
+	/**
+	 * Hook listener to attach click handlers to emitter deletion buttons in rendered chat messages.
+	 * @param {Chatlog} chatlog - The ChatLog instance.
+	 * @param {JQuery} html - The rendered HTML elements of the chat message.
+	 * @param {Object} data - Data associated with the rendered message.
+	 */
 	Hooks.on("renderChatMessage", function (chatlog, html, data) {
 		const buttons = html.find('button[name="button.delete-emitter"]');
 
@@ -89,6 +114,13 @@ export function initChatController() {
 	});
 }
 
+/**
+ * Handles particle emission requested via chat command arguments.
+ * @param {Array<string>} args - Command line arguments passed in chat.
+ * @param {Function} emmissionMethod - The emission method to invoke.
+ * @param {import("./script/object/particleInput.js").MotionTemplateQuery & import("./script/object/particleInput.js").ColorTemplateQuery} [input={}] - Input options for the emission.
+ * @returns {void}
+ */
 function handleEmission (args, emmissionMethod, input = {}){
 	const multipleEmission = hasOption(args, ['--multiple', '-m']);
 	let computedInput, computedArgs;
@@ -127,6 +159,12 @@ function handleEmission (args, emmissionMethod, input = {}){
 	}
 }
 
+/**
+ * Handles missile particle emission requested via chat arguments.
+ * @param {Array<string>} args - Command arguments.
+ * @param {Array<import("./script/prefillMotionTemplate.js").MotionTemplateQuery & import("./script/prefillColorTemplate.js").ColorTemplateQuery>} [input={}] - Input options object.
+ * @returns {void}
+ */
 function handleMissile(args, input = {}){
 	input.type = 'Missile';
 
@@ -141,12 +179,22 @@ function handleMissile(args, input = {}){
 	handleEmission(args, emitController.missile, input)
 }
 
+/**
+ * Stops an emitter by ID as commanded via chat.
+ * @param {Array<string>} args - Chat command arguments containing emitter ID.
+ * @returns {string} Formatted localized return message.
+ */
 function handleStopById(args){
 	const isImmediate = hasOption(args, ['--instant', '-i']);
 	const stoppedEmitters = emitController.stop(getEmittersId(args), isImmediate);
 	return game.i18n.localize("PARTICULE-FX.Chat-Command.stopById.return") + JSON.stringify(stoppedEmitters);
 }
 
+/**
+ * Stops an emitter workflow as commanded via chat.
+ * @param {Array<string>} args - Chat command arguments.
+ * @returns {string} Formatted localized return message.
+ */
 function handleStopWorkflow(args){
 	const isImmediate = hasOption(args, ['--instant', '-i']);
 	const all = hasOption(args, ['--all', '-a']);
@@ -154,17 +202,33 @@ function handleStopWorkflow(args){
 	return game.i18n.localize("PARTICULE-FX.Chat-Command.stopById.return") + JSON.stringify(stoppedEmitters);
 }
 
+/**
+ * Stops all particle emissions as commanded via chat.
+ * @param {Array<string>} args - Chat command arguments.
+ * @returns {string} Formatted localized return message.
+ */
 function handleStopAll(args){
 	const isImmediate = hasOption(args, ['--instant', '-i']);
 	const stoppedEmitters = emitController.stopAll(isImmediate);
 	return game.i18n.localize("PARTICULE-FX.Chat-Command.stopAll.return") + JSON.stringify(stoppedEmitters);	  
 }
 
+/**
+ * Checks whether at least one matching option exists in the given command options.
+ * @param {Array<string>} givenOptions - Array of options specified by user.
+ * @param {Array<string>} matchOptions - Array of flag options to look for.
+ * @returns {boolean} True if a matching option exists.
+ */
 function hasOption(givenOptions, matchOptions){
 	const intersections = givenOptions.filter(x => matchOptions.includes(x));
 	return intersections.length > 0;
 }
 
+/**
+ * Extracts or infers an emitter ID from chat arguments.
+ * @param {Array<string>} args - Chat command arguments.
+ * @returns {number|string} Emitter ID or indicator string ("f" or "l").
+ */
 function getEmittersId(args){
 	const numbers = args.filter((item) => ! isNaN(item));
 

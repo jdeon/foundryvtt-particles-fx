@@ -1,6 +1,12 @@
 import { ParticleInput } from "../object/particleInput.js"
 import { Utils, sameStartKey } from "../utils/utils.js"
 
+/**
+ * Generates emission properties for a circular measured template.
+ * @param {number} radius - Radius in grid distance units.
+ * @param {number} velocity - Emission velocity.
+ * @returns {{positionSpawning: Vector3, particleLifetime:number|undefined, angleStart: number|undefined, angleEnd: number|undefined}} Generated position, lifetime, and angle properties.
+ */
 function generateTemplateForCircle(radius, velocity){
     let result
     const angle = Utils.getRandomValueFrom('0_360')
@@ -36,6 +42,14 @@ function generateTemplateForCircle(radius, velocity){
     return result
 }
 
+/**
+ * Generates emission properties for a cone measured template.
+ * @param {number} radius - Cone radius in grid distance units.
+ * @param {number} openingAngle - Opening angle of the cone in degrees.
+ * @param {number} directionAngle - Center direction angle in degrees.
+ * @param {number} velocity - Emission velocity.
+ * @returns {{positionSpawning: Vector3, particleLifetime:number|undefined, angleStart: number|undefined, angleEnd: number|undefined}} Generated emission properties.
+ */
 function generateTemplateForCone(radius, openingAngle, directionAngle, velocity){
     let result
 
@@ -75,6 +89,14 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
     return result
 }
 
+/**
+ * Generates emission properties for a rectangular measured template.
+ * @param {number} diagonalLength - Diagonal length in distance units.
+ * @param {number} diagonalAngle - Angle of the diagonal in degrees.
+ * @param {number} velocity - Average emission velocity.
+ * @param {number} velocityGap - Half difference between start and end velocity.
+ * @returns {{positionSpawning: Vector3, particleLifetime:number|undefined, velocityStart:number|undefined, velocityEnd:number|undefined, angleStart: number|undefined, angleEnd: number|undefined}} Generated emission properties.
+ */
 function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, velocityGap){
     let result
 
@@ -145,6 +167,14 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, veloci
     return result
 }
 
+/**
+ * Generates emission properties for a ray/beam measured template.
+ * @param {number} length - Length of ray in grid distance units.
+ * @param {number} width - Width of ray in grid distance units.
+ * @param {number} directionAngle - Direction angle of ray in degrees.
+ * @param {number} velocity - Emission velocity.
+ * @returns {{positionSpawning: Vector3, particleLifetime:number|undefined, angleStart: number|undefined, angleEnd: number|undefined}} Generated emission properties.
+ */
 function generateTemplateForRay(length, width, directionAngle, velocity){
     let result
 
@@ -191,6 +221,13 @@ function generateTemplateForRay(length, width, directionAngle, velocity){
 }
 
 
+/**
+ * Generates particle template override parameters matching a canvas measured template.
+ * @param {TODO find foundry type MeasuredTemplate} measuredTemplate - Target measured template document.
+ * @param {number} velocityStart - Starting particle velocity.
+ * @param {number} velocityEnd - Ending particle velocity.
+ * @returns {{positionSpawning: ParticleInput<Vector3>, particleLifetime:ParticleInput<number>|undefined, velocityStart:ParticleInput<number>|undefined, velocityEnd:ParticleInput<number>|undefined, angleStart: ParticleInput<number>|undefined, angleEnd: ParticleInput<number>|undefined}} Property map converted to ParticleInput instances.
+ */
 export function generatePrefillTemplateForMeasured(measuredTemplate, velocityStart, velocityEnd){
     let result
 
@@ -211,6 +248,11 @@ export function generatePrefillTemplateForMeasured(measuredTemplate, velocitySta
     return mapToInputParticle(result)
 }
 
+/**
+ * Computes bounding dimensions (width and height) for a measured template.
+ * @param {TODO find foundry type MeasuredTemplate} measuredTemplate - Target measured template.
+ * @returns {{w: number, h: number}} Bounding width and height in distance units.
+ */
 export function computeTemplateForMeasuredDimension(measuredTemplate){
     let result
 
@@ -233,6 +275,11 @@ export function computeTemplateForMeasuredDimension(measuredTemplate){
     return result
 }
 
+/**
+ * Maps raw property values in an object to ParticleInput instances.
+ * @param {Record<string, number|string|Vector3>} result - Raw property dictionary.
+ * @returns {Record<string, ParticleInput>} Transformed object containing ParticleInputs.
+ */
 function mapToInputParticle(result){
     const keys = Object.keys(result)
 

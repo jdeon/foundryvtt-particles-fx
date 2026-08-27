@@ -2,6 +2,11 @@ import emitController from "./emitController.js";
 import templateController from "./templateController.js";
 import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
 
+/**
+ * Exposes the global particle API on the `window.particlesFx` object.
+ * Allows invocation of particle emission and template management methods globally.
+ * @returns {void}
+ */
 export function subscribeApiToWindow(){
     if(foundry.utils.getProperty(window,'particlesFx.isInit')) return;
             

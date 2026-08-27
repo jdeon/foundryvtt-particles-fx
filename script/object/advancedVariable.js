@@ -1,15 +1,25 @@
 import { Utils } from "../utils/utils.js"
 
+/**
+ * Handles evaluation and dependency sorting of dynamic timed variables in particle configurations.
+ */
 export class AdvancedVariable { 
 
+    /** List of reserved timed parameter names available to variable functions. */
     static RESERVED_TIMED_PARAM = [
         "dt", //Delta time with last frame
         "lt", //Lifetime (time of existence in millisecond)
         "tp"  //Percentage of living time
     ]
      
+    /** Logged error keys to avoid redundant warnings. */
     static LIST_OF_LOGGED_ERROR = []
 
+    /**
+     * Parses and resolves dependencies for a set of advanced variable definitions.
+     * @param {Record<string, Function|number|string>} advancedVariables - Map of raw variable definitions.
+     * @returns {Record<string, AdvancedVariable>|undefined} Resolved map of AdvancedVariable instances.
+     */
     static computeAdvancedVariables(advancedVariables){
         if(!advancedVariables) return
 
@@ -32,10 +42,23 @@ export class AdvancedVariable {
         {});
     }
 
+    /**
+     * Re-evaluates all advanced variables for a given time tick.
+     * @param {Record<string, AdvancedVariable>} advancedVariables - Map of active AdvancedVariable instances.
+     * @param {number} deltaTime - Frame delta time in milliseconds.
+     * @param {number} lifetime - Current particle lifetime in milliseconds.
+     * @param {number} lifetimeProportion - Ratio of elapsed lifetime (0 to 1).
+     * @returns {void}
+     */
     static generateAll(advancedVariables, deltaTime, lifetime, lifetimeProportion){
         Object.keys(advancedVariables).forEach((key) => advancedVariables[key].generate(advancedVariables, deltaTime, lifetime, lifetimeProportion));
     }
 
+    /**
+     * Ensures an error log key is only recorded once.
+     * @param {string} key - Error key to check/log.
+     * @returns {boolean} True if logged for the first time, false if previously logged.
+     */
     static _doLog(key){
         if(! AdvancedVariable.LIST_OF_LOGGED_ERROR.includes(key)){
             AdvancedVariable.LIST_OF_LOGGED_ERROR.push(key)
@@ -45,6 +68,12 @@ export class AdvancedVariable {
         }
     }
 
+    /**
+     * Extracts parameter names required by a variable function.
+     * @param {string} variableKey - Variable key name.
+     * @param {Function} inputFunction - Variable calculation function.
+     * @returns {Array<string>} Array of required parameter keys.
+     */
     static _getParam(variableKey, inputFunction){
         const regex = /\(\{.*?\}\)/g; //Regex to find ({...})
         const found = inputFunction.toString().match(regex);
@@ -65,6 +94,12 @@ export class AdvancedVariable {
         return result
     }
 
+    /**
+     * Comparator for sorting AdvancedVariables by dependency order.
+     * @param {AdvancedVariable} a - First instance.
+     * @param {AdvancedVariable} b - Second instance.
+     * @returns {number} Sorting order (-1, 0, or 1).
+     */
     static _compare(a, b) {
         if(a.requiredParam.length === 0 && b.requiredParam.length === 0){
             return 0
@@ -89,6 +124,11 @@ export class AdvancedVariable {
         return 0
     }
 
+    /**
+     * Constructs an AdvancedVariable instance.
+     * @param {string} key - Variable name.
+     * @param {Function|number|string} input - Initial constant value or calculation function.
+     */
     constructor(key, input){
         this.key = key
         this.input = input;
@@ -104,6 +144,14 @@ export class AdvancedVariable {
         }
     }
 
+    /**
+     * Evaluates the variable value for the current tick.
+     * @param {Record<string, AdvancedVariable>} advancedVariables - Map of existing AdvancedVariables.
+     * @param {number} deltaTime - Frame delta time in ms.
+     * @param {number} [lifetime=0] - Elapsed particle lifetime in ms.
+     * @param {number} [lifetimeProportion=0] - Proportion of total lifetime (0 to 1).
+     * @returns {void}
+     */
     generate(advancedVariables, deltaTime, lifetime = 0, lifetimeProportion = 0){
         if(this.isFinish || !this.input instanceof Function) return
 
@@ -167,6 +215,10 @@ export class AdvancedVariable {
         }
     }
 
+    /**
+     * Validates that the variable function only invokes safe Math methods.
+     * @returns {boolean} True if the function is safe to execute.
+     */
     _isSecuredFunction(){
         //check if function have . other than Math.
         if(!this.input instanceof Function) return true

@@ -1,6 +1,9 @@
 import { s_MODULE_ID } from "../utils/utils.js"
 import { s_MESSAGE_TYPES, emitForOtherClient } from "../utils/socketManager.js"
 
+/**
+ * Controller API for managing custom prefill motion and color templates.
+ */
 export default {
     motion : {
       add : addCustomPrefillMotionTemplate,
@@ -14,6 +17,12 @@ export default {
     }
 }
 
+/**
+ * Adds a custom prefill motion template to world settings or syncs it via sockets.
+ * @param {string} key - Unique key identifier for the motion template.
+ * @param {import("../prefillMotionTemplate.js").MotionTemplate} customPrefillMotionTemplate - Motion template configuration.
+ * @returns {void}
+ */
 function addCustomPrefillMotionTemplate(key, customPrefillMotionTemplate){
     if(! isCustomPrefillTemplateParamValid(key, customPrefillMotionTemplate)) return;
   
@@ -33,6 +42,11 @@ function addCustomPrefillMotionTemplate(key, customPrefillMotionTemplate){
     }
 }
   
+/**
+ * Removes a custom prefill motion template by its key.
+ * @param {string} key - Key of the motion template to remove.
+ * @returns {void}
+ */
 function removeCustomPrefillMotionTemplate(key){
     if(game.user.isGM){
       let actualPrefillMotionTemplate = game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate")
@@ -56,6 +70,11 @@ function removeCustomPrefillMotionTemplate(key){
     }
 }
   
+/**
+ * Retrieves a custom prefill motion template by key, or all templates if key is omitted.
+ * @param {string} [key] - Optional key of the motion template.
+ * @returns {import("../prefillMotionTemplate.js").MotionTemplate|Record<string, import("../prefillMotionTemplate.js").MotionTemplate>} The requested motion template or all templates.
+ */
 function getCustomPrefillMotionTemplate(key){
     const prefillMotionTemplate = game.settings.get(s_MODULE_ID, "customPrefillMotionTemplate")
   
@@ -66,6 +85,12 @@ function getCustomPrefillMotionTemplate(key){
     }
 }
   
+/**
+ * Adds a custom prefill color template to world settings or syncs it via sockets.
+ * @param {string} key - Unique key identifier for the color template.
+ * @param {import("../prefillColorTemplate.js").ColorTemplateQuery} customPrefillColorTemplate - Color template configuration.
+ * @returns {void}
+ */
 function addCustomPrefillColorTemplate(key, customPrefillColorTemplate){
     if(! isCustomPrefillTemplateParamValid(key, customPrefillColorTemplate)) return;
   
@@ -85,6 +110,11 @@ function addCustomPrefillColorTemplate(key, customPrefillColorTemplate){
     }
 }
   
+/**
+ * Removes a custom prefill color template by its key.
+ * @param {string} key - Key of the color template to remove.
+ * @returns {void}
+ */
 function removeCustomPrefillColorTemplate(key){
     if(game.user.isGM){
       let actualPrefillColorTemplate = game.settings.get(s_MODULE_ID, "customPrefillColorTemplate")
@@ -108,6 +138,11 @@ function removeCustomPrefillColorTemplate(key){
     }
 }
   
+/**
+ * Retrieves a custom prefill color template by key, or all templates if key is omitted.
+ * @param {string} [key] - Optional key of the color template.
+ * @returns {import("../prefillColorTemplate.js").ColorTemplateQuery|Record<string, import("../prefillColorTemplate.js").ColorTemplateQuery>} The requested color template or all templates.
+ */
 function getCustomPrefillColorTemplate(key){
     const prefillColorTemplate = game.settings.get(s_MODULE_ID, "customPrefillColorTemplate")
   
@@ -118,7 +153,12 @@ function getCustomPrefillColorTemplate(key){
     }
 }
 
-  
+/**
+ * Validates parameters for adding custom prefill templates.
+ * @param {string} key - Template key to validate.
+ * @param {(import("./script/prefillMotionTemplate.js").MotionTemplateQuery & import("./script/prefillColorTemplate.js").ColorTemplateQuery)} customPrefillTemplate - Template configuration to validate.
+ * @returns {boolean} True if key and template are valid.
+ */
 function isCustomPrefillTemplateParamValid(key, customPrefillTemplate){
     if(!key || ! typeof key === 'string' || !customPrefillTemplate || !customPrefillTemplate instanceof Object){
       ui.notifications.error(game.i18n.localize('PARTICULE-FX.Prefill-Template.Bad-Param'));
