@@ -223,7 +223,7 @@ function generateTemplateForRay(length, width, directionAngle, velocity){
 
 /**
  * Generates particle template override parameters matching a canvas measured template.
- * @param {TODO type} measuredTemplate - Target measured template document.
+ * @param {TODO find foundry type MeasuredTemplate} measuredTemplate - Target measured template document.
  * @param {number} velocityStart - Starting particle velocity.
  * @param {number} velocityEnd - Ending particle velocity.
  * @returns {{positionSpawning: ParticleInput<Vector3>, particleLifetime:ParticleInput<number>|undefined, velocityStart:ParticleInput<number>|undefined, velocityEnd:ParticleInput<number>|undefined, angleStart: ParticleInput<number>|undefined, angleEnd: ParticleInput<number>|undefined}} Property map converted to ParticleInput instances.
@@ -250,7 +250,7 @@ export function generatePrefillTemplateForMeasured(measuredTemplate, velocitySta
 
 /**
  * Computes bounding dimensions (width and height) for a measured template.
- * @param {TODO type} measuredTemplate - Target measured template.
+ * @param {TODO find foundry type MeasuredTemplate} measuredTemplate - Target measured template.
  * @returns {{w: number, h: number}} Bounding width and height in distance units.
  */
 export function computeTemplateForMeasuredDimension(measuredTemplate){

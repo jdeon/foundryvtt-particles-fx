@@ -50,8 +50,8 @@ export default class ParticlesEmitter {
     /**
      * Constructs a ParticlesEmitter instance.
      * @param {number|string} emitterId - Unique identifier for the emitter.
-     * @param {TODO type} particleTemplate - Template defining particle generation rules.
-     * @param {TODO type} emitterProperty - Emission frequency, max count, and duration settings.
+     * @param {ParticleTemplate} particleTemplate - Template defining particle generation rules.
+     * @param {{spawningFrequence: number, spawningNumber: number, maxParticles: number, emissionDuration: number}} emitterProperty - Emission frequency, max count, and duration settings.
      * @param {string} [parentWorkflowId] - ID of parent workflow step if spawned from workflow.
      * @param {number} [nbSibling=1] - Number of sibling emitters sharing particle quota.
      */

@@ -61,7 +61,7 @@ export class CompatibiltyV2Manager {
 
     /**
      * Scans and auto-corrects legacy parameter names in input objects (replacing 'particule' with 'particle').
-     * @param {Record<string, TODO type>} input - Input configuration object to correct.
+     * @param {Object} input - Input configuration object to correct.
      * @param {boolean} [preventMessage] - If true, suppresses warning notification.
      * @returns {Array<string>} List of corrected parameter keys.
      */

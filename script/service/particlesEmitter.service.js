@@ -506,7 +506,7 @@ function _orderInputArg(args) {
 
 /**
  * Handles multi-template or multi-shape combinations by building parent workflow emitters.
- * @param {TODO type} options - Parsed arguments options.
+ * @param {{ emitterId: string|number|undefined, inputObject:import("../prefillMotionTemplate.js").MotionTemplateQuery & import("../prefillColorTemplate.js").ColorTemplateQuery, motionNameTemplates: string | undefined, colorNameTemplates: string | undefined, particleShapes: string | undefined}} options - Parsed arguments options.
  * @param {Function} callback - Worker emission callback.
  * @returns {ParticlesEmitter} Instantiated emitter.
  */

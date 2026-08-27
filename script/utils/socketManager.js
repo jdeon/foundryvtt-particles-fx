@@ -67,7 +67,7 @@ export function listen() {
 
 /**
  * Handles incoming socket request for GM to update custom prefill template settings.
- * @param {TODO type} options - Object containing type, operation, key, and template data.
+ * @param {{type: "motion" | "color", operation: "add" | "remove" | "get", key: string, customPrefillTemplate: import("../prefillMotionTemplate.js").MotionTemplateQuery | import("../prefillColorTemplate.js").ColorTemplateQuery}} options - Object containing type, operation, key, and template data.
  * @returns {void}
  */
 function updateCustomPrefillTemplate({type, operation, key, customPrefillTemplate}) {
