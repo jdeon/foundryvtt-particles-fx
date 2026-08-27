@@ -59,7 +59,7 @@ function stopEmissionById(emitterId, immediate){
 /**
  * Stops all active emissions and resets emitter IDs.
  * @param {boolean} [immediate] - If true, stops immediately.
- * @returns {Array<TODO type>} List of stopped emitters.
+ * @returns {Array<number|string>} List of stopped emitters.
  */
 function stopAllEmission(immediate){
     particlesEmitterService.resetEmitterId()

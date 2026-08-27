@@ -277,7 +277,7 @@ export class TimedParticleVectorInput  extends TimedParticleInput {
 
     /**
      * Evaluates dynamic timed Vector3 value using active advanced variables.
-     * @param {Record<string, TODO type>} [advancedVariables] - Active advanced variables.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>} [advancedVariables] - Active advanced variables.
      * @returns {Vector3} Calculated Vector3 value.
      */
     getValue(advancedVariables){
@@ -327,7 +327,7 @@ export class TimedParticleVectorInput  extends TimedParticleInput {
 
     /**
      * Evaluates timed Vector3 expression for current frame.
-     * @param {Record<string, TODO type>} advancedVariables - Active advanced variables map.
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables map.
      * @returns {Vector3} Computed Vector3 result.
      */
     _computeTimeValue(advancedVariables){

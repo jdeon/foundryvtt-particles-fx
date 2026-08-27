@@ -54,7 +54,7 @@ export class ParticleTemplate {
      * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
      * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
      * @param {boolean} freezeOnPause - Freeze state on game pause.
-     * @param {Array<TODO type>} next - Array of chained template definitions.
+     * @param {Array<{type: "atEmissionStart"|"atParticleStart"|"atEmissionEnd"|"atParticleEnd", particleInputs : Array<string|import('../prefillMotionTemplate.js').MotionTemplateQuery|import('../prefillColorTemplate.js').ColorTemplateQuery>, delay: number | undefined}>} next - Array of chained template definitions.
      * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables configuration object.
      */
     constructor(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd,
@@ -231,7 +231,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
      * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
      * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
      * @param {boolean} freezeOnPause - Freeze state on game pause.
-     * @param {Array<TODO type>} next - Array of next template steps.
+     * @param {Array<{type: "atEmissionStart"|"atParticleStart"|"atEmissionEnd"|"atParticleEnd", particleInputs : Array<string|import('../prefillMotionTemplate.js').MotionTemplateQuery|import('../prefillColorTemplate.js').ColorTemplateQuery>, delay: number | undefined}>} next - Array of next template steps.
      * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables configuration.
      */
     constructor(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
@@ -366,7 +366,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
      * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
      * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
      * @param {boolean} freezeOnPause - Freeze state on game pause.
-     * @param {Array<TODO type>} next - Array of next steps.
+     * @param {Array<{type: "atEmissionStart"|"atParticleStart"|"atEmissionEnd"|"atParticleEnd", particleInputs : Array<string|import('../prefillMotionTemplate.js').MotionTemplateQuery|import('../prefillColorTemplate.js').ColorTemplateQuery>, delay: number | undefined}>} next - Array of next steps.
      * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables.
      * @param {Array<ParticleTemplate>} subParticleTemplates - Templates for sub-particles trailing the missile.
      */
@@ -637,7 +637,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
          * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
          * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
          * @param {boolean} freezeOnPause - Freeze state on game pause.
-         * @param {Array<TODO type>} next - Array of next steps.
+         * @param {Array<{type: "atEmissionStart"|"atParticleStart"|"atEmissionEnd"|"atParticleEnd", particleInputs : Array<string|import('../prefillMotionTemplate.js').MotionTemplateQuery|import('../prefillColorTemplate.js').ColorTemplateQuery>, delay: number | undefined}>} next - Array of next steps.
          * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables.
          * @param {Array<ParticleTemplate>} subParticleTemplates - Templates for sub-particles trailing the missile.
          */
@@ -671,7 +671,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
      * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
      * @param {boolean} onlyEmitterFollow - Whether particle only follows emitter.
      * @param {boolean} freezeOnPause - Freeze state on game pause.
-     * @param {Array<TODO type>} next - Array of next steps.
+     * @param {Array<{type: "atEmissionStart"|"atParticleStart"|"atEmissionEnd"|"atParticleEnd", particleInputs : Array<string|import('../prefillMotionTemplate.js').MotionTemplateQuery|import('../prefillColorTemplate.js').ColorTemplateQuery>, delay: number | undefined}>} next - Array of next steps.
      * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables.
      */
     constructor(source, target, angleStart, axisElevationAngle, angularVelocityStart, angularVelocityEnd, riseRateStart, riseRateEnd, radiusStart, radiusEnd,
