@@ -75,7 +75,7 @@ export function initEmitters(emittersQueries) {
  * @returns {ParticlesEmitter} Created ParticlesEmitter instance.
  */
 export function sprayParticles(...args) {
-    const orderedInputs = _orderInputArg([...args, { type : 'Spraying'}]);
+    const orderedInputs = _orderInputArg([...args, { type: 'Spraying' }]);
     return _handleMultipleEmission(orderedInputs, _sprayParticles)
 }
 
@@ -103,9 +103,9 @@ function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) 
  * @returns {ParticlesEmitter} Created ParticlesEmitter instance.
  */
 export function missileParticles(...args) {
-    const orderedInputs = _orderInputArg([...args, { type : 'Missile'}]);
+    const orderedInputs = _orderInputArg([...args, { type: 'Missile' }]);
 
-    if(orderedInputs.motionNameTemplates.length > 1){
+    if (orderedInputs.motionNameTemplates.length > 1) {
         const particleInputs = orderedInputs.motionNameTemplates.map((motionName) => [orderedInputs.inputObject, motionName, ...orderedInputs.colorNameTemplates, ...orderedInputs.particleShapes]);
         const parentInput = buildInputForParentEmitter(particleInputs);
         return _sprayParticles(undefined, undefined, parentInput, orderedInputs.emitterId) //Simpler for a spray to handle a parent workflow
@@ -113,7 +113,7 @@ export function missileParticles(...args) {
         const motionTemplate = ParticlesEmitter.prefillMotionTemplate[orderedInputs.motionNameTemplates[0]];
         const colorTemplates = orderedInputs.colorNameTemplates.map((templateName) => ParticlesEmitter.prefillColorTemplate[templateName]);
         return _missileParticles({
-            emitterId: orderedInputs.emitterId, 
+            emitterId: orderedInputs.emitterId,
             inputObject: orderedInputs.inputObject,
             motionTemplate,
             colorTemplates,
@@ -127,7 +127,7 @@ export function missileParticles(...args) {
  * @param {{emitterId:number|string, inputObject:Object, motionTemplate:Object, colorTemplates:Object, particleShapes:string}} options - Missile emission configuration options.
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
-function _missileParticles({ emitterId, inputObject, motionTemplate, colorTemplates, particleShapes}) {
+function _missileParticles({ emitterId, inputObject, motionTemplate, colorTemplates, particleShapes }) {
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
 
     const finalInput = _mergeTemplate(
@@ -136,7 +136,7 @@ function _missileParticles({ emitterId, inputObject, motionTemplate, colorTempla
         inputObject
     )
 
-    if(particleShapes.length > 0){
+    if (particleShapes.length > 0) {
         inputObject.particleShape = Utils.retrieveRandomElementFromArray(particleShapes);
     }
 
@@ -148,7 +148,7 @@ function _missileParticles({ emitterId, inputObject, motionTemplate, colorTempla
         shapeSafeArray.forEach((particleShape) => {
             const finalSubParticlesInput = Utils.mergeInputTemplate(finalInput.subParticles, colorTemplate)
 
-            if(colorTemplate === undefined){
+            if (colorTemplate === undefined) {
                 if (!finalSubParticlesInput.particleColorStart) {
                     finalSubParticlesInput.particleColorStart = finalInput.particleColorStart;
                     finalSubParticlesInput.particleColorEnd = finalInput.particleColorEnd;
@@ -157,7 +157,7 @@ function _missileParticles({ emitterId, inputObject, motionTemplate, colorTempla
                 }
             }
 
-            if(particleShape){
+            if (particleShape) {
                 finalSubParticlesInput.particleShape = particleShape;
             } else if (!finalInput.subParticles.particleShape) {
                 finalSubParticlesInput.particleShape = finalInput.particleShape;
@@ -174,7 +174,7 @@ function _missileParticles({ emitterId, inputObject, motionTemplate, colorTempla
                 subParticleTemplate.type = GravitingParticleTemplate.getType();
             }
 
-            if(subParticleTemplate){
+            if (subParticleTemplate) {
                 subParticleTemplates.push(subParticleTemplate)
             }
         })
@@ -223,7 +223,7 @@ function _missileParticles({ emitterId, inputObject, motionTemplate, colorTempla
  * @returns {ParticlesEmitter} Created ParticlesEmitter instance.
  */
 export function gravitateParticles(...args) {
-    const orderedInputs = _orderInputArg([...args, { type : 'Graviting'}]);
+    const orderedInputs = _orderInputArg([...args, { type: 'Graviting' }]);
     return _handleMultipleEmission(orderedInputs, _gravitateParticles)
 }
 
@@ -252,15 +252,15 @@ function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitter
  */
 export function buildInputForParentEmitter(childsInputs) {
     return {
-            source: new Vector3(0,0,0),
-            maxParticles: 0,
-            emissionDuration: ParticlesEmitter.UNTIL_CHILD_END_DURATION,
-            next: [{
-                type: "atEmissionStart",
-                delay: 0,
-                particleInputs: childsInputs
-            }]
-        }
+        source: new Vector3(0, 0, 0),
+        maxParticles: 0,
+        emissionDuration: ParticlesEmitter.UNTIL_CHILD_END_DURATION,
+        next: [{
+            type: "atEmissionStart",
+            delay: 0,
+            particleInputs: childsInputs
+        }]
+    }
 }
 
 /**
@@ -348,8 +348,8 @@ export function stopEmissionById(emitterId, immediate) {
  * @param {boolean} [all] - Stop all active workflows.
  * @returns {string|undefined} Stopped emitter ID.
  */
-export function stopWorkflow(emitterId, immediate, all){
-    if(all) {
+export function stopWorkflow(emitterId, immediate, all) {
+    if (all) {
         ParticleWorkFlowManager.stopAll(immediate);
 
         ParticlesEmitter.emitters.forEach(emitter => {
@@ -376,7 +376,7 @@ export function stopWorkflow(emitterId, immediate, all){
  * @param {number|string} emitterId - Emitter ID or shortcut.
  * @returns {ParticlesEmitter|undefined} Found emitter instance.
  */
-function findEmitterById(emitterId){
+function findEmitterById(emitterId) {
     if (emitterId === undefined || (typeof emitterId === 'string' && (emitterId.toLowerCase() === 'l' || emitterId.toLowerCase() === 'last'))) {
         //Find last emitter
         return findParentEmitterIdAlive(ParticlesEmitter.emitters[ParticlesEmitter.emitters.length - 1])
@@ -385,7 +385,7 @@ function findEmitterById(emitterId){
         return findParentEmitterIdAlive(ParticlesEmitter.emitters[0])
     } else {
         return ParticlesEmitter.emitters.find(emitter => emitter.id === String(emitterId));
-    } 
+    }
 }
 
 /**
@@ -393,20 +393,20 @@ function findEmitterById(emitterId){
  * @param {ParticlesEmitter} emitter - Emitter instance.
  * @returns {ParticlesEmitter} Top-level parent emitter instance.
  */
-function findParentEmitterIdAlive(emitter){
+function findParentEmitterIdAlive(emitter) {
     let parent = emitter;
     let current;
-    while (parent){
+    while (parent) {
         current = parent;
         const workflowId = current.parentWorkflowId;
 
-        if(workflowId){
+        if (workflowId) {
             const workflowEmitterId = workflowId.split(":")[0];
             parent = ParticlesEmitter.emitters.find(emitter => emitter.id === workflowEmitterId);
         } else {
             parent = undefined;
         }
-        
+
     }
 
     return current
@@ -453,7 +453,7 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
         particleTemplate,
         {
             spawningFrequence: finalInput.spawningFrequence,
-            spawningNumber:  finalInput.spawningNumber,
+            spawningNumber: finalInput.spawningNumber,
             maxParticles: finalInput.maxParticles,
             emissionDuration: finalInput.emissionDuration,
         },
@@ -486,22 +486,22 @@ function _orderInputArg(args) {
     let emitterId
 
     for (let arg of args) {
-        if (arg === undefined){
+        if (arg === undefined) {
             continue;
         } else if (arg.emitterId) {
             emitterId = arg
         } else if (arg instanceof Object) {
-            inputObject = {...inputObject, ...arg}
+            inputObject = { ...inputObject, ...arg }
         } else if (ParticlesEmitter.prefillMotionTemplate[arg]) {
             motionNameTemplates.push(arg)
         } else if (ParticlesEmitter.prefillColorTemplate[arg]) {
             colorNameTemplates.push(arg)
-        } else if (Object.keys(SPRITE_TEXTURE_MAPPING).includes(arg.toUpperCase())){
+        } else if (Object.keys(SPRITE_TEXTURE_MAPPING).includes(arg.toUpperCase())) {
             particleShapes.push(arg.toUpperCase());
         }
     }
 
-    return { emitterId, inputObject, motionNameTemplates, colorNameTemplates, particleShapes}
+    return { emitterId, inputObject, motionNameTemplates, colorNameTemplates, particleShapes }
 }
 
 /**
@@ -510,9 +510,9 @@ function _orderInputArg(args) {
  * @param {Function} callback - Worker emission callback.
  * @returns {ParticlesEmitter} Instantiated emitter.
  */
-function _handleMultipleEmission({ emitterId, inputObject, motionNameTemplates, colorNameTemplates, particleShapes} , callback) {
+function _handleMultipleEmission({ emitterId, inputObject, motionNameTemplates, colorNameTemplates, particleShapes }, callback) {
     let computedInput, motionTemplate, colorTemplate
-    if(motionNameTemplates.length > 1 || colorNameTemplates.length > 1 || particleShapes.length > 1 ){
+    if (motionNameTemplates.length > 1 || colorNameTemplates.length > 1 || particleShapes.length > 1) {
         const motionNameSafeArray = motionNameTemplates.length > 0 ? motionNameTemplates : [null];
         const colorNameSafeArray = colorNameTemplates.length > 0 ? colorNameTemplates : [null];
         const shapeSafeArray = particleShapes.length > 0 ? particleShapes : [null];
@@ -520,10 +520,10 @@ function _handleMultipleEmission({ emitterId, inputObject, motionNameTemplates, 
 
         const nbEmitterSibling = colorNameSafeArray.length * shapeSafeArray.length //Lower generated particles number depending of the number of emmitter generated
 
-        for(let motion of motionNameSafeArray){
-            for(let color of colorNameSafeArray){
-                for(let shape of shapeSafeArray){
-                    particleInputs.push([{...inputObject, _nbEmitterSibling: nbEmitterSibling}, motion, color, shape].filter((item) => item !== null));
+        for (let motion of motionNameSafeArray) {
+            for (let color of colorNameSafeArray) {
+                for (let shape of shapeSafeArray) {
+                    particleInputs.push([{ ...inputObject, _nbEmitterSibling: nbEmitterSibling }, motion, color, shape].filter((item) => item !== null));
                 }
             }
         }
@@ -533,8 +533,8 @@ function _handleMultipleEmission({ emitterId, inputObject, motionNameTemplates, 
         motionTemplate = motionNameTemplates.length === 1 ? ParticlesEmitter.prefillMotionTemplate[motionNameTemplates[0]] : undefined;
         colorTemplate = colorNameTemplates.length === 1 ? ParticlesEmitter.prefillColorTemplate[colorNameTemplates[0]] : undefined;
         computedInput = inputObject;
-        
-        if (particleShapes.length === 1){
+
+        if (particleShapes.length === 1) {
             computedInput.particleShape = particleShapes[0]
         }
     }
