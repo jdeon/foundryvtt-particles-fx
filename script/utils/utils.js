@@ -260,8 +260,8 @@ export class Utils {
      * @param {Array<T>} array - Array of elements.
      * @returns {T} Selected element or undefined.
      */
-    static retrieveRandomElementFromArray(array){
-        if(array === undefined || ! Array.isArray(array)) return undefined;
+    static retrieveRandomElementFromArray(array) {
+        if (array === undefined || !Array.isArray(array)) return undefined;
 
         const indexToRetrieve = Math.floor(Math.random() * array.length);
         return array[indexToRetrieve]
@@ -327,7 +327,6 @@ export class Utils {
     /**
      * Replaces variable mustache tags `{{varName}}` in strings with calculated values.
      * @param {string|Object} inValue - String or object containing variable tags.
-     * @param {Record<string, TODO type>} advancedVariables - Map of evaluated advanced variables.
      * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined>} advancedVariables - Map of evaluated advanced variables.
      * @returns {string|Object} Replaced string or object.
      */
@@ -342,9 +341,9 @@ export class Utils {
                 result[key] = Utils._replaceWithAdvanceVariable(inValue[key], advancedVariables)
             }
             return result
-        } 
+        }
 
-        if(typeof inValue !== "string") return inValue
+        if (typeof inValue !== "string") return inValue
 
         let valueAdvancedSplit = inValue.split(/{{|}}/)
 
@@ -370,7 +369,7 @@ export class Utils {
      * @param {Object} inValue - Raw configuration object.
      * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} advancedVariables - Active advanced variables map.
      * @param {boolean} [inputMode] - If true, wraps values into ParticleInput instances.
-     * @returns {Record<string, TODO type>} Resolved object.
+     * @returns {Record<string, number|string|Vector3|ParticleInput<number|string|Vector3>} Resolved object.
      */
     static getObjectRandomValueFrom(inValue, advancedVariables, inputMode) {
         if (!inValue) return
@@ -404,9 +403,9 @@ export class Utils {
         const containSubArray = inArray.filter((item) => Array.isArray(item));
         let arrayToHandle
 
-        if(containSubArray.length){ 
+        if (containSubArray.length) {
             const randomItem = Utils.retrieveRandomElementFromArray(inArray);
-            if(Array.isArray(randomItem)){
+            if (Array.isArray(randomItem)) {
                 arrayToHandle = randomItem;
             } else {
                 arrayToHandle = [randomItem]
@@ -415,7 +414,7 @@ export class Utils {
             arrayToHandle = inArray;
         }
 
-        let result = arrayToHandle.map((item) =>  Utils.getRandomValueFrom(item, advancedVariables));
+        let result = arrayToHandle.map((item) => Utils.getRandomValueFrom(item, advancedVariables));
 
         if (inputMode) {
             for (let i = 0; i < result.length; i++) {
@@ -648,11 +647,11 @@ export class Utils {
      * @param {string|Array<string>} id - Shape key name or array of keys.
      * @returns {PIXI.Texture} Corresponding PIXI.Texture instance.
      */
-    static getSpriteTextureFromId(id){
+    static getSpriteTextureFromId(id) {
         let result
 
-        if(id){
-            if(typeof id === "string"){
+        if (id) {
+            if (typeof id === "string") {
                 result = SPRITE_TEXTURE_MAPPING[id]
             } else if (Array.isArray(id) && id.length > 0) {
                 const randomId = Utils.retrieveRandomElementFromArray(id);
@@ -660,7 +659,7 @@ export class Utils {
             }
         }
 
-        if( result ) {
+        if (result) {
             return result
         }
 
@@ -673,7 +672,7 @@ export class Utils {
      * @param {ParticleInput} particleInputEnd - End input to check.
      * @returns {ParticleInput} Final ParticleInput instance.
      */
-    static computeSameAsStart(particleInputStart, particleInputEnd){
+    static computeSameAsStart(particleInputStart, particleInputEnd) {
         return particleInputEnd.getValue() === sameStartKey ? particleInputStart.clone() : particleInputEnd;
     }
 }

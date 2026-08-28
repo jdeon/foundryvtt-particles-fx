@@ -34,10 +34,10 @@ export class EmitData {
      * @param {foundry.canvas.placeables.PlaceableObject} target - Target placeable canvas object.
      * @param {number} distance - Grid distance between source and target.
      */
-    constructor (type, source, target, distance){
+    constructor(type, source, target, distance) {
         this.type = type
         this.source = source
-        this.target = target 
+        this.target = target
         this.distance = distance
     }
 }
@@ -50,7 +50,7 @@ export class ColorData {
      * @param {string|undefined} id - Color template key or undefined for default.
      * @param {number} fraction - Proportion ratio between 0 and 1.
      */
-    constructor (id, fraction){
+    constructor(id, fraction) {
         this.id = id //string
         this.fraction = fraction //number
     }
@@ -60,10 +60,10 @@ export class ColorData {
  * Sets up module settings for system automation.
  * @returns {void}
  */
-export function setupAutomation(){
+export function setupAutomation() {
     systemMethods = SUPPORTED_SYSTEM[game.system.id]
 
-    if(systemMethods){
+    if (systemMethods) {
         game.settings.register(s_MODULE_ID, "autoEmission", {
             name: game.i18n.localize("PARTICULE-FX.Settings.autoEmission.label"),
             hint: game.i18n.localize("PARTICULE-FX.Settings.autoEmission.description"),
@@ -80,11 +80,11 @@ export function setupAutomation(){
  * Initializes system-specific automation handlers if enabled in settings.
  * @returns {void}
  */
-export function automationInitialisation(){
-    if(!isInit && systemMethods && game.settings.get(s_MODULE_ID, "autoEmission")){
+export function automationInitialisation() {
+    if (!isInit && systemMethods && game.settings.get(s_MODULE_ID, "autoEmission")) {
         systemMethods.automationInitialisation()
         _initGlobalHooks()
-        isInit =true
+        isInit = true
     }
 }
 
@@ -94,74 +94,74 @@ export function automationInitialisation(){
  * @param {Array<ColorData>} colors - Array of ColorData instances.
  * @returns {void}
  */
-export function emitParticle (emitDataArray, colors){
-    if(! game.settings.get(s_MODULE_ID, "autoEmission")){
+export function emitParticle(emitDataArray, colors) {
+    if (!game.settings.get(s_MODULE_ID, "autoEmission")) {
         console.log('particles FX | autoEmission is disable')
         return
     }
 
-    emitDataArray.forEach((emitData) => 
+    emitDataArray.forEach((emitData) =>
         colors.forEach((color) => {
             let gridSizeSource
-            switch(emitData.type){
-                case TYPE_EMISSION.meleeAttack :
+            switch (emitData.type) {
+                case TYPE_EMISSION.meleeAttack:
                     emitController.gravit(
                         {
                             source: emitData.source?.id,
-                            target: emitData.target?.id, 
-                            spawningFrequence: color.fraction, 
+                            target: emitData.target?.id,
+                            spawningFrequence: color.fraction,
                             particleRadiusStart: [`${emitData.distance * 50}%`, `${emitData.distance * 75}%`, `${emitData.distance * 100}%`],
-                            particleSizeStart: {x: emitData.distance * 5, y:emitData.distance * 25},                        
-                        }, 
+                            particleSizeStart: { x: emitData.distance * 5, y: emitData.distance * 25 },
+                        },
                         color.id,
                         'slash'
                     )
                     break
-                case TYPE_EMISSION.rangeAttack :
+                case TYPE_EMISSION.rangeAttack:
                     emitController.missile(
                         {
                             source: emitData.source?.id,
-                            target: emitData.target?.id, 
-                            spawningFrequence: 10*color.fraction,
+                            target: emitData.target?.id,
+                            spawningFrequence: 10 * color.fraction,
                             particleVelocityStart: (emitData.distance * 100) + '%'
-                        }, 
+                        },
                         color.id
                     )
                     break
-                case TYPE_EMISSION.bonusEffect :
-                    gridSizeSource = (Math.max(emitData.target.w, emitData.target.h) ?? canvas.scene.grid.size)/canvas.scene.grid.size 
+                case TYPE_EMISSION.bonusEffect:
+                    gridSizeSource = (Math.max(emitData.target.w, emitData.target.h) ?? canvas.scene.grid.size) / canvas.scene.grid.size
                     emitController.gravit(
                         {
                             source: emitData.target.id,
                             emissionDuration: 2000,
-                            spawningFrequence: 5*color.fraction,
-                            particleRadiusStart: `${gridSizeSource*50}%`,
-                            particleRadiusEnd: `${gridSizeSource*50 + 25}%_${gridSizeSource*100 + 50}%`,
-                        }, 
+                            spawningFrequence: 5 * color.fraction,
+                            particleRadiusStart: `${gridSizeSource * 50}%`,
+                            particleRadiusEnd: `${gridSizeSource * 50 + 25}%_${gridSizeSource * 100 + 50}%`,
+                        },
                         color.id,
                         "aura"
                     )
                     break
-                case TYPE_EMISSION.penaltyEffect :
-                    gridSizeSource = (Math.max(emitData.target.w, emitData.target.h) ?? canvas.scene.grid.size)/canvas.scene.grid.size 
+                case TYPE_EMISSION.penaltyEffect:
+                    gridSizeSource = (Math.max(emitData.target.w, emitData.target.h) ?? canvas.scene.grid.size) / canvas.scene.grid.size
                     emitController.gravit(
                         {
                             source: emitData.target.id,
                             emissionDuration: 2000,
-                            spawningFrequence: 6*color.fraction,
-                            particleRadiusStart: `${gridSizeSource*50}%`,
-                            particleRadiusEnd: `${gridSizeSource*50 + 25}%_${gridSizeSource*100 + 50}%`,
-                            particleRadiusStart: `${gridSizeSource*50 + 50}%`,
-                            particleRadiusEnd: `${gridSizeSource*25}%`,
-                        }, 
+                            spawningFrequence: 6 * color.fraction,
+                            particleRadiusStart: `${gridSizeSource * 50}%`,
+                            particleRadiusEnd: `${gridSizeSource * 50 + 25}%_${gridSizeSource * 100 + 50}%`,
+                            particleRadiusStart: `${gridSizeSource * 50 + 50}%`,
+                            particleRadiusEnd: `${gridSizeSource * 25}%`,
+                        },
                         color.id,
                         "vortex"
                     )
                     break
-                default :
-                console.warn('Automatic emission with unknown type ' + emitData.type)
-                break
-                    
+                default:
+                    console.warn('Automatic emission with unknown type ' + emitData.type)
+                    break
+
             }
         })
     );
@@ -172,36 +172,36 @@ export function emitParticle (emitDataArray, colors){
  * @param {Array<foundry.dice.Roll>|foundry.dice.Roll} rolls - Damage roll(s).
  * @returns {Array<ColorData>} Computed array of ColorData instances.
  */
-export function getColorsFromDamageRolls (rolls) {
-    if(!Array.isArray(rolls)){
+export function getColorsFromDamageRolls(rolls) {
+    if (!Array.isArray(rolls)) {
         rolls = [rolls]
     }
 
     const colorResumed = {
-        mainDamage: { colorDamage : undefined, value: 0 },
-        total : 0 
+        mainDamage: { colorDamage: undefined, value: 0 },
+        total: 0
     }
     const colorData = rolls?.reduce((acc, roll) => {
         const colorDamage = systemMethods.getColorFromDamageRolls(roll)
 
-        if(acc[colorDamage]){
+        if (acc[colorDamage]) {
             acc[colorDamage].value += roll.total
-        } else if (roll.total > 0){
-            acc[colorDamage] = { value : roll.total }
+        } else if (roll.total > 0) {
+            acc[colorDamage] = { value: roll.total }
         }
 
         colorResumed.total += roll.total
 
-        if(! colorResumed.mainDamage.colorDamage || colorResumed.mainDamage.value < acc[colorDamage].value ){
-            colorResumed.mainDamage = { colorDamage , value: acc[colorDamage].value }
+        if (!colorResumed.mainDamage.colorDamage || colorResumed.mainDamage.value < acc[colorDamage].value) {
+            colorResumed.mainDamage = { colorDamage, value: acc[colorDamage].value }
         }
 
         return acc
     },
-    {})
+        {})
 
 
-    if(colorResumed.total === 0) return []
+    if (colorResumed.total === 0) return []
     delete colorData.resume
 
     return Object.keys(colorData)
@@ -213,19 +213,19 @@ export function getColorsFromDamageRolls (rolls) {
  * Registers global hooks for measured template creation.
  * @returns {void}
  */
-function _initGlobalHooks(){
+function _initGlobalHooks() {
     /**
      * Hook triggered when a measured template is created.
      * @param {foundry.canvas.placeables.MeasuredTemplate} template - Created measured template.
      * @param {Object} data - Template data.
      * @param {string} userId - ID of the creating user.
      */
-    Hooks.on("createMeasuredTemplate", async (template, data, userId) => {
-        if (userId !== game.user.id && ! systemMethods) return
+    Hooks.on("createMeasuredTemplate", async (template, _data, userId) => {
+        if (userId !== game.user.id && !systemMethods) return
 
         const itemId = systemMethods.getItemIdFromTemplate(template)
 
-        if(itemId){
+        if (itemId) {
             const aetc = AutoEmissionTemplateCache.findByItem(itemId)
             aetc.setTemplate(template)
         }

@@ -12,32 +12,32 @@ export class ParticleInput {
      * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables.
      * @returns {ParticleInput} Instantiated ParticleInput instance.
      */
-    static build(inputValue, inputCmd, advancedVariables){
+    static build(inputValue, inputCmd, advancedVariables) {
         let isTimedLinked = false
 
-        if(typeof inputCmd === 'string'){
-            isTimedLinked = ParticleInput._checkIsTimedLinked (inputCmd, advancedVariables)
-        } else if (inputCmd instanceof Vector3){
-            for(let key of Object.keys(inputCmd)){
-                 if(ParticleInput._checkIsTimedLinked (inputCmd[key], advancedVariables)){
-                     isTimedLinked = true
-                     break
-                 }
-             }
+        if (typeof inputCmd === 'string') {
+            isTimedLinked = ParticleInput._checkIsTimedLinked(inputCmd, advancedVariables)
+        } else if (inputCmd instanceof Vector3) {
+            for (let key of Object.keys(inputCmd)) {
+                if (ParticleInput._checkIsTimedLinked(inputCmd[key], advancedVariables)) {
+                    isTimedLinked = true
+                    break
+                }
+            }
         }
-         
-         
-         if(isTimedLinked){
-            if(inputValue instanceof Vector3){
+
+
+        if (isTimedLinked) {
+            if (inputValue instanceof Vector3) {
                 return new TimedParticleVectorInput(inputValue, inputCmd)
             } else {
-                return new TimedParticleInput (inputValue, inputCmd)
+                return new TimedParticleInput(inputValue, inputCmd)
             }
-         } else if(inputValue instanceof Vector3){
+        } else if (inputValue instanceof Vector3) {
             return new ParticleVectorInput(inputValue)
-         }else {
+        } else {
             return new ParticleInput(inputValue)
-         }
+        }
     }
 
     /**
@@ -46,21 +46,21 @@ export class ParticleInput {
      * @param {Record<string, AdvancedVariable>} advancedVariables - Active advanced variables map.
      * @returns {boolean} True if linked to timed variables.
      */
-    static _checkIsTimedLinked (inputCmd, advancedVariables) {
-        if(typeof inputCmd !== "string") return false
+    static _checkIsTimedLinked(inputCmd, advancedVariables) {
+        if (typeof inputCmd !== "string") return false
 
 
         let isTimedLinked = false
 
-        const usedVariables =  inputCmd.match(/(?<=\{\{).+?(?=\}\})/g) //Get all value inside {{}}
-             
-        if(usedVariables?.length > 0){
-             for(let key of usedVariables){
-                 if(advancedVariables[key]?.isTimedLinked){
-                     isTimedLinked = true
-                     break
-                 }
-             }
+        const usedVariables = inputCmd.match(/(?<=\{\{).+?(?=\}\})/g) //Get all value inside {{}}
+
+        if (usedVariables?.length > 0) {
+            for (let key of usedVariables) {
+                if (advancedVariables[key]?.isTimedLinked) {
+                    isTimedLinked = true
+                    break
+                }
+            }
         }
 
         return isTimedLinked
@@ -70,7 +70,7 @@ export class ParticleInput {
      * Constructs a ParticleInput instance.
      * @param {number|string|symbol} inputValue - Initial scalar input value.
      */
-    constructor(inputValue){
+    constructor(inputValue) {
         this.inputValue = inputValue
     }
 
@@ -78,7 +78,7 @@ export class ParticleInput {
      * Retrieves current scalar input value.
      * @returns {number|string|symbol} Current scalar value.
      */
-    getValue(){
+    getValue() {
         return this.inputValue
     }
 
@@ -87,8 +87,8 @@ export class ParticleInput {
      * @param {number} value - Factor multiplier.
      * @returns {ParticleInput} Reference to this instance.
      */
-    multiply(value){
-        if(this._isInvalidOperation(value)) return this
+    multiply(value) {
+        if (this._isInvalidOperation(value)) return this
 
         this.inputValue = this.inputValue * value
 
@@ -100,8 +100,8 @@ export class ParticleInput {
      * @param {number} value - Term to add.
      * @returns {ParticleInput} Reference to this instance.
      */
-    add(value){
-        if(this._isInvalidOperation(value)) return this
+    add(value) {
+        if (this._isInvalidOperation(value)) return this
 
         this.inputValue = this.inputValue + value
 
@@ -113,7 +113,7 @@ export class ParticleInput {
      * @param {number} value - Operation operand.
      * @returns {boolean} True if operation is invalid.
      */
-    _isInvalidOperation(value){
+    _isInvalidOperation(value) {
         return isNaN(value) || this.inputValue === sameStartKey
     }
 
@@ -121,7 +121,7 @@ export class ParticleInput {
      * Clones this ParticleInput instance.
      * @returns {ParticleInput} Cloned instance.
      */
-    clone(){
+    clone() {
         return new ParticleInput(this.inputValue);
     }
 }
@@ -135,7 +135,7 @@ export class ParticleVectorInput extends ParticleInput {
      * Constructs a ParticleVectorInput instance.
      * @param {Vector3} inputValue - Vector3 input value.
      */
-    constructor(inputValue){
+    constructor(inputValue) {
         super(inputValue)
     }
 
@@ -143,7 +143,7 @@ export class ParticleVectorInput extends ParticleInput {
      * Retrieves current Vector3 value.
      * @returns {Vector3} Current Vector3 value.
      */
-    getValue(){
+    getValue() {
         return this.inputValue
     }
 
@@ -152,7 +152,7 @@ export class ParticleVectorInput extends ParticleInput {
      * @param {number} value - Multiplier factor.
      * @returns {ParticleVectorInput} Reference to this instance.
      */
-    multiply(value){
+    multiply(value) {
         this.inputValue = this.inputValue.multiply(value)
         return this
     }
@@ -162,7 +162,7 @@ export class ParticleVectorInput extends ParticleInput {
      * @param {number} value - Term to add.
      * @returns {ParticleVectorInput} Reference to this instance.
      */
-    add(value){
+    add(value) {
         this.inputValue = this.inputValue.add(value)
         return this
     }
@@ -171,7 +171,7 @@ export class ParticleVectorInput extends ParticleInput {
      * Clones this ParticleVectorInput instance.
      * @returns {ParticleVectorInput} Cloned instance.
      */
-    clone(){
+    clone() {
         return new ParticleVectorInput(Vector3.build(this.inputValue));
     }
 }
@@ -180,14 +180,14 @@ export class ParticleVectorInput extends ParticleInput {
 /**
  * Subclass handling dynamic, time-linked scalar particle input values.
  */
-export class TimedParticleInput  extends ParticleInput {
+export class TimedParticleInput extends ParticleInput {
 
     /**
      * Constructs a TimedParticleInput instance.
      * @param {number|string|symbol} inputValue - Initial default input value.
      * @param {string} inputCmd - Command template expression string.
      */
-    constructor(inputValue, inputCmd){
+    constructor(inputValue, inputCmd) {
         super(inputValue)
         this.inputCmd = inputCmd
         this._valueOperations = []
@@ -198,9 +198,9 @@ export class TimedParticleInput  extends ParticleInput {
      * @param {Record<string, number|string|Vector3|Object|Array|Function>>} [advancedVariables] - Active advanced variables.
      * @returns {number|string|symbol} Calculated timed scalar value.
      */
-    getValue(advancedVariables){
-        
-        if( advancedVariables ){
+    getValue(advancedVariables) {
+
+        if (advancedVariables) {
             return this._computeTimeValue(advancedVariables)
         }
 
@@ -212,10 +212,10 @@ export class TimedParticleInput  extends ParticleInput {
      * @param {number} value - Multiplier.
      * @returns {TimedParticleInput} Reference to this instance.
      */
-    multiply(value){
-        if(this._isInvalidOperation(value)) return this
+    multiply(value) {
+        if (this._isInvalidOperation(value)) return this
 
-        this._valueOperations.push({value, operation:(a, b) => a * b})
+        this._valueOperations.push({ value, operation: (a, b) => a * b })
 
         return this
     }
@@ -225,10 +225,10 @@ export class TimedParticleInput  extends ParticleInput {
      * @param {number} value - Term to add.
      * @returns {TimedParticleInput} Reference to this instance.
      */
-    add(value){
-        if(this._isInvalidOperation(value)) return this
+    add(value) {
+        if (this._isInvalidOperation(value)) return this
 
-        this._valueOperations.push({value, operation:(a,b) => a + b})
+        this._valueOperations.push({ value, operation: (a, b) => a + b })
 
         return this
     }
@@ -237,7 +237,7 @@ export class TimedParticleInput  extends ParticleInput {
      * Clones this TimedParticleInput instance.
      * @returns {TimedParticleInput} Cloned instance.
      */
-    clone(){
+    clone() {
         const result = new TimedParticleInput(this.inputValue, this.inputCmd);
         result._valueOperations.push(...this._valueOperations)
         return result;
@@ -248,12 +248,12 @@ export class TimedParticleInput  extends ParticleInput {
      * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables map.
      * @returns {number} Evaluated frame result.
      */
-    _computeTimeValue(advancedVariables){
+    _computeTimeValue(advancedVariables) {
         let result = Utils._managePercent(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables));
 
-        if(isNaN(result)) return this.inputValue 
+        if (isNaN(result)) return this.inputValue
 
-        for(let valueOperation of this._valueOperations){
+        for (let valueOperation of this._valueOperations) {
             result = valueOperation.operation(result, valueOperation.value)
         }
 
@@ -264,14 +264,14 @@ export class TimedParticleInput  extends ParticleInput {
 /**
  * Subclass handling dynamic, time-linked Vector3 particle input values.
  */
-export class TimedParticleVectorInput  extends TimedParticleInput {
+export class TimedParticleVectorInput extends TimedParticleInput {
 
     /**
      * Constructs a TimedParticleVectorInput instance.
      * @param {Vector3} inputValue - Default Vector3 input value.
      * @param {Vector3|string} inputCmd - Vector command expression.
      */
-    constructor(inputValue, inputCmd){
+    constructor(inputValue, inputCmd) {
         super(inputValue, inputCmd)
     }
 
@@ -280,9 +280,9 @@ export class TimedParticleVectorInput  extends TimedParticleInput {
      * @param {Record<string, number|string|Vector3|Object|Array|Function>} [advancedVariables] - Active advanced variables.
      * @returns {Vector3} Calculated Vector3 value.
      */
-    getValue(advancedVariables){
-        
-        if( advancedVariables ){
+    getValue(advancedVariables) {
+
+        if (advancedVariables) {
             return this._computeTimeValue(advancedVariables)
         }
 
@@ -294,10 +294,10 @@ export class TimedParticleVectorInput  extends TimedParticleInput {
      * @param {number|Vector3} value - Multiplier.
      * @returns {TimedParticleVectorInput} Reference to this instance.
      */
-    multiply(value){
-        if(isNaN(value) && !value instanceof Vector3) return this
+    multiply(value) {
+        if (isNaN(value) && !value instanceof Vector3) return this
 
-        this._valueOperations.push({value, operation:(a, b) => a.multiply(b)})
+        this._valueOperations.push({ value, operation: (a, b) => a.multiply(b) })
 
         return this
     }
@@ -307,10 +307,10 @@ export class TimedParticleVectorInput  extends TimedParticleInput {
      * @param {number|Vector3} value - Term to add.
      * @returns {TimedParticleVectorInput} Reference to this instance.
      */
-    add(value){
-        if(isNaN(value)  && !value instanceof Vector3) return this
+    add(value) {
+        if (isNaN(value) && !value instanceof Vector3) return this
 
-        this._valueOperations.push({value, operation:(a,b) => a.add(b)})
+        this._valueOperations.push({ value, operation: (a, b) => a.add(b) })
 
         return this
     }
@@ -319,7 +319,7 @@ export class TimedParticleVectorInput  extends TimedParticleInput {
      * Clones this TimedParticleVectorInput instance.
      * @returns {TimedParticleVectorInput} Cloned instance.
      */
-    clone(){
+    clone() {
         const result = new TimedParticleVectorInput(Vector3.build(this.inputValue), this.inputCmd);
         result._valueOperations.push(...this._valueOperations)
         return result;
@@ -330,12 +330,12 @@ export class TimedParticleVectorInput  extends TimedParticleInput {
      * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables map.
      * @returns {Vector3} Computed Vector3 result.
      */
-    _computeTimeValue(advancedVariables){
+    _computeTimeValue(advancedVariables) {
         let result = Vector3.build(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables))
 
-        if(!result.computeVariable()) return this.inputValue
+        if (!result.computeVariable()) return this.inputValue
 
-        for(let valueOperation of this._valueOperations){
+        for (let valueOperation of this._valueOperations) {
             result = valueOperation.operation(result, valueOperation.value)
         }
 

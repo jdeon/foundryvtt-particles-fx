@@ -161,12 +161,12 @@ export class Particle {
      * Returns current particle 3D position vector.
      * @returns {Vector3} Current position vector.
      */
-    getPosition(){
-        if(this.sprite?.transform?.position){
-            return new Vector3( this.sprite.transform.position.x, this.sprite.transform.position.y, this.positionVibrationLess.z )
+    getPosition() {
+        if (this.sprite?.transform?.position) {
+            return new Vector3(this.sprite.transform.position.x, this.sprite.transform.position.y, this.positionVibrationLess.z)
         }
 
-        return new Vector3( this.positionVibrationLess.x, this.positionVibrationLess.y, this.positionVibrationLess.z )
+        return new Vector3(this.positionVibrationLess.x, this.positionVibrationLess.y, this.positionVibrationLess.z)
     }
 }
 
@@ -208,7 +208,7 @@ export class SprayingParticle extends Particle {
         super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage)
 
         this.target = target;
-        this.velocityStart = velocityStart;    
+        this.velocityStart = velocityStart;
         this.velocityEnd = Utils.computeSameAsStart(velocityStart, velocityEnd);
         this.angleStart = angleStart;
         this.angleEnd = Utils.computeSameAsStart(angleStart, angleEnd);
@@ -335,7 +335,7 @@ export class PathParticle extends Particle {
             this.sprite.y = this.positionVibrationLess.y
         }
 
-         this.sprite.angle += this.getDirection()
+        this.sprite.angle += this.getDirection()
     }
 
     /**

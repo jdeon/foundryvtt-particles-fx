@@ -10,7 +10,7 @@ import { ParticleInput } from './particleInput.js'
  */
 export class ParticleTemplate {
 
-//TODO return undefined instead of source
+    //TODO return undefined instead of source
     /**
      * Resolves source/target references to canvas placeable objects.
      * @param {Array<string|foundry.canvas.placeables.PlaceableObject>|string|foundry.canvas.placeables.PlaceableObject} source - Source string ID, array, or object.
@@ -104,7 +104,7 @@ export class ParticleTemplate {
         const angleStartInput = Utils.getRandomParticuleInputFrom(this.particleRotationStart, advancedVariable)
         const colorStartInput = Utils.getRandomParticuleInputFrom(this.colorStart, advancedVariable)
         const sprite = this.initSprite(this.currentSourcePosition, startSizeInput, angleStartInput, colorStartInput);
-        
+
         return new Particle(
             sprite,
             Utils.getRandomValueFrom(this.particleLifetime, advancedVariable),
@@ -135,13 +135,13 @@ export class ParticleTemplate {
      * @param {ParticleInput} colorStartInput - Initial color input.
      * @returns {PIXI.Sprite} Created PIXI.Sprite instance.
      */
-    initSprite (position, startSizeInput, angleStartInput, colorStartInput){
+    initSprite(position, startSizeInput, angleStartInput, colorStartInput) {
         let sprite = new PIXI.Sprite(Utils.getSpriteTextureFromId(this.particleShape))
         sprite.x = position.x;
         sprite.y = position.y;
         sprite.anchor.set(0.5);
 
-        
+
         let startSize = Vector3.build(startSizeInput)
         const sizeFactor = Utils.handleElevationFactorForSize(this.isElevationManage ? position.z : undefined)
         sprite.width = startSize.x * sizeFactor
@@ -290,7 +290,7 @@ export class SprayingParticleTemplate extends ParticleTemplate {
         }
 
         let sprite = this.initSprite(
-            {... Vector3.build(this.currentSourcePosition).add(positionSpawning), r:this.currentSourcePosition.r},
+            { ...Vector3.build(this.currentSourcePosition).add(positionSpawning), r: this.currentSourcePosition.r },
             particleProperties.sizeStart,
             particleProperties.particleRotationStart,
             particleProperties.colorStart
@@ -377,7 +377,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
             vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced)
 
-        if( targets === undefined || Array.isArray(targets) ) {
+        if (targets === undefined || Array.isArray(targets)) {
             this.targets = targets
         } else {
             this.targets = [targets]
@@ -400,11 +400,11 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
      * @returns {Particle} Main missile particle instance.
      */
     generateMainParticles() {
-        if( this.targets === undefined ){
+        if (this.targets === undefined) {
             const mainParticle = super.generateParticles();
             mainParticle.particleRotationStart.add(mainParticle.angleStart.getValue())
             mainParticle.particleRotationEnd.add(mainParticle.angleEnd.getValue())
-            return mainParticle 
+            return mainParticle
         }
 
         let advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
@@ -417,27 +417,27 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
         const pathPositions = [this.currentSourcePosition, ...targetsPosition];
         const path = Path.build(
-            this.pathType, 
+            this.pathType,
             pathPositions,
-            particleProperties.angleStart, 
+            particleProperties.angleStart,
             particleProperties.angleEnd
         );
 
-        if( path === undefined || path.totalLenght === 0 ){
-            return  super.generateParticles();
+        if (path === undefined || path.totalLenght === 0) {
+            return super.generateParticles();
         }
 
         let particleLifetime = particleProperties.particleLifetime.getValue()
         let positionSpawning = particleProperties.positionSpawning.getValue()
 
         const sprite = this.initSprite(
-            {... Vector3.build(this.currentSourcePosition).add(positionSpawning), r:this.currentSourcePosition.r}, 
+            { ...Vector3.build(this.currentSourcePosition).add(positionSpawning), r: this.currentSourcePosition.r },
             particleProperties.sizeStart,
             particleProperties.particleRotationStart,
             particleProperties.colorStart
         );
 
-        const mainParticle = new PathParticle (
+        const mainParticle = new PathParticle(
             advancedVariable,
             sprite,
             path,
@@ -473,11 +473,11 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
      * @param {number} distance - Trajectory path distance.
      * @returns {void}
      */
-    computeVelocity(mainParticle, distance){
+    computeVelocity(mainParticle, distance) {
         const averageVelocity = mainParticle.velocityEnd?.getValue() !== undefined ? (mainParticle.velocityStart?.getValue() + mainParticle.velocityEnd?.getValue()) / 2 : mainParticle.velocityStart?.getValue();
         const lifetimeVelocity = 1000 * distance / mainParticle.particleLifetime;
 
-        if(lifetimeVelocity > averageVelocity){
+        if (lifetimeVelocity > averageVelocity) {
             //We should move up velocity
             const velocityDifference = lifetimeVelocity - averageVelocity;
             mainParticle.velocityStart?.add(velocityDifference);
@@ -491,7 +491,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         }
     }
 
-    
+
     /**
      * Generates main or trailing sub-particles for missile emission.
      * @returns {Particle|undefined} Generated particle instance or undefined.
