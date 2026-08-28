@@ -71,7 +71,7 @@ export class Particle {
         this.colorStart = colorStart;
         this.colorEnd = Utils.computeSameAsStart(colorStart, colorEnd);
         this.alphaStart = alphaStart;
-        this.alphaEnd = Utils.computeSameAsStart(colorStart, colorEnd);
+        this.alphaEnd = Utils.computeSameAsStart(alphaStart, alphaEnd);
         this.vibrationAmplitudeStart = vibrationAmplitudeStart
         this.vibrationAmplitudeEnd = Utils.computeSameAsStart(vibrationAmplitudeStart, vibrationAmplitudeEnd);
         this.vibrationFrequencyStart = vibrationFrequencyStart
