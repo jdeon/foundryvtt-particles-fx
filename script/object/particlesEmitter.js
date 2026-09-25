@@ -4,6 +4,7 @@ import { Particle } from "./particle.js"
 import { ParticleWorkFlowManager } from "./particleWorkFlow.js"
 import { ParticleTemplate } from "./particleTemplate.js"
 import { EmittersPanel } from "./emittersPanel.js"
+import { ParticleHighlightManager } from "./particleHighlightManager.js"
 
 /**
  * Controller class managing a group of particles spawned by a particle template.
@@ -62,12 +63,7 @@ export default class ParticlesEmitter {
             ParticlesEmitter.highlightedEmitterId = null;
         }
 
-        const currentHighlighted = ParticlesEmitter.highlightedEmitterId;
-
-        for (const emitter of ParticlesEmitter.emitters) {
-            const shouldHighlight = currentHighlighted !== null && ParticlesEmitter.isEmitterMatchingId(emitter, currentHighlighted);
-            emitter.setHighlighted(shouldHighlight);
-        }
+        ParticleHighlightManager.update();
     }
 
     /**
@@ -121,29 +117,11 @@ export default class ParticlesEmitter {
         this.destroyHooks = [];
         this.maxParticleId = 0;
 
-        if (ParticlesEmitter.highlightedEmitterId && ParticlesEmitter.isEmitterMatchingId(this, ParticlesEmitter.highlightedEmitterId)) {
-            this.isHighlighted = true;
-        } else {
-            this.isHighlighted = false;
-        }
-
         if (!ParticlesEmitter._EMISSION_CANVAS) {
             ParticlesEmitter.INIT_EMISSION_CANVAS()
         }
 
         ParticleWorkFlowManager.triggerWorkflows(ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.id, this.particleTemplate)
-    }
-
-    /**
-     * Updates highlighted state on this emitter and all active particles.
-     * @param {boolean} enable - True to enable highlight.
-     * @returns {void}
-     */
-    setHighlighted(enable) {
-        this.isHighlighted = !!enable;
-        for (const particle of this.particles) {
-            particle.setHighlighted(this.isHighlighted);
-        }
     }
 
     /**
@@ -209,10 +187,6 @@ export default class ParticlesEmitter {
                 }
 
                 particle.id = this.maxParticleId++;
-
-                if (this.isHighlighted) {
-                    particle.setHighlighted(true);
-                }
 
                 ParticlesEmitter._EMISSION_CANVAS.addChild(particle.sprite);
                 if (this.particleTemplate?.isElevationManage) {

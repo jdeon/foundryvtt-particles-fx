@@ -168,53 +168,6 @@ export class Particle {
 
         return new Vector3(this.positionVibrationLess.x, this.positionVibrationLess.y, this.positionVibrationLess.z)
     }
-
-    /**
-     * Enables or disables the glowing selected halo effect on this particle.
-     * @param {boolean} enable - True to enable glowing halo highlight, false to disable.
-     * @returns {void}
-     */
-    setHighlighted(enable) {
-        const shouldHighlight = !!enable;
-        if (this.isHighlighted === shouldHighlight) return;
-        this.isHighlighted = shouldHighlight;
-
-        if (!this.sprite || this.sprite.destroyed) return;
-
-        if (this.isHighlighted) {
-            if (!this._haloSprite) {
-                try {
-                    const haloTexture = Utils.getSpriteTextureFromId("TOR") || Utils.getSpriteTextureFromId("CIRCLE");
-                    if (haloTexture) {
-                        const halo = new PIXI.Sprite(haloTexture);
-                        halo.anchor.set(0.5);
-                        const parentTexWidth = this.sprite.texture?.width || 64;
-                        const haloTexWidth = haloTexture.width || 64;
-                        const scaleFactor = (parentTexWidth / haloTexWidth) * 1.6;
-                        halo.scale.set(scaleFactor);
-                        halo.tint = 0xc9593f;
-                        halo.alpha = 0.9;
-                        if (typeof PIXI.BLEND_MODES !== "undefined" && PIXI.BLEND_MODES.ADD !== undefined) {
-                            halo.blendMode = PIXI.BLEND_MODES.ADD;
-                        }
-                        this.sprite.sortableChildren = true;
-                        halo.zIndex = -1;
-                        this.sprite.addChildAt(halo, 0);
-                        this._haloSprite = halo;
-                    }
-                } catch (err) {
-                    console.warn("ParticlesFX | Could not create halo sprite", err);
-                }
-            }
-        } else {
-            if (this._haloSprite) {
-                try {
-                    this._haloSprite.destroy();
-                } catch (e) {}
-                this._haloSprite = null;
-            }
-        }
-    }
 }
 
 /**
