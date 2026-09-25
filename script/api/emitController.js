@@ -78,3 +78,11 @@ function stopWorkflow(emitterId, immediate, all) {
     emitForOtherClient(s_MESSAGE_TYPES.stopWorkflow, immediate, all);
     return particlesEmitterService.stopWorkflow(emitterId, immediate, all)
 }
+
+function showEmittersPanel() {
+    EmittersPanel.show();
+}
+
+function refreshEmittersPanel() {
+    EmittersPanel.refresh();
+}

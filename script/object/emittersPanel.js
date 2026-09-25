@@ -1,4 +1,4 @@
-import ParticlesEmitter from "../object/particlesEmitter.js";
+import ParticlesEmitter from "./particlesEmitter.js";
 import { s_MODULE_ID } from "../utils/utils.js";
 
 /**

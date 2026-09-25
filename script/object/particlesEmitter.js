@@ -3,7 +3,7 @@ import { colorTemplateDictionnary } from "../prefillColorTemplate.js"
 import { Particle } from "./particle.js"
 import { ParticleWorkFlowManager } from "./particleWorkFlow.js"
 import { ParticleTemplate } from "./particleTemplate.js"
-import { EmittersPanel } from "../api/emittersPanel.js"
+import { EmittersPanel } from "./emittersPanel.js"
 
 /**
  * Controller class managing a group of particles spawned by a particle template.

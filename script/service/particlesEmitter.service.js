@@ -6,7 +6,7 @@ import { ParticleWorkFlowManager } from "../object/particleWorkFlow.js"
 import { defaultMotionTemplate } from "../prefillMotionTemplate.js"
 import { defaultColorTemplate } from "../prefillColorTemplate.js"
 import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
-import { EmittersPanel } from "../api/emittersPanel.js"
+import { EmittersPanel } from "../object/emittersPanel.js"
 
 /**
  * Increments and returns the next emitter ID from world settings or via socket.
