@@ -1,7 +1,6 @@
 import emitController from "./emitController.js";
 import templateController from "./templateController.js";
 import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
-import { EmittersPanel } from "./emittersPanel.js";
 
 /**
  * Exposes the global particle API on the `window.particlesFx` object.

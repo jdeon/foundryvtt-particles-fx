@@ -1,5 +1,6 @@
 import * as particlesEmitterService from "../service/particlesEmitter.service.js"
 import { s_MESSAGE_TYPES, emitForOtherClient } from "../utils/socketManager.js"
+import { EmittersPanel } from "../object/emittersPanel.js";
 
 export default {
     spray: sprayParticles,
