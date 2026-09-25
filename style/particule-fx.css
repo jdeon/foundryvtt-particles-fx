@@ -39,9 +39,12 @@
     transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 
-.particles-fx-emitters-panel .legend-item.emitter-item:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: var(--color-border-highlight, #ff6400);
+.particles-fx-emitters-panel .legend-item.emitter-item:hover,
+.particles-fx-emitters-panel .legend-item.emitter-item.is-highlighted {
+    background: rgba(201, 89, 63, 0.2);
+    border-color: #c9593f;
+    box-shadow: 0 0 10px rgba(201, 89, 63, 0.4);
+    transform: translateX(2px);
 }
 
 .particles-fx-emitters-panel .emitter-info {
@@ -59,7 +62,7 @@
     font-weight: 500;
 }
 
-.particles-fx-emitters-panel .emitter-id-tag {
+.emitter-id-tag {
     font-family: var(--font-mono, monospace);
     font-size: 12px;
     font-weight: 600;
@@ -68,6 +71,19 @@
     border-radius: 3px;
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: #e0e0e0;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.emitter-id-tag:hover,
+.emitter-id-tag.is-highlighted,
+.particles-fx-emitters-panel .legend-item.emitter-item:hover .emitter-id-tag,
+.particles-fx-emitters-panel .legend-item.emitter-item.is-highlighted .emitter-id-tag {
+    background: #c9593f;
+    color: #fff;
+    border-color: #d96d53;
+    font-weight: 700;
+    box-shadow: 0 0 8px rgba(201, 89, 63, 0.8);
 }
 
 .particles-fx-emitters-panel .empty-emitters {

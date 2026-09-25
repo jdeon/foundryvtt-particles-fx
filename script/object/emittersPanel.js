@@ -49,10 +49,11 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
     }
 
     /**
-     * Shows the emitters panel on screen.
+     * Shows the emitters panel on screen and initializes global hover listeners.
      */
     static show() {
         if (!game?.ready) return;
+        this.setupGlobalEmitterHoverListeners();
         this.instance.render({ force: true });
     }
 
@@ -63,6 +64,40 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
         if (this._instance && this._instance.rendered) {
             this._instance.render({ force: false });
         }
+    }
+
+    /** @type {boolean} */
+    static _hoverListenersInitialized = false;
+
+    /**
+     * Sets up document-level delegated hover event listeners for emitter ID elements.
+     * @returns {void}
+     */
+    static setupGlobalEmitterHoverListeners() {
+        if (this._hoverListenersInitialized) return;
+        this._hoverListenersInitialized = true;
+
+        document.body.addEventListener("mouseover", (event) => {
+            const target = event.target?.closest?.("[data-emitter-id]");
+            if (target) {
+                const emitterId = target.dataset.emitterId;
+                if (emitterId) {
+                    target.classList.add("is-highlighted");
+                    ParticlesEmitter.highlightEmitter(emitterId, true);
+                }
+            }
+        });
+
+        document.body.addEventListener("mouseout", (event) => {
+            const target = event.target?.closest?.("[data-emitter-id]");
+            if (target) {
+                const related = event.relatedTarget?.closest?.("[data-emitter-id]");
+                if (!related || related.dataset.emitterId !== target.dataset.emitterId) {
+                    target.classList.remove("is-highlighted");
+                    ParticlesEmitter.highlightEmitter(target.dataset.emitterId, false);
+                }
+            }
+        });
     }
 
     /** @override */

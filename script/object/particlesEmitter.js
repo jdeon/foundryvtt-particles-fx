@@ -46,6 +46,46 @@ export default class ParticlesEmitter {
         ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
     }
 
+    /** Currently highlighted target emitter ID. */
+    static highlightedEmitterId = null;
+
+    /**
+     * Highlights or unhighlights particles for all active emitters matching the target emitter ID.
+     * @param {number|string|null} emitterId - Target emitter ID to highlight or clear.
+     * @param {boolean} enable - Whether highlight should be enabled.
+     * @returns {void}
+     */
+    static highlightEmitter(emitterId, enable) {
+        if (enable && emitterId !== null && emitterId !== undefined) {
+            ParticlesEmitter.highlightedEmitterId = String(emitterId);
+        } else if (!enable && String(emitterId) === ParticlesEmitter.highlightedEmitterId) {
+            ParticlesEmitter.highlightedEmitterId = null;
+        }
+
+        const currentHighlighted = ParticlesEmitter.highlightedEmitterId;
+
+        for (const emitter of ParticlesEmitter.emitters) {
+            const shouldHighlight = currentHighlighted !== null && ParticlesEmitter.isEmitterMatchingId(emitter, currentHighlighted);
+            emitter.setHighlighted(shouldHighlight);
+        }
+    }
+
+    /**
+     * Evaluates whether an emitter matches a target emitter ID string.
+     * @param {ParticlesEmitter} emitter - Target emitter instance.
+     * @param {string} targetId - Target emitter ID string.
+     * @returns {boolean} True if matching.
+     */
+    static isEmitterMatchingId(emitter, targetId) {
+        if (!emitter || !targetId) return false;
+        const eId = String(emitter.id);
+        const tId = String(targetId);
+        if (eId === tId) return true;
+        if (eId.startsWith(`${tId}-`)) return true;
+        if (emitter.parentWorkflowId && String(emitter.parentWorkflowId).split(":")[0] === tId) return true;
+        return false;
+    }
+
     /** Constant key specifying duration until child workflow emissions complete. */
     static UNTIL_CHILD_END_DURATION = 'untilChildEnd'
 
@@ -81,11 +121,29 @@ export default class ParticlesEmitter {
         this.destroyHooks = [];
         this.maxParticleId = 0;
 
+        if (ParticlesEmitter.highlightedEmitterId && ParticlesEmitter.isEmitterMatchingId(this, ParticlesEmitter.highlightedEmitterId)) {
+            this.isHighlighted = true;
+        } else {
+            this.isHighlighted = false;
+        }
+
         if (!ParticlesEmitter._EMISSION_CANVAS) {
             ParticlesEmitter.INIT_EMISSION_CANVAS()
         }
 
         ParticleWorkFlowManager.triggerWorkflows(ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.id, this.particleTemplate)
+    }
+
+    /**
+     * Updates highlighted state on this emitter and all active particles.
+     * @param {boolean} enable - True to enable highlight.
+     * @returns {void}
+     */
+    setHighlighted(enable) {
+        this.isHighlighted = !!enable;
+        for (const particle of this.particles) {
+            particle.setHighlighted(this.isHighlighted);
+        }
     }
 
     /**
@@ -151,6 +209,10 @@ export default class ParticlesEmitter {
                 }
 
                 particle.id = this.maxParticleId++;
+
+                if (this.isHighlighted) {
+                    particle.setHighlighted(true);
+                }
 
                 ParticlesEmitter._EMISSION_CANVAS.addChild(particle.sprite);
                 if (this.particleTemplate?.isElevationManage) {
