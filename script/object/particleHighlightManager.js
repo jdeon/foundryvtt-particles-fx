@@ -11,6 +11,86 @@ export class ParticleHighlightManager {
     static _haloSprites = [];
     static _tickerAdded = false;
 
+    static _cachedGlowFilter = null;
+
+    /**
+     * Retrieves or creates shared container WebGL GlowFilter for soft glowing aura.
+     * @returns {PIXI.Filter|null} Filter instance.
+     */
+    static getGlowFilter() {
+        if (this._cachedGlowFilter) return this._cachedGlowFilter;
+
+        try {
+            if (typeof PIXI === "undefined" || !PIXI.Filter) return null;
+
+            const vertexShader = `
+                attribute vec2 aVertexPosition;
+                attribute vec2 aTextureCoord;
+                uniform mat3 projectionMatrix;
+                varying vec2 vTextureCoord;
+                void main(void) {
+                    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
+                    vTextureCoord = aTextureCoord;
+                }
+            `;
+
+            const fragmentShader = `
+                precision mediump float;
+                varying vec2 vTextureCoord;
+                uniform sampler2D uSampler;
+                uniform vec4 uGlowColor;
+
+                void main(void) {
+                    vec4 color = texture2D(uSampler, vTextureCoord);
+                    vec2 step = vec2(0.002, 0.002);
+
+                    float blurAlpha = 0.0;
+                    blurAlpha += texture2D(uSampler, vTextureCoord + vec2(step.x * 1.5, 0.0)).a;
+                    blurAlpha += texture2D(uSampler, vTextureCoord + vec2(-step.x * 1.5, 0.0)).a;
+                    blurAlpha += texture2D(uSampler, vTextureCoord + vec2(0.0, step.y * 1.5)).a;
+                    blurAlpha += texture2D(uSampler, vTextureCoord + vec2(0.0, -step.y * 1.5)).a;
+                    blurAlpha += texture2D(uSampler, vTextureCoord + vec2(step.x, step.y)).a;
+                    blurAlpha += texture2D(uSampler, vTextureCoord + vec2(-step.x, step.y)).a;
+                    blurAlpha += texture2D(uSampler, vTextureCoord + vec2(step.x, -step.y)).a;
+                    blurAlpha += texture2D(uSampler, vTextureCoord + vec2(-step.x, -step.y)).a;
+
+                    float softGlow = clamp(blurAlpha * 0.15, 0.0, 1.0);
+
+                    if (color.a < 0.05 && softGlow > 0.0) {
+                        gl_FragColor = vec4(uGlowColor.rgb * softGlow * 1.4, softGlow * uGlowColor.a);
+                    } else {
+                        gl_FragColor = color + vec4(uGlowColor.rgb * softGlow * 0.5, 0.0);
+                    }
+                }
+            `;
+
+            let filter = null;
+            if (typeof PIXI.Filter.from === "function") {
+                try {
+                    filter = PIXI.Filter.from({
+                        gl: { vertex: vertexShader, fragment: fragmentShader }
+                    });
+                } catch (e) {
+                    filter = null;
+                }
+            }
+            if (!filter) {
+                filter = new PIXI.Filter(vertexShader, fragmentShader, {
+                    uGlowColor: [0.788, 0.349, 0.247, 1.0]
+                });
+            }
+
+            if (filter) {
+                filter.padding = 32;
+                this._cachedGlowFilter = filter;
+            }
+        } catch (err) {
+            console.warn("ParticlesFX | Could not initialize glow filter", err);
+        }
+
+        return this._cachedGlowFilter;
+    }
+
     /**
      * Initializes the shared halo container layer on the emission canvas.
      */
@@ -21,6 +101,11 @@ export class ParticleHighlightManager {
         container.zIndex = Particle.SORT_LAYER - 1;
         if (typeof PIXI !== "undefined" && PIXI.BLEND_MODES?.ADD !== undefined) {
             container.blendMode = PIXI.BLEND_MODES.ADD;
+        }
+
+        const filter = this.getGlowFilter();
+        if (filter) {
+            container.filters = [filter];
         }
 
         if (ParticlesEmitter._EMISSION_CANVAS) {
@@ -57,12 +142,12 @@ export class ParticleHighlightManager {
         }
 
         const count = targetParticles.length;
-        const haloTexture = Utils.getSpriteTextureFromId("TOR") || Utils.getSpriteTextureFromId("CIRCLE");
-        if (!haloTexture) return;
 
         // Object pool expansion
         while (this._haloSprites.length < count) {
-            const halo = new PIXI.Sprite(haloTexture);
+            const firstParticle = targetParticles[0];
+            const defaultTexture = firstParticle?.sprite?.texture || Utils.getSpriteTextureFromId("CIRCLE");
+            const halo = new PIXI.Sprite(defaultTexture);
             halo.anchor.set(0.5);
             halo.tint = 0xc9593f;
             this._haloContainer.addChild(halo);
@@ -77,13 +162,17 @@ export class ParticleHighlightManager {
             const halo = this._haloSprites[i];
             halo.visible = true;
 
+            // Use exact source particle sprite texture
+            if (p.sprite?.texture && halo.texture !== p.sprite.texture) {
+                halo.texture = p.sprite.texture;
+            }
+
             halo.x = p.sprite.x;
             halo.y = p.sprite.y;
             halo.rotation = p.sprite.rotation;
 
-            const parentTexWidth = p.sprite.texture?.width || 64;
-            const haloTexWidth = haloTexture.width || 64;
-            const baseScale = (parentTexWidth / haloTexWidth) * 1.6;
+            // Scale slightly larger than source particle for glowing outline matching source shape
+            const baseScale = 1.35;
 
             halo.scale.x = p.sprite.scale.x * baseScale;
             halo.scale.y = p.sprite.scale.y * baseScale;
