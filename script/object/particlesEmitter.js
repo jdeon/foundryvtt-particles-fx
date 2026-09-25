@@ -3,6 +3,7 @@ import { colorTemplateDictionnary } from "../prefillColorTemplate.js"
 import { Particle } from "./particle.js"
 import { ParticleWorkFlowManager } from "./particleWorkFlow.js"
 import { ParticleTemplate } from "./particleTemplate.js"
+import { EmittersPanel } from "../api/emittersPanel.js"
 
 /**
  * Controller class managing a group of particles spawned by a particle template.
@@ -195,6 +196,8 @@ export default class ParticlesEmitter {
         if (this.destroyHooks.length > 0) {
             this.destroyHooks.forEach((destroyHook) => destroyHook(this.id))
         }
+
+        EmittersPanel.refresh()
     }
 
     /**

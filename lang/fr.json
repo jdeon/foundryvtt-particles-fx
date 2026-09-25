@@ -41,5 +41,8 @@
   "PARTICULE-FX.advancedMode.badFormatInput": "{variableKey} : Impossible de gérer la fonction d'une variable avancée à cause du format des paramètres. Essayez ({a,b})",
   "PARTICULE-FX.advancedMode.badFormatFunction": "{variableKey} : la fonction utilise un objet autre que Math",
   "PARTICULE-FX.advancedMode.missingParameters": "La variable avancée {variableKey} contient des paramètres introuvables : {missingParameters}",
-  "PARTICULE-FX.advancedMode.computeError": "Une erreur s'est produite lors de l'exécution de la variable {variableKey}"
+  "PARTICULE-FX.advancedMode.computeError": "Une erreur s'est produite lors de l'exécution de la variable {variableKey}",
+  "PARTICULE-FX.EmittersPanel.Title": "Panneau des Émetteurs",
+  "PARTICULE-FX.EmittersPanel.Emitter": "Émetteur",
+  "PARTICULE-FX.EmittersPanel.NoEmitters": "Aucun émetteur actif"
 }

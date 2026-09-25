@@ -1,6 +1,7 @@
 import emitController from "./emitController.js";
 import templateController from "./templateController.js";
 import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
+import { EmittersPanel } from "./emittersPanel.js";
 
 /**
  * Exposes the global particle API on the `window.particlesFx` object.
@@ -26,6 +27,8 @@ export function subscribeApiToWindow(){
         addCustomPrefillColorTemplate : templateController.color.add,
         removeCustomPrefillColorTemplate : templateController.color.remove,
         getCustomPrefillColorTemplate : templateController.color.get,
+        showEmittersPanel: () => EmittersPanel.show(),
+        refreshEmittersPanel: () => EmittersPanel.refresh(),
     }
 
     CompatibiltyV2Manager.manageDeprecatedWindowCall()
