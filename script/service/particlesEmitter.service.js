@@ -343,6 +343,25 @@ export function stopEmissionById(emitterId, immediate) {
 }
 
 /**
+ * Toggles play/pause state for a specific emitter by ID.
+ * @param {number|string} emitterId - Emitter ID to pause or resume.
+ * @param {boolean} [forceState] - Optional explicit state to force.
+ * @returns {boolean} New paused state of the emitter.
+ */
+export function togglePauseEmissionById(emitterId, forceState) {
+    const emitter = findEmitterById(emitterId);
+    if (emitter) {
+        if (typeof forceState === "boolean") {
+            emitter.isPaused = forceState;
+        } else {
+            emitter.togglePause();
+        }
+        return emitter.isPaused;
+    }
+    return false;
+}
+
+/**
  * Stops an emitter workflow or all workflows.
  * @param {number|string} emitterId - Target emitter ID.
  * @param {boolean} [immediate] - Stop immediately.

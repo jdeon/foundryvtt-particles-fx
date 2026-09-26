@@ -89,9 +89,10 @@
 .particles-fx-emitters-panel .emitter-controls {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 }
 
+.particles-fx-emitters-panel .emitter-pause-btn,
 .particles-fx-emitters-panel .emitter-stop-btn,
 .particles-fx-emitters-panel .emitter-delete-btn {
     display: flex;
@@ -109,6 +110,26 @@
     font-size: 11px;
     line-height: 1;
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.particles-fx-emitters-panel .emitter-pause-btn:hover {
+    background: #2980b9;
+    color: #ffffff;
+    border-color: #3498db;
+    box-shadow: 0 0 8px rgba(52, 152, 219, 0.8);
+}
+
+.particles-fx-emitters-panel .emitter-pause-btn.is-paused {
+    background: rgba(52, 152, 219, 0.3);
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.particles-fx-emitters-panel .emitter-pause-btn.is-paused:hover {
+    background: #27ae60;
+    color: #ffffff;
+    border-color: #2ecc71;
+    box-shadow: 0 0 8px rgba(46, 204, 113, 0.8);
 }
 
 .particles-fx-emitters-panel .emitter-stop-btn:hover {

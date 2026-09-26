@@ -27,6 +27,7 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
             top: 70
         },
         actions: {
+            togglePauseEmitter: EmittersPanel._onTogglePauseEmitter,
             stopEmitter: EmittersPanel._onStopEmitter,
             deleteEmitter: EmittersPanel._onDeleteEmitter
         }
@@ -111,10 +112,26 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
         const emitters = ParticlesEmitter.emitters || [];
         context.emitters = emitters.map(emitter => ({
             id: String(emitter.id),
+            isPaused: !!emitter.isPaused,
             particleCount: emitter.particles?.length || 0
         }));
         context.hasEmitters = context.emitters.length > 0;
         return context;
+    }
+
+    /**
+     * Action handler to toggle play/pause state of an emitter.
+     * @param {PointerEvent} event - The click event.
+     * @param {HTMLElement} target - The button target element.
+     */
+    static _onTogglePauseEmitter(event, target) {
+        event.stopPropagation();
+        const emitterItem = target.closest("[data-emitter-id]");
+        const emitterId = emitterItem?.dataset?.emitterId;
+        if (emitterId) {
+            emitController.togglePause(emitterId);
+            EmittersPanel.refresh();
+        }
     }
 
     /**
