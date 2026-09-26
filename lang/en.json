@@ -45,5 +45,6 @@
     "PARTICULE-FX.EmittersPanel.Title": "Emitters Panel",
     "PARTICULE-FX.EmittersPanel.Emitter": "Emitter",
     "PARTICULE-FX.EmittersPanel.NoEmitters": "No active emitters",
-    "PARTICULE-FX.EmittersPanel.StopEmitter": "Stop emission"
+    "PARTICULE-FX.EmittersPanel.StopEmitter": "Stop emission",
+    "PARTICULE-FX.EmittersPanel.DeleteEmitter": "Delete emission (immediate)"
 }

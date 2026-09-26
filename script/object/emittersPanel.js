@@ -21,13 +21,14 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
             minimizable: true
         },
         position: {
-            width: 240,
+            width: 250,
             height: "auto",
             left: 120,
             top: 70
         },
         actions: {
-            stopEmitter: EmittersPanel._onStopEmitter
+            stopEmitter: EmittersPanel._onStopEmitter,
+            deleteEmitter: EmittersPanel._onDeleteEmitter
         }
     };
 
@@ -127,6 +128,21 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
         const emitterId = emitterItem?.dataset?.emitterId;
         if (emitterId) {
             emitController.stop(emitterId);
+            EmittersPanel.refresh();
+        }
+    }
+
+    /**
+     * Action handler to immediately delete/destroy an emitter when clicking the delete button.
+     * @param {PointerEvent} event - The click event.
+     * @param {HTMLElement} target - The button target element.
+     */
+    static _onDeleteEmitter(event, target) {
+        event.stopPropagation();
+        const emitterItem = target.closest("[data-emitter-id]");
+        const emitterId = emitterItem?.dataset?.emitterId;
+        if (emitterId) {
+            emitController.stop(emitterId, true);
             EmittersPanel.refresh();
         }
     }

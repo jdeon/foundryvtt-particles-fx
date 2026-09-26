@@ -92,7 +92,8 @@
     gap: 6px;
 }
 
-.particles-fx-emitters-panel .emitter-stop-btn {
+.particles-fx-emitters-panel .emitter-stop-btn,
+.particles-fx-emitters-panel .emitter-delete-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -111,6 +112,13 @@
 }
 
 .particles-fx-emitters-panel .emitter-stop-btn:hover {
+    background: #e67e22;
+    color: #ffffff;
+    border-color: #f39c12;
+    box-shadow: 0 0 8px rgba(230, 126, 34, 0.8);
+}
+
+.particles-fx-emitters-panel .emitter-delete-btn:hover {
     background: #d93838;
     color: #ffffff;
     border-color: #ff5252;
