@@ -2,6 +2,7 @@ import { buildInputForParentEmitter, writeMessageForEmissionById } from "../serv
 import { s_MODULE_ID, Utils, Vector3, SPRITE_TEXTURE_MAPPING } from "../utils/utils.js"
 import emitController from "./emitController.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
+import { EmittersPanel } from "../object/emittersPanel.js"
 
 /**
  * Mapping of '/pfx' chat commands associated with their handler functions.
@@ -11,6 +12,7 @@ const EXISTING_CHAT_COMMAND = {
 	'stopAll': (args) => handleStopAll(args),
 	'stopById': (args) => handleStopById(args),
 	'stopWorkflow': (args) => handleStopWorkflow(args),
+	'pause': (args) => handlePause(args),
 	'spray': (args) => handleEmission(args, emitController.spray, { type: 'Spraying' }),
 	'missile': (args) => handleMissile(args),
 	'gravitate': (args) => handleEmission(args, emitController.gravit, { type: 'Graviting' }),
@@ -188,6 +190,21 @@ function handleStopById(args) {
 	const isImmediate = hasOption(args, ['--instant', '-i']);
 	const stoppedEmitters = emitController.stop(getEmittersId(args), isImmediate);
 	return game.i18n.localize("PARTICULE-FX.Chat-Command.stopById.return") + JSON.stringify(stoppedEmitters);
+}
+
+/**
+ * Pauses or resumes a specific particle emitter as commanded via chat.
+ * @param {Array<string>} args - Chat command arguments containing emitter ID.
+ * @returns {string} Formatted localized return message.
+ */
+function handlePause(args) {
+	const emitterId = getEmittersId(args);
+	const isPaused = emitController.togglePause(emitterId);
+	EmittersPanel.refresh();
+	const statusText = isPaused 
+		? game.i18n.localize("PARTICULE-FX.Chat-Command.pause.paused") 
+		: game.i18n.localize("PARTICULE-FX.Chat-Command.pause.resumed");
+	return game.i18n.localize("PARTICULE-FX.Chat-Command.pause.return") + `${emitterId} (${statusText})`;
 }
 
 /**
