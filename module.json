@@ -12,6 +12,9 @@
 			"name": "Jideon"
 		}
 	],
+	"styles": [
+		"./style/particule-fx.css"
+	],
 	"esmodules": [
 		"./main.js"
 	],

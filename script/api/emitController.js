@@ -1,5 +1,6 @@
 import * as particlesEmitterService from "../service/particlesEmitter.service.js"
 import { s_MESSAGE_TYPES, emitForOtherClient } from "../utils/socketManager.js"
+import { EmittersPanel } from "../object/emittersPanel.js";
 
 export default {
     spray: sprayParticles,
@@ -8,6 +9,8 @@ export default {
     stop: stopEmissionById,
     stopAll: stopAllEmission,
     stopWorkflow: stopWorkflow,
+    showManagerPanel: showEmittersPanel,
+    refreshManagerPanel: refreshEmittersPanel,
     writeMessage: particlesEmitterService.writeMessageForEmissionById,   //No need to emit to other client
 };
 
@@ -77,4 +80,18 @@ function stopAllEmission(immediate) {
 function stopWorkflow(emitterId, immediate, all) {
     emitForOtherClient(s_MESSAGE_TYPES.stopWorkflow, immediate, all);
     return particlesEmitterService.stopWorkflow(emitterId, immediate, all)
+}
+
+/**
+ * Shows the emitters panel.
+ */
+function showEmittersPanel() {
+    EmittersPanel.show();
+}
+
+/**
+ * Refreshes the emitters panel.
+ */
+function refreshEmittersPanel() {
+    EmittersPanel.refresh();
 }

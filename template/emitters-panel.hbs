@@ -1,0 +1,20 @@
+<div class="emitters-panel-content">
+    {{#if hasEmitters}}
+        <ol class="legend-list plain emitters-list">
+            {{#each emitters}}
+                <li class="legend-item emitter-item" data-emitter-id="{{this.id}}">
+                    <div class="emitter-info">
+                        <i class="fas fa-atom emitter-icon"></i>
+                        <span class="emitter-title">{{localize 'PARTICULE-FX.EmittersPanel.Emitter'}}</span>
+                    </div>
+                    <span class="emitter-id-tag">#{{this.id}}</span>
+                </li>
+            {{/each}}
+        </ol>
+    {{else}}
+        <div class="empty-emitters">
+            <i class="fas fa-ghost empty-icon"></i>
+            <span>{{localize 'PARTICULE-FX.EmittersPanel.NoEmitters'}}</span>
+        </div>
+    {{/if}}
+</div>

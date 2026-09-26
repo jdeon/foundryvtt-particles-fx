@@ -8,6 +8,7 @@ import { subscribeApiToWindow } from "./script/api/windowsController.js"
 import { initChatController } from "./script/api/chatController.js"
 import ParticlesEmitter from "./script/object/particlesEmitter.js"
 import { setupAutomation, automationInitialisation } from "./script/autoGeneration/automaticGeneration.service.js"
+import { EmittersPanel } from "./script/object/emittersPanel.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 /**
@@ -153,6 +154,10 @@ Hooks.on("canvasReady", () => {
             firstSceneEmittersQueries = emittersQueries
         }
     }
+
+    if (game.ready) {
+        EmittersPanel.show();
+    }
 });
 
 /**
@@ -175,9 +180,10 @@ Hooks.once('ready', function () {
     subscribeApiToWindow()
     automationInitialisation()
 
+    EmittersPanel.show();
+
     listen()
 });
-
 
 //Closing canvas hooks
 /**

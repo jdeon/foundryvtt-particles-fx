@@ -3,6 +3,8 @@ import { colorTemplateDictionnary } from "../prefillColorTemplate.js"
 import { Particle } from "./particle.js"
 import { ParticleWorkFlowManager } from "./particleWorkFlow.js"
 import { ParticleTemplate } from "./particleTemplate.js"
+import { EmittersPanel } from "./emittersPanel.js"
+import { ParticleHighlightManager } from "./particleHighlightManager.js"
 
 /**
  * Controller class managing a group of particles spawned by a particle template.
@@ -43,6 +45,41 @@ export default class ParticlesEmitter {
         effectsCanvas.addChild(particleFxCanvas);
         effectsCanvas.moduleParticlesFx = particleFxCanvas;
         ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
+    }
+
+    /** Currently highlighted target emitter ID. */
+    static highlightedEmitterId = null;
+
+    /**
+     * Highlights or unhighlights particles for all active emitters matching the target emitter ID.
+     * @param {number|string|null} emitterId - Target emitter ID to highlight or clear.
+     * @param {boolean} enable - Whether highlight should be enabled.
+     * @returns {void}
+     */
+    static highlightEmitter(emitterId, enable) {
+        if (enable && emitterId !== null && emitterId !== undefined) {
+            ParticlesEmitter.highlightedEmitterId = String(emitterId);
+        } else if (!enable && String(emitterId) === ParticlesEmitter.highlightedEmitterId) {
+            ParticlesEmitter.highlightedEmitterId = null;
+        }
+
+        ParticleHighlightManager.update();
+    }
+
+    /**
+     * Evaluates whether an emitter matches a target emitter ID string.
+     * @param {ParticlesEmitter} emitter - Target emitter instance.
+     * @param {string} targetId - Target emitter ID string.
+     * @returns {boolean} True if matching.
+     */
+    static isEmitterMatchingId(emitter, targetId) {
+        if (!emitter || !targetId) return false;
+        const eId = String(emitter.id);
+        const tId = String(targetId);
+        if (eId === tId) return true;
+        if (eId.startsWith(`${tId}-`)) return true;
+        if (emitter.parentWorkflowId && String(emitter.parentWorkflowId).split(":")[0] === tId) return true;
+        return false;
     }
 
     /** Constant key specifying duration until child workflow emissions complete. */
@@ -195,6 +232,8 @@ export default class ParticlesEmitter {
         if (this.destroyHooks.length > 0) {
             this.destroyHooks.forEach((destroyHook) => destroyHook(this.id))
         }
+
+        EmittersPanel.refresh()
     }
 
     /**

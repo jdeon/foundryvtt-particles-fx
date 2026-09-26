@@ -1,0 +1,102 @@
+/* Particles FX - Emitters Panel (Foundry VTT v13 Region Legend style) */
+
+.particles-fx-emitters-panel {
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.particles-fx-emitters-panel .window-content {
+    padding: 6px;
+    background: rgba(18, 20, 26, 0.85);
+    backdrop-filter: blur(6px);
+}
+
+.particles-fx-emitters-panel .emitters-panel-content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.particles-fx-emitters-panel .legend-list.emitters-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.particles-fx-emitters-panel .legend-item.emitter-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+    color: var(--color-text-light-highlight, #f0f0e0);
+    font-size: 13px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.particles-fx-emitters-panel .legend-item.emitter-item:hover,
+.particles-fx-emitters-panel .legend-item.emitter-item.is-highlighted {
+    background: rgba(201, 89, 63, 0.2);
+    border-color: #c9593f;
+    box-shadow: 0 0 10px rgba(201, 89, 63, 0.4);
+    transform: translateX(2px);
+}
+
+.particles-fx-emitters-panel .emitter-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.particles-fx-emitters-panel .emitter-icon {
+    color: var(--color-text-hyperlink, #ff9800);
+    font-size: 12px;
+}
+
+.particles-fx-emitters-panel .emitter-title {
+    font-weight: 500;
+}
+
+.emitter-id-tag {
+    font-family: var(--font-mono, monospace);
+    font-size: 12px;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #e0e0e0;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.emitter-id-tag:hover,
+.emitter-id-tag.is-highlighted,
+.particles-fx-emitters-panel .legend-item.emitter-item:hover .emitter-id-tag,
+.particles-fx-emitters-panel .legend-item.emitter-item.is-highlighted .emitter-id-tag {
+    background: #c9593f;
+    color: #fff;
+    border-color: #d96d53;
+    font-weight: 700;
+    box-shadow: 0 0 8px rgba(201, 89, 63, 0.8);
+}
+
+.particles-fx-emitters-panel .empty-emitters {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 8px;
+    color: var(--color-text-dark-5, #999);
+    font-style: italic;
+    font-size: 12px;
+}
+
+.particles-fx-emitters-panel .empty-icon {
+    opacity: 0.6;
+}

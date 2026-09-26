@@ -41,5 +41,8 @@
     "PARTICULE-FX.advancedMode.badFormatInput": "{variableKey} : Unable to handle advanced variable function due to incorrect parameter format. Try ({a,b})",
     "PARTICULE-FX.advancedMode.badFormatFunction": "{variableKey} : Function uses an object other than Math",
     "PARTICULE-FX.advancedMode.missingParameters": "{variableKey} : Advanced variable has some inputs that could not be found: {missingParameters}",
-    "PARTICULE-FX.advancedMode.computeError": "Error during computation of {variableKey}"
+    "PARTICULE-FX.advancedMode.computeError": "Error during computation of {variableKey}",
+    "PARTICULE-FX.EmittersPanel.Title": "Emitters Panel",
+    "PARTICULE-FX.EmittersPanel.Emitter": "Emitter",
+    "PARTICULE-FX.EmittersPanel.NoEmitters": "No active emitters"
 }
