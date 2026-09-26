@@ -86,6 +86,45 @@
     box-shadow: 0 0 8px rgba(201, 89, 63, 0.8);
 }
 
+.particles-fx-emitters-panel .emitter-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.particles-fx-emitters-panel .emitter-stop-btn,
+.particles-fx-emitters-panel .emitter-delete-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 3px;
+    color: #e0e0e0;
+    cursor: pointer;
+    font-size: 11px;
+    line-height: 1;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.particles-fx-emitters-panel .emitter-stop-btn:hover {
+    background: #e67e22;
+    color: #ffffff;
+    border-color: #f39c12;
+    box-shadow: 0 0 8px rgba(230, 126, 34, 0.8);
+}
+
+.particles-fx-emitters-panel .emitter-delete-btn:hover {
+    background: #d93838;
+    color: #ffffff;
+    border-color: #ff5252;
+    box-shadow: 0 0 8px rgba(217, 56, 56, 0.8);
+}
+
 .particles-fx-emitters-panel .empty-emitters {
     display: flex;
     align-items: center;

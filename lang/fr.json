@@ -44,5 +44,7 @@
   "PARTICULE-FX.advancedMode.computeError": "Une erreur s'est produite lors de l'exécution de la variable {variableKey}",
   "PARTICULE-FX.EmittersPanel.Title": "Panneau des Émetteurs",
   "PARTICULE-FX.EmittersPanel.Emitter": "Émetteur",
-  "PARTICULE-FX.EmittersPanel.NoEmitters": "Aucun émetteur actif"
+  "PARTICULE-FX.EmittersPanel.NoEmitters": "Aucun émetteur actif",
+  "PARTICULE-FX.EmittersPanel.StopEmitter": "Arrêter l'émission",
+  "PARTICULE-FX.EmittersPanel.DeleteEmitter": "Supprimer l'émission (immédiat)"
 }

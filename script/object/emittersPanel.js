@@ -1,4 +1,5 @@
 import ParticlesEmitter from "./particlesEmitter.js";
+import emitController from "../api/emitController.js";
 import { s_MODULE_ID } from "../utils/utils.js";
 
 /**
@@ -20,10 +21,14 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
             minimizable: true
         },
         position: {
-            width: 220,
+            width: 250,
             height: "auto",
             left: 120,
             top: 70
+        },
+        actions: {
+            stopEmitter: EmittersPanel._onStopEmitter,
+            deleteEmitter: EmittersPanel._onDeleteEmitter
         }
     };
 
@@ -110,5 +115,35 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
         }));
         context.hasEmitters = context.emitters.length > 0;
         return context;
+    }
+
+    /**
+     * Action handler to stop an emitter when clicking the stop button.
+     * @param {PointerEvent} event - The click event.
+     * @param {HTMLElement} target - The button target element.
+     */
+    static _onStopEmitter(event, target) {
+        event.stopPropagation();
+        const emitterItem = target.closest("[data-emitter-id]");
+        const emitterId = emitterItem?.dataset?.emitterId;
+        if (emitterId) {
+            emitController.stop(emitterId);
+            EmittersPanel.refresh();
+        }
+    }
+
+    /**
+     * Action handler to immediately delete/destroy an emitter when clicking the delete button.
+     * @param {PointerEvent} event - The click event.
+     * @param {HTMLElement} target - The button target element.
+     */
+    static _onDeleteEmitter(event, target) {
+        event.stopPropagation();
+        const emitterItem = target.closest("[data-emitter-id]");
+        const emitterId = emitterItem?.dataset?.emitterId;
+        if (emitterId) {
+            emitController.stop(emitterId, true);
+            EmittersPanel.refresh();
+        }
     }
 }

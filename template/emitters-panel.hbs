@@ -7,7 +7,15 @@
                         <i class="fas fa-atom emitter-icon"></i>
                         <span class="emitter-title">{{localize 'PARTICULE-FX.EmittersPanel.Emitter'}}</span>
                     </div>
-                    <span class="emitter-id-tag">#{{this.id}}</span>
+                    <div class="emitter-controls">
+                        <span class="emitter-id-tag">#{{this.id}}</span>
+                        <button type="button" class="emitter-stop-btn" data-action="stopEmitter" data-tooltip="{{localize 'PARTICULE-FX.EmittersPanel.StopEmitter'}}" aria-label="{{localize 'PARTICULE-FX.EmittersPanel.StopEmitter'}}">
+                            <i class="fas fa-stop"></i>
+                        </button>
+                        <button type="button" class="emitter-delete-btn" data-action="deleteEmitter" data-tooltip="{{localize 'PARTICULE-FX.EmittersPanel.DeleteEmitter'}}" aria-label="{{localize 'PARTICULE-FX.EmittersPanel.DeleteEmitter'}}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 </li>
             {{/each}}
         </ol>
