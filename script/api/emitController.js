@@ -65,7 +65,6 @@ function stopEmissionById(emitterId, immediate) {
  * @returns {Array<number|string>} List of stopped emitters.
  */
 function stopAllEmission(immediate) {
-    particlesEmitterService.resetEmitterId()
     emitForOtherClient(s_MESSAGE_TYPES.stopAllEmission, immediate);
     return particlesEmitterService.stopAllEmission(immediate)
 }

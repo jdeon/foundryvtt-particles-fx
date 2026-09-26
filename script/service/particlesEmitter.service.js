@@ -9,39 +9,13 @@ import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
 import { EmittersPanel } from "../object/emittersPanel.js"
 
 /**
- * Increments and returns the next emitter ID from world settings or via socket.
- * @returns {number} The next unique numeric emitter ID.
+ * Generates a unique 10-character random string emitter ID using Foundry's randomID utility.
+ * @returns {string} The unique emitter ID string.
  */
 export function nextEmitterId() {
-    let lastId = game.settings.get(s_MODULE_ID, "maxEmitterId");
-    lastId++
-
-    if (game.user.isGM) {
-        game.settings.set(s_MODULE_ID, "maxEmitterId", lastId);
-    } else {
-        game.socket.emit(s_EVENT_NAME, {
-            type: s_MESSAGE_TYPES.updateMaxEmitterId,
-            payload: { maxEmitterId: lastId }
-        });
-    }
-
-
-    return lastId
-}
-
-/**
- * Resets the max emitter ID setting back to zero.
- * @returns {void}
- */
-export function resetEmitterId() {
-    if (game.user.isGM) {
-        game.settings.set(s_MODULE_ID, "maxEmitterId", 0);
-    } else {
-        game.socket.emit(s_EVENT_NAME, {
-            type: s_MESSAGE_TYPES.updateMaxEmitterId,
-            payload: { maxEmitterId: 0 }
-        });
-    }
+    return (typeof foundry !== "undefined" && foundry.utils?.randomID)
+        ? foundry.utils.randomID(10)
+        : Math.random().toString(36).substring(2, 12);
 }
 
 /**
