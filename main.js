@@ -179,7 +179,7 @@ Hooks.once('ready', function () {
 //Closing canvas hooks
 /**
  * Handles the 'canvasTearDown' hook to persist active emitters and stop all particle emissions.
- * @returns {Array<number|string>} List of stopped emitters.
+ * @returns {Array<string>} List of stopped emitters.
  */
 Hooks.on("canvasTearDown", () => {
     persistEmitters()
