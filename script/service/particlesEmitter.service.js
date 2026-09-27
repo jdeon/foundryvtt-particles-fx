@@ -25,22 +25,42 @@ export function nextEmitterId() {
  */
 export function initEmitters(emittersQueries) {
     const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
-    if (isSaveAllowed && emittersQueries && Array.isArray(emittersQueries)) {
-        emittersQueries.forEach(query => {
-            switch (query.type) {
-                case SprayingParticleTemplate.getType():
-                    sprayParticles(query);
-                    break;
-                case GravitingParticleTemplate.getType():
-                    gravitateParticles(query);
-                    break;
-                case MissileParticleTemplate.getType():
-                    missileParticles(query);
-                    break;
-                default:
-                    sprayParticles(query);
-            }
-        });
+    if (isSaveAllowed && emittersQueries) {
+        //Deprecated persist format : Array
+        if (Array.isArray(emittersQueries)) {
+            emittersQueries.forEach(query => {
+                switch (query.type) {
+                    case SprayingParticleTemplate.getType():
+                        sprayParticles(query);
+                        break;
+                    case GravitingParticleTemplate.getType():
+                        gravitateParticles(query);
+                        break;
+                    case MissileParticleTemplate.getType():
+                        missileParticles(query);
+                        break;
+                    default:
+                        sprayParticles(query);
+                }
+            });
+        } else {
+            //New persist format : Object<EmitterId, EmitterData>
+            Object.entries(emittersQueries).forEach(([emitterId, query]) => {
+                switch (query.type) {
+                    case SprayingParticleTemplate.getType():
+                        sprayParticles({ emitterId }, query);
+                        break;
+                    case GravitingParticleTemplate.getType():
+                        gravitateParticles({ emitterId }, query);
+                        break;
+                    case MissileParticleTemplate.getType():
+                        missileParticles({ emitterId }, query);
+                        break;
+                    default:
+                        sprayParticles({ emitterId }, query);
+                }
+            });
+        }
     }
 }
 
@@ -240,26 +260,36 @@ export function buildInputForParentEmitter(childsInputs) {
 
 /**
  * Persists active scene emitters into scene flags if saveEmitters setting is enabled.
+ * Synchronously snapshots active emitter state before updating scene flags asynchronously.
  * @returns {void}
  */
 export function persistEmitters() {
     const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
 
     if (isSaveAllowed && game.user.isGM) {
+        const targetScene = canvas.scene
         const activeEmmittersQuery = ParticlesEmitter.emitters
             .filter(emitter => emitter.remainingTime === undefined || emitter.remainingTime > 0)
-            .map(emitter => {
+            .reduce((acc, emitter) => {
                 const query = emitter.finalQuery
                 query.emissionDuration = emitter.remainingTime
                 query.type = emitter.particleTemplate.constructor.getType()
-                return query
-            })
+                acc[emitter.id] = query
+                return acc
+            }, {})
 
-        if (activeEmmittersQuery) {
-            canvas.scene.setFlag(s_MODULE_ID, "emitters", activeEmmittersQuery)
-        } else {
-            canvas.scene.unsetFlag(s_MODULE_ID, "emitters")
-        }
+        const hasActiveEmitters = Object.keys(activeEmmittersQuery).length > 0;
+
+        (async () => {
+            try {
+                await targetScene.unsetFlag(s_MODULE_ID, "emitters")
+                if (hasActiveEmitters) {
+                    await targetScene.setFlag(s_MODULE_ID, "emitters", activeEmmittersQuery)
+                }
+            } catch (err) {
+                console.error(`${s_MODULE_ID} | Error persisting emitters:`, err)
+            }
+        })()
     }
 }
 
