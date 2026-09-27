@@ -54,7 +54,7 @@ export default class ParticlesEmitter {
 
     /**
      * Highlights or unhighlights particles for all active emitters matching the target emitter ID.
-     * @param {number|string|null} emitterId - Target emitter ID to highlight or clear.
+     * @param {string|null} emitterId - Target emitter ID to highlight or clear.
      * @param {boolean} enable - Whether highlight should be enabled.
      * @returns {void}
      */
@@ -89,7 +89,7 @@ export default class ParticlesEmitter {
 
     /**
      * Constructs a ParticlesEmitter instance.
-     * @param {number|string} emitterId - Unique identifier for the emitter.
+     * @param {string} emitterId - Unique identifier for the emitter.
      * @param {ParticleTemplate} particleTemplate - Template defining particle generation rules.
      * @param {{spawningFrequence: number, spawningNumber: number, maxParticles: number, emissionDuration: number}} emitterProperty - Emission frequency, max count, and duration settings.
      * @param {string} [parentWorkflowId] - ID of parent workflow step if spawned from workflow.

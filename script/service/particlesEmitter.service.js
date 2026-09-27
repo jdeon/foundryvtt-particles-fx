@@ -79,7 +79,7 @@ export function sprayParticles(...args) {
  * @param {Object} colorTemplate - Color template object.
  * @param {Object} motionTemplate - Motion template object.
  * @param {Object} inputObject - Input configuration parameters.
- * @param {number|string} emitterId - Emitter ID metadata.
+ * @param {string} emitterId - Emitter ID metadata.
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
@@ -119,7 +119,7 @@ export function missileParticles(...args) {
 
 /**
  * Internal worker constructing missile particle template and emitter.
- * @param {{emitterId:number|string, inputObject:Object, motionTemplate:Object, colorTemplates:Object, particleShapes:string}} options - Missile emission configuration options.
+ * @param {{emitterId:string, inputObject:Object, motionTemplate:Object, colorTemplates:Object, particleShapes:string}} options - Missile emission configuration options.
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _missileParticles({ emitterId, inputObject, motionTemplate, colorTemplates, particleShapes }) {
@@ -227,7 +227,7 @@ export function gravitateParticles(...args) {
  * @param {Object} colorTemplate - Color template object.
  * @param {Object} motionTemplate - Motion template object.
  * @param {Object} inputObject - Input configuration parameters.
- * @param {number|string} emitterId - Emitter ID metadata.
+ * @param {string} emitterId - Emitter ID metadata.
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
@@ -323,7 +323,7 @@ export function stopAllEmission(immediate) {
 
 /**
  * Stops a specific particle emitter by its ID.
- * @param {number|string} emitterId - Emitter ID to stop.
+ * @param {string} emitterId - Emitter ID to stop.
  * @param {boolean} [immediate] - If true, stops immediately.
  * @returns {string|undefined} Stopped emitter ID or undefined if not found.
  */
@@ -348,7 +348,7 @@ export function stopEmissionById(emitterId, immediate) {
 
 /**
  * Stops an emitter workflow or all workflows.
- * @param {number|string} emitterId - Target emitter ID.
+ * @param {string} emitterId - Target emitter ID.
  * @param {boolean} [immediate] - Stop immediately.
  * @param {boolean} [all] - Stop all active workflows.
  * @returns {string|undefined} Stopped emitter ID.
@@ -378,7 +378,7 @@ export function stopWorkflow(emitterId, immediate, all) {
 
 /**
  * Looks up an emitter instance by ID, supporting shortcuts "f"/"first" and "l"/"last".
- * @param {number|string} emitterId - Emitter ID or shortcut.
+ * @param {string} emitterId - Emitter ID or shortcut.
  * @returns {ParticlesEmitter|undefined} Found emitter instance.
  */
 function findEmitterById(emitterId) {
@@ -419,7 +419,7 @@ function findParentEmitterIdAlive(emitter) {
 
 /**
  * Renders and posts a whisper chat message summarizing emission state.
- * @param {number|string} emitterId - Target emitter ID.
+ * @param {string} emitterId - Target emitter ID.
  * @param {boolean} [verbal] - Whether to include raw original query.
  * @returns {Promise<string>} Rendered HTML message content.
  */
@@ -449,7 +449,7 @@ export async function writeMessageForEmissionById(emitterId, verbal) {
  * @param {Object} inputQuery - Raw query parameters.
  * @param {Object} finalInput - Merged template input parameters.
  * @param {Object} particleTemplate - Template instance.
- * @param {number|string} emitterIds - Emitter ID object.
+ * @param {{emitterId?: string, parentWorkflowId?: string}} [emitterIds] - Emitter ID object.
  * @returns {ParticlesEmitter} Created emitter instance.
  */
 function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitterIds) {
@@ -482,7 +482,7 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
 /**
  * Categorizes argument inputs into config object, motion templates, color templates, and shapes.
  * @param {Array<Object|string>} args - Raw argument list.
- * @returns {{emitterId: number|string, inputObject: Object, motionNameTemplates: Array<string>, colorNameTemplates: Array<string>, particleShapes: Array<string>}} Sorted args object.
+ * @returns {{emitterId: {emitterId: string, parentWorkflowId?: string}, inputObject: Object, motionNameTemplates: Array<string>, colorNameTemplates: Array<string>, particleShapes: Array<string>}} Sorted args object.
  */
 function _orderInputArg(args) {
     let inputObject = {}
@@ -512,7 +512,7 @@ function _orderInputArg(args) {
 
 /**
  * Handles multi-template or multi-shape combinations by building parent workflow emitters.
- * @param {{ emitterId: string|number|undefined, inputObject:import("../prefillMotionTemplate.js").MotionTemplateQuery & import("../prefillColorTemplate.js").ColorTemplateQuery, motionNameTemplates: string | undefined, colorNameTemplates: string | undefined, particleShapes: string | undefined}} options - Parsed arguments options.
+ * @param {{ emitterId: string|undefined, inputObject:import("../prefillMotionTemplate.js").MotionTemplateQuery & import("../prefillColorTemplate.js").ColorTemplateQuery, motionNameTemplates: string | undefined, colorNameTemplates: string | undefined, particleShapes: string | undefined}} options - Parsed arguments options.
  * @param {Function} callback - Worker emission callback.
  * @returns {ParticlesEmitter} Instantiated emitter.
  */
