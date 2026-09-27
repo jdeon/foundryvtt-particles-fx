@@ -40,6 +40,8 @@ export default class ParticlesEmitter {
             effectsCanvas.moduleParticlesFx.destroy();
         }
 
+        ParticleHighlightManager.reset();
+
         const particleFxCanvas = new PIXI.Container();
         particleFxCanvas.zIndex = Particle.SORT_LAYER;
         effectsCanvas.addChild(particleFxCanvas);

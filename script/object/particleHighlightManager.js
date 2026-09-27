@@ -97,6 +97,9 @@ export class ParticleHighlightManager {
     static init() {
         if (this._haloContainer && !this._haloContainer.destroyed) return;
 
+        this._haloSprites = [];
+        this._tickerAdded = false;
+
         const container = new PIXI.Container();
         container.zIndex = Particle.SORT_LAYER - 1;
         if (typeof PIXI !== "undefined" && PIXI.BLEND_MODES?.ADD !== undefined) {
@@ -143,6 +146,9 @@ export class ParticleHighlightManager {
 
         const count = targetParticles.length;
 
+        // Filter out any destroyed sprites from pool
+        this._haloSprites = this._haloSprites.filter(sprite => sprite && !sprite.destroyed);
+
         // Object pool expansion
         while (this._haloSprites.length < count) {
             const firstParticle = targetParticles[0];
@@ -180,7 +186,9 @@ export class ParticleHighlightManager {
         }
 
         for (let i = count; i < this._haloSprites.length; i++) {
-            this._haloSprites[i].visible = false;
+            if (this._haloSprites[i] && !this._haloSprites[i].destroyed) {
+                this._haloSprites[i].visible = false;
+            }
         }
 
         if (!this._tickerAdded && canvas?.app?.ticker) {
@@ -203,7 +211,22 @@ export class ParticleHighlightManager {
         }
 
         for (let i = 0; i < this._haloSprites.length; i++) {
-            this._haloSprites[i].visible = false;
+            if (this._haloSprites[i] && !this._haloSprites[i].destroyed) {
+                this._haloSprites[i].visible = false;
+            }
         }
+    }
+
+    /**
+     * Completely resets the highlight manager state on canvas teardown/re-init.
+     */
+    static reset() {
+        this.clear();
+        if (this._haloContainer && !this._haloContainer.destroyed) {
+            this._haloContainer.destroy({ children: true });
+        }
+        this._haloContainer = null;
+        this._haloSprites = [];
+        this._tickerAdded = false;
     }
 }
