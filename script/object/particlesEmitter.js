@@ -99,6 +99,7 @@ export default class ParticlesEmitter {
         this.id = String(emitterId);
         this.parentWorkflowId = parentWorkflowId;
         this.spawnedEnable = true;
+        this.isPaused = false;
         this.particles = [];
         this.particleTemplate = particleTemplate;
 
@@ -135,7 +136,7 @@ export default class ParticlesEmitter {
         const dt = newDate - this.lastUpdate
         this.lastUpdate = newDate
 
-        if (this.particleTemplate.freezeOnPause && game.paused) {
+        if (this.isPaused || (this.particleTemplate.freezeOnPause && game.paused)) {
             return
         }
 
@@ -236,6 +237,15 @@ export default class ParticlesEmitter {
         }
 
         EmittersPanel.refresh()
+    }
+
+    /**
+     * Toggles the pause state of this emitter.
+     * @returns {boolean} The new isPaused state.
+     */
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        return this.isPaused;
     }
 
     /**
