@@ -19,6 +19,7 @@ export function subscribeApiToWindow() {
         missileParticles: emitController.missile,
         stopEmissionById: emitController.stop,
         togglePauseEmissionById: emitController.togglePause,
+        pauseAllEmission: emitController.pauseAll,
         stopAllEmission: emitController.stopAll,
         showEmittersPanel: emitController.showEmittersPanel,
         refreshEmittersPanel: emitController.refreshEmittersPanel,

@@ -362,6 +362,24 @@ export function togglePauseEmissionById(emitterId, forceState) {
 }
 
 /**
+ * Pauses or resumes all active particle emissions.
+ * @param {boolean} [isPaused=true] - State to set for all emitters (defaults to true).
+ * @returns {Array<string>} List of updated emitter IDs.
+ */
+export function setPauseStateToAllEmission(isPaused = true) {
+    const targetState = typeof isPaused === "boolean" ? isPaused : true;
+    let updatedIds = [];
+
+    ParticlesEmitter.emitters.forEach(emitter => {
+        emitter.isPaused = targetState;
+        updatedIds.push(emitter.id);
+    });
+
+    EmittersPanel.refresh();
+    return updatedIds;
+}
+
+/**
  * Stops an emitter workflow or all workflows.
  * @param {number|string} emitterId - Target emitter ID.
  * @param {boolean} [immediate] - Stop immediately.

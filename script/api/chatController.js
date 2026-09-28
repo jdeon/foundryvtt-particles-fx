@@ -193,11 +193,22 @@ function handleStopById(args) {
 }
 
 /**
- * Pauses or resumes a specific particle emitter as commanded via chat.
- * @param {Array<string>} args - Chat command arguments containing emitter ID.
+ * Pauses or resumes a specific particle emitter or all emitters as commanded via chat.
+ * @param {Array<string>} args - Chat command arguments.
  * @returns {string} Formatted localized return message.
  */
 function handlePause(args) {
+	if (hasOption(args, ['--all', '-a'])) {
+		const isResume = hasOption(args, ['--resume', '-r', '--unpause']);
+		const isPaused = !isResume;
+		const updatedEmitters = emitController.pauseAll(isPaused);
+		EmittersPanel.refresh();
+		const statusText = isPaused 
+			? game.i18n.localize("PARTICULE-FX.Chat-Command.pause.paused") 
+			: game.i18n.localize("PARTICULE-FX.Chat-Command.pause.resumed");
+		return game.i18n.localize("PARTICULE-FX.Chat-Command.pauseAll.return") + `(${statusText}) ` + JSON.stringify(updatedEmitters);
+	}
+
 	const emitterId = getEmittersId(args);
 	const isPaused = emitController.togglePause(emitterId);
 	EmittersPanel.refresh();

@@ -8,6 +8,7 @@ export default {
     missile: missileParticles,
     stop: stopEmissionById,
     togglePause: togglePauseEmissionById,
+    pauseAll: setPauseStateToAllEmission,
     stopAll: stopAllEmission,
     stopWorkflow: stopWorkflow,
     showManagerPanel: showEmittersPanel,
@@ -70,6 +71,17 @@ function togglePauseEmissionById(emitterId, isPaused) {
     const newState = particlesEmitterService.togglePauseEmissionById(emitterId, isPaused);
     emitForOtherClient(s_MESSAGE_TYPES.togglePauseEmissionById, { emitterId, isPaused: newState });
     return newState;
+}
+
+/**
+ * Pauses or resumes all active emissions and notifies connected clients.
+ * @param {boolean} [isPaused=true] - Optional state (defaults to true).
+ * @returns {Array<string>} List of updated emitter IDs.
+ */
+function setPauseStateToAllEmission(isPaused = true) {
+    const targetState = typeof isPaused === "boolean" ? isPaused : true;
+    emitForOtherClient(s_MESSAGE_TYPES.pauseAllEmission, targetState);
+    return particlesEmitterService.setPauseStateToAllEmission(targetState);
 }
 
 /**
