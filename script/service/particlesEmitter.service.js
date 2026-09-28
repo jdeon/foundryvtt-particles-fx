@@ -9,39 +9,13 @@ import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
 import { EmittersPanel } from "../object/emittersPanel.js"
 
 /**
- * Increments and returns the next emitter ID from world settings or via socket.
- * @returns {number} The next unique numeric emitter ID.
+ * Generates a unique 10-character random string emitter ID using Foundry's randomID utility.
+ * @returns {string} The unique emitter ID string.
  */
 export function nextEmitterId() {
-    let lastId = game.settings.get(s_MODULE_ID, "maxEmitterId");
-    lastId++
-
-    if (game.user.isGM) {
-        game.settings.set(s_MODULE_ID, "maxEmitterId", lastId);
-    } else {
-        game.socket.emit(s_EVENT_NAME, {
-            type: s_MESSAGE_TYPES.updateMaxEmitterId,
-            payload: { maxEmitterId: lastId }
-        });
-    }
-
-
-    return lastId
-}
-
-/**
- * Resets the max emitter ID setting back to zero.
- * @returns {void}
- */
-export function resetEmitterId() {
-    if (game.user.isGM) {
-        game.settings.set(s_MODULE_ID, "maxEmitterId", 0);
-    } else {
-        game.socket.emit(s_EVENT_NAME, {
-            type: s_MESSAGE_TYPES.updateMaxEmitterId,
-            payload: { maxEmitterId: 0 }
-        });
-    }
+    return (typeof foundry !== "undefined" && foundry.utils?.randomID)
+        ? foundry.utils.randomID(10)
+        : Math.random().toString(36).substring(2, 12);
 }
 
 /**
@@ -51,22 +25,42 @@ export function resetEmitterId() {
  */
 export function initEmitters(emittersQueries) {
     const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
-    if (isSaveAllowed && emittersQueries && Array.isArray(emittersQueries)) {
-        emittersQueries.forEach(query => {
-            switch (query.type) {
-                case SprayingParticleTemplate.getType():
-                    sprayParticles(query);
-                    break;
-                case GravitingParticleTemplate.getType():
-                    gravitateParticles(query);
-                    break;
-                case MissileParticleTemplate.getType():
-                    missileParticles(query);
-                    break;
-                default:
-                    sprayParticles(query);
-            }
-        });
+    if (isSaveAllowed && emittersQueries) {
+        //Deprecated persist format : Array
+        if (Array.isArray(emittersQueries)) {
+            emittersQueries.forEach(query => {
+                switch (query.type) {
+                    case SprayingParticleTemplate.getType():
+                        sprayParticles(query);
+                        break;
+                    case GravitingParticleTemplate.getType():
+                        gravitateParticles(query);
+                        break;
+                    case MissileParticleTemplate.getType():
+                        missileParticles(query);
+                        break;
+                    default:
+                        sprayParticles(query);
+                }
+            });
+        } else {
+            //New persist format : Object<EmitterId, EmitterData>
+            Object.entries(emittersQueries).forEach(([emitterId, query]) => {
+                switch (query.type) {
+                    case SprayingParticleTemplate.getType():
+                        sprayParticles({ emitterId }, query);
+                        break;
+                    case GravitingParticleTemplate.getType():
+                        gravitateParticles({ emitterId }, query);
+                        break;
+                    case MissileParticleTemplate.getType():
+                        missileParticles({ emitterId }, query);
+                        break;
+                    default:
+                        sprayParticles({ emitterId }, query);
+                }
+            });
+        }
     }
 }
 
@@ -85,7 +79,7 @@ export function sprayParticles(...args) {
  * @param {Object} colorTemplate - Color template object.
  * @param {Object} motionTemplate - Motion template object.
  * @param {Object} inputObject - Input configuration parameters.
- * @param {number|string} emitterId - Emitter ID metadata.
+ * @param {string} emitterId - Emitter ID metadata.
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
@@ -125,7 +119,7 @@ export function missileParticles(...args) {
 
 /**
  * Internal worker constructing missile particle template and emitter.
- * @param {{emitterId:number|string, inputObject:Object, motionTemplate:Object, colorTemplates:Object, particleShapes:string}} options - Missile emission configuration options.
+ * @param {{emitterId:string, inputObject:Object, motionTemplate:Object, colorTemplates:Object, particleShapes:string}} options - Missile emission configuration options.
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _missileParticles({ emitterId, inputObject, motionTemplate, colorTemplates, particleShapes }) {
@@ -233,7 +227,7 @@ export function gravitateParticles(...args) {
  * @param {Object} colorTemplate - Color template object.
  * @param {Object} motionTemplate - Motion template object.
  * @param {Object} inputObject - Input configuration parameters.
- * @param {number|string} emitterId - Emitter ID metadata.
+ * @param {string} emitterId - Emitter ID metadata.
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
@@ -266,26 +260,36 @@ export function buildInputForParentEmitter(childsInputs) {
 
 /**
  * Persists active scene emitters into scene flags if saveEmitters setting is enabled.
+ * Synchronously snapshots active emitter state before updating scene flags asynchronously.
  * @returns {void}
  */
 export function persistEmitters() {
     const isSaveAllowed = game.settings.get(s_MODULE_ID, "saveEmitters")
 
     if (isSaveAllowed && game.user.isGM) {
+        const targetScene = canvas.scene
         const activeEmmittersQuery = ParticlesEmitter.emitters
             .filter(emitter => emitter.remainingTime === undefined || emitter.remainingTime > 0)
-            .map(emitter => {
+            .reduce((acc, emitter) => {
                 const query = emitter.finalQuery
                 query.emissionDuration = emitter.remainingTime
                 query.type = emitter.particleTemplate.constructor.getType()
-                return query
-            })
+                acc[emitter.id] = query
+                return acc
+            }, {})
 
-        if (activeEmmittersQuery) {
-            canvas.scene.setFlag(s_MODULE_ID, "emitters", activeEmmittersQuery)
-        } else {
-            canvas.scene.unsetFlag(s_MODULE_ID, "emitters")
-        }
+        const hasActiveEmitters = Object.keys(activeEmmittersQuery).length > 0;
+
+        (async () => {
+            try {
+                await targetScene.unsetFlag(s_MODULE_ID, "emitters")
+                if (hasActiveEmitters) {
+                    await targetScene.setFlag(s_MODULE_ID, "emitters", activeEmmittersQuery)
+                }
+            } catch (err) {
+                console.error(`${s_MODULE_ID} | Error persisting emitters:`, err)
+            }
+        })()
     }
 }
 
@@ -319,7 +323,7 @@ export function stopAllEmission(immediate) {
 
 /**
  * Stops a specific particle emitter by its ID.
- * @param {number|string} emitterId - Emitter ID to stop.
+ * @param {string} emitterId - Emitter ID to stop.
  * @param {boolean} [immediate] - If true, stops immediately.
  * @returns {string|undefined} Stopped emitter ID or undefined if not found.
  */
@@ -381,7 +385,7 @@ export function setPauseStateToAllEmission(isPaused = true) {
 
 /**
  * Stops an emitter workflow or all workflows.
- * @param {number|string} emitterId - Target emitter ID.
+ * @param {string} emitterId - Target emitter ID.
  * @param {boolean} [immediate] - Stop immediately.
  * @param {boolean} [all] - Stop all active workflows.
  * @returns {string|undefined} Stopped emitter ID.
@@ -411,7 +415,7 @@ export function stopWorkflow(emitterId, immediate, all) {
 
 /**
  * Looks up an emitter instance by ID, supporting shortcuts "f"/"first" and "l"/"last".
- * @param {number|string} emitterId - Emitter ID or shortcut.
+ * @param {string} emitterId - Emitter ID or shortcut.
  * @returns {ParticlesEmitter|undefined} Found emitter instance.
  */
 function findEmitterById(emitterId) {
@@ -452,7 +456,7 @@ function findParentEmitterIdAlive(emitter) {
 
 /**
  * Renders and posts a whisper chat message summarizing emission state.
- * @param {number|string} emitterId - Target emitter ID.
+ * @param {string} emitterId - Target emitter ID.
  * @param {boolean} [verbal] - Whether to include raw original query.
  * @returns {Promise<string>} Rendered HTML message content.
  */
@@ -482,7 +486,7 @@ export async function writeMessageForEmissionById(emitterId, verbal) {
  * @param {Object} inputQuery - Raw query parameters.
  * @param {Object} finalInput - Merged template input parameters.
  * @param {Object} particleTemplate - Template instance.
- * @param {number|string} emitterIds - Emitter ID object.
+ * @param {{emitterId?: string, parentWorkflowId?: string}} [emitterIds] - Emitter ID object.
  * @returns {ParticlesEmitter} Created emitter instance.
  */
 function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitterIds) {
@@ -515,7 +519,7 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
 /**
  * Categorizes argument inputs into config object, motion templates, color templates, and shapes.
  * @param {Array<Object|string>} args - Raw argument list.
- * @returns {{emitterId: number|string, inputObject: Object, motionNameTemplates: Array<string>, colorNameTemplates: Array<string>, particleShapes: Array<string>}} Sorted args object.
+ * @returns {{emitterId: {emitterId: string, parentWorkflowId?: string}, inputObject: Object, motionNameTemplates: Array<string>, colorNameTemplates: Array<string>, particleShapes: Array<string>}} Sorted args object.
  */
 function _orderInputArg(args) {
     let inputObject = {}
@@ -545,7 +549,7 @@ function _orderInputArg(args) {
 
 /**
  * Handles multi-template or multi-shape combinations by building parent workflow emitters.
- * @param {{ emitterId: string|number|undefined, inputObject:import("../prefillMotionTemplate.js").MotionTemplateQuery & import("../prefillColorTemplate.js").ColorTemplateQuery, motionNameTemplates: string | undefined, colorNameTemplates: string | undefined, particleShapes: string | undefined}} options - Parsed arguments options.
+ * @param {{ emitterId: string|undefined, inputObject:import("../prefillMotionTemplate.js").MotionTemplateQuery & import("../prefillColorTemplate.js").ColorTemplateQuery, motionNameTemplates: string | undefined, colorNameTemplates: string | undefined, particleShapes: string | undefined}} options - Parsed arguments options.
  * @param {Function} callback - Worker emission callback.
  * @returns {ParticlesEmitter} Instantiated emitter.
  */

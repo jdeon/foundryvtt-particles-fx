@@ -100,15 +100,6 @@ Hooks.on("setup", () => {
 
     setupAutomation()
 
-    game.settings.register(s_MODULE_ID, "maxEmitterId", {
-        name: "Last id emitter",
-        hint: "Don't touch this",
-        default: 0,
-        type: Number,
-        scope: 'world',
-        config: false
-    });
-
     game.settings.register(s_MODULE_ID, "customPrefillMotionTemplate", {
         name: "Map of custom prefill motion template",
         hint: "Don't touch this",
@@ -188,7 +179,7 @@ Hooks.once('ready', function () {
 //Closing canvas hooks
 /**
  * Handles the 'canvasTearDown' hook to persist active emitters and stop all particle emissions.
- * @returns {Array<number|string>} List of stopped emitters.
+ * @returns {Array<string>} List of stopped emitters.
  */
 Hooks.on("canvasTearDown", () => {
     persistEmitters()

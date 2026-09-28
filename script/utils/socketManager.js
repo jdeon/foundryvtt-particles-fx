@@ -16,7 +16,6 @@ export const s_MESSAGE_TYPES = {
    stopWorkflow: 'stopWorkflow',
    togglePauseEmissionById: 'togglePauseEmissionById',
    pauseAllEmission: 'pauseAllEmission',
-   updateMaxEmitterId: 'updateMaxEmitterId',
    updateCustomPrefillTemplate: 'updateCustomPrefillTemplate'
 };
 
@@ -55,7 +54,6 @@ export function listen() {
             case s_MESSAGE_TYPES.stopWorkflow: particlesEmitterService.stopWorkflow(data.payload); break;
             case s_MESSAGE_TYPES.togglePauseEmissionById: particlesEmitterService.togglePauseEmissionById(data.payload.emitterId, data.payload.isPaused); break;
             case s_MESSAGE_TYPES.pauseAllEmission: particlesEmitterService.setPauseStateToAllEmission(data.payload); break;
-            case s_MESSAGE_TYPES.updateMaxEmitterId: updateMaxEmitterId(data.payload); break;
             case s_MESSAGE_TYPES.updateCustomPrefillTemplate: updateCustomPrefillTemplate(data.payload); break;
          }
       }

@@ -255,16 +255,16 @@ function hasOption(givenOptions, matchOptions) {
 /**
  * Extracts or infers an emitter ID from chat arguments.
  * @param {Array<string>} args - Chat command arguments.
- * @returns {number|string} Emitter ID or indicator string ("f" or "l").
+ * @returns {string} Emitter ID or indicator string ("f" or "l").
  */
 function getEmittersId(args) {
-	const numbers = args.filter((item) => !isNaN(item));
+	const targetId = args.find((item) => !item.startsWith("-") && item !== "first" && item !== "f" && item !== "last" && item !== "l");
 
-	if (numbers.length > 0) {
-		return numbers[0]
+	if (targetId) {
+		return targetId;
 	} else if (args.includes("first") || args.includes("f")) {
-		return "f"
+		return "f";
 	}
 
-	return "l"
+	return "l";
 }
