@@ -347,6 +347,25 @@ export function stopEmissionById(emitterId, immediate) {
 }
 
 /**
+ * Retrieves the query configuration for a specific active emitter by ID.
+ * @param {string} emitterId - Target emitter ID or shortcut ("f"/"first", "l"/"last").
+ * @param {boolean} [original=false] - If true, returns raw user input query instead of merged final query.
+ * @returns {Object|undefined} Cloned query object or undefined.
+ */
+export function getQuery(emitterId, original = false) {
+    const emitter = findEmitterById(emitterId);
+    if (!emitter) return undefined;
+    const query = original ? emitter.originalQuery : emitter.finalQuery;
+    if (!query) return undefined;
+
+    const queryCopy = foundry.utils.deepClone ? foundry.utils.deepClone(query) : JSON.parse(JSON.stringify(query));
+    if (!queryCopy.type && emitter.particleTemplate?.constructor?.getType) {
+        queryCopy.type = emitter.particleTemplate.constructor.getType();
+    }
+    return queryCopy;
+}
+
+/**
  * Toggles play/pause state for a specific emitter by ID.
  * @param {number|string} emitterId - Emitter ID to pause or resume.
  * @param {boolean} [forceState] - Optional explicit state to force.

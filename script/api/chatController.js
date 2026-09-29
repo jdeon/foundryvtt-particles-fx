@@ -16,6 +16,7 @@ const EXISTING_CHAT_COMMAND = {
 	'spray': (args) => handleEmission(args, emitController.spray, { type: 'Spraying' }),
 	'missile': (args) => handleMissile(args),
 	'gravitate': (args) => handleEmission(args, emitController.gravit, { type: 'Graviting' }),
+	'query': (args) => handleGetQuery(args),
 	'help': () => game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Object.keys(EXISTING_CHAT_COMMAND).join(', ')
 }
 
@@ -203,8 +204,8 @@ function handlePause(args) {
 		const isPaused = !isResume;
 		const updatedEmitters = emitController.pauseAll(isPaused);
 		EmittersPanel.refresh();
-		const statusText = isPaused 
-			? game.i18n.localize("PARTICULE-FX.Chat-Command.pause.paused") 
+		const statusText = isPaused
+			? game.i18n.localize("PARTICULE-FX.Chat-Command.pause.paused")
 			: game.i18n.localize("PARTICULE-FX.Chat-Command.pause.resumed");
 		return game.i18n.localize("PARTICULE-FX.Chat-Command.pauseAll.return") + `(${statusText}) ` + JSON.stringify(updatedEmitters);
 	}
@@ -212,8 +213,8 @@ function handlePause(args) {
 	const emitterId = getEmittersId(args);
 	const isPaused = emitController.togglePause(emitterId);
 	EmittersPanel.refresh();
-	const statusText = isPaused 
-		? game.i18n.localize("PARTICULE-FX.Chat-Command.pause.paused") 
+	const statusText = isPaused
+		? game.i18n.localize("PARTICULE-FX.Chat-Command.pause.paused")
 		: game.i18n.localize("PARTICULE-FX.Chat-Command.pause.resumed");
 	return game.i18n.localize("PARTICULE-FX.Chat-Command.pause.return") + `${emitterId} (${statusText})`;
 }
@@ -239,6 +240,21 @@ function handleStopAll(args) {
 	const isImmediate = hasOption(args, ['--instant', '-i']);
 	const stoppedEmitters = emitController.stopAll(isImmediate);
 	return game.i18n.localize("PARTICULE-FX.Chat-Command.stopAll.return") + JSON.stringify(stoppedEmitters);
+}
+
+/**
+ * Retrieves an emitter's query configuration as commanded via chat.
+ * @param {Array<string>} args - Chat command arguments.
+ * @returns {string} Formatted localized return message with JSON string.
+ */
+function handleGetQuery(args) {
+	const isOriginal = hasOption(args, ['--original', '-o']);
+	const emitterId = getEmittersId(args);
+	const query = emitController.getQuery(emitterId, isOriginal);
+	if (!query) {
+		return game.i18n.localize("PARTICULE-FX.Emission.Not-found") + emitterId;
+	}
+	return `<code> ${JSON.stringify(query)} </code>`;
 }
 
 /**
