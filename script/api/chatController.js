@@ -254,7 +254,7 @@ function handleGetQuery(args) {
 	if (!query) {
 		return game.i18n.localize("PARTICULE-FX.Emission.Not-found") + emitterId;
 	}
-	return `<code> ${JSON.stringify(query)} </code>`;
+	return `<pre><code style="white-space: pre-wrap; word-break: break-all;">${JSON.stringify(query, null, 2)}</code></pre>`;
 }
 
 /**
