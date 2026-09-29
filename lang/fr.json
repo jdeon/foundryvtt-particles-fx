@@ -11,6 +11,8 @@
   "PARTICULE-FX.Settings.Persist.description": "Sauvegarder les émetteurs en cours dans la scène lors d'un changement de scène, puis les recharger lors du retour à celle-ci.",
   "PARTICULE-FX.Settings.minRole.label": "Rôle minimal pour les templates personnalisés",
   "PARTICULE-FX.Settings.minRole.description": "Rôle minimal pour créer ou supprimer de nouveaux modèles (templates) prédéfinis personnalisés.",
+  "PARTICULE-FX.Settings.showPanelOnStart.label": "Afficher le panneau des émetteurs au démarrage",
+  "PARTICULE-FX.Settings.showPanelOnStart.description": "Ouvrir automatiquement le panneau des émetteurs pour le MJ au démarrage.",
   "PARTICULE-FX.Chat-Command.Options.help":"<code>--help</code>, <code>-h</code> : Affiche ce message d'aide.",
   "PARTICULE-FX.Chat-Command.Options.instant":"<code>--instant</code>, <code>-i</code> : Force l'arrêt en détruisant immédiattement les particules emmisent.",
   "PARTICULE-FX.Chat-Command.Options.first":"<code>first</code>, <code>f</code> : Cible le premier émetteur de la liste.",

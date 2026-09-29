@@ -37,6 +37,15 @@ Hooks.on("setup", () => {
         default: false
     });
 
+    game.settings.register(s_MODULE_ID, "showPanelOnStart", {
+        name: game.i18n.localize("PARTICULE-FX.Settings.showPanelOnStart.label"),
+        hint: game.i18n.localize("PARTICULE-FX.Settings.showPanelOnStart.description"),
+        scope: "client",
+        config: true,
+        type: Boolean,
+        default: true
+    });
+
     CompatibiltyV2Manager.addMigrationSettings()
 
     game.settings.register(s_MODULE_ID, "saveEmitters", {
@@ -146,7 +155,7 @@ Hooks.on("canvasReady", () => {
         }
     }
 
-    if (game.ready) {
+    if (game.ready && game.settings.get(s_MODULE_ID, "showPanelOnStart")) {
         EmittersPanel.show();
     }
 });
@@ -171,7 +180,9 @@ Hooks.once('ready', function () {
     subscribeApiToWindow()
     automationInitialisation()
 
-    EmittersPanel.show();
+    if (game.settings.get(s_MODULE_ID, "showPanelOnStart")) {
+        EmittersPanel.show();
+    }
 
     listen()
 });
