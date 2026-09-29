@@ -21,7 +21,7 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
             minimizable: true
         },
         position: {
-            width: 250,
+            width: 300,
             height: "auto",
             left: 120,
             top: 70
