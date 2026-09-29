@@ -37,15 +37,6 @@ Hooks.on("setup", () => {
         default: false
     });
 
-    game.settings.register(s_MODULE_ID, "showPanelOnStart", {
-        name: game.i18n.localize("PARTICULE-FX.Settings.showPanelOnStart.label"),
-        hint: game.i18n.localize("PARTICULE-FX.Settings.showPanelOnStart.description"),
-        scope: "client",
-        config: true,
-        type: Boolean,
-        default: true
-    });
-
     CompatibiltyV2Manager.addMigrationSettings()
 
     game.settings.register(s_MODULE_ID, "saveEmitters", {
@@ -55,6 +46,15 @@ Hooks.on("setup", () => {
         config: true,
         type: Boolean,
         default: false
+    });
+
+    game.settings.register(s_MODULE_ID, "showPanelOnStart", {
+        name: game.i18n.localize("PARTICULE-FX.Settings.showPanelOnStart.label"),
+        hint: game.i18n.localize("PARTICULE-FX.Settings.showPanelOnStart.description"),
+        scope: "world",
+        config: true,
+        type: Boolean,
+        default: true
     });
 
     game.settings.register(s_MODULE_ID, "minimalRole", {
