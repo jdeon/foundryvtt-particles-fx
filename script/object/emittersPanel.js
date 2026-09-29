@@ -58,7 +58,7 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
      * Shows the emitters panel on screen and initializes global hover listeners.
      */
     static show() {
-        if (!game?.ready) return;
+        if (!game?.ready || !game.user?.isGM) return;
         this.setupGlobalEmitterHoverListeners();
         this.instance.render({ force: true });
     }
