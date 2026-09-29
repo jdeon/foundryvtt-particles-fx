@@ -54,5 +54,6 @@
   "PARTICULE-FX.EmittersPanel.PauseEmitter": "Mettre l'émission en pause",
   "PARTICULE-FX.EmittersPanel.PlayEmitter": "Reprendre l'émission",
   "PARTICULE-FX.EmittersPanel.StopEmitter": "Arrêter l'émission",
-  "PARTICULE-FX.EmittersPanel.DeleteEmitter": "Supprimer l'émission (immédiat)"
+  "PARTICULE-FX.EmittersPanel.DeleteEmitter": "Supprimer l'émission (immédiat)",
+  "PARTICULE-FX.EmittersPanel.CopiedId": "ID d'émetteur {id} copié dans le presse-papiers."
 }

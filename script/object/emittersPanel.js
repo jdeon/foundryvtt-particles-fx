@@ -104,6 +104,23 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
                 }
             }
         });
+
+        document.body.addEventListener("click", (event) => {
+            if (event.target?.closest?.("button, [data-action]")) return;
+
+            const target = event.target?.closest?.("[data-emitter-id]");
+            if (target) {
+                const emitterId = target.dataset.emitterId;
+                if (emitterId) {
+                    if (navigator.clipboard?.writeText) {
+                        navigator.clipboard.writeText(emitterId);
+                    } else if (game.utils?.copyToClipboard) {
+                        game.utils.copyToClipboard({ content: emitterId });
+                    }
+                    ui.notifications.info(game.i18n.format("PARTICULE-FX.EmittersPanel.CopiedId", { id: emitterId }));
+                }
+            }
+        });
     }
 
     /** @override */
