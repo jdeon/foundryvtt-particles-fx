@@ -102,7 +102,7 @@ export function missileParticles(...args) {
 
     if (orderedInputs.motionNameTemplates.length > 1) {
         const particleInputs = orderedInputs.motionNameTemplates.map((motionName) => [orderedInputs.inputObject, motionName, ...orderedInputs.colorNameTemplates, ...orderedInputs.particleShapes]);
-        const parentInput = buildInputForParentEmitter(particleInputs, orderedInputs?.inputObject?.source);
+        const parentInput = buildInputForParentEmitter(particleInputs, orderedInputs?.inputObject?.source, orderedInputs?.inputObject?.target);
         return _sprayParticles(undefined, undefined, parentInput, orderedInputs.emitterId) //Simpler for a spray to handle a parent workflow
     } else {
         const motionTemplate = ParticlesEmitter.prefillMotionTemplate[orderedInputs.motionNameTemplates[0]];
@@ -243,11 +243,14 @@ function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitter
 /**
  * Constructs a parent dummy input object that coordinates chained child emission workflows.
  * @param {Array<Object>} childsInputs - Array of child emission input definitions.
+ * @param {Vector3|string} parentSource - Source vector of the parent emitter.
+ * @param {Vector3|string} parentTarget - Target vector of the parent emitter.
  * @returns {Object>} Parent input object.
  */
-export function buildInputForParentEmitter(childsInputs, parentSource) {
+export function buildInputForParentEmitter(childsInputs, parentSource, parentTarget) {
     return {
         source: parentSource ?? new Vector3(0, 0, 0),
+        target: parentTarget,
         maxParticles: 0,
         emissionDuration: ParticlesEmitter.UNTIL_CHILD_END_DURATION,
         next: [{
@@ -376,11 +379,12 @@ export function duplicateEmitter(emitterId, overrides = {}) {
     if (!query) return undefined;
 
     const oldSource = query.source;
+    const oldTarget = query.target;
     const newQuery = { ...query, ...overrides };
     delete newQuery.emitterId;
 
-    if (newQuery.next && oldSource !== undefined && newQuery.source !== undefined) {
-        newQuery.next = _updateWorkflowSources(newQuery.next, oldSource, newQuery.source);
+    if (newQuery.next) {
+        newQuery.next = _updateWorkflowSources(newQuery.next, oldSource, newQuery.source, oldTarget, newQuery.target);
     }
 
     switch (newQuery.type) {
@@ -412,14 +416,23 @@ function _isEqualSource(s1, s2) {
 }
 
 /**
- * Recursively updates references to oldSource with newSource in workflow definitions (next property and particleInputs).
+ * Recursively updates references to old sources and targets with new values in workflow definitions (next property and particleInputs).
  * @param {Array<Object>} next - Array of workflow step definitions.
- * @param {*} oldSource - Source value to be replaced.
+ * @param {*} oldSource - Old source value to replace.
  * @param {*} newSource - Replacement source value.
+ * @param {*} oldTarget - Old target value to replace.
+ * @param {*} newTarget - Replacement target value.
  * @returns {Array<Object>} Updated next array.
  */
-function _updateWorkflowSources(next, oldSource, newSource) {
-    if (!Array.isArray(next) || oldSource === undefined || newSource === undefined) {
+function _updateWorkflowSources(next, oldSource, newSource, oldTarget, newTarget) {
+    if (!Array.isArray(next)) {
+        return next;
+    }
+
+    const hasSourceChange = oldSource !== undefined && newSource !== undefined;
+    const hasTargetChange = oldTarget !== undefined && newTarget !== undefined;
+
+    if (!hasSourceChange && !hasTargetChange) {
         return next;
     }
 
@@ -430,11 +443,14 @@ function _updateWorkflowSources(next, oldSource, newSource) {
             return input.map(updateInput);
         } else if (typeof input === "object") {
             const updated = { ...input };
-            if (updated.source && _isEqualSource(updated.source, oldSource)) {
+            if (hasSourceChange && updated.source && _isEqualSource(updated.source, oldSource)) {
                 updated.source = newSource;
             }
+            if (hasTargetChange && updated.target && _isEqualSource(updated.target, oldTarget)) {
+                updated.target = newTarget;
+            }
             if (Array.isArray(updated.next)) {
-                updated.next = _updateWorkflowSources(updated.next, oldSource, newSource);
+                updated.next = _updateWorkflowSources(updated.next, oldSource, newSource, oldTarget, newTarget);
             }
             return updated;
         }
@@ -677,7 +693,7 @@ function _handleMultipleEmission({ emitterId, inputObject, motionNameTemplates, 
             }
         }
 
-        computedInput = buildInputForParentEmitter(particleInputs, inputObject?.source);
+        computedInput = buildInputForParentEmitter(particleInputs, inputObject?.source, inputObject?.target);
     } else {
         motionTemplate = motionNameTemplates.length === 1 ? ParticlesEmitter.prefillMotionTemplate[motionNameTemplates[0]] : undefined;
         colorTemplate = colorNameTemplates.length === 1 ? ParticlesEmitter.prefillColorTemplate[colorNameTemplates[0]] : undefined;
