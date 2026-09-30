@@ -102,7 +102,7 @@ export function missileParticles(...args) {
 
     if (orderedInputs.motionNameTemplates.length > 1) {
         const particleInputs = orderedInputs.motionNameTemplates.map((motionName) => [orderedInputs.inputObject, motionName, ...orderedInputs.colorNameTemplates, ...orderedInputs.particleShapes]);
-        const parentInput = buildInputForParentEmitter(particleInputs);
+        const parentInput = buildInputForParentEmitter(particleInputs, orderedInputs?.inputObject?.source);
         return _sprayParticles(undefined, undefined, parentInput, orderedInputs.emitterId) //Simpler for a spray to handle a parent workflow
     } else {
         const motionTemplate = ParticlesEmitter.prefillMotionTemplate[orderedInputs.motionNameTemplates[0]];
@@ -245,9 +245,9 @@ function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitter
  * @param {Array<Object>} childsInputs - Array of child emission input definitions.
  * @returns {Object>} Parent input object.
  */
-export function buildInputForParentEmitter(childsInputs) {
+export function buildInputForParentEmitter(childsInputs, parentSource) {
     return {
-        source: new Vector3(0, 0, 0),
+        source: parentSource ?? new Vector3(0, 0, 0),
         maxParticles: 0,
         emissionDuration: ParticlesEmitter.UNTIL_CHILD_END_DURATION,
         next: [{
@@ -375,8 +375,13 @@ export function duplicateEmitter(emitterId, overrides = {}) {
     const query = getQuery(emitterId, false);
     if (!query) return undefined;
 
+    const oldSource = query.source;
     const newQuery = { ...query, ...overrides };
     delete newQuery.emitterId;
+
+    if (newQuery.next && oldSource !== undefined && newQuery.source !== undefined) {
+        newQuery.next = _updateWorkflowSources(newQuery.next, oldSource, newQuery.source);
+    }
 
     switch (newQuery.type) {
         case MissileParticleTemplate.getType():
@@ -387,6 +392,64 @@ export function duplicateEmitter(emitterId, overrides = {}) {
         default:
             return sprayParticles(newQuery);
     }
+}
+
+/**
+ * Helper to check equality between two source definitions (string ID, object coordinates, placeable object).
+ * @param {*} s1 - First source.
+ * @param {*} s2 - Second source.
+ * @returns {boolean} True if sources are equal.
+ */
+function _isEqualSource(s1, s2) {
+    if (s1 === s2) return true;
+    if (!s1 || !s2) return false;
+    if (typeof s1 === "string" || typeof s2 === "string") return false;
+    if (typeof s1 === "object" && typeof s2 === "object") {
+        if (s1.id && s2.id) return s1.id === s2.id;
+        return s1.x === s2.x && s1.y === s2.y && s1.z === s2.z;
+    }
+    return false;
+}
+
+/**
+ * Recursively updates references to oldSource with newSource in workflow definitions (next property and particleInputs).
+ * @param {Array<Object>} next - Array of workflow step definitions.
+ * @param {*} oldSource - Source value to be replaced.
+ * @param {*} newSource - Replacement source value.
+ * @returns {Array<Object>} Updated next array.
+ */
+function _updateWorkflowSources(next, oldSource, newSource) {
+    if (!Array.isArray(next) || oldSource === undefined || newSource === undefined) {
+        return next;
+    }
+
+    const updateInput = (input) => {
+        if (!input) return input;
+
+        if (Array.isArray(input)) {
+            return input.map(updateInput);
+        } else if (typeof input === "object") {
+            const updated = { ...input };
+            if (updated.source && _isEqualSource(updated.source, oldSource)) {
+                updated.source = newSource;
+            }
+            if (Array.isArray(updated.next)) {
+                updated.next = _updateWorkflowSources(updated.next, oldSource, newSource);
+            }
+            return updated;
+        }
+
+        return input;
+    };
+
+    return next.map(step => {
+        if (!step || typeof step !== "object") return step;
+        const updatedStep = { ...step };
+        if (Array.isArray(updatedStep.particleInputs)) {
+            updatedStep.particleInputs = updatedStep.particleInputs.map(updateInput);
+        }
+        return updatedStep;
+    });
 }
 
 /**
@@ -614,7 +677,7 @@ function _handleMultipleEmission({ emitterId, inputObject, motionNameTemplates, 
             }
         }
 
-        computedInput = buildInputForParentEmitter(particleInputs);
+        computedInput = buildInputForParentEmitter(particleInputs, inputObject?.source);
     } else {
         motionTemplate = motionNameTemplates.length === 1 ? ParticlesEmitter.prefillMotionTemplate[motionNameTemplates[0]] : undefined;
         colorTemplate = colorNameTemplates.length === 1 ? ParticlesEmitter.prefillColorTemplate[colorNameTemplates[0]] : undefined;
