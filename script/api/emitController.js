@@ -15,6 +15,7 @@ export default {
     refreshManagerPanel: refreshEmittersPanel,
     writeMessage: particlesEmitterService.writeMessageForEmissionById,   //No need to emit to other client
     getQuery: particlesEmitterService.getQuery,
+    duplicate: duplicateParticles,
 };
 
 /**
@@ -49,6 +50,26 @@ function missileParticles(...args) {
     let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
     emitForOtherClient(s_MESSAGE_TYPES.missileParticles, [...args, emitterId]);
     return particlesEmitterService.missileParticles(...args, emitterId)?.id
+}
+
+/**
+ * Duplicates an existing particle emission by ID with optional overrides and broadcasts to connected clients.
+ * @param {string} emitterId - Target emitter ID or shortcut ('f'/'l').
+ * @param {Object} [overrides={}] - Optional configuration parameters to override.
+ * @returns {string|undefined} Created emitter ID.
+ */
+function duplicateParticles(emitterId, overrides = {}) {
+    const newEmitter = particlesEmitterService.duplicateEmitter(emitterId, overrides);
+    if (newEmitter) {
+        const query = particlesEmitterService.getQuery(newEmitter.id, false);
+        if (query) {
+            const messageType = query.type === "Missile"
+                ? s_MESSAGE_TYPES.missileParticles
+                : (query.type === "Graviting" ? s_MESSAGE_TYPES.gravitateParticles : s_MESSAGE_TYPES.sprayParticles);
+            emitForOtherClient(messageType, [query, { emitterId: newEmitter.id }]);
+        }
+    }
+    return newEmitter?.id;
 }
 
 /**

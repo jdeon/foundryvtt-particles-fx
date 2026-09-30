@@ -366,6 +366,30 @@ export function getQuery(emitterId, original = false) {
 }
 
 /**
+ * Duplicates an existing particle emission by ID with optional configuration overrides.
+ * @param {string} emitterId - Target emitter ID or shortcut ("f"/"first", "l"/"last").
+ * @param {Object} [overrides={}] - Optional configuration parameters to override.
+ * @returns {ParticlesEmitter|undefined} Newly created ParticlesEmitter instance.
+ */
+export function duplicateEmitter(emitterId, overrides = {}) {
+    const query = getQuery(emitterId, false);
+    if (!query) return undefined;
+
+    const newQuery = { ...query, ...overrides };
+    delete newQuery.emitterId;
+
+    switch (newQuery.type) {
+        case MissileParticleTemplate.getType():
+            return missileParticles(newQuery);
+        case GravitingParticleTemplate.getType():
+            return gravitateParticles(newQuery);
+        case SprayingParticleTemplate.getType():
+        default:
+            return sprayParticles(newQuery);
+    }
+}
+
+/**
  * Toggles play/pause state for a specific emitter by ID.
  * @param {number|string} emitterId - Emitter ID to pause or resume.
  * @param {boolean} [forceState] - Optional explicit state to force.
