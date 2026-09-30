@@ -1,6 +1,7 @@
 import * as particlesEmitterService from "../service/particlesEmitter.service.js"
 import { s_MESSAGE_TYPES, emitForOtherClient } from "../utils/socketManager.js"
 import { EmittersPanel } from "../object/emittersPanel.js";
+import { GravitingParticleTemplate, MissileParticleTemplate, SprayingParticleTemplate } from "../object/particleTemplate.js";
 
 export default {
     spray: sprayParticles,
@@ -62,10 +63,20 @@ function duplicateParticles(emitterId, overrides = {}) {
     const newEmitter = particlesEmitterService.duplicateEmitter(emitterId, overrides);
     if (newEmitter) {
         const query = particlesEmitterService.getQuery(newEmitter.id, false);
-        if (query) {
-            const messageType = query.type === "Missile"
-                ? s_MESSAGE_TYPES.missileParticles
-                : (query.type === "Graviting" ? s_MESSAGE_TYPES.gravitateParticles : s_MESSAGE_TYPES.sprayParticles);
+
+        if (query?.type) {
+            let messageType
+            switch (query.type) {
+                case SprayingParticleTemplate.getType():
+                    messageType = s_MESSAGE_TYPES.sprayParticle
+                    break
+                case GravitingParticleTemplate.getType():
+                    messageType = s_MESSAGE_TYPES.gravitateParticles
+                    break
+                case MissileParticleTemplate.getType():
+                    messageType = s_MESSAGE_TYPES.missileParticles
+                    break
+            }
             emitForOtherClient(messageType, [query, { emitterId: newEmitter.id }]);
         }
     }
