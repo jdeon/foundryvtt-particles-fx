@@ -56,6 +56,5 @@
     "PARTICULE-FX.EmittersPanel.PlayEmitter": "Resume emission",
     "PARTICULE-FX.EmittersPanel.StopEmitter": "Stop emission",
     "PARTICULE-FX.EmittersPanel.DeleteEmitter": "Delete emission (immediate)",
-    "PARTICULE-FX.EmittersPanel.DuplicateEmitter": "Duplicate emission",
     "PARTICULE-FX.EmittersPanel.CopiedId": "Emitter ID {id} copied to clipboard."
 }
