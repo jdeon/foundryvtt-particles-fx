@@ -17,6 +17,7 @@ const EXISTING_CHAT_COMMAND = {
 	'missile': (args) => handleMissile(args),
 	'gravitate': (args) => handleEmission(args, emitController.gravit, { type: 'Graviting' }),
 	'query': (args) => handleGetQuery(args),
+	'duplicate': (args) => handleDuplicate(args),
 	'manage': (args) => handleManage(args),
 	'help': () => game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Object.keys(EXISTING_CHAT_COMMAND).join(', ')
 }
@@ -259,9 +260,33 @@ function handleGetQuery(args) {
 }
 
 /**
+ * Duplicates an existing particle emitter as commanded via chat.
+ * @param {Array<string>} args - Chat command arguments.
+ * @returns {void|string} Localized error message if emitter not found.
+ */
+function handleDuplicate(args) {
+	const emitterId = getEmittersId(args);
+	const overrides = {};
+
+	const source = Utils.getSelectedSource();
+	if (!source) return //As all emission, we need source even to duplicate existing one
+
+	overrides.source = source.id;
+
+	const targetId = Utils.getTargetId();
+	if (targetId) overrides.target = targetId;
+
+	const newEmitterId = emitController.duplicate(emitterId, overrides);
+	if (!newEmitterId) {
+		return game.i18n.localize("PARTICULE-FX.Emission.Not-found") + emitterId;
+	}
+	writeMessageForEmissionById(newEmitterId);
+}
+
+/**
  * Opens the GM emitters panel.
  * @returns {void}
- */          
+ */
 function handleManage() {
 	EmittersPanel.show();
 }

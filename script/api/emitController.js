@@ -1,6 +1,7 @@
 import * as particlesEmitterService from "../service/particlesEmitter.service.js"
 import { s_MESSAGE_TYPES, emitForOtherClient } from "../utils/socketManager.js"
 import { EmittersPanel } from "../object/emittersPanel.js";
+import { GravitingParticleTemplate, MissileParticleTemplate, SprayingParticleTemplate } from "../object/particleTemplate.js";
 
 export default {
     spray: sprayParticles,
@@ -15,6 +16,7 @@ export default {
     refreshManagerPanel: refreshEmittersPanel,
     writeMessage: particlesEmitterService.writeMessageForEmissionById,   //No need to emit to other client
     getQuery: particlesEmitterService.getQuery,
+    duplicate: duplicateParticles,
 };
 
 /**
@@ -49,6 +51,36 @@ function missileParticles(...args) {
     let emitterId = { emitterId: particlesEmitterService.nextEmitterId() }
     emitForOtherClient(s_MESSAGE_TYPES.missileParticles, [...args, emitterId]);
     return particlesEmitterService.missileParticles(...args, emitterId)?.id
+}
+
+/**
+ * Duplicates an existing particle emission by ID with optional overrides and broadcasts to connected clients.
+ * @param {string} emitterId - Target emitter ID or shortcut ('f'/'l').
+ * @param {Object} [overrides={}] - Optional configuration parameters to override.
+ * @returns {string|undefined} Created emitter ID.
+ */
+function duplicateParticles(emitterId, overrides = {}) {
+    const newEmitter = particlesEmitterService.duplicateEmitter(emitterId, overrides);
+    if (newEmitter) {
+        const query = particlesEmitterService.getQuery(newEmitter.id, false);
+
+        if (query?.type) {
+            let messageType
+            switch (query.type) {
+                case SprayingParticleTemplate.getType():
+                    messageType = s_MESSAGE_TYPES.sprayParticle
+                    break
+                case GravitingParticleTemplate.getType():
+                    messageType = s_MESSAGE_TYPES.gravitateParticles
+                    break
+                case MissileParticleTemplate.getType():
+                    messageType = s_MESSAGE_TYPES.missileParticles
+                    break
+            }
+            emitForOtherClient(messageType, [query, { emitterId: newEmitter.id }]);
+        }
+    }
+    return newEmitter?.id;
 }
 
 /**

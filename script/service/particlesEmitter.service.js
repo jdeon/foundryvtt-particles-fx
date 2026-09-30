@@ -102,7 +102,7 @@ export function missileParticles(...args) {
 
     if (orderedInputs.motionNameTemplates.length > 1) {
         const particleInputs = orderedInputs.motionNameTemplates.map((motionName) => [orderedInputs.inputObject, motionName, ...orderedInputs.colorNameTemplates, ...orderedInputs.particleShapes]);
-        const parentInput = buildInputForParentEmitter(particleInputs);
+        const parentInput = buildInputForParentEmitter(particleInputs, orderedInputs?.inputObject?.source, orderedInputs?.inputObject?.target);
         return _sprayParticles(undefined, undefined, parentInput, orderedInputs.emitterId) //Simpler for a spray to handle a parent workflow
     } else {
         const motionTemplate = ParticlesEmitter.prefillMotionTemplate[orderedInputs.motionNameTemplates[0]];
@@ -243,11 +243,14 @@ function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitter
 /**
  * Constructs a parent dummy input object that coordinates chained child emission workflows.
  * @param {Array<Object>} childsInputs - Array of child emission input definitions.
+ * @param {Vector3|string} parentSource - Source vector of the parent emitter.
+ * @param {Vector3|string} parentTarget - Target vector of the parent emitter.
  * @returns {Object>} Parent input object.
  */
-export function buildInputForParentEmitter(childsInputs) {
+export function buildInputForParentEmitter(childsInputs, parentSource, parentTarget) {
     return {
-        source: new Vector3(0, 0, 0),
+        source: parentSource ?? new Vector3(0, 0, 0),
+        target: parentTarget,
         maxParticles: 0,
         emissionDuration: ParticlesEmitter.UNTIL_CHILD_END_DURATION,
         next: [{
@@ -363,6 +366,106 @@ export function getQuery(emitterId, original = false) {
         queryCopy.type = emitter.particleTemplate.constructor.getType();
     }
     return queryCopy;
+}
+
+/**
+ * Duplicates an existing particle emission by ID with optional configuration overrides.
+ * @param {string} emitterId - Target emitter ID or shortcut ("f"/"first", "l"/"last").
+ * @param {Object} [overrides={}] - Optional configuration parameters to override.
+ * @returns {ParticlesEmitter|undefined} Newly created ParticlesEmitter instance.
+ */
+export function duplicateEmitter(emitterId, overrides = {}) {
+    const query = getQuery(emitterId, false);
+    if (!query) return undefined;
+
+    const oldSource = query.source;
+    const oldTarget = query.target;
+    const newQuery = { ...query, ...overrides };
+    delete newQuery.emitterId;
+
+    if (newQuery.next) {
+        newQuery.next = _updateWorkflowSources(newQuery.next, oldSource, newQuery.source, oldTarget, newQuery.target);
+    }
+
+    switch (newQuery.type) {
+        case MissileParticleTemplate.getType():
+            return missileParticles(newQuery);
+        case GravitingParticleTemplate.getType():
+            return gravitateParticles(newQuery);
+        case SprayingParticleTemplate.getType():
+        default:
+            return sprayParticles(newQuery);
+    }
+}
+
+/**
+ * Helper to check equality between two source definitions (string ID, object coordinates, placeable object).
+ * @param {*} s1 - First source.
+ * @param {*} s2 - Second source.
+ * @returns {boolean} True if sources are equal.
+ */
+function _isEqualSource(s1, s2) {
+    if (s1 === s2) return true;
+    if (!s1 || !s2) return false;
+    if (typeof s1 === "string" || typeof s2 === "string") return false;
+    if (typeof s1 === "object" && typeof s2 === "object") {
+        if (s1.id && s2.id) return s1.id === s2.id;
+        return s1.x === s2.x && s1.y === s2.y && s1.z === s2.z;
+    }
+    return false;
+}
+
+/**
+ * Recursively updates references to old sources and targets with new values in workflow definitions (next property and particleInputs).
+ * @param {Array<Object>} next - Array of workflow step definitions.
+ * @param {*} oldSource - Old source value to replace.
+ * @param {*} newSource - Replacement source value.
+ * @param {*} oldTarget - Old target value to replace.
+ * @param {*} newTarget - Replacement target value.
+ * @returns {Array<Object>} Updated next array.
+ */
+function _updateWorkflowSources(next, oldSource, newSource, oldTarget, newTarget) {
+    if (!Array.isArray(next)) {
+        return next;
+    }
+
+    const hasSourceChange = oldSource !== undefined && newSource !== undefined;
+    const hasTargetChange = oldTarget !== undefined && newTarget !== undefined;
+
+    if (!hasSourceChange && !hasTargetChange) {
+        return next;
+    }
+
+    const updateInput = (input) => {
+        if (!input) return input;
+
+        if (Array.isArray(input)) {
+            return input.map(updateInput);
+        } else if (typeof input === "object") {
+            const updated = { ...input };
+            if (hasSourceChange && updated.source && _isEqualSource(updated.source, oldSource)) {
+                updated.source = newSource;
+            }
+            if (hasTargetChange && updated.target && _isEqualSource(updated.target, oldTarget)) {
+                updated.target = newTarget;
+            }
+            if (Array.isArray(updated.next)) {
+                updated.next = _updateWorkflowSources(updated.next, oldSource, newSource, oldTarget, newTarget);
+            }
+            return updated;
+        }
+
+        return input;
+    };
+
+    return next.map(step => {
+        if (!step || typeof step !== "object") return step;
+        const updatedStep = { ...step };
+        if (Array.isArray(updatedStep.particleInputs)) {
+            updatedStep.particleInputs = updatedStep.particleInputs.map(updateInput);
+        }
+        return updatedStep;
+    });
 }
 
 /**
@@ -590,7 +693,7 @@ function _handleMultipleEmission({ emitterId, inputObject, motionNameTemplates, 
             }
         }
 
-        computedInput = buildInputForParentEmitter(particleInputs);
+        computedInput = buildInputForParentEmitter(particleInputs, inputObject?.source, inputObject?.target);
     } else {
         motionTemplate = motionNameTemplates.length === 1 ? ParticlesEmitter.prefillMotionTemplate[motionNameTemplates[0]] : undefined;
         colorTemplate = colorNameTemplates.length === 1 ? ParticlesEmitter.prefillColorTemplate[colorNameTemplates[0]] : undefined;

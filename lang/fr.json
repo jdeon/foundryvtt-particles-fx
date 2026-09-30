@@ -35,6 +35,7 @@
   "PARTICULE-FX.Chat-Command.pause.help": "Met en pause ou reprend un émetteur ou tous les émetteurs actifs.<br><b>Options :</b><br>• Id de l'émetteur à mettre en pause/reprendre<br>• <code>--all</code>, <code>-a</code> : Cible tous les émetteurs actifs.<br>• {first}<br>• {last}<br>• {help}<br><br>",
   "PARTICULE-FX.Chat-Command.pauseAll.return": "État de pause de toutes les émissions modifié : ",
   "PARTICULE-FX.Chat-Command.query.help": "Récupère la configuration (query) d'un émetteur spécifique.<br><b>Options :</b><br>• Id de l'émetteur<br>• <code>--original</code>, <code>-o</code> : Retourne la query d'origine au lieu de la query finale fusionnée.<br>• {first}<br>• {last}<br>• {help}<br><br>",
+  "PARTICULE-FX.Chat-Command.duplicate.help": "Duplique un émetteur existant en utilisant la source sélectionnée et la cible visée.<br><b>Options :</b><br>• Id de l'émetteur à dupliquer<br>• {first}<br>• {last}<br>• {help}<br><br>",
   "PARTICULE-FX.Chat-Command.manage.help": "Ouvre le panneau des émetteurs (MJ uniquement).<br><b>Options :</b><br>• {help}<br><br>",
   "PARTICULE-FX.Chat-Command.help.return": "Voici les commandes de chat existantes pour particles FX : ",
   "PARTICULE-FX.Chat-Command.help.help": "Liste toutes les commandes disponibles du module Particule FX.",

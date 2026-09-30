@@ -35,6 +35,7 @@
     "PARTICULE-FX.Chat-Command.pause.help": "Pauses or resumes an emitter or all active emitters.<br><b>Options:</b><br>• ID of the emitter to pause/resume<br>• <code>--all</code>, <code>-a</code>: Targets all active emitters.<br>• {first}<br>• {last}<br>• {help}<br><br>",
     "PARTICULE-FX.Chat-Command.pause.all.return": "All emissions pause state updated: ",
     "PARTICULE-FX.Chat-Command.query.help": "Retrieves the configuration query of a specific emitter.<br><b>Options:</b><br>• ID of the emitter<br>• <code>--original</code>, <code>-o</code>: Returns original input query instead of final merged query.<br>• {first}<br>• {last}<br>• {help}<br><br>",
+    "PARTICULE-FX.Chat-Command.duplicate.help": "Duplicates an existing emitter, using the currently selected source and targeted token.<br><b>Options:</b><br>• ID of the emitter to duplicate<br>• {first}<br>• {last}<br>• {help}<br><br>",
     "PARTICULE-FX.Chat-Command.manage.help": "Opens the Emitters Panel (Gamemaster only).<br><b>Options:</b><br>• {help}<br><br>",
     "PARTICULE-FX.Chat-Command.help.return": "Here are the existing chat commands for particles FX: ",
     "PARTICULE-FX.Chat-Command.help.help": "Lists all available commands for the Particle FX module.",
