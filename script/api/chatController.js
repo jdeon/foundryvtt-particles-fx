@@ -18,6 +18,7 @@ const EXISTING_CHAT_COMMAND = {
 	'gravitate': (args) => handleEmission(args, emitController.gravit, { type: 'Graviting' }),
 	'query': (args) => handleGetQuery(args),
 	'duplicate': (args) => handleDuplicate(args),
+	'manage': (args) => handleManage(args),
 	'help': () => game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Object.keys(EXISTING_CHAT_COMMAND).join(', ')
 }
 
@@ -280,6 +281,14 @@ function handleDuplicate(args) {
 		return game.i18n.localize("PARTICULE-FX.Emission.Not-found") + emitterId;
 	}
 	writeMessageForEmissionById(newEmitterId);
+}
+
+/**
+ * Opens the GM emitters panel.
+ * @returns {void}
+ */
+function handleManage() {
+	EmittersPanel.show();
 }
 
 /**
