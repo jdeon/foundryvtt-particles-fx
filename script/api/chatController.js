@@ -16,6 +16,7 @@ const EXISTING_CHAT_COMMAND = {
 	'spray': (args) => handleEmission(args, emitController.spray, { type: 'Spraying' }),
 	'missile': (args) => handleMissile(args),
 	'gravitate': (args) => handleEmission(args, emitController.gravit, { type: 'Graviting' }),
+	'query': (args) => handleGetQuery(args),
 	'manage': (args) => handleManage(args),
 	'help': () => game.i18n.localize("PARTICULE-FX.Chat-Command.help.return") + Object.keys(EXISTING_CHAT_COMMAND).join(', ')
 }
@@ -243,9 +244,24 @@ function handleStopAll(args) {
 }
 
 /**
+ * Retrieves an emitter's query configuration as commanded via chat.
+ * @param {Array<string>} args - Chat command arguments.
+ * @returns {string} Formatted localized return message with JSON string.
+ */
+function handleGetQuery(args) {
+	const isOriginal = hasOption(args, ['--original', '-o']);
+	const emitterId = getEmittersId(args);
+	const query = emitController.getQuery(emitterId, isOriginal);
+	if (!query) {
+		return game.i18n.localize("PARTICULE-FX.Emission.Not-found") + emitterId;
+	}
+	return `<pre><code style="white-space: pre-wrap; word-break: break-all;">${JSON.stringify(query, null, 2)}</code></pre>`;
+}
+
+/**
  * Opens the GM emitters panel.
  * @returns {void}
- */
+ */          
 function handleManage() {
 	EmittersPanel.show();
 }

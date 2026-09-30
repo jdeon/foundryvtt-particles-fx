@@ -14,6 +14,7 @@ export default {
     showManagerPanel: showEmittersPanel,
     refreshManagerPanel: refreshEmittersPanel,
     writeMessage: particlesEmitterService.writeMessageForEmissionById,   //No need to emit to other client
+    getQuery: particlesEmitterService.getQuery,
 };
 
 /**

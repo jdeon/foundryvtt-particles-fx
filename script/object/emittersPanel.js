@@ -21,7 +21,7 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
             minimizable: true
         },
         position: {
-            width: 250,
+            width: 300,
             height: "auto",
             left: 120,
             top: 70
@@ -101,6 +101,23 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
                 if (!related || related.dataset.emitterId !== target.dataset.emitterId) {
                     target.classList.remove("is-highlighted");
                     ParticlesEmitter.highlightEmitter(target.dataset.emitterId, false);
+                }
+            }
+        });
+
+        document.body.addEventListener("click", (event) => {
+            if (event.target?.closest?.("button, [data-action]")) return;
+
+            const target = event.target?.closest?.("[data-emitter-id]");
+            if (target) {
+                const emitterId = target.dataset.emitterId;
+                if (emitterId) {
+                    if (navigator.clipboard?.writeText) {
+                        navigator.clipboard.writeText(emitterId);
+                    } else if (game.utils?.copyToClipboard) {
+                        game.utils.copyToClipboard({ content: emitterId });
+                    }
+                    ui.notifications.info(game.i18n.format("PARTICULE-FX.EmittersPanel.CopiedId", { id: emitterId }));
                 }
             }
         });
