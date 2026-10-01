@@ -10,11 +10,10 @@ import { ParticleInput } from './particleInput.js'
  */
 export class ParticleTemplate {
 
-    //TODO return undefined instead of source
     /**
      * Resolves source/target references to canvas placeable objects.
      * @param {Array<string|foundry.canvas.placeables.PlaceableObject>|string|foundry.canvas.placeables.PlaceableObject} source - Source string ID, array, or object.
-     * @returns {Array<foundry.canvas.placeables.PlaceableObject>|foundry.canvas.placeables.PlaceableObject} Resolved placeable object or original input.
+     * @returns {Array<foundry.canvas.placeables.PlaceableObject>|foundry.canvas.placeables.PlaceableObject|undefined} Resolved placeable object or original input.
      */
     static _translatePlaceableObject(source) {
         let result
@@ -26,8 +25,9 @@ export class ParticleTemplate {
             }
         } else if (typeof source === 'string' && isNaN(source) && !source.includes('_')) {
             result = Utils.getPlaceableObjectById(source)
-        } else {
             result = source
+        } else {
+            result = undefined
         }
 
         return result
