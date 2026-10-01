@@ -99,7 +99,6 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
  */
 function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, velocityGap) {
     let result
-    //TODO bad origin emission
     const rectDiagonal = diagonalLength * Utils.pixelOfDistanceConvertor()
     const rectX = rectDiagonal * Math.cos(diagonalAngle * Math.PI / 180)
     const rectY = rectDiagonal * Math.sin(diagonalAngle * Math.PI / 180)
