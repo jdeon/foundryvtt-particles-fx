@@ -25,6 +25,7 @@ export class ParticleTemplate {
             }
         } else if (typeof source === 'string' && isNaN(source) && !source.includes('_')) {
             result = Utils.getPlaceableObjectById(source)
+        } else if (source instanceof Vector3 || source instanceof foundry.canvas.placeables.PlaceableObject) {
             result = source
         } else {
             result = undefined
