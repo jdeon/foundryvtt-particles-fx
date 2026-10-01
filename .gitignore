@@ -1,4 +1,4 @@
-
+.idea/*
 packs/particles-fx-macros/*
 !packs/particles-fx-macros/_source
 node_modules/*

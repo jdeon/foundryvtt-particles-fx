@@ -1,6 +1,17 @@
 import { Vector3, sameStartKey, Utils } from './utils.js'
 
+/**
+ * Abstract base path class for calculating positions and directions along a trajectory.
+ */
 export class Path {
+	/**
+	 * Factory builder for path instances (LinearPath or CurvePath).
+	 * @param {string} pathType - Type of path ("LINEAR" or "CURVE").
+	 * @param {Array<Vector3|Array|number|string>} stepPositions - Waypoints along path.
+	 * @param {ParticleInput<number>} angleStart - Starting angle input.
+	 * @param {ParticleInput<number>} angleEnd - Ending angle input.
+	 * @returns {Path|undefined} Instantiated Path instance or undefined.
+	 */
 	static build(pathType, stepPositions, angleStart, angleEnd){
 		if(stepPositions === null || stepPositions.length <= 1){
 			return
@@ -13,6 +24,10 @@ export class Path {
 		return new LinearPath(stepPositions);
 	}
 		
+	/**
+	 * Constructs a Path instance.
+	 * @param {Array<Vector3|Array|number|string>} stepPositions - Waypoints array.
+	 */
 	constructor(stepPositions){
 		this.stepPositions = stepPositions.map((step) => Vector3.build(step));
 
@@ -29,6 +44,11 @@ export class Path {
 		this.pathProportion = 0;
 	}
 
+	/**
+	 * Computes segment proportion ratio for a overall path progress value (0 to 1).
+	 * @param {number} pathProportion - Ratio of overall path completed.
+	 * @returns {number} Ratio within current segment.
+	 */
 	computeStepProportion(pathProportion) {
 		this.pathProportion = pathProportion;
 
@@ -47,13 +67,26 @@ export class Path {
 	}
 }
 
+/**
+ * Path implementation for straight linear segment interpolation between waypoints.
+ */
 export class LinearPath extends Path {
+	/** Path type constant string. */
 	static PATH_TYPE = "LINEAR";
 
+	/**
+	 * Constructs a LinearPath instance.
+	 * @param {Array<Vector3|Array|number|string>} stepArray - Waypoints array.
+	 */
 	constructor(stepArray){
 		super(stepArray);
 	}
 
+ 	/**
+ 	 * Calculates 3D point along path at given proportion (0 to 1).
+ 	 * @param {number} pathProportion - Proportion of total path.
+ 	 * @returns {Vector3} Interpolated 3D position vector.
+ 	 */
  	getPointAtProportion(pathProportion) {
  		const currentStepProportion = this.computeStepProportion(pathProportion);
 		if(currentStepProportion<=0){
@@ -69,7 +102,8 @@ export class LinearPath extends Path {
 	}
 
 	/**
-	* Direction in degree at current step
+	* Returns direction angle in degrees at current step.
+	* @returns {number} Direction in degrees.
 	*/
 	getDirection() {
 		const vectorDirection = this.stepPath[this.currentStep];
@@ -78,9 +112,19 @@ export class LinearPath extends Path {
 	}
 }
 
+/**
+ * Path implementation for smooth cubic Bezier curve interpolation across waypoints.
+ */
 export class CurvePath extends Path {
+	/** Path type constant string. */
 	static PATH_TYPE = "CURVE";
 
+ 	/**
+ 	 * Constructs a CurvePath instance.
+ 	 * @param {Array<Vector3|Array|number|string>} stepPositions - Array of waypoints.
+ 	 * @param {number} angleStart - Starting angle in degrees.
+ 	 * @param {number} angleEnd - Ending angle in degrees.
+ 	 */
  	constructor(stepPositions, angleStart, angleEnd){
 		super(stepPositions);
 
@@ -92,6 +136,13 @@ export class CurvePath extends Path {
 		this.direction = this.curveSteps[0].getDirectionForProportion(0);
 	}
 
+	/**
+	 * Converts array of waypoints into list of BezierCurve segments using C2 continuity control points.
+	 * @param {Array<Vector3>} points - Waypoints array.
+	 * @param {Vector3} startCtrl - First control point.
+	 * @param {Vector3} endCtrl - Last control point.
+	 * @returns {Array<BezierCurve>} Array of BezierCurve segment instances.
+	 */
 	positionToCurves(points, startCtrl, endCtrl) {
 	    if (!points || points.length < 2) {
 	        return [];
@@ -114,6 +165,11 @@ export class CurvePath extends Path {
 	    return curveSteps;
 	}
 
+	/**
+	 * Calculates 3D point on curve path at given proportion (0 to 1).
+	 * @param {number} pathProportion - Total path progress ratio (0 to 1).
+	 * @returns {Vector3} Calculated 3D point.
+	 */
 	getPointAtProportion(pathProportion) {
 		const currentStepProportion = this.computeStepProportion(pathProportion);
 
@@ -122,13 +178,20 @@ export class CurvePath extends Path {
 		return this.curveSteps[this.currentStep].getPointForProportion(currentStepProportion);
 	}
 
+	/**
+	 * Returns current tangent direction angle in degrees.
+	 * @returns {number} Angle in degrees.
+	 */
 	getDirection() {
 		return Math.atan2(this.direction.y, this.direction.x) * 180 / Math.PI;
 	}
 
 	/**
-	* Calculates the control points to have a C2 continuity curve on position.
-	* Using Thomas algorithm.
+	* Calculates control points for C2 continuity curve passing through waypoints using Thomas algorithm.
+	* @param {Array<Vector3>} K - Waypoints array.
+	* @param {Vector3} p1_start - Start control point.
+	* @param {Vector3} p2_end - End control point.
+	* @returns {{p1: Array<Vector3>, p2: Array<Vector3>}} Arrays of p1 and p2 control points per segment.
 	*/
 	_computeControlPoints3D(K, p1_start, p2_end) {
 	    const S = K.length - 1; // Number of segments
@@ -212,6 +275,12 @@ export class CurvePath extends Path {
 	    return { p1, p2 };
 	}
 
+	/**
+	 * Computes control point displacement vector at end points.
+	 * @param {Vector3} pathStep - Segment vector.
+	 * @param {number} angle - Angle in degrees.
+	 * @returns {Vector3} Control point offset vector.
+	 */
 	_computeEndsControlPoint(pathStep, angle){
 		const length = pathStep.magnitude() * .4;
 
@@ -223,7 +292,17 @@ export class CurvePath extends Path {
 	}
 }
 
+/**
+ * Representation of a single cubic Bezier curve segment.
+ */
 class BezierCurve {
+	/**
+	 * Constructs a BezierCurve instance.
+	 * @param {Vector3} startPoint - Start point vector.
+	 * @param {Vector3} controlPoint1 - First control point vector.
+	 * @param {Vector3} controlPoint2 - Second control point vector.
+	 * @param {Vector3} endPoint - End point vector.
+	 */
 	constructor(startPoint, controlPoint1, controlPoint2, endPoint){
 		this.startPoint= startPoint; 		//Vector3
 		this.controlPoint1= controlPoint1; 	//Vector3
@@ -233,6 +312,11 @@ class BezierCurve {
 		//this._showControlPoint();
 	}
 
+	/**
+	 * Evaluates 3D position vector on curve for parameter p (0 to 1).
+	 * @param {number} p - Parameter along segment (0 to 1).
+	 * @returns {Vector3} Evaluated 3D position vector.
+	 */
 	getPointForProportion(p){
 		if(p < 0 ){
 			return this.startPoint;
@@ -246,6 +330,11 @@ class BezierCurve {
 			.add(this.endPoint.multiply(Math.pow(p,3)));
 	}
 
+	/**
+	 * Evaluates tangent vector on curve for parameter p (0 to 1).
+	 * @param {number} p - Parameter along segment (0 to 1).
+	 * @returns {Vector3} Tangent direction vector.
+	 */
 	getDirectionForProportion(p){
 		if(p < 0 ){
 			p = 0;
@@ -259,6 +348,10 @@ class BezierCurve {
 			.add(this.endPoint.multiply(3*Math.pow(p,2)));
 	}
 
+	/**
+	 * Debug visualizer adding sprites at control point coordinates.
+	 * @returns {void}
+	 */
 	_showControlPoint(){
 		let spriteFcp = new PIXI.Sprite(Utils.getSpriteTextureFromId("CIRCLE"))
         spriteFcp.x = this.controlPoint1.x;

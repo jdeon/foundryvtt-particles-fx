@@ -1,21 +1,35 @@
 import { motionTemplateDictionnary } from "../prefillMotionTemplate.js"
 import { colorTemplateDictionnary } from "../prefillColorTemplate.js"
 import { Particle } from "./particle.js"
-import { ParticleWorkFlowManager } from"./particleWorkFlow.js"
+import { ParticleWorkFlowManager } from "./particleWorkFlow.js"
+import { ParticleTemplate } from "./particleTemplate.js"
+import { EmittersPanel } from "./emittersPanel.js"
+import { ParticleHighlightManager } from "./particleHighlightManager.js"
 
+/**
+ * Controller class managing a group of particles spawned by a particle template.
+ */
 export default class ParticlesEmitter {
 
+    /** Default dictionary of motion prefill templates. */
     static prefillMotionTemplate = motionTemplateDictionnary
+    /** Default dictionary of color prefill templates. */
     static prefillColorTemplate = colorTemplateDictionnary
 
+    /** Global registry array of active ParticlesEmitter instances. */
     static emitters = []
 
+    /** PIXI.Container serving as the emission canvas container layer. */
     static _EMISSION_CANVAS
 
+    /**
+     * Initializes or resets the PIXI container for particle emissions on canvas.
+     * @returns {void}
+     */
     static INIT_EMISSION_CANVAS = () => {
         let effectsCanvas
-        
-        if(canvas?.environment?.effects) {
+
+        if (canvas?.environment?.effects) {
             effectsCanvas = canvas.environment.effects;
         } else {
             //Before v14
@@ -26,6 +40,8 @@ export default class ParticlesEmitter {
             effectsCanvas.moduleParticlesFx.destroy();
         }
 
+        ParticleHighlightManager.reset();
+
         const particleFxCanvas = new PIXI.Container();
         particleFxCanvas.zIndex = Particle.SORT_LAYER;
         effectsCanvas.addChild(particleFxCanvas);
@@ -33,33 +49,70 @@ export default class ParticlesEmitter {
         ParticlesEmitter._EMISSION_CANVAS = particleFxCanvas
     }
 
+    /** Currently highlighted target emitter ID. */
+    static highlightedEmitterId = null;
+
+    /**
+     * Highlights or unhighlights particles for all active emitters matching the target emitter ID.
+     * @param {string|null} emitterId - Target emitter ID to highlight or clear.
+     * @param {boolean} enable - Whether highlight should be enabled.
+     * @returns {void}
+     */
+    static highlightEmitter(emitterId, enable) {
+        if (enable && emitterId !== null && emitterId !== undefined) {
+            ParticlesEmitter.highlightedEmitterId = String(emitterId);
+        } else if (!enable && String(emitterId) === ParticlesEmitter.highlightedEmitterId) {
+            ParticlesEmitter.highlightedEmitterId = null;
+        }
+
+        ParticleHighlightManager.update();
+    }
+
+    /**
+     * Evaluates whether an emitter matches a target emitter ID string.
+     * @param {ParticlesEmitter} emitter - Target emitter instance.
+     * @param {string} targetId - Target emitter ID string.
+     * @returns {boolean} True if matching.
+     */
+    static isEmitterMatchingId(emitter, targetId) {
+        if (!emitter || !targetId) return false;
+        const eId = String(emitter.id);
+        const tId = String(targetId);
+        if (eId === tId) return true;
+        if (eId.startsWith(`${tId}-`)) return true;
+        if (emitter.parentWorkflowId && String(emitter.parentWorkflowId).split(":")[0] === tId) return true;
+        return false;
+    }
+
+    /** Constant key specifying duration until child workflow emissions complete. */
     static UNTIL_CHILD_END_DURATION = 'untilChildEnd'
 
     /**
-     * Construtor of a particle emitter
-     * @param {Number | String} emitterId 
-     * @param {ParticleTemplate} particleTemplate
-     * @param {{particleFrequence, spawningNumber, maxParticles, emissionDuration, isGravitate} emitterProperty 
-     * @param {Number} nbSibling (default 1)
-     * */
+     * Constructs a ParticlesEmitter instance.
+     * @param {string} emitterId - Unique identifier for the emitter.
+     * @param {ParticleTemplate} particleTemplate - Template defining particle generation rules.
+     * @param {{spawningFrequence: number, spawningNumber: number, maxParticles: number, emissionDuration: number}} emitterProperty - Emission frequency, max count, and duration settings.
+     * @param {string} [parentWorkflowId] - ID of parent workflow step if spawned from workflow.
+     * @param {number} [nbSibling=1] - Number of sibling emitters sharing particle quota.
+     */
     constructor(emitterId, particleTemplate, emitterProperty, parentWorkflowId, nbSibling = 1) {
         this.id = String(emitterId);
         this.parentWorkflowId = parentWorkflowId;
         this.spawnedEnable = true;
+        this.isPaused = false;
         this.particles = [];
         this.particleTemplate = particleTemplate;
 
-        if(nbSibling === 1 ){
+        if (nbSibling === 1) {
             this.particleFrequence = emitterProperty.spawningFrequence;
             this.spawningNumber = emitterProperty.spawningNumber;
             this.maxParticles = emitterProperty.maxParticles;
         } else {
-            //TODO mix this.spawningFrequence and this.spawningNumber with nbSibling division to handle low particle tempate (ex: satellite)
             this.particleFrequence = emitterProperty.spawningFrequence * nbSibling;
             this.spawningNumber = emitterProperty.spawningNumber;
             this.maxParticles = Math.ceil(emitterProperty.maxParticles / nbSibling);
         }
-        
+
         this.remainingTime = emitterProperty.emissionDuration
         this.isGravitate = emitterProperty.isGravitate
         this.lastUpdate = Date.now();
@@ -70,15 +123,19 @@ export default class ParticlesEmitter {
             ParticlesEmitter.INIT_EMISSION_CANVAS()
         }
 
-        ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.id, this.particleTemplate )
+        ParticleWorkFlowManager.triggerWorkflows(ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_START, this.id, this.particleTemplate)
     }
 
+    /**
+     * Per-frame ticker callback updating particle positions and spawning new particles.
+     * @returns {void}
+     */
     manageParticles() {
         let newDate = Date.now()
         const dt = newDate - this.lastUpdate
         this.lastUpdate = newDate
 
-        if(this.particleTemplate.freezeOnPause && game.paused){
+        if (this.isPaused || (this.particleTemplate.freezeOnPause && game.paused)) {
             return
         }
 
@@ -90,7 +147,7 @@ export default class ParticlesEmitter {
             particle.manageLifetime(dt)
 
             if (particle.remainingTime <= 0) {
-                ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_PARTICLE_END, this.id, this.particleTemplate, particle )
+                ParticleWorkFlowManager.triggerWorkflows(ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_PARTICLE_END, this.id, this.particleTemplate, particle)
                 particle.sprite.destroy()
                 this.particles.splice(i, 1)
                 //Return to last particle
@@ -103,16 +160,16 @@ export default class ParticlesEmitter {
         }
 
         //Decrease remainingTime of emmission if it has one and it s a number
-        if (! isNaN(this.remainingTime)) {
+        if (!isNaN(this.remainingTime)) {
             this.remainingTime -= dt;
         }
 
         //Handle generation of new particles
         if (
-            this.spawnedEnable 
-            && this.particles.length < this.maxParticles 
+            this.spawnedEnable
+            && this.particles.length < this.maxParticles
             && (isNaN(this.remainingTime) || this.remainingTime > 0)
-            ) {
+        ) {
             //Spawned new particles
             let numberNewParticles = Math.ceil(this.spawningNumber * dt / this.particleFrequence)
             let increaseTime = (this.spawningNumber * dt) % this.particleFrequence
@@ -131,14 +188,14 @@ export default class ParticlesEmitter {
                     break
                 }
 
-                particle.id = this.maxParticleId ++;
+                particle.id = this.maxParticleId++;
 
                 ParticlesEmitter._EMISSION_CANVAS.addChild(particle.sprite);
                 if (this.particleTemplate?.isElevationManage) {
                     canvas.primary.addChild(particle.sprite);
                 }
                 this.particles.push(particle);
-                ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START, this.id, this.particleTemplate, particle );
+                ParticleWorkFlowManager.triggerWorkflows(ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_PARTICLE_START, this.id, this.particleTemplate, particle);
             }
 
             this.spawnedEnable = false;
@@ -149,12 +206,16 @@ export default class ParticlesEmitter {
 
         //Delete emission
         if (this._shouldEnd()) {
-           this.destroy()
+            this.destroy()
         }
     }
 
     //Delete immediatly emission without waiting for each particle's end
-    destroy(){
+    /**
+     * Immediately destroys this emitter, destroys all active particles, and triggers end hooks.
+     * @returns {void}
+     */
+    destroy() {
         canvas.app.ticker.remove(this.callback);
 
         while (this.particles.length > 0) {
@@ -164,31 +225,54 @@ export default class ParticlesEmitter {
         }
 
         const emitterIndex = ParticlesEmitter.emitters.findIndex((emitter) => emitter.id === this.id);
-        if( emitterIndex >= 0 ){
+        if (emitterIndex >= 0) {
             ParticlesEmitter.emitters.splice(emitterIndex, 1);
         }
-        
-        ParticleWorkFlowManager.triggerWorkflows ( ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_END, this.id, this.particleTemplate )
 
-        if(this.destroyHooks.length > 0){
-            this.destroyHooks.forEach((destroyHook) => destroyHook(this.id) )
+        ParticleWorkFlowManager.triggerWorkflows(ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_END, this.id, this.particleTemplate)
+
+        if (this.destroyHooks.length > 0) {
+            this.destroyHooks.forEach((destroyHook) => destroyHook(this.id))
         }
+
+        EmittersPanel.refresh()
     }
 
+    /**
+     * Toggles the pause state of this emitter.
+     * @returns {boolean} The new isPaused state.
+     */
+    togglePause() {
+        this.isPaused = !this.isPaused;
+        return this.isPaused;
+    }
+
+    /**
+     * Enables spawning flag after cooldown delay.
+     * @returns {void}
+     */
     enableSpawning() {
         this.spawnedEnable = true;
     }
 
-    disableWorkflow(){
+    /**
+     * Disables chained workflow steps for this emitter.
+     * @returns {void}
+     */
+    disableWorkflow() {
         this.particleTemplate.next = [];
     }
 
-    _shouldEnd(){
-        if (! isNaN(this.remainingTime) ){
-            if( this.remainingTime <= 0 && this.particles.length === 0 ) {
+    /**
+     * Evaluates whether this emitter has completed its active lifetime and should be destroyed.
+     * @returns {boolean} True if emitter should terminate.
+     */
+    _shouldEnd() {
+        if (!isNaN(this.remainingTime)) {
+            if (this.remainingTime <= 0 && this.particles.length === 0) {
                 return true
             }
-        } else if (this.remainingTime === ParticlesEmitter.UNTIL_CHILD_END_DURATION ) {
+        } else if (this.remainingTime === ParticlesEmitter.UNTIL_CHILD_END_DURATION) {
             const childsEmission = ParticleWorkFlowManager.getWorkflowsByEmitterId(this.id) ?? []
             return childsEmission.length === 0;
         }

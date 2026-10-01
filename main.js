@@ -8,14 +8,25 @@ import { subscribeApiToWindow } from "./script/api/windowsController.js"
 import { initChatController } from "./script/api/chatController.js"
 import ParticlesEmitter from "./script/object/particlesEmitter.js"
 import { setupAutomation, automationInitialisation } from "./script/autoGeneration/automaticGeneration.service.js"
+import { EmittersPanel } from "./script/object/emittersPanel.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
+/**
+ * Temporarily stores the first scene emitters queries if canvas is ready before game ready hook.
+ * @type {Array<import("./script/prefillMotionTemplate.js").MotionTemplateQuery & import("./script/prefillColorTemplate.js").ColorTemplateQuery>}
+ */
 let firstSceneEmittersQueries
 
+/**
+ * Handles the 'init' hook to initialize module chat controller.
+ */
 Hooks.on("init", () => {
     initChatController();
 });
 
+/**
+ * Handles the 'setup' hook to register module settings and initialize automation.
+ */
 Hooks.on("setup", () => {
     game.settings.register(s_MODULE_ID, "avoidParticle", {
         name: game.i18n.localize("PARTICULE-FX.Settings.Avoid.label"),
@@ -37,12 +48,27 @@ Hooks.on("setup", () => {
         default: false
     });
 
+    game.settings.register(s_MODULE_ID, "showPanelOnStart", {
+        name: game.i18n.localize("PARTICULE-FX.Settings.showPanelOnStart.label"),
+        hint: game.i18n.localize("PARTICULE-FX.Settings.showPanelOnStart.description"),
+        scope: "world",
+        config: true,
+        type: Boolean,
+        default: true
+    });
+
     game.settings.register(s_MODULE_ID, "minimalRole", {
         name: game.i18n.localize("PARTICULE-FX.Settings.minRole.label"),
         hint: game.i18n.localize("PARTICULE-FX.Settings.minRole.description"),
         default: CONST.USER_ROLES.GAMEMASTER,
         choices: Object.entries(CONST.USER_ROLES).reduce(
             //Generate object of role with id for value
+            /**
+             * Reducer callback to map role names to localized labels.
+             * @param {Record<string, string>} accumulator - Accumulator object for role ID to localized label.
+             * @param {[string, number]} entry - Key-value pair of [label, id].
+             * @returns {Record<string, string>} Updated accumulator.
+             */
             (accumulator, [label, id]) => {
                 const capLabel = label[0].toUpperCase() + label.slice(1).toLowerCase()
                 const localizeLabel = game.i18n.localize(`USER.Role${capLabel}`)
@@ -72,21 +98,16 @@ Hooks.on("setup", () => {
         config: true,
         type: Number,
         default: 10,
+        /**
+         * Updates the doubleSizeElevation value when the setting changes.
+         * @param {number} value - The new setting value.
+         */
         onChange: value => {
             Utils.doubleSizeElevation = value;
         }
     });
 
     setupAutomation()
-
-    game.settings.register(s_MODULE_ID, "maxEmitterId", {
-        name: "Last id emitter",
-        hint: "Don't touch this",
-        default: 0,
-        type: Number,
-        scope: 'world',
-        config: false
-    });
 
     game.settings.register(s_MODULE_ID, "customPrefillMotionTemplate", {
         name: "Map of custom prefill motion template",
@@ -113,6 +134,9 @@ Hooks.on("setup", () => {
     });
 });
 
+/**
+ * Handles the 'canvasReady' hook to initialize emission canvas and load saved emitters.
+ */
 Hooks.on("canvasReady", () => {
     ParticlesEmitter.INIT_EMISSION_CANVAS()
 
@@ -130,8 +154,15 @@ Hooks.on("canvasReady", () => {
             firstSceneEmittersQueries = emittersQueries
         }
     }
+
+    if (game.ready && game.settings.get(s_MODULE_ID, "showPanelOnStart")) {
+        EmittersPanel.show();
+    }
 });
 
+/**
+ * Handles the 'ready' hook for final module initialization once Foundry VTT is ready.
+ */
 Hooks.once('ready', function () {
     console.log(`main | ready to ${s_MODULE_ID}`);
 
@@ -149,11 +180,18 @@ Hooks.once('ready', function () {
     subscribeApiToWindow()
     automationInitialisation()
 
+    if (game.settings.get(s_MODULE_ID, "showPanelOnStart")) {
+        EmittersPanel.show();
+    }
+
     listen()
 });
 
-
 //Closing canvas hooks
+/**
+ * Handles the 'canvasTearDown' hook to persist active emitters and stop all particle emissions.
+ * @returns {Array<string>} List of stopped emitters.
+ */
 Hooks.on("canvasTearDown", () => {
     persistEmitters()
     return stopAllEmission(true)
