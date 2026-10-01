@@ -108,7 +108,6 @@ export default class ParticlesEmitter {
             this.spawningNumber = emitterProperty.spawningNumber;
             this.maxParticles = emitterProperty.maxParticles;
         } else {
-            //TODO mix this.spawningFrequence and this.spawningNumber with nbSibling division to handle low particle tempate (ex: satellite)
             this.particleFrequence = emitterProperty.spawningFrequence * nbSibling;
             this.spawningNumber = emitterProperty.spawningNumber;
             this.maxParticles = Math.ceil(emitterProperty.maxParticles / nbSibling);
