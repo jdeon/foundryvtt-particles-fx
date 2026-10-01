@@ -28,7 +28,6 @@ function sprayParticles(...args) {
     return particlesEmitterService.sprayParticles(...args, emitterId)?.id
 }
 
-//TODO concentring not work on client
 /**
  * Triggers a gravitating particle emission and broadcasts to connected clients.
  * @param {...Object} args - Emission configuration arguments.
