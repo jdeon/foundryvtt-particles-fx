@@ -256,6 +256,9 @@ export class SprayingParticleTemplate extends ParticleTemplate {
         let particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable, true)
 
         this.currentSourcePosition = Utils.getSourcePosition(particleProperties.source.getValue(), this.isElevationManage)
+
+        if (this.currentSourcePosition === undefined) return
+
         let target = particleProperties.target.getValue()
         let particleLifetime = particleProperties.particleLifetime.getValue()
         let positionSpawning = particleProperties.positionSpawning.getValue()
@@ -413,6 +416,9 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         let particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable, true)
 
         this.currentSourcePosition = Utils.getSourcePosition(particleProperties.source.getValue(), this.isElevationManage)
+
+        if (this.currentSourcePosition === undefined) return
+
         let targetsPosition = Utils.getArrayRandomValueFrom(this.targets)
             .map((item) => Utils.getSourcePosition(item, this.isElevationManage));
 
