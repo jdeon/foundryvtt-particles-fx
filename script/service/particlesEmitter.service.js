@@ -313,7 +313,7 @@ export function stopAllEmission(immediate) {
         while (ParticlesEmitter.emitters.length > 0) {
             let emitter = ParticlesEmitter.emitters[0]
             emitter.disableWorkflow()
-            emitter.destroy()
+            emitter.destroy(false)
             deletedIds.push(emitter.id)
         }
     } else {
