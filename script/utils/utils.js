@@ -474,7 +474,7 @@ export class Utils {
                 } else {
                     result[key] = defaultInput[key]
                 }
-            } else if (prioritizeProperty instanceof Object) {
+            } else if (prioritizeProperty instanceof Object && !(prioritizeProperty instanceof Vector3)) {
                 result[key] = Utils.mergeInputTemplate(prioritizeProperty, defaultInput[key])
             } else {
                 result[key] = prioritizeProperty
