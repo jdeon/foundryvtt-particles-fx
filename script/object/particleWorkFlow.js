@@ -303,7 +303,7 @@ class ParticleWorkFlowStep {
 		if (withEmmiter) {
 			for (let i = this.handleEmitters.length - 1; i >= 0; i--) {
 				//We look througt the list backward to avoid error from deleting an item that shift the whole array
-				this.handleEmitters[i].destroy();
+				this.handleEmitters[i].destroy(false);
 			}
 		} else {
 			for (let i = this.handleEmitters.length - 1; i >= 0; i--) {

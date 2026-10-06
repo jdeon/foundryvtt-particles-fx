@@ -46,6 +46,8 @@ export function initEmitters(emittersQueries) {
         } else {
             //New persist format : Object<EmitterId, EmitterData>
             Object.entries(emittersQueries).forEach(([emitterId, query]) => {
+                if (ParticlesEmitter.emitters.some(e => e.id === String(emitterId))) return;
+
                 switch (query.type) {
                     case SprayingParticleTemplate.getType():
                         sprayParticles({ emitterId }, query);
@@ -272,9 +274,10 @@ export function persistEmitters() {
     if (isSaveAllowed && game.user.isGM) {
         const targetScene = canvas.scene
         const activeEmmittersQuery = ParticlesEmitter.emitters
-            .filter(emitter => emitter.remainingTime === undefined || emitter.remainingTime > 0)
+            .filter(emitter => !emitter.parentWorkflowId && (emitter.remainingTime === undefined || emitter.remainingTime === ParticlesEmitter.UNTIL_CHILD_END_DURATION || emitter.remainingTime > 0))
             .reduce((acc, emitter) => {
-                const query = emitter.finalQuery
+                const query = foundry.utils.deepClone(emitter.finalQuery)
+                query.isPaused = emitter.isPaused
                 query.emissionDuration = emitter.remainingTime
                 query.type = emitter.particleTemplate.constructor.getType()
                 acc[emitter.id] = query
@@ -310,7 +313,7 @@ export function stopAllEmission(immediate) {
         while (ParticlesEmitter.emitters.length > 0) {
             let emitter = ParticlesEmitter.emitters[0]
             emitter.disableWorkflow()
-            emitter.destroy()
+            emitter.destroy(false)
             deletedIds.push(emitter.id)
         }
     } else {
@@ -321,6 +324,9 @@ export function stopAllEmission(immediate) {
         })
     }
 
+    if (canvas?.scene && game.settings.get(s_MODULE_ID, "saveEmitters")) {
+        canvas.scene.unsetFlag(s_MODULE_ID, "emitters").then()
+    }
     return deletedIds
 }
 
@@ -482,6 +488,9 @@ export function togglePauseEmissionById(emitterId, forceState) {
         } else {
             emitter.togglePause();
         }
+        if (!emitter.parentWorkflowId) {
+            persistEmitters();
+        }
         return emitter.isPaused;
     }
     return false;
@@ -502,6 +511,7 @@ export function setPauseStateToAllEmission(isPaused = true) {
     });
 
     EmittersPanel.refresh();
+    persistEmitters();
     return updatedIds;
 }
 
@@ -625,6 +635,10 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
         finalInput._nbEmitterSibling
     );
 
+    if (finalInput.isPaused) {
+        particlesEmitter.isPaused = true;
+    }
+
     // Listen for animate update
     particlesEmitter.callback = particlesEmitter.manageParticles.bind(particlesEmitter)
     particlesEmitter.originalQuery = inputQuery
@@ -634,6 +648,10 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
 
     ParticlesEmitter.emitters.push(particlesEmitter)
     EmittersPanel.refresh()
+
+    if (!particlesEmitter.parentWorkflowId) {
+        persistEmitters();
+    }
 
     return particlesEmitter
 }

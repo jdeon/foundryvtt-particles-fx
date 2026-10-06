@@ -5,6 +5,7 @@ import { ParticleWorkFlowManager } from "./particleWorkFlow.js"
 import { ParticleTemplate } from "./particleTemplate.js"
 import { EmittersPanel } from "./emittersPanel.js"
 import { ParticleHighlightManager } from "./particleHighlightManager.js"
+import { persistEmitters } from "../service/particlesEmitter.service.js"
 
 /**
  * Controller class managing a group of particles spawned by a particle template.
@@ -213,9 +214,10 @@ export default class ParticlesEmitter {
     //Delete immediatly emission without waiting for each particle's end
     /**
      * Immediately destroys this emitter, destroys all active particles, and triggers end hooks.
+     * @param {boolean} [shouldEvict=true] - Whether to call persistEmitters upon destruction to update persisted scene state.
      * @returns {void}
      */
-    destroy() {
+    destroy(shouldEvict = true) {
         canvas.app.ticker.remove(this.callback);
 
         while (this.particles.length > 0) {
@@ -227,6 +229,9 @@ export default class ParticlesEmitter {
         const emitterIndex = ParticlesEmitter.emitters.findIndex((emitter) => emitter.id === this.id);
         if (emitterIndex >= 0) {
             ParticlesEmitter.emitters.splice(emitterIndex, 1);
+            if (shouldEvict && !this.parentWorkflowId) {
+                persistEmitters();
+            }
         }
 
         ParticleWorkFlowManager.triggerWorkflows(ParticleWorkFlowManager.NEXT_WORKFLOW_TYPES.AT_EMISSION_END, this.id, this.particleTemplate)

@@ -45,7 +45,14 @@ Hooks.on("setup", () => {
         scope: "world",
         config: true,
         type: Boolean,
-        default: false
+        default: false,
+        onChange: value => {
+            if (value) {
+                persistEmitters(true);
+            } else if (game.user?.isGM && canvas?.scene) {
+                canvas.scene.unsetFlag(s_MODULE_ID, "emitters");
+            }
+        }
     });
 
     game.settings.register(s_MODULE_ID, "showPanelOnStart", {
@@ -193,6 +200,6 @@ Hooks.once('ready', function () {
  * @returns {Array<string>} List of stopped emitters.
  */
 Hooks.on("canvasTearDown", () => {
-    persistEmitters()
+    persistEmitters(true)
     return stopAllEmission(true)
 });
