@@ -274,7 +274,7 @@ export function persistEmitters() {
     if (isSaveAllowed && game.user.isGM) {
         const targetScene = canvas.scene
         const activeEmmittersQuery = ParticlesEmitter.emitters
-            .filter(emitter => emitter.remainingTime === undefined || emitter.remainingTime > 0)
+            .filter(emitter => !emitter.parentWorkflowId && (emitter.remainingTime === undefined || emitter.remainingTime === ParticlesEmitter.UNTIL_CHILD_END_DURATION || emitter.remainingTime > 0))
             .reduce((acc, emitter) => {
                 const query = foundry.utils.deepClone(emitter.finalQuery)
                 query.isPaused = emitter.isPaused
@@ -488,7 +488,9 @@ export function togglePauseEmissionById(emitterId, forceState) {
         } else {
             emitter.togglePause();
         }
-        persistEmitters();
+        if (!emitter.parentWorkflowId) {
+            persistEmitters();
+        }
         return emitter.isPaused;
     }
     return false;
@@ -647,7 +649,9 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
     ParticlesEmitter.emitters.push(particlesEmitter)
     EmittersPanel.refresh()
 
-    persistEmitters(particlesEmitter.id)
+    if (!particlesEmitter.parentWorkflowId) {
+        persistEmitters();
+    }
 
     return particlesEmitter
 }
