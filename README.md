@@ -24,14 +24,21 @@ The module contains several methods to generate particles without needing premad
   - Add description to chat command with `-h` or `-help` like `/pfx spray -h`.
 - **v2.6.0**: 
   - Add pf2e system for automatic emission settings on item usage.
+- **v2.7.0**: 
+  - Foundry VTT v14 compatibility.
+  - Added Emitters Manager Panel to monitor, stop and highlight active emissions in real time.
+  - Added ability to pause and resume emissions manually (per emitter or globally).
+  - Added ability to get emitter query and duplicate it.
+  - Improved scene saving and persistence triggers for active emitters.
 
 ## Settings
 1. Avoid showing particles from other clients (useful for minimal configuration) (Client setting)
 2. Save emitters when changing scenes and retrieve them when returning (World setting)
-3. Define minimal user role to manage custom prefill templates (World setting)
-4. Automatically generate emission when using items (Client setting) (Only existing on DnD 5e)
-5. Activate elevation management for particles (useful for minimal configuration) (Client setting)
-6. Elevation to double the size of a particle in grid number (World setting)
+3. Display Emitters Manager Panel on start (World setting)
+4. Define minimal user role to manage custom prefill templates (World setting)
+5. Automatically generate emission when using items (Client setting) (Supported on DnD 5e & PF2e)
+6. Activate elevation management for particles (useful for minimal configuration) (Client setting)
+7. Elevation to double the size of a particle in grid number (World setting)
 
 ## Emission Methods
 The emission methods are used to interpret the input and manage the particles during their lifetime. The method returns its ID.
@@ -50,6 +57,15 @@ Gravitating particles turn around the source with a velocity at a distance defin
 The missile method emits spray particles that are used to emit sub-particles.
 
 ![Missile animation](doc/pfx-missile-Animation.gif)
+
+### Emitters Manager Panel
+Open an interactive GM panel listing all active emitters on the scene with their ID, play/pause status, and live particle count.
+- Hover over an emitter item to highlight its position on screen.
+- Click an emitter item to copy its ID to the clipboard.
+- Pause/Resume, Stop, or Delete emitters directly with single-click action buttons.
+
+### Pause / Resume Emissions
+Pause or resume active emissions. Living particles remain rendered on screen while frozen, and particle spawning is suspended until resumed. Can be toggled per emitter or globally across all active emissions.
 
 ### Stop All Emissions
 To stop all emissions in the scene and reset the particle emitter's IDs index.
@@ -70,39 +86,64 @@ To stop a future emission linked by a workflow to a current one, you need to use
 - `isImmediate` is a boolean parameter: `true` for instant deletion of emitters already generated, `false` to stop/disable only workflows that have not yet begun.
 - `all` is a boolean to select workflows in all emitters.
 
+### Duplicate an Emission
+Duplicate an existing emitter (by ID, 'l', or 'f') using the currently selected token/target, with optional parameter overrides.
+
+### Retrieve Emission Query
+Retrieve the active JSON query configuration of any emitter (merged or unmerged original input) by ID for macro creation or debugging.
+
 ## How to Call It
 
 ### Call by Chat
-You can start or stop emissions via chat with the command `/pfx`.
-It adds a message response in the chat.
+You call some methods using the prefix `/pfx` in a chat message.
+It adds a message response in the chat with id of the generated (or deleted) emission.
 
-Commands:
-- `/pfx stopAll (--instant) (--help)`
-- `/pfx stopById *id* (--instant) (--help)`
-- `/pfx stopWorkflow *id* (--instant) (--all) (--help)`
-- `/pfx pause *id* (--all) (--resume) (--help)`
-- `/pfx spray *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* (--multiple) (--help)`
-- `/pfx gravitate *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* (--multiple) (--help)`
-- `/pfx missile *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* (--curve) (--multiple) (--help)`
+Here is the list of all the commands (except the prefix and the first word, all the following words are optional commands):
+- `/pfx manage`
+- `/pfx pause *id* --all --resume`
+- `/pfx stopAll --instant`
+- `/pfx stopById *id* --instant`
+- `/pfx stopWorkflow *id* --instant --all`
+- `/pfx pause *id* --all --resume`
+- `/pfx spray *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* --multiple`
+- `/pfx gravitate *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* --multiple`
+- `/pfx missile *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* --multiple --curve`
+- `/pfx query *id* --original`
+- `/pfx duplicate *id*`
 - `/pfx help`
 
 ```/pfx spray ray death ice```
 
-> To stop a command, you can add the param *--instant* so you do not have to wait for the end of the particles' lifetime.
+> The parameters "prefillXXXTemplates" are optional, if it is not given, we are using the default prefill. You can choose multiple templates (to mix color for example)<br>
+> The parameter "particleShapes" is optional, it must be circle (default), diamond, tor or star. You can choose multiple shapes [More details](https://github.com/jdeon/foundryvtt-particles-fx/wiki/Customize-input-options#particle-shape)<br>
+> The parameter "--instant" (`-i`) is optional; if used on a stop command, deletes active particles immediately without waiting for lifetime end.<br>
+> The parameter "--multiple" (`-m`) allows you to generate an emission for each targeted token.<br>
+> The parameter "--curve" (`-c`) makes missile trajectories follow a curved path between targets.<br>
+> The parameter "--original" (`-o`) on query retrieves the raw original input before prefill merging.<br>
+> The parameter "--all" (`-a`) on pause target all active emitters.<br>
+> The parameter "--resume" (`-r` / `--unpause`) on pause resumes paused emitters.<br>
+> All commands accept `--help` (`-h`) to view detailed options and usage.
 
 ### Call by Script
 
-- To emit spray particles, you need to use a macro to call the method `particlesFx.sprayParticles(prefillMotionTemplates, prefillColorTemplates, particleShapes, {Advanced options})`
-- To emit gravitating particles, you need to use a macro to call the method `particlesFx.gravitateParticles(prefillMotionTemplates, prefillColorTemplates, particleShapes, {Advanced options})`
-- To emit missile particles, you need to use a macro to call the method `particlesFx.missileParticles(prefillMotionTemplates, prefillColorTemplates, particleShapes, {Advanced options})`. Advanced options have the same input as Spray particles with a nested object `subParticles` containing another input (spray or gravitating) and type (equals to "Spraying" or "Gravitating").
-- Write a message to describe the emitter and a button to stop it: `particlesFx.writeMessageForEmissionById(emitterId, isVerbal)`. The `isVerbal` parameter also writes advanced input in the message.
-- To stop all emissions, you need to use a macro to call the method `particlesFx.stopAllEmission(instantDelete)`. `instantDelete` is a boolean parameter: if true, it deletes all particles already emitted; if false, it stops only the emission (living particles are not killed).
-- To pause or resume all emissions, you can call `particlesFx.setPauseStateToAllEmission(isPaused)`.
-- To stop a specific emission, you need to use a macro to call the method `particlesFx.stopEmissionById(id)`. ID is a number or a string:
-  - ID of the emission (returned by the method)
-  - 'l' or 'last' for the newest emission
-  - 'f' or 'first' for the oldest emission
-- To stop a future emission linked by a workflow to a current one, you need to use a macro to call the method `particlesFx.stopWorkflow(id, isImmediate, all)`. ID is like the one for `stopEmissionById`, and `all` disables workflows for all current workflows.
+- To emit spray particles: `particlesFx.sprayParticles(prefillMotionTemplates, prefillColorTemplates, particleShapes, {Advanced options})`
+- To emit gravitating particles: `particlesFx.gravitateParticles(prefillMotionTemplates, prefillColorTemplates, particleShapes, {Advanced options})`
+- To emit missile particles: `particlesFx.missileParticles(prefillMotionTemplates, prefillColorTemplates, particleShapes, {Advanced options})`. Advanced options have the same input as Spray particles with a nested object `subParticles` containing another input (spray or gravitating) and type (equals to "Spraying" or "Gravitating").
+- Open Emitters Manager Panel: `particlesFx.showEmittersPanel()`
+- Refresh Emitters Manager Panel: `particlesFx.refreshEmittersPanel()`
+- Toggle pause/resume on an emission: `particlesFx.togglePauseEmissionById(id, isPaused)`
+- Pause or resume all emissions: `particlesFx.pauseAllEmission(isPaused)`
+- Stop all emissions: `particlesFx.stopAllEmission(instantDelete)`. `instantDelete` is a boolean parameter: if true, it deletes all particles already emitted; if false, it stops only the emission (living particles are not killed).
+- Stop a specific emission: `particlesFx.stopEmissionById(id, immediate)`. ID is a number or a string ('l'/'last', 'f'/'first').
+- Stop a workflow: `particlesFx.stopWorkflow(id, isImmediate, all)`.
+- Write a message describing the emitter with a stop button: `particlesFx.writeMessageForEmissionById(emitterId, isVerbal)`.
+- Manage custom templates:
+  - `particlesFx.addCustomPrefillMotionTemplate(key, template)`
+  - `particlesFx.removeCustomPrefillMotionTemplate(key)`
+  - `particlesFx.getCustomPrefillMotionTemplate(key)`
+  - `particlesFx.addCustomPrefillColorTemplate(key, template)`
+  - `particlesFx.removeCustomPrefillColorTemplate(key)`
+  - `particlesFx.getCustomPrefillColorTemplate(key)`
 
 > **Example**
 > To emit missile particles with gravitating sub-particles that form a trail: 
@@ -110,15 +151,28 @@ Commands:
 
 #### API Methods
 
-All these methods can also be called with the module's API `game.modules.get("particle-fx").api` with the same parameters and behavior:
-- `xxx.api.emit.spray(xxx)`
-- `xxx.api.emit.gravit(xxx)`
-- `xxx.api.emit.missile(xxx)`
-- `xxx.api.emit.writeMessage(xxx)`
-- `xxx.api.emit.pauseAll(xxx)`
-- `xxx.api.emit.stopAll(xxx)`
-- `xxx.api.emit.stop(xxx)`
-- `xxx.api.emit.stopWorkflow(xxx)`
+All these methods can also be called via the module API `game.modules.get("particule-fx").api`:
+- **Emission API (`api.emit`)**:
+  - `xxx.api.emit.spray(...)`
+  - `xxx.api.emit.gravit(...)`
+  - `xxx.api.emit.missile(...)`
+  - `xxx.api.emit.stop(id, immediate)`
+  - `xxx.api.emit.stopAll(immediate)`
+  - `xxx.api.emit.stopWorkflow(id, immediate, all)`
+  - `xxx.api.emit.togglePause(id, isPaused)`
+  - `xxx.api.emit.pauseAll(isPaused)`
+  - `xxx.api.emit.duplicate(emitterId, overrides)`
+  - `xxx.api.emit.getQuery(emitterId, isOriginal)`
+  - `xxx.api.emit.showManagerPanel()`
+  - `xxx.api.emit.refreshManagerPanel()`
+  - `xxx.api.emit.writeMessage(emitterId, isVerbal)`
+- **Custom Prefill Template API (`api.template`)**:
+  - `xxx.api.template.motion.add(key, template)`
+  - `xxx.api.template.motion.remove(key)`
+  - `xxx.api.template.motion.get(key)`
+  - `xxx.api.template.color.add(key, template)`
+  - `xxx.api.template.color.remove(key)`
+  - `xxx.api.template.color.get(key)`
 
 ## Prefill Templates
 
@@ -136,6 +190,7 @@ The method emitting particles can be called with multiple prefill templates or n
 - aura (designed for gravitate)
 - satellite (designed for gravitate)
 - slash (designed for gravitate)
+- atom (designed for gravitate)
 - flash (designed for spray (square zone) or gravitate (circle zone))
 
 *Example*
@@ -151,6 +206,7 @@ The method emitting particles can be called with multiple prefill templates or n
 - poison
 - silver
 - cyber
+- charm
 
 *Example*
 ```/pfx spray breath fire```
@@ -193,4 +249,5 @@ For more advanced functionality, please read the [WIKI](https://github.com/jdeon
 With v2.0.0, all words containing "particule" have been renamed "particle". Additionally, the object exposing the module's methods (`particleEmitter`) has been renamed `particlesFx`.
 
 Compatibility management has been added with warnings to flag outdated names.
+
 
