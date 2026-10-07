@@ -1,5 +1,45 @@
 import { sameStartKey } from "./utils/utils.js";
 
+/**
+ * @typedef {Object} MotionTemplateQuery
+ * @property {string|Array<string>} [particleShape] Particle shape identifier (e.g., "CIRCLE", "STAR", "TOR", "DIAMOND").
+ * @property {number|string|Array<number|string>} [spawningFrequence] Frequency of particle spawning.
+ * @property {number|string|Array<number|string>} [spawningNumber] Number of particles spawned per cycle.
+ * @property {number} [maxParticles] Maximum allowable active particles for this emitter.
+ * @property {number|string} [emissionDuration] Duration of particle emission in milliseconds.
+ * @property {{x: number|string, y: number|string, z: number|string}} [source] Emission source coordinate offset.
+ * @property {{x: number|string, y: number|string, z: number|string}} [positionSpawning] Spawning position offset.
+ * @property {number|string|Array<number|string>} [particleLifetime] Particle lifetime range or fixed value in milliseconds.
+ * @property {number|string|Array<number|string>} [particleVelocityStart] Starting velocity percentage or value.
+ * @property {number|string|Array<number|string>} [particleVelocityEnd] Ending velocity percentage or value.
+ * @property {number|string|Array<number|string>} [particleAxisElevationAngle] Axis elevation angle in degrees.
+ * @property {number|string|Array<number|string>} [particleRiseRateStart] Starting elevation rise rate.
+ * @property {number|string|Array<number|string>} [particleRiseRateEnd] Ending elevation rise rate.
+ * @property {number|string|Array<number|string>} [particleAngleStart] Starting emission angle in degrees.
+ * @property {number|string|Array<number|string>} [particleAngleEnd] Ending emission angle in degrees or sameStartKey.
+ * @property {number|string|Array<number|string>} [particleRadiusStart] Starting orbital radius.
+ * @property {number|string|Array<number|string>} [particleRadiusEnd] Ending orbital radius.
+ * @property {number|string|{x: number|string, y: number|string}|Array} [particleSizeStart] Starting particle size.
+ * @property {number|string|{x: number|string, y: number|string}|Array} [particleSizeEnd] Ending particle size.
+ * @property {number|string|Array<number|string>} [particleRotationStart] Starting particle rotation angle in degrees.
+ * @property {number|string|Array<number|string>} [particleRotationEnd] Ending particle rotation angle in degrees.
+ * @property {number|string|Array<number|string>} [alphaStart] Starting opacity alpha value (0 to 1).
+ * @property {number|string|Array<number|string>} [alphaEnd] Ending opacity alpha value (0 to 1).
+ * @property {number|string|Array<number|string>} [vibrationAmplitudeStart] Starting vibration amplitude.
+ * @property {number|string|Array<number|string>} [vibrationAmplitudeEnd] Ending vibration amplitude.
+ * @property {number|string|Array<number|string>} [vibrationFrequencyStart] Starting vibration frequency.
+ * @property {number|string|Array<number|string>} [vibrationFrequencyEnd] Ending vibration frequency.
+ * @property {string} [pathType] Trajectory path type (e.g., "LINEAR", "CURVE").
+ * @property {boolean} [onlyEmitterFollow] Whether particles only follow the emitter object.
+ * @property {boolean} [freezeOnPause] Whether particle motion freezes when the game is paused.
+ * @property {MotionTemplateQuery} [subParticles] Configuration options for trailing sub-particles.
+ * @property {Array<MotionTemplateQuery|string>} [next] Chained motion template definitions.
+ */
+
+/**
+ * Returns default motion template configuration.
+ * @returns {MotionTemplateQuery} Object containing default particle motion properties.
+ */
 export const defaultMotionTemplate = () => {
     return {
         particleShape: "CIRCLE",
@@ -66,6 +106,7 @@ export const defaultMotionTemplate = () => {
  * velocity multiply by particle lifetime must done an average of 500% (5 grids)
  */
 
+/** Motion template for explosion effect. */
 const explosionMotionTemplate = {
     emissionDuration: 250,
     spawningNumber: 10,
@@ -81,6 +122,7 @@ const explosionMotionTemplate = {
     alphaEnd: .75
 }
 
+/** Motion template for breath / cone effect. */
 const breathMotionTemplate = {
     emissionDuration: 1000,
     spawningFrequence: 2,
@@ -95,6 +137,7 @@ const breathMotionTemplate = {
     alphaEnd: 0
 }
 
+/** Motion template for ray / beam effect. */
 const rayMotionTemplate = {
     positionSpawning: { x: '50%', y: '-10%_10%', z: 0 },
     emissionDuration: 3000,
@@ -109,6 +152,7 @@ const rayMotionTemplate = {
     vibrationFrequencyStart: '0_100'
 }
 
+/** Motion template for sonar / wave effect. */
 const sonarMotionTemplate = {
     spawningFrequence: 1000,
     spawningNumber: 2000,
@@ -124,6 +168,7 @@ const sonarMotionTemplate = {
  * MISSILE DESIGNED PREFILLED TEMPLATE
  * 
  */
+/** Motion template for trailing missile effect. */
 const trailMissileMotionTemlate = {
     spawningFrequence: 5,
     spawningNumber: 1,
@@ -145,6 +190,7 @@ const trailMissileMotionTemlate = {
     }
 }
 
+/** Motion template for wave missile effect. */
 const waveMissileMotionTemlate = {
     subParticles: {
         type: "Spraying",
@@ -153,6 +199,7 @@ const waveMissileMotionTemlate = {
     }
 }
 
+/** Motion template for growing missile effect. */
 const growingMissileMotionTemlate = {
     subParticles: {
         type: "Graviting",
@@ -168,6 +215,7 @@ const growingMissileMotionTemlate = {
  * GRAVITATE DESIGNED PREFILLED TEMPLATE
  * 
  */
+/** Motion template for vortex effect. */
 const vortexMotionTemplate = {
     spawningFrequence: 3,
     maxParticles: 1000,
@@ -183,6 +231,7 @@ const vortexMotionTemplate = {
     alphaEnd: 0
 }
 
+/** Motion template for aura effect. */
 const auraMotionTemplate = {
     spawningFrequence: 2,
     maxParticles: 10000,
@@ -199,6 +248,7 @@ const auraMotionTemplate = {
     onlyEmitterFollow: true
 }
 
+/** Motion template for satellite / orbiting effect. */
 const satelliteMotionTemplate = {
     spawningFrequence: 1000,
     maxParticles: 4,
@@ -210,6 +260,7 @@ const satelliteMotionTemplate = {
     alphaStart: .9,
 }
 
+/** Motion template for slash effect. */
 const slashMotionTemplate = {
     spawningFrequence: .5,
     maxParticles: 500,
@@ -224,6 +275,7 @@ const slashMotionTemplate = {
     alphaStart: .5
 }
 
+/** Motion template for atom / orbital effect. */
 const atomMotionTemplate = {
     spawningFrequence: 25,
     maxParticles: 250,
@@ -236,6 +288,7 @@ const atomMotionTemplate = {
     alphaStart: .9,
 }
 
+/** Motion template for flash / starburst effect. */
 const flashMotionTemplate = {
     particleShape: "STAR",
     particleLifetime: [100, 250, 500],
@@ -245,6 +298,10 @@ const flashMotionTemplate = {
     particleRadiusStart: '0%_200%'
 }
 
+/**
+ * Dictionary of built-in motion templates.
+ * @type {Record<string, MotionTemplate>}
+ */
 export const motionTemplateDictionnary = {
     breath: breathMotionTemplate,
     explosion: explosionMotionTemplate,

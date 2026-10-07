@@ -22,6 +22,8 @@ The module contains several methods to generate particles without needing premad
   - Allow calling emission with multiple prefill templates at once.
   - Emission can be triggered for multiple targets with `-m` or `--multiple`.
   - Add description to chat command with `-h` or `-help` like `/pfx spray -h`.
+- **v2.6.0**: 
+  - Add pf2e system for automatic emission settings on item usage.
 
 ## Settings
 1. Avoid showing particles from other clients (useful for minimal configuration) (Client setting)
@@ -78,6 +80,7 @@ Commands:
 - `/pfx stopAll (--instant) (--help)`
 - `/pfx stopById *id* (--instant) (--help)`
 - `/pfx stopWorkflow *id* (--instant) (--all) (--help)`
+- `/pfx pause *id* (--all) (--resume) (--help)`
 - `/pfx spray *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* (--multiple) (--help)`
 - `/pfx gravitate *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* (--multiple) (--help)`
 - `/pfx missile *prefillMotionTemplates* *prefillColorTemplates* *particleShapes* (--curve) (--multiple) (--help)`
@@ -94,6 +97,7 @@ Commands:
 - To emit missile particles, you need to use a macro to call the method `particlesFx.missileParticles(prefillMotionTemplates, prefillColorTemplates, particleShapes, {Advanced options})`. Advanced options have the same input as Spray particles with a nested object `subParticles` containing another input (spray or gravitating) and type (equals to "Spraying" or "Gravitating").
 - Write a message to describe the emitter and a button to stop it: `particlesFx.writeMessageForEmissionById(emitterId, isVerbal)`. The `isVerbal` parameter also writes advanced input in the message.
 - To stop all emissions, you need to use a macro to call the method `particlesFx.stopAllEmission(instantDelete)`. `instantDelete` is a boolean parameter: if true, it deletes all particles already emitted; if false, it stops only the emission (living particles are not killed).
+- To pause or resume all emissions, you can call `particlesFx.setPauseStateToAllEmission(isPaused)`.
 - To stop a specific emission, you need to use a macro to call the method `particlesFx.stopEmissionById(id)`. ID is a number or a string:
   - ID of the emission (returned by the method)
   - 'l' or 'last' for the newest emission
@@ -111,6 +115,7 @@ All these methods can also be called with the module's API `game.modules.get("pa
 - `xxx.api.emit.gravit(xxx)`
 - `xxx.api.emit.missile(xxx)`
 - `xxx.api.emit.writeMessage(xxx)`
+- `xxx.api.emit.pauseAll(xxx)`
 - `xxx.api.emit.stopAll(xxx)`
 - `xxx.api.emit.stop(xxx)`
 - `xxx.api.emit.stopWorkflow(xxx)`
