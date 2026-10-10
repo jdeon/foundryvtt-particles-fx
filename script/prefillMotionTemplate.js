@@ -1,5 +1,3 @@
-import { sameStartKey } from "./utils/utils.js";
-
 /**
  * @typedef {Object} MotionTemplateQuery
  * @property {string|Array<string>} [particleShape] Particle shape identifier (e.g., "CIRCLE", "STAR", "TOR", "DIAMOND").
@@ -16,7 +14,7 @@ import { sameStartKey } from "./utils/utils.js";
  * @property {number|string|Array<number|string>} [particleRiseRateStart] Starting elevation rise rate.
  * @property {number|string|Array<number|string>} [particleRiseRateEnd] Ending elevation rise rate.
  * @property {number|string|Array<number|string>} [particleAngleStart] Starting emission angle in degrees.
- * @property {number|string|Array<number|string>} [particleAngleEnd] Ending emission angle in degrees or sameStartKey.
+ * @property {number|string|Array<number|string>} [particleAngleEnd] Ending emission angle in degrees.
  * @property {number|string|Array<number|string>} [particleRadiusStart] Starting orbital radius.
  * @property {number|string|Array<number|string>} [particleRadiusEnd] Ending orbital radius.
  * @property {number|string|{x: number|string, y: number|string}|Array} [particleSizeStart] Starting particle size.
@@ -54,8 +52,7 @@ export const defaultMotionTemplate = () => {
         particleAxisElevationAngle: 0,
         particleRiseRateStart: 0,
         particleRiseRateEnd: 0,
-        particleAngleStart: '0_360',
-        particleAngleEnd: sameStartKey,
+        particleAngle: '0_360',
         particleRadiusStart: '100%',
         particleRadiusEnd: '50%',
         particleSizeStart: 10,

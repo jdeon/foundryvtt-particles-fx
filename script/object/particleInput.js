@@ -1,42 +1,44 @@
-import { Utils, Vector3, sameStartKey } from "../utils/utils.js"
+import { Utils, Vector3 } from "../utils/utils.js"
 
 /**
- * Wrapper class managing scalar particle configuration input values and operations.
+ * ParticleInput class managing keyframe list particle configuration input values and operations.
  */
 export class ParticleInput {
 
     /**
-     * Factory method creating appropriate ParticleInput subclass based on input command and variables.
-     * @param {number|Vector3} inputValue - Constant initial scalar or vector value.
-     * @param {string|Vector3} inputCmd - Input command string or command vector.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables.
+     * Factory method creating appropriate ParticleInput instance based on input command and variables.
+     * @param {Array<{time:number,value:number|Vector3|string, inputCmd:string|Vector3}>} inputValue - Keyframe list property object { list: [...] }
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>} [advancedVariables] - Active advanced variables.
      * @returns {ParticleInput} Instantiated ParticleInput instance.
      */
-    static build(inputValue, inputCmd, advancedVariables) {
-        let isTimedLinked = false
+    static build(inputValue, advancedVariables) {
+        if (inputValue instanceof ParticleInput) {
+            return inputValue;
+        }
 
-        if (typeof inputCmd === 'string') {
-            isTimedLinked = ParticleInput._checkIsTimedLinked(inputCmd, advancedVariables)
-        } else if (inputCmd instanceof Vector3) {
-            for (let key of Object.keys(inputCmd)) {
-                if (ParticleInput._checkIsTimedLinked(inputCmd[key], advancedVariables)) {
-                    isTimedLinked = true
-                    break
+        if (!inputValue?.list) {
+            return new ParticleInput(inputValue)
+        }
+
+        let isTimedLinked = inputValue.list.some(item => {
+            if (typeof item.inputCmd === 'string') {
+                return ParticleInput._checkIsTimedLinked(item.inputCmd, advancedVariables)
+            } else if (item.inputCmd instanceof Vector3) {
+                for (let key of Object.keys(item.inputCmd)) {
+                    if (ParticleInput._checkIsTimedLinked(item.inputCmd[key], advancedVariables)) {
+                        return true;
+                    }
                 }
             }
-        }
+            return false;
+        })
 
 
         if (isTimedLinked) {
-            if (inputValue instanceof Vector3) {
-                return new TimedParticleVectorInput(inputValue, inputCmd)
-            } else {
-                return new TimedParticleInput(inputValue, inputCmd)
-            }
-        } else if (inputValue instanceof Vector3) {
-            return new ParticleVectorInput(inputValue)
+            //TODO inputValue should have only one item for timed particle input
+            return new TimedParticleInput(inputValue.list[0], inputCmd)
         } else {
-            return new ParticleInput(inputValue)
+            return new FrameParticleInput(inputValue.list)
         }
     }
 
@@ -47,74 +49,71 @@ export class ParticleInput {
      * @returns {boolean} True if linked to timed variables.
      */
     static _checkIsTimedLinked(inputCmd, advancedVariables) {
-        if (typeof inputCmd !== "string") return false
+        if (typeof inputCmd !== "string") return false;
 
-
-        let isTimedLinked = false
-
-        const usedVariables = inputCmd.match(/(?<=\{\{).+?(?=\}\})/g) //Get all value inside {{}}
+        let isTimedLinked = false;
+        const usedVariables = inputCmd.match(/(?<=\{\{).+?(?=\}\})/g); //Get all value inside {{}}
 
         if (usedVariables?.length > 0) {
             for (let key of usedVariables) {
                 if (advancedVariables[key]?.isTimedLinked) {
-                    isTimedLinked = true
-                    break
+                    isTimedLinked = true;
+                    break;
                 }
             }
         }
 
-        return isTimedLinked
+        return isTimedLinked;
     }
 
     /**
-     * Constructs a ParticleInput instance.
-     * @param {number|string|symbol} inputValue - Initial scalar input value.
+     * Constructs a ParticleInput instance managing a keyframe list.
+     * @param {number|Vector3|string} value
+     * @param {Record<string, Object>} [advancedVariables] - Map of active advanced variables.
+    */
+    constructor(value, advancedVariables) {
+        this.currentValue = value;
+    }
+
+    /**
+     * Interpolates time-value keyframes over lifetime proportion.
+     * @param {number} [lifetimeProportion=0] - Ratio of elapsed lifetime (0 to 1).
+     * @param {Record<string, Object>} [advancedVariables] - Map of active advanced variables.
+     * @returns {number|Vector3} Interpolated frame result.
      */
-    constructor(inputValue) {
-        this.inputValue = inputValue
+    computeValue(_lifetimeProportion = 0, _advancedVariables) {
+        return this.currentValue;
     }
 
     /**
-     * Retrieves current scalar input value.
-     * @returns {number|string|symbol} Current scalar value.
-     */
-    getValue() {
-        return this.inputValue
-    }
-
-    /**
-     * Multiplies scalar value by factor.
-     * @param {number} value - Factor multiplier.
-     * @returns {ParticleInput} Reference to this instance.
-     */
-    multiply(value) {
-        if (this._isInvalidOperation(value)) return this
-
-        this.inputValue = this.inputValue * value
-
-        return this
-    }
-
-    /**
-     * Adds scalar value to input value.
-     * @param {number} value - Term to add.
+     * Adds scalar or vector value to all keyframe values in this list.
+     * @param {number|Vector3} value - Term to add.
      * @returns {ParticleInput} Reference to this instance.
      */
     add(value) {
-        if (this._isInvalidOperation(value)) return this
+        if (this.currentValue && typeof this.currentValue.add === 'function') {
+            this.currentValue.add(value);
+        } else if (typeof this.currentValue === 'number') {
+            this.currentValue += value;
+        }
 
-        this.inputValue = this.inputValue + value
-
-        return this
+        return this;
     }
 
     /**
-     * Checks if operation is invalid (NaN or sameStartKey).
-     * @param {number} value - Operation operand.
-     * @returns {boolean} True if operation is invalid.
+     * Multiplies all keyframe values by factor.
+     * @param {number|Vector3} value - Multiplier factor.
+     * @returns {ParticleInput} Reference to this instance.
      */
-    _isInvalidOperation(value) {
-        return isNaN(value) || this.inputValue === sameStartKey
+    multiply(value) {
+
+        if (this.currentValue && typeof this.currentValue.multiply === 'function') {
+            this.currentValue.multiply(value);
+        } else if (typeof this.currentValue === 'number') {
+            this.currentValue *= value;
+        }
+
+        return this;
     }
 
     /**
@@ -122,89 +121,148 @@ export class ParticleInput {
      * @returns {ParticleInput} Cloned instance.
      */
     clone() {
-        return new ParticleInput(this.inputValue);
+        return new ParticleInput(this.currentValue);
     }
 }
 
-/**
- * Subclass handling Vector3 particle input values.
- */
-export class ParticleVectorInput extends ParticleInput {
 
+export class FrameParticleInput {
     /**
-     * Constructs a ParticleVectorInput instance.
-     * @param {Vector3} inputValue - Vector3 input value.
-     */
-    constructor(inputValue) {
-        super(inputValue)
+     * Constructs a ParticleInput instance managing a keyframe list.
+     * @param {Array<{time:number,value:number|Vector3|string, inputCmd:string|Vector3}>} values - Keyframes list array or object.
+     * @param {Record<string, Object>} [advancedVariables] - Map of active advanced variables.
+    */
+    constructor(values, advancedVariables) {
+        this.values = values.sort((a, b) => a.time - b.time);
+        this.lifetimeProportion = 0;
+
+        //TODO compute all values
+        this.currentValue = values[0].value;
     }
 
     /**
-     * Retrieves current Vector3 value.
-     * @returns {Vector3} Current Vector3 value.
+     * Interpolates time-value keyframes over lifetime proportion.
+     * @param {number} [lifetimeProportion=0] - Ratio of elapsed lifetime (0 to 1).
+     * @param {Record<string, Object>} [advancedVariables] - Map of active advanced variables.
+     * @returns {number|Vector3} Interpolated frame result.
      */
-    getValue() {
-        return this.inputValue
+    computeValue(lifetimeProportion = 0, _advancedVariables) {
+        this.lifetimeProportion = lifetimeProportion;
+
+        if (!this.values || this.values.length === 0) return undefined;
+
+        if (this.values.length === 1 || lifetimeProportion <= this.values[0].time) {
+            this.currentValue = this.values[0].value;
+            return this.currentValue;
+        }
+
+        if (lifetimeProportion >= this.values[this.values.length - 1].time) {
+            this.currentValue = this.values[this.values.length - 1].value;
+            return this.currentValue;
+        }
+
+        const nextIndex = this.values.findIndex((item) => item.time > lifetimeProportion); //find the first keyframe time greater than the current lifetime proportion
+        const currentIndex = nextIndex - 1
+
+        const timeDiff = this.values[nextIndex].time - this.values[currentIndex].time;
+        const segmentProportion = timeDiff > 0 ? (lifetimeProportion - this.values[currentIndex].time) / timeDiff : 0;
+
+        const v0 = this.values[currentIndex].value;
+        const v1 = this.values[nextIndex].value;
+
+        if (v0 instanceof Vector3) {
+            if (!v1 instanceof Vector3) {
+                //TODO throw an error, the list is not composed of Vector3
+            }
+            this.currentValue = v0.add(v1.minus(v0).multiply(segmentProportion));
+        } else if (typeof v0 === 'number' && typeof v1 === 'number') {
+            this.currentValue = v0 + (v1 - v0) * segmentProportion;
+        } else {
+            this.currentValue = v0
+        }
+
+        return this.currentValue;
     }
 
     /**
-     * Multiplies Vector3 value by scalar factor.
-     * @param {number} value - Multiplier factor.
-     * @returns {ParticleVectorInput} Reference to this instance.
-     */
-    multiply(value) {
-        this.inputValue = this.inputValue.multiply(value)
-        return this
-    }
-
-    /**
-     * Adds scalar value to Vector3 value components.
-     * @param {number} value - Term to add.
-     * @returns {ParticleVectorInput} Reference to this instance.
+     * Adds scalar or vector value to all keyframe values in this list.
+     * @param {number|Vector3} value - Term to add.
+     * @returns {FrameParticleInput} Reference to this instance.
      */
     add(value) {
-        this.inputValue = this.inputValue.add(value)
-        return this
+        if (!this.list) return this;
+        for (const item of this.list) {
+            if (item.value && typeof item.value.add === 'function') {
+                item.value.add(value);
+            } else if (typeof item.value === 'number') {
+                item.value += value;
+            }
+        }
+        return this;
     }
 
     /**
-     * Clones this ParticleVectorInput instance.
-     * @returns {ParticleVectorInput} Cloned instance.
+     * Multiplies all keyframe values by factor.
+     * @param {number|Vector3} value - Multiplier factor.
+     * @returns {FrameParticleInput} Reference to this instance.
+     */
+    multiply(value) {
+        if (!this.list) return this;
+        for (const item of this.list) {
+            if (item.value && typeof item.value.multiply === 'function') {
+                item.value.multiply(value);
+            } else if (typeof item.value === 'number') {
+                item.value *= value;
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Clones this ParticleInput instance.
+     * @returns {FrameParticleInput} Cloned instance.
      */
     clone() {
-        return new ParticleVectorInput(Vector3.build(this.inputValue));
+        const newList = this.list.map(item => ({
+            time: item.time,
+            value: item.value && typeof item.value.clone === 'function' ? item.value.clone() : item.value
+        }));
+        return new FrameParticleInput(newList);
     }
 }
 
 
 /**
- * Subclass handling dynamic, time-linked scalar particle input values.
+ * Subclass handling dynamic, time-linked scalar particle value inputs.
  */
 export class TimedParticleInput extends ParticleInput {
 
     /**
-     * Constructs a TimedParticleInput instance.
-     * @param {number|string|symbol} inputValue - Initial default input value.
-     * @param {string} inputCmd - Command template expression string.
+     * Constructs a TimedParticleValueInput instance.
+     * @param {Array<{time:number,value:number|Vector3|string, inputCmd:string|Vector3}>} values - Keyframes list array or object.
+     * @param {Record<string, Object>} [advancedVariables] - Map of active advanced variables.
      */
-    constructor(inputValue, inputCmd) {
-        super(inputValue)
-        this.inputCmd = inputCmd
+    constructor(values, advancedVariables) {
+        super(values, advancedVariables);
         this._valueOperations = []
     }
 
     /**
      * Evaluates dynamic timed value using active advanced variables.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>>} [advancedVariables] - Active advanced variables.
+     * @param {number|Record<string, Object>} [lifetimeProportion] - Lifetime proportion or active advanced variables map.
+     * @param {Record<string, Object>} [advancedVariables] - Active advanced variables.
      * @returns {number|string|symbol} Calculated timed scalar value.
      */
-    getValue(advancedVariables) {
-
-        if (advancedVariables) {
-            return this._computeTimeValue(advancedVariables)
+    computeValue(lifetimeProportion, advancedVariables) {
+        if (typeof lifetimeProportion === 'object' && !advancedVariables) {
+            advancedVariables = lifetimeProportion;
         }
-
-        return this.inputValue
+        if (advancedVariables) {
+            this.currentValue = this._computeTimeValue(advancedVariables);
+        } else {
+            this.currentValue = this.values[0].value;
+        }
+        return this.currentValue;
     }
 
     /**
@@ -213,11 +271,9 @@ export class TimedParticleInput extends ParticleInput {
      * @returns {TimedParticleInput} Reference to this instance.
      */
     multiply(value) {
-        if (this._isInvalidOperation(value)) return this
-
-        this._valueOperations.push({ value, operation: (a, b) => a * b })
-
-        return this
+        if (this._isInvalidOperation(value)) return this;
+        this._valueOperations.push({ value, operation: (a, b) => a * b });
+        return this;
     }
 
     /**
@@ -226,67 +282,65 @@ export class TimedParticleInput extends ParticleInput {
      * @returns {TimedParticleInput} Reference to this instance.
      */
     add(value) {
-        if (this._isInvalidOperation(value)) return this
-
-        this._valueOperations.push({ value, operation: (a, b) => a + b })
-
-        return this
+        if (this._isInvalidOperation(value)) return this;
+        this._valueOperations.push({ value, operation: (a, b) => a + b });
+        return this;
     }
 
     /**
-     * Clones this TimedParticleInput instance.
+     * Clones this TimedParticleValueInput instance.
      * @returns {TimedParticleInput} Cloned instance.
      */
     clone() {
-        const result = new TimedParticleInput(this.inputValue, this.inputCmd);
-        result._valueOperations.push(...this._valueOperations)
+        const result = new TimedParticleValueInput(this.values);
+        result._valueOperations.push(...this._valueOperations);
         return result;
     }
 
     /**
      * Evaluates timed value expression for current frame.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables map.
+     * @param {Record<string, Object>} advancedVariables - Active advanced variables map.
      * @returns {number} Evaluated frame result.
      */
     _computeTimeValue(advancedVariables) {
-        let result = Utils._managePercent(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables));
-
-        if (isNaN(result)) return this.inputValue
+        let result = Utils._managePercent(Utils._replaceWithAdvanceVariable(this.values[0].inputCmd, advancedVariables));
+        if (isNaN(result)) return this.currentValue;
 
         for (let valueOperation of this._valueOperations) {
-            result = valueOperation.operation(result, valueOperation.value)
+            result = valueOperation.operation(result, valueOperation.value);
         }
-
-        return result
+        return result;
     }
 }
 
 /**
- * Subclass handling dynamic, time-linked Vector3 particle input values.
+ * Subclass handling dynamic, time-linked Vector3 particle value inputs.
  */
 export class TimedParticleVectorInput extends TimedParticleInput {
 
     /**
-     * Constructs a TimedParticleVectorInput instance.
-     * @param {Vector3} inputValue - Default Vector3 input value.
-     * @param {Vector3|string} inputCmd - Vector command expression.
+     * Constructs a TimedParticleVectorInput instance.     
+     * @param {Array<{time:number,value:Vector3, inputCmd:string|Vector3}>} values - Keyframes list array or object.
+     * @param {Record<string, Object>} [advancedVariables] - Map of active advanced variables.
      */
-    constructor(inputValue, inputCmd) {
-        super(inputValue, inputCmd)
+    constructor(values, advancedVariables) {
+        super(values, advancedVariables);
     }
 
     /**
      * Evaluates dynamic timed Vector3 value using active advanced variables.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>} [advancedVariables] - Active advanced variables.
+     * @param {number|Record<string, Object>} [lifetimeProportion] - Lifetime proportion or active advanced variables map.
+     * @param {Record<string, Object>} [advancedVariables] - Active advanced variables.
      * @returns {Vector3} Calculated Vector3 value.
      */
-    getValue(advancedVariables) {
-
-        if (advancedVariables) {
-            return this._computeTimeValue(advancedVariables)
+    computeValue(lifetimeProportion, advancedVariables) {
+        if (typeof lifetimeProportion === 'object' && !advancedVariables) {
+            advancedVariables = lifetimeProportion;
         }
-
-        return this.inputValue
+        if (advancedVariables) {
+            return this._computeTimeValue(advancedVariables);
+        }
+        return this.inputValue;
     }
 
     /**
@@ -295,11 +349,9 @@ export class TimedParticleVectorInput extends TimedParticleInput {
      * @returns {TimedParticleVectorInput} Reference to this instance.
      */
     multiply(value) {
-        if (isNaN(value) && !value instanceof Vector3) return this
-
-        this._valueOperations.push({ value, operation: (a, b) => a.multiply(b) })
-
-        return this
+        if (isNaN(value) && !(value instanceof Vector3)) return this;
+        this._valueOperations.push({ value, operation: (a, b) => a.multiply(b) });
+        return this;
     }
 
     /**
@@ -308,11 +360,9 @@ export class TimedParticleVectorInput extends TimedParticleInput {
      * @returns {TimedParticleVectorInput} Reference to this instance.
      */
     add(value) {
-        if (isNaN(value) && !value instanceof Vector3) return this
-
-        this._valueOperations.push({ value, operation: (a, b) => a.add(b) })
-
-        return this
+        if (isNaN(value) && !(value instanceof Vector3)) return this;
+        this._valueOperations.push({ value, operation: (a, b) => a.add(b) });
+        return this;
     }
 
     /**
@@ -327,18 +377,16 @@ export class TimedParticleVectorInput extends TimedParticleInput {
 
     /**
      * Evaluates timed Vector3 expression for current frame.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables map.
+     * @param {Record<string, Object>} advancedVariables - Active advanced variables map.
      * @returns {Vector3} Computed Vector3 result.
      */
     _computeTimeValue(advancedVariables) {
-        let result = Vector3.build(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables))
-
-        if (!result.computeVariable()) return this.inputValue
+        let result = Vector3.build(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables));
+        if (!result.computeVariable()) return this.inputValue;
 
         for (let valueOperation of this._valueOperations) {
-            result = valueOperation.operation(result, valueOperation.value)
+            result = valueOperation.operation(result, valueOperation.value);
         }
-
-        return result
+        return result;
     }
 }

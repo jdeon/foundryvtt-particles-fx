@@ -1,5 +1,6 @@
-import { Utils, Vector3, sameStartKey } from "../utils/utils.js";
+import { Utils, Vector3 } from "../utils/utils.js";
 import { AdvancedVariable } from "./advancedVariable.js";
+import { ParticleInput } from "./particleInput.js";
 
 /**
  * Base particle representation handling position, lifetime, size, color, rotation, and rendering updates.
@@ -9,77 +10,40 @@ export class Particle {
     /** Sort layer for PixiJS rendering hierarchy. */
     static SORT_LAYER = 950
 
-    /**
-     * Interpolates value between start and end state over lifetime proportion.
-     * @param {number|Vector3} startValue - Value at start of lifetime.
-     * @param {number|Vector3|symbol} endValue - Value at end of lifetime.
-     * @param {number} lifetimeProportion - Ratio of elapsed lifetime (0 to 1).
-     * @returns {number|Vector3} Interpolated value.
-     */
-    static _computeValue(startValue, endValue, lifetimeProportion) {
-        if (endValue !== undefined && endValue !== sameStartKey && startValue !== endValue) {
-            if (startValue instanceof Vector3) {
-                endValue = Vector3.replaceSameAsStart(startValue, endValue)
-                if (endValue === startValue) {
-                    return startValue
-                }
-                return startValue.add(endValue.minus(startValue).multiply(lifetimeProportion))
-
-            } else {
-                return startValue + (endValue - startValue) * lifetimeProportion
-            }
-        }
-
-        return startValue
-    }
-
+    //TODO separate advancedVariables from option
     /**
      * Constructs a base Particle instance.
-     * @param {Record<string, AdvancedVariable>} advancedVariables - Map of active advanced variables.
-     * @param {PIXI.Sprite} sprite - PIXI.Sprite for particle rendering.
-     * @param {number} particleLifetime - Total lifetime in milliseconds.
-     * @param {number} elevationStart - Starting elevation in pixels.
-     * @param {ParticuleInput<Number>} riseRateStart - Starting rise rate input.
-     * @param {ParticuleInput<Number>} riseRateEnd - Ending rise rate input.
-     * @param {ParticuleInput<Vector3>} sizeStart - Starting size input.
-     * @param {ParticuleInput<Vector3>} sizeEnd - Ending size input.
-     * @param {ParticuleInput<Number>} particleRotationStart - Starting rotation input.
-     * @param {ParticuleInput<Number>} particleRotationEnd - Ending rotation input.
-     * @param {ParticuleInput<Vector3>} colorStart - Starting color input.
-     * @param {ParticuleInput<Vector3>} colorEnd - Ending color input.
-     * @param {ParticuleInput<Number>} alphaStart - Starting alpha input.
-     * @param {ParticuleInput<Number>} alphaEnd - Ending alpha input.
-     * @param {ParticuleInput<Number>} vibrationAmplitudeStart - Starting vibration amplitude.
-     * @param ParticuleInput<Number>} vibrationAmplitudeEnd - Ending vibration amplitude.
-     * @param {ParticuleInput<Number>} vibrationFrequencyStart - Starting vibration frequency.
-     * @param {ParticuleInput<Number>} vibrationFrequencyEnd - Ending vibration frequency.
-     * @param {boolean} isElevationManage - Whether 3D elevation is managed.
+     * @param {Object} options - Options object containing computed particle properties.
+     * @param {Record<string, AdvancedVariable>} [options.advancedVariables] - Active advanced variables.
+     * @param {PIXI.Sprite} options.sprite - Particle PIXI Sprite instance.
+     * @param {number} options.particleLifetime - Lifetime in milliseconds.
+     * @param {number} options.elevationStart - Elevation at spawning.
+     * @param {ParticleInput} options.particleRiseRate - Elevation rise rate keyframe list.
+     * @param {ParticleInput} options.particleSize - Particle size keyframe list.
+     * @param {ParticleInput} options.particleRotation - Particle rotation keyframe list.
+     * @param {ParticleInput} options.particleColor - Particle color keyframe list.
+     * @param {ParticleInput} options.alpha - Opacity alpha keyframe list.
+     * @param {ParticleInput} options.vibrationAmplitude - Vibration amplitude keyframe list.
+     * @param {ParticleInput} options.vibrationFrequency - Vibration frequency keyframe list.
+     * @param {boolean} options.isElevationManage - Whether elevation management is enabled.
      */
-    constructor(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage) {
-        this.advancedVariables = advancedVariables;
-        this.sprite = sprite;
-        this.positionVibrationLess = { x: sprite.x, y: sprite.y, z: isElevationManage ? elevationStart : 0 };
-        this.remainingTime = particleLifetime;
-        this.particleLifetime = particleLifetime;
-        this.riseRateStart = riseRateStart;
-        this.riseRateEnd = Utils.computeSameAsStart(riseRateStart, riseRateEnd);
-        this.sizeStart = sizeStart;
-        this.sizeEnd = Utils.computeSameAsStart(sizeStart, sizeEnd);
-        this.particleRotationStart = particleRotationStart;
-        this.particleRotationEnd = Utils.computeSameAsStart(particleRotationStart, particleRotationEnd);
-        this.colorStart = colorStart;
-        this.colorEnd = Utils.computeSameAsStart(colorStart, colorEnd);
-        this.alphaStart = alphaStart;
-        this.alphaEnd = Utils.computeSameAsStart(alphaStart, alphaEnd);
-        this.vibrationAmplitudeStart = vibrationAmplitudeStart
-        this.vibrationAmplitudeEnd = Utils.computeSameAsStart(vibrationAmplitudeStart, vibrationAmplitudeEnd);
-        this.vibrationFrequencyStart = vibrationFrequencyStart
-        this.vibrationFrequencyEnd = Utils.computeSameAsStart(vibrationFrequencyStart, vibrationFrequencyEnd);
+    constructor(options) {
+        this.advancedVariables = options.advancedVariables;
+        this.sprite = options.sprite;
+        this.positionVibrationLess = { x: options.sprite.x, y: options.sprite.y, z: options.isElevationManage ? options.elevationStart : 0 };
+        this.remainingTime = options.particleLifetime;
+        this.particleLifetime = options.particleLifetime;
+        this.particleRiseRate = options.particleRiseRate;
+        this.particleSize = options.particleSize;
+        this.particleRotation = options.particleRotation;
+        this.particleColor = options.particleColor;
+        this.alpha = options.alpha;
+        this.vibrationAmplitude = options.vibrationAmplitude;
+        this.vibrationFrequency = options.vibrationFrequency;
         this.timedParticule = this.advancedVariables && !!Object.values(this.advancedVariables).filter((item) => item.isTimedLinked).length
-        this.isElevationManage = isElevationManage;
+        this.isElevationManage = options.isElevationManage;
 
-        this.sprite.elevation = isElevationManage ? elevationStart / Utils.pixelOfDistanceConvertor() : undefined
+        this.sprite.elevation = options.isElevationManage ? options.elevationStart / Utils.pixelOfDistanceConvertor() : undefined
         this.sprite.sortLayer = Particle.SORT_LAYER
     }
 
@@ -107,23 +71,23 @@ export class Particle {
      */
     _manageLifetime(dt, lifetimeProportion) {
         //Particle change size
-        const currentSize = Particle._computeValue(this.sizeStart.getValue(this.advancedVariables), this.sizeEnd?.getValue(this.advancedVariables), lifetimeProportion)
+        const currentSize = this.particleSize.computeValue(lifetimeProportion, this.advancedVariables)
 
         const sizeFactor = Utils.handleElevationFactorForSize(this.isElevationManage ? this.positionVibrationLess.z : undefined)
         this.sprite.width = currentSize.x * sizeFactor
         this.sprite.height = currentSize.y * sizeFactor
 
-        let particleRotation = Particle._computeValue(this.particleRotationStart.getValue(this.advancedVariables), this.particleRotationEnd?.getValue(this.advancedVariables), lifetimeProportion);
+        let particleRotation = this.particleRotation.computeValue(lifetimeProportion, this.advancedVariables);
         this.sprite.angle = particleRotation
 
         //Particle change color
-        this.sprite.alpha = Particle._computeValue(this.alphaStart.getValue(this.advancedVariables), this.alphaEnd.getValue(this.advancedVariables), lifetimeProportion);
+        this.sprite.alpha = this.alpha.computeValue(lifetimeProportion, this.advancedVariables);
 
-        const actualColorVector = Particle._computeValue(this.colorStart.getValue(this.advancedVariables), this.colorEnd.getValue(this.advancedVariables), lifetimeProportion)
+        const actualColorVector = this.particleColor.computeValue(lifetimeProportion, this.advancedVariables)
         this.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x) / 255, Math.floor(actualColorVector.y) / 255, Math.floor(actualColorVector.z) / 255])
 
-        let vibrationAmplitudeCurrent = Particle._computeValue(this.vibrationAmplitudeStart.getValue(this.advancedVariables), this.vibrationAmplitudeEnd.getValue(this.advancedVariables), lifetimeProportion);
-        let vibrationFrequencyCurrent = Particle._computeValue(this.vibrationFrequencyStart.getValue(this.advancedVariables), this.vibrationFrequencyEnd.getValue(this.advancedVariables), lifetimeProportion);
+        let vibrationAmplitudeCurrent = this.vibrationAmplitude.computeValue(lifetimeProportion, this.advancedVariables);
+        let vibrationFrequencyCurrent = this.vibrationFrequency.computeValue(lifetimeProportion, this.advancedVariables);
         if (vibrationAmplitudeCurrent && vibrationFrequencyCurrent) {
             let timeFromStart = (this.particleLifetime - this.remainingTime)
             this.vibrationCurrent = vibrationAmplitudeCurrent * Math.sin(2 * Math.PI * (timeFromStart / vibrationFrequencyCurrent))
@@ -144,7 +108,7 @@ export class Particle {
             return 0
         }
 
-        const currentRiseRate = Particle._computeValue(this.riseRateStart.getValue(this.advancedVariables), this.riseRateEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const currentRiseRate = this.particleRiseRate.computeValue(lifetimeProportion, this.advancedVariables);
 
         return Utils.handleFraction(currentRiseRate)
     }
@@ -177,41 +141,16 @@ export class SprayingParticle extends Particle {
 
     /**
      * Constructs a SprayingParticle instance.
-     * @param {Record<string, AdvancedVariable>} advancedVariables - Map of active advanced variables.
-     * @param {PIXI.Sprite} sprite - PIXI.Sprite instance.
-     * @param {ParticleInput<Vector3|foundry.canvas.placeables.PlaceableObject>} target - Target object or position.
-     * @param {number} particleLifetime - Total lifetime in ms.
-     * @param {number} elevationStart - Starting elevation.
-     * @param {ParticleInput<Number>} riseRateStart - Starting rise rate input.
-     * @param {ParticleInput<Number>} riseRateEnd - Ending rise rate input.
-     * @param {ParticleInput<Number>} velocityStart - Starting velocity input.
-     * @param {ParticleInput<Number>} velocityEnd - Ending velocity input.
-     * @param {ParticleInput<Number>} angleStart - Starting angle input.
-     * @param {ParticleInput<Number>} angleEnd - Ending angle input.
-     * @param {ParticleInput<Vector3>} sizeStart - Starting size input.
-     * @param {ParticleInput<Vector3>} sizeEnd - Ending size input.
-     * @param {ParticleInput<Number>} particleRotationStart - Starting rotation input.
-     * @param {ParticleInput<Number>} particleRotationEnd - Ending rotation input.
-     * @param {ParticleInput<Vector3>} colorStart - Starting color input.
-     * @param {ParticleInput<Vector3>} colorEnd - Ending color input.
-     * @param {ParticleInput<Number>} alphaStart - Starting alpha input.
-     * @param {ParticleInput<Number>} alphaEnd - Ending alpha input.
-     * @param {ParticleInput<Number>} vibrationAmplitudeStart - Starting vibration amplitude.
-     * @param {ParticleInput<Number>} vibrationAmplitudeEnd - Ending vibration amplitude.
-     * @param {ParticleInput<Number>} vibrationFrequencyStart - Starting vibration frequency.
-     * @param {ParticleInput<Number>} vibrationFrequencyEnd - Ending vibration frequency.
-     * @param {boolean} isElevationManage - Whether 3D elevation is managed.
+     * @param {Object} options - Computed spraying particle options object.
+     * @param {Object} [options.target] - Target position object.
+     * @param {ParticleInput} options.particleVelocity - Velocity keyframe list.
+     * @param {ParticleInput} options.particleAngle - Angle keyframe list.
      */
-    constructor(advancedVariables, sprite, target, particleLifetime, elevationStart, riseRateStart, riseRateEnd, velocityStart, velocityEnd, angleStart, angleEnd,
-        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage) {
-        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage)
-
-        this.target = target;
-        this.velocityStart = velocityStart;
-        this.velocityEnd = Utils.computeSameAsStart(velocityStart, velocityEnd);
-        this.angleStart = angleStart;
-        this.angleEnd = Utils.computeSameAsStart(angleStart, angleEnd);
+    constructor(options) {
+        super(options);
+        this.target = options.target;
+        this.particleVelocity = options.particleVelocity;
+        this.particleAngle = options.particleAngle;
     }
 
     /**
@@ -228,7 +167,7 @@ export class SprayingParticle extends Particle {
         }
 
         //Particle move
-        const currentVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const currentVelocity = this.particleVelocity.computeValue(lifetimeProportion, this.advancedVariables);
         let angleRadiant = this.getDirection() * (Math.PI / 180)
 
         let horizontalMovement, verticalMovement
@@ -263,7 +202,7 @@ export class SprayingParticle extends Particle {
      * @returns {number} Direction in degrees.
      */
     getDirection() {
-        return Particle._computeValue(this.angleStart.getValue(this.advancedVariables), this.angleEnd.getValue(this.advancedVariables), this.getLifetimeProportion())
+        return this.particleAngle.computeValue(this.getLifetimeProportion(), this.advancedVariables)
     }
 }
 
@@ -273,37 +212,14 @@ export class SprayingParticle extends Particle {
 export class PathParticle extends Particle {
     /**
      * Constructs a PathParticle instance.
-     * @param {Record<string, AdvancedVariable>} advancedVariables - Map of active advanced variables.
-     * @param {PIXI.Sprite} sprite - PIXI.Sprite instance.
-     * @param {Path} path - Trajectory path object.
-     * @param {number} particleLifetime - Lifetime in ms.
-     * @param {number} elevationStart - Starting elevation.
-     * @param {ParticleInput<Number>} riseRateStart - Starting rise rate input.
-     * @param {ParticleInput<Number>} riseRateEnd - Ending rise rate input.
-     * @param {ParticleInput<Number>} velocityStart - Starting velocity input.
-     * @param {ParticleInput<Number>} velocityEnd - Ending velocity input.
-     * @param {ParticleInput<Vector3>} sizeStart - Starting size input.
-     * @param {ParticleInput<Vector3>} sizeEnd - Ending size input.
-     * @param {ParticleInput<Number>} particleRotationStart - Starting rotation input.
-     * @param {ParticleInput<Number>} particleRotationEnd - Ending rotation input.
-     * @param {ParticleInput<Vector3>} colorStart - Starting color input.
-     * @param {ParticleInput<Vector3>} colorEnd - Ending color input.
-     * @param {ParticleInput<Number>} alphaStart - Starting alpha input.
-     * @param {ParticleInput<Number>} alphaEnd - Ending alpha input.
-     * @param {ParticleInput<Number>} vibrationAmplitudeStart - Starting vibration amplitude.
-     * @param {ParticleInput<Number>} vibrationAmplitudeEnd - Ending vibration amplitude.
-     * @param {ParticleInput<Number>} vibrationFrequencyStart - Starting vibration frequency.
-     * @param {ParticleInput<Number>} vibrationFrequencyEnd - Ending vibration frequency.
-     * @param {boolean} isElevationManage - Whether 3D elevation is managed.
+     * @param {Object} options - Computed path particle options object.
+     * @param {Path} options.path - Trajectory path instance.
+     * @param {ParticleInput} options.particleVelocity - Velocity keyframe list.
      */
-    constructor(advancedVariables, sprite, path, particleLifetime, elevationStart, riseRateStart, riseRateEnd, velocityStart, velocityEnd,
-        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage) {
-        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage)
-
-        this.path = path;
-        this.velocityStart = velocityStart;
-        this.velocityEnd = Utils.computeSameAsStart(velocityStart, velocityEnd);
+    constructor(options) {
+        super(options);
+        this.path = options.path;
+        this.particleVelocity = options.particleVelocity;
         this.lengthPosition = 0;
     }
 
@@ -321,7 +237,7 @@ export class PathParticle extends Particle {
         }
 
         //Particle move
-        const currentVelocity = Particle._computeValue(this.velocityStart.getValue(this.advancedVariables), this.velocityEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const currentVelocity = this.particleVelocity.computeValue(lifetimeProportion, this.advancedVariables);
         this.lengthPosition += currentVelocity * dt / 1000;
         this.positionVibrationLess = this.path.getPointAtProportion(this.lengthPosition / this.path.totalLenght);
 
@@ -383,45 +299,20 @@ export class GravitingParticle extends Particle {
 
     /**
      * Constructs a GravitingParticle instance.
-     * @param {Record<string, AdvancedVariable>} advancedVariables - Map of active advanced variables.
-     * @param {PIXI.Sprite} sprite - PIXI.Sprite instance.
-     * @param {ParticleInput<Vector3|foundry.canvas.placeables.PlaceableObject>} source - Center source object or position.
-     * @param {number} particleLifetime - Total lifetime in ms.
-     * @param {number} elevationStart - Starting elevation.
-     * @param {number} axisElevationAngle - Track elevation angle.
-     * @param {ParticleInput<Number>} riseRateStart - Starting rise rate input.
-     * @param {ParticleInput<Number>} riseRateEnd - Ending rise rate input.
-     * @param {number} angleStart - Starting angle in degrees.
-     * @param {ParticleInput<Number>} angularVelocityStart - Starting angular velocity.
-     * @param {ParticleInput<Number>} angularVelocityEnd - Ending angular velocity.
-     * @param {ParticleInput<Number>} radiusStart - Starting radius input.
-     * @param {ParticleInput<Number>} radiusEnd - Ending radius input.
-     * @param {ParticleInput<Vector3>} sizeStart - Starting size input.
-     * @param {ParticleInput<Vector3>} sizeEnd - Ending size input.
-     * @param {ParticleInput<Number>} particleRotationStart - Starting rotation input.
-     * @param {ParticleInput<Number>} particleRotationEnd - Ending rotation input.
-     * @param {ParticleInput<Vector3>} colorStart - Starting color input.
-     * @param {ParticleInput<Vector3>} colorEnd - Ending color input.
-     * @param {ParticleInput<Number>} alphaStart - Starting alpha input.
-     * @param {ParticleInput<Number>} alphaEnd - Ending alpha input.
-     * @param {ParticleInput<Number>} vibrationAmplitudeStart - Starting vibration amplitude.
-     * @param {ParticleInput<Number>} vibrationAmplitudeEnd - Ending vibration amplitude.
-     * @param {ParticleInput<Number>} vibrationFrequencyStart - Starting vibration frequency.
-     * @param {ParticleInput<Number>} vibrationFrequencyEnd - Ending vibration frequency.
-     * @param {boolean} isElevationManage - Whether 3D elevation is managed.
+     * @param {Object} options - Computed gravitating particle options object.
+     * @param {Vector3|Object} [options.center] - Source center position.
+     * @param {number} [options.angle] - Current angle on track.
+     * @param {number} [options.axisElevationAngle] - Track elevation angle.
+     * @param {ParticleInput} [options.angularVelocity] - Angular velocity keyframe list.
+     * @param {ParticleInput} [options.particleRadius] - Radius keyframe list.
      */
-    constructor(advancedVariables, sprite, source, particleLifetime, elevationStart, axisElevationAngle, riseRateStart, riseRateEnd, angleStart, angularVelocityStart, angularVelocityEnd, radiusStart, radiusEnd,
-        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage) {
-        super(advancedVariables, sprite, particleLifetime, elevationStart, riseRateStart, riseRateEnd, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, colorStart, colorEnd, alphaStart, alphaEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, isElevationManage)
-
-        this.source = source
-        this.angle = angleStart                                                                         //Number 
-        this.axisElevationAngle = axisElevationAngle
-        this.angularVelocityStart = angularVelocityStart;                                               //ParticleInput<Number>
-        this.angularVelocityEnd = Utils.computeSameAsStart(angularVelocityStart, angularVelocityEnd);   //ParticleInput<Number>
-        this.radiusStart = radiusStart;                                                                 //ParticleInput<Number>
-        this.radiusEnd = Utils.computeSameAsStart(radiusStart, radiusEnd);                              //ParticleInput<Number>
+    constructor(options) {
+        super(options);
+        this.source = options.center ?? options.source;
+        this.angle = options.angle ?? options.angleStart;
+        this.axisElevationAngle = options.axisElevationAngle;
+        this.particleVelocity = options.angularVelocity ?? options.particleVelocity;
+        this.particleRadius = options.particleRadius;
     }
 
     /**
@@ -446,11 +337,11 @@ export class GravitingParticle extends Particle {
         }
 
         //Particle move
-        const currentVelocity = Particle._computeValue(this.angularVelocityStart.getValue(this.advancedVariables), this.angularVelocityEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const currentVelocity = this.particleVelocity.computeValue(lifetimeProportion, this.advancedVariables);
         this.angle += currentVelocity * dt / 1000
         const angleRadiant = this.angle * (Math.PI / 180);
 
-        const currentRadius = Particle._computeValue(this.radiusStart.getValue(this.advancedVariables), this.radiusEnd.getValue(this.advancedVariables), lifetimeProportion);
+        const currentRadius = this.particleRadius.computeValue(lifetimeProportion, this.advancedVariables);
         const currentRiseRate = this._computeRiseRate(lifetimeProportion);
 
         this.positionVibrationLess = GravitingParticle.computeParticlePosition(source, currentRadius, angleRadiant, currentRiseRate, this.isElevationManage ? this.axisElevationAngle : 0)
