@@ -5,6 +5,8 @@ import { Utils, Vector3 } from "../utils/utils.js"
  */
 export class ParticleInput {
 
+    //TODO particleInput.build is use with unsync param number
+
     /**
      * Factory method creating appropriate ParticleInput instance based on input command and variables.
      * @param {Array<{time:number,value:number|Vector3|string, inputCmd:string|Vector3}>} inputValue - Keyframe list property object { list: [...] }
@@ -190,8 +192,8 @@ export class FrameParticleInput {
      * @returns {FrameParticleInput} Reference to this instance.
      */
     add(value) {
-        if (!this.list) return this;
-        for (const item of this.list) {
+        if (!this.values) return this;
+        for (const item of this.values) {
             if (item.value && typeof item.value.add === 'function') {
                 item.value.add(value);
             } else if (typeof item.value === 'number') {
@@ -207,8 +209,8 @@ export class FrameParticleInput {
      * @returns {FrameParticleInput} Reference to this instance.
      */
     multiply(value) {
-        if (!this.list) return this;
-        for (const item of this.list) {
+        if (!this.values) return this;
+        for (const item of this.values) {
             if (item.value && typeof item.value.multiply === 'function') {
                 item.value.multiply(value);
             } else if (typeof item.value === 'number') {
@@ -223,11 +225,11 @@ export class FrameParticleInput {
      * @returns {FrameParticleInput} Cloned instance.
      */
     clone() {
-        const newList = this.list.map(item => ({
+        const newValues = this.values.map(item => ({
             time: item.time,
             value: item.value && typeof item.value.clone === 'function' ? item.value.clone() : item.value
         }));
-        return new FrameParticleInput(newList);
+        return new FrameParticleInput(newValues);
     }
 }
 

@@ -325,7 +325,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
     static build(input, subParticleTemplates) {
         return new MissileParticleTemplate(
             input.source,
-            input.targets,
+            input.target,
             input.pathType,
             input.positionSpawning,
             input.particleVelocity,
