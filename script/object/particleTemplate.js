@@ -566,7 +566,7 @@ export class GravitingParticleTemplate extends ParticleTemplate {
      */
     static build(input) {
         return new GravitingParticleTemplate(input.source, input.target, input.particleAngle,
-            input.particleAxisElevationAngle, input.angularVelocity, input.particleRiseRate,
+            input.particleAxisElevationAngle, input.particleVelocity, input.particleRiseRate,
             input.particleRadius, input.particleSize, input.particleRotation, input.particleLifetime,
             input.particleShape, input.particleColor, input.alpha,
             input.vibrationAmplitude, input.vibrationFrequency, input.onlyEmitterFollow,
@@ -598,12 +598,13 @@ export class GravitingParticleTemplate extends ParticleTemplate {
     constructor(source, target, particleAngle, particleAxisElevationAngle, angularVelocity, particleRiseRate, particleRadius, particleSize, particleRotation,
         particleLifetime, particleShape, particleColor, alpha, vibrationAmplitude, vibrationFrequency, onlyEmitterFollow, freezeOnPause, next, advanced) {
 
-        super(source, target, particleAxisElevationAngle, particleRiseRate, particleSize, particleRotation,
-            particleLifetime, particleShape, particleColor, alpha, vibrationAmplitude, vibrationFrequency, freezeOnPause, next, advanced);
+        super(source, target, particleSize, particleRotation, particleLifetime, particleShape, particleColor,
+            alpha, particleRiseRate, vibrationAmplitude, vibrationFrequency, freezeOnPause, next, advanced);
 
+        this.particleAngle = particleAngle;
         this.axisElevationAngle = this.isElevationManage ? particleAxisElevationAngle : undefined;
         this.angularVelocity = angularVelocity;
-        this.radius = particleRadius;
+        this.particleRadius = particleRadius;
         this.onlyEmitterFollow = onlyEmitterFollow;
     }
 
@@ -613,14 +614,14 @@ export class GravitingParticleTemplate extends ParticleTemplate {
      */
     generateParticles() {
         const advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
+        const particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable, true)
 
-        const source = Utils.getRandomValueFrom(this.source, advancedVariable)
+        const source = particleProperties.source.computeValue(0, advancedVariable)
         this.currentSourcePosition = Utils.getSourcePosition(source, this.isElevationManage)
 
-        const target = Utils.getRandomValueFrom(this.target, advancedVariable)
+        const target = particleProperties.target.computeValue(0, advancedVariable)
         const targetPosition = Utils.getSourcePosition(target, this.isElevationManage)
 
-        let particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable, true)
 
         let angleOriginValue
         let axisElevationAngle
