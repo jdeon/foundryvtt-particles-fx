@@ -42,7 +42,8 @@ const FIXED_PARTICLE_PARAMETER = [
     "freezeOnPause",
     "subParticles",
     "advanced",
-    "next"
+    "next",
+    "_nbEmitterSibling"
 ]
 
 /**
