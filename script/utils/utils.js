@@ -29,6 +29,7 @@ const FIXED_PARTICLE_PARAMETER = [
     "type",
     "target",
     "source",
+    "emissionDuration",
     "particleShape",
     "spawningFrequence",
     "spawningNumber",
@@ -386,7 +387,7 @@ export class Utils {
 
         for (const startKey of startKeys) {
             const baseKey = startKey.slice(0, -5);
-            if (result[baseKey]) {
+            if (result[baseKey] !== undefined) {
                 continue;
             }
 
@@ -516,6 +517,11 @@ export class Utils {
         let defaultPropertyKey = Object.keys(defaultInput)
 
         for (const key of defaultPropertyKey) {
+            //If the property has a start or end suffix, it means it's a start or end property, so we skip it
+            if (prioritizeInput[`${key}Start`] && prioritizeInput[`${key}End`]) {
+                continue
+            }
+
             let prioritizeProperty = prioritizeInput[key]
 
             if (prioritizeProperty === undefined) {

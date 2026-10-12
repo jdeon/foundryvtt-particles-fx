@@ -53,6 +53,8 @@ export const defaultMotionTemplate = () => {
         particleRiseRateStart: 0,
         particleRiseRateEnd: 0,
         particleAngle: '0_360',
+        particleAngleStart: '0_360',
+        particleAngleEnd: '0_360',
         particleRadiusStart: '100%',
         particleRadiusEnd: '50%',
         particleSizeStart: 10,
@@ -112,7 +114,7 @@ const explosionMotionTemplate = {
     particleLifetime: 2000,
     particleVelocityStart: '400%_500%',
     particleVelocityEnd: '0%_25%',
-    particleAngleStart: '0_360',
+    particleAngle: '0_360',
     particleSizeStart: 10,
     particleSizeEnd: '25_50',
     alphaStart: 1,
@@ -127,7 +129,7 @@ const breathMotionTemplate = {
     particleLifetime: 4000,
     particleVelocityStart: '200%_300%',
     particleVelocityEnd: '10%_25%',
-    particleAngleStart: '-30_30',
+    particleAngle: '-30_30',
     particleSizeStart: 10,
     particleSizeEnd: '10_25',
     alphaStart: 1,
@@ -141,12 +143,12 @@ const rayMotionTemplate = {
     spawningFrequence: 1,
     maxParticles: 10000,
     particleLifetime: 1000,
-    particleVelocityStart: '400%_500%',
-    particleAngleStart: 0,
-    particleSizeStart: { x: '50%', y: '15%' },
-    alphaStart: .25,
-    vibrationAmplitudeStart: '0_10',
-    vibrationFrequencyStart: '0_100'
+    particleVelocity: '400%_500%',
+    particleAngle: 0,
+    particleSize: { x: '50%', y: '15%' },
+    alpha: .25,
+    vibrationAmplitude: '0_10',
+    vibrationFrequency: '0_100'
 }
 
 /** Motion template for sonar / wave effect. */
@@ -155,9 +157,9 @@ const sonarMotionTemplate = {
     spawningNumber: 2000,
     maxParticles: 20000,
     particleLifetime: 4000,
-    particleSizeStart: 5,
-    particleVelocityStart: '125%',
-    alphaStart: .5,
+    particleSize: 5,
+    particleVelocity: '125%',
+    alpha: .5,
     onlyEmitterFollow: true
 }
 
@@ -170,8 +172,8 @@ const trailMissileMotionTemlate = {
     spawningFrequence: 5,
     spawningNumber: 1,
     maxParticles: 1000,
-    particleSizeStart: { x: '50%', y: '15%' },
-    alphaStart: 1,
+    particleSize: { x: '50%', y: '15%' },
+    alpha: 1,
     subParticles: {
         type: "Spraying",
         positionSpawning: { x: 0, y: '-5%_5%', z: 0 },
@@ -201,7 +203,7 @@ const growingMissileMotionTemlate = {
     subParticles: {
         type: "Graviting",
         particleLifetime: 2000,
-        particleAngleStart: '0_360',
+        particleAngle: '0_360',
         particleRadiusStart: '10%',
         particleRadiusEnd: '50%',
     }
@@ -219,7 +221,7 @@ const vortexMotionTemplate = {
     particleLifetime: [1000, 1500],
     particleVelocityStart: 150,
     particleVelocityEnd: 50,
-    particleAngleStart: '0_360',
+    particleAngle: '0_360',
     particleRadiusStart: '100%',
     particleRadiusEnd: '25%',
     particleSizeStart: 10,
@@ -235,7 +237,7 @@ const auraMotionTemplate = {
     particleLifetime: [1000, 1500],
     particleVelocityStart: '25_50',
     particleVelocityEnd: '0_10',
-    particleAngleStart: '0_360',
+    particleAngle: '0_360',
     particleRadiusStart: '50%',
     particleRadiusEnd: '75%_150%',
     particleSizeStart: 10,
@@ -250,11 +252,11 @@ const satelliteMotionTemplate = {
     spawningFrequence: 1000,
     maxParticles: 4,
     particleLifetime: 8000,
-    particleVelocityStart: '90',
-    particleAngleStart: 0,
-    particleRadiusStart: '100%',
-    particleSizeStart: 50,
-    alphaStart: .9,
+    particleVelocity: '90',
+    particleAngle: 0,
+    particleRadius: '100%',
+    particleSize: 50,
+    alpha: .9,
 }
 
 /** Motion template for slash effect. */
@@ -263,13 +265,13 @@ const slashMotionTemplate = {
     maxParticles: 500,
     emissionDuration: 250,
     particleLifetime: 500,
-    particleVelocityStart: 180,
-    particleAngleStart: -45,
-    particleRadiusStart: ['50%', '75%', '100%'],
-    particleSizeStart: { x: 5, y: 25 },
+    particleVelocity: 180,
+    particleAngle: -45,
+    particleRadius: ['50%', '75%', '100%'],
+    particleSize: { x: 5, y: 25 },
     particleRotationStart: -45,
     particleRotationEnd: 45,
-    alphaStart: .5
+    alpha: .5
 }
 
 /** Motion template for atom / orbital effect. */
@@ -277,12 +279,12 @@ const atomMotionTemplate = {
     spawningFrequence: 25,
     maxParticles: 250,
     particleLifetime: 60000,
-    particleVelocityStart: 120,
-    particleRiseRateStart: [-Math.sqrt(2.75 / 4), 0, Math.sqrt(3.25 / 4)],
-    particleAngleStart: 0,
-    particleRadiusStart: '75%',
-    particleSizeStart: [2, 2, 2, 2, 2, [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 10]],
-    alphaStart: .9,
+    particleVelocity: 120,
+    particleRiseRate: [-Math.sqrt(2.75 / 4), 0, Math.sqrt(3.25 / 4)],
+    particleAngle: 0,
+    particleRadius: '75%',
+    particleSize: [2, 2, 2, 2, 2, [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 10]],
+    alpha: .9,
 }
 
 /** Motion template for flash / starburst effect. */
@@ -290,9 +292,9 @@ const flashMotionTemplate = {
     particleShape: "STAR",
     particleLifetime: [100, 250, 500],
     positionSpawning: { x: "-200%_200%", y: "-200%_200%", z: 0 },
-    particleVelocityStart: '0',
-    particleAngleStart: "0_360",
-    particleRadiusStart: '0%_200%'
+    particleVelocity: '0',
+    particleAngle: "0_360",
+    particleRadius: '0%_200%'
 }
 
 /**
