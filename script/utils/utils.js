@@ -309,18 +309,6 @@ export class Utils {
     }
 
     /**
-     * Evaluates random input and wraps it in a ParticleInput instance.
-     * @param {number|string|Object|Array} inValue - Raw input property.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined>} advancedVariables - Active advanced variables.
-     * @returns {ParticleInput} Built ParticleInput instance.
-     */
-    static getRandomParticuleInputFrom(inValue, advancedVariables) {
-        const computeValue = Utils.getRandomValueFrom(inValue, advancedVariables)
-
-        return ParticleInput.build(computeValue, inValue, advancedVariables)
-    }
-
-    /**
      * Replaces variable mustache tags `{{varName}}` in strings with calculated values.
      * @param {string|Object} inValue - String or object containing variable tags.
      * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined>} advancedVariables - Map of evaluated advanced variables.
@@ -397,7 +385,7 @@ export class Utils {
             };
 
             const endKey = baseKey + 'End';
-            if (input[endKey]) {
+            if (input[endKey] !== undefined) {
                 result[baseKey].list.push({ time: 1, value: input[endKey] });
             }
         }
