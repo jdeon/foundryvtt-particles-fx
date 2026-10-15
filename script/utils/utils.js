@@ -431,7 +431,7 @@ export class Utils {
 
         if (inputMode) {
             for (const key of inKey) {
-                result[key] = ParticleInput.build(result[key], inValue[key], advancedVariables);
+                result[key] = ParticleInput.build(key, result[key], inValue[key], advancedVariables);
             }
         }
 
@@ -440,12 +440,13 @@ export class Utils {
 
     /**
     * Handles nested array selection and resolves random element values.
+    * @param {string} keyProperty - The key of the property.
     * @param {Array<number|string|Vector3|Object|Array>} inArray - Array of values or sub-arrays.
     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} advancedVariables - Advanced variables map.
     * @param {boolean} [inputMode] - If true, wraps values in ParticleInputs.
     * @returns {Array<number|string|Vector3|Object>} Resolved array of values.
     */
-    static getArrayRandomValueFrom(inArray, advancedVariables, inputMode) {
+    static getArrayRandomValueFrom(keyProperty, inArray, advancedVariables, inputMode) {
         if (!Array.isArray(inArray)) return
 
         const containSubArray = inArray.filter((item) => Array.isArray(item));
@@ -466,7 +467,7 @@ export class Utils {
 
         if (inputMode) {
             for (let i = 0; i < result.length; i++) {
-                result[i] = ParticleInput.build(result[i], arrayToHandle[i], advancedVariables);
+                result[i] = ParticleInput.build(`${keyProperty}[${i}]`, result[i], arrayToHandle[i], advancedVariables);
             }
         }
 

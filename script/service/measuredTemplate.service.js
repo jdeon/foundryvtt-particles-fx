@@ -276,7 +276,7 @@ function mapToInputParticle(result) {
     const keys = Object.keys(result)
 
     for (let key of keys) {
-        result[key] = ParticleInput.build(result[key])
+        result[key] = ParticleInput.build(key, result[key])
     }
 
     return result

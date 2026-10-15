@@ -7,18 +7,19 @@ export class ParticleInput {
 
     /**
      * Factory method creating appropriate ParticleInput instance based on input command and variables.
+     * @param {string} propertyKey - The key of the property.
      * @param {{list:Array<{time:number,value:number|Vector3|string}>}} inputValues - Keyframe list property object { list: [...] }
      * @param {{list:Array<{time:number,value:Vector3|string}>}} inputQueries - String to extract the value from the input
      * @param {Record<string, number|string|Vector3|Object|Array|Function>} [advancedVariables] - Active advanced variables.
      * @returns {ParticleInput} Instantiated ParticleInput instance.
      */
-    static build(inputValues, inputQueries, advancedVariables) {
+    static build(propertyKey, inputValues, inputQueries, advancedVariables) {
         if (inputValues instanceof ParticleInput) {
             return inputValues;
         }
 
         if (!inputValues?.list) {
-            return new ParticleInput(inputValues)
+            return new ParticleInput(propertyKey, inputValues)
         }
 
         let isTimedLinked = (inputQueries?.list ?? []).some(item => {
@@ -36,15 +37,16 @@ export class ParticleInput {
 
 
         if (isTimedLinked) {
-            //TODO inputValue should have only one item for timed particle input
-
+            if (inputValues.list.length > 1) {
+                throw new Error(`Particule FX | ${propertyKey} : Timed input should only have one timed query. Start and End suffix is not allowed.`);
+            }
             const initialValue = inputValues.list[0].value;
             if (initialValue instanceof Vector3) {
-                return new TimedParticleVectorInput(initialValue, inputQueries.list[0].value)
+                return new TimedParticleVectorInput(propertyKey, initialValue, inputQueries.list[0].value)
             }
-            return new TimedParticleInput(initialValue, inputQueries.list[0].value)
+            return new TimedParticleInput(propertyKey, initialValue, inputQueries.list[0].value)
         } else {
-            return new FrameParticleInput(inputValues.list)
+            return new FrameParticleInput(propertyKey, inputValues.list)
         }
     }
 
@@ -74,9 +76,11 @@ export class ParticleInput {
 
     /**
      * Constructs a ParticleInput instance managing a keyframe list.
+     * @param {string} propertyKey - The key of the property.
      * @param {number|Vector3|string} value
     */
-    constructor(value) {
+    constructor(propertyKey, value) {
+        this.propertyKey = propertyKey;
         this.currentValue = value;
     }
 
@@ -126,7 +130,7 @@ export class ParticleInput {
      * @returns {ParticleInput} Cloned instance.
      */
     clone() {
-        return new ParticleInput(this.currentValue);
+        return new ParticleInput(this.propertyKey, this.currentValue);
     }
 }
 
@@ -134,11 +138,12 @@ export class ParticleInput {
 export class FrameParticleInput extends ParticleInput {
     /**
      * Constructs a ParticleInput instance managing a keyframe list.
+     * @param {string} propertyKey - The key of the property.
      * @param {Array<{time:number,value:number|Vector3|string>}} values - Keyframes list array or object.
     */
-    constructor(values) {
+    constructor(propertyKey, values) {
         const orderedValues = values.sort((a, b) => a.time - b.time);
-        super(orderedValues[0].value);
+        super(propertyKey, orderedValues[0].value);
         this.values = orderedValues;
         this.lifetimeProportion = 0;
     }
@@ -175,7 +180,7 @@ export class FrameParticleInput extends ParticleInput {
 
         if (v0 instanceof Vector3) {
             if (!v1 instanceof Vector3) {
-                //TODO throw an error, the list is not composed of Vector3
+                throw new Error(`Particule FX | ${this.propertyKey} : Keyframe only partially composed of Vector3`);
             }
             this.currentValue = v0.add(v1.minus(v0).multiply(segmentProportion));
         } else if (typeof v0 === 'number' && typeof v1 === 'number') {
@@ -230,7 +235,7 @@ export class FrameParticleInput extends ParticleInput {
             time: item.time,
             value: item.value && typeof item.value.clone === 'function' ? item.value.clone() : item.value
         }));
-        return new FrameParticleInput(newValues);
+        return new FrameParticleInput(this.propertyKey, newValues);
     }
 }
 
@@ -242,11 +247,12 @@ export class TimedParticleInput extends ParticleInput {
 
     /**
      * Constructs a TimedParticleValueInput instance.
+     * @param {string} propertyKey - The key of the property.
      * @param {number|string} value - Initial value.
      * @param {string} inputQuery - Input query string.
      */
-    constructor(value, inputQuery) {
-        super(value);
+    constructor(propertyKey, value, inputQuery) {
+        super(propertyKey, value);
         this.initialValue = value
         this.inputQuery = inputQuery
         this._valueOperations = []
@@ -294,7 +300,7 @@ export class TimedParticleInput extends ParticleInput {
      * @returns {TimedParticleInput} Cloned instance.
      */
     clone() {
-        const result = new TimedParticleValueInput(this.values);
+        const result = new TimedParticleValueInput(this.propertyKey, this.values);
         result._valueOperations.push(...this._valueOperations);
         return result;
     }
@@ -321,12 +327,13 @@ export class TimedParticleInput extends ParticleInput {
 export class TimedParticleVectorInput extends TimedParticleInput {
 
     /**
-     * Constructs a TimedParticleVectorInput instance.     
+     * Constructs a TimedParticleVectorInput instance.
+     * @param {string} propertyKey - The key of the property.
      * @param {Vector3} value - Initial value.
      * @param {string|Vector3} inputQuery - Input query string.
      */
-    constructor(value, inputQuery) {
-        super(value, inputQuery);
+    constructor(propertyKey, value, inputQuery) {
+        super(propertyKey, value, inputQuery);
     }
 
     /**
@@ -356,7 +363,7 @@ export class TimedParticleVectorInput extends TimedParticleInput {
      * @returns {TimedParticleVectorInput} Cloned instance.
      */
     clone() {
-        const result = new TimedParticleVectorInput(Vector3.build(this.inputValue), this.inputQuery);
+        const result = new TimedParticleVectorInput(this.propertyKey, Vector3.build(this.inputValue), this.inputQuery);
         result._valueOperations.push(...this._valueOperations)
         return result;
     }

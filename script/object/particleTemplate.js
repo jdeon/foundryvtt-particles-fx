@@ -412,7 +412,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
         if (this.currentSourcePosition === undefined) return
 
-        let targetsPosition = Utils.getArrayRandomValueFrom(this.targets)
+        let targetsPosition = Utils.getArrayRandomValueFrom('targets', this.targets)
             .map((item) => Utils.getSourcePosition(item, this.isElevationManage));
 
         const pathPositions = [this.currentSourcePosition, ...targetsPosition];
