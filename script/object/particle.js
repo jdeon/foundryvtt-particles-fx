@@ -10,40 +10,39 @@ export class Particle {
     /** Sort layer for PixiJS rendering hierarchy. */
     static SORT_LAYER = 950
 
-    //TODO separate advancedVariables from option
     /**
      * Constructs a base Particle instance.
-     * @param {Object} options - Options object containing computed particle properties.
-     * @param {Record<string, AdvancedVariable>} [options.advancedVariables] - Active advanced variables.
-     * @param {PIXI.Sprite} options.sprite - Particle PIXI Sprite instance.
-     * @param {number} options.particleLifetime - Lifetime in milliseconds.
-     * @param {number} options.elevationStart - Elevation at spawning.
-     * @param {ParticleInput} options.particleRiseRate - Elevation rise rate keyframe list.
-     * @param {ParticleInput} options.particleSize - Particle size keyframe list.
-     * @param {ParticleInput} options.particleRotation - Particle rotation keyframe list.
-     * @param {ParticleInput} options.particleColor - Particle color keyframe list.
-     * @param {ParticleInput} options.alpha - Opacity alpha keyframe list.
-     * @param {ParticleInput} options.vibrationAmplitude - Vibration amplitude keyframe list.
-     * @param {ParticleInput} options.vibrationFrequency - Vibration frequency keyframe list.
-     * @param {boolean} options.isElevationManage - Whether elevation management is enabled.
+     * @param {Object} particleProperties - particleProperties object containing computed particle properties.
+     * @param {PIXI.Sprite} particleProperties.sprite - Particle PIXI Sprite instance.
+     * @param {number} particleProperties.particleLifetime - Lifetime in milliseconds.
+     * @param {number} particleProperties.elevationStart - Elevation at spawning.
+     * @param {ParticleInput} particleProperties.particleRiseRate - Elevation rise rate keyframe list.
+     * @param {ParticleInput} particleProperties.particleSize - Particle size keyframe list.
+     * @param {ParticleInput} particleProperties.particleRotation - Particle rotation keyframe list.
+     * @param {ParticleInput} particleProperties.particleColor - Particle color keyframe list.
+     * @param {ParticleInput} particleProperties.alpha - Opacity alpha keyframe list.
+     * @param {ParticleInput} particleProperties.vibrationAmplitude - Vibration amplitude keyframe list.
+     * @param {ParticleInput} particleProperties.vibrationFrequency - Vibration frequency keyframe list.
+     * @param {Record<string, AdvancedVariable>} advancedVariables - Active advanced variables
+     * @param {boolean} isElevationManage - Whether elevation management is enabled.
      */
-    constructor(options) {
-        this.advancedVariables = options.advancedVariables;
-        this.sprite = options.sprite;
-        this.positionVibrationLess = { x: options.sprite.x, y: options.sprite.y, z: options.isElevationManage ? options.elevationStart : 0 };
-        this.remainingTime = options.particleLifetime;
-        this.particleLifetime = options.particleLifetime;
-        this.particleRiseRate = options.particleRiseRate;
-        this.particleSize = options.particleSize;
-        this.particleRotation = options.particleRotation;
-        this.particleColor = options.particleColor;
-        this.alpha = options.alpha;
-        this.vibrationAmplitude = options.vibrationAmplitude;
-        this.vibrationFrequency = options.vibrationFrequency;
+    constructor(particleProperties, advancedVariables, isElevationManage) {
+        this.advancedVariables = advancedVariables;
+        this.sprite = particleProperties.sprite;
+        this.positionVibrationLess = { x: particleProperties.sprite.x, y: particleProperties.sprite.y, z: particleProperties.isElevationManage ? particleProperties.elevationStart : 0 };
+        this.remainingTime = particleProperties.particleLifetime;
+        this.particleLifetime = particleProperties.particleLifetime;
+        this.particleRiseRate = particleProperties.particleRiseRate;
+        this.particleSize = particleProperties.particleSize;
+        this.particleRotation = particleProperties.particleRotation;
+        this.particleColor = particleProperties.particleColor;
+        this.alpha = particleProperties.alpha;
+        this.vibrationAmplitude = particleProperties.vibrationAmplitude;
+        this.vibrationFrequency = particleProperties.vibrationFrequency;
         this.timedParticule = this.advancedVariables && !!Object.values(this.advancedVariables).filter((item) => item.isTimedLinked).length
-        this.isElevationManage = options.isElevationManage;
+        this.isElevationManage = isElevationManage;
 
-        this.sprite.elevation = options.isElevationManage ? options.elevationStart / Utils.pixelOfDistanceConvertor() : undefined
+        this.sprite.elevation = isElevationManage ? particleProperties.elevationStart / Utils.pixelOfDistanceConvertor() : undefined
         this.sprite.sortLayer = Particle.SORT_LAYER
     }
 
@@ -141,16 +140,18 @@ export class SprayingParticle extends Particle {
 
     /**
      * Constructs a SprayingParticle instance.
-     * @param {Object} options - Computed spraying particle options object.
-     * @param {Object} [options.target] - Target position object.
-     * @param {ParticleInput} options.particleVelocity - Velocity keyframe list.
-     * @param {ParticleInput} options.particleAngle - Angle keyframe list.
+     * @param {Object} particleProperties - Computed spraying particle particleProperties object.
+     * @param {Object} [particleProperties.target] - Target position object.
+     * @param {ParticleInput} particleProperties.particleVelocity - Velocity keyframe list.
+     * @param {ParticleInput} particleProperties.particleAngle - Angle keyframe list.
+     * @param {Record<string, AdvancedVariable>} advancedVariables - Active advanced variables
+     * @param {boolean} isElevationManage - Whether elevation management is enabled.
      */
-    constructor(options) {
-        super(options);
-        this.target = options.target;
-        this.particleVelocity = options.particleVelocity;
-        this.particleAngle = options.particleAngle;
+    constructor(particleProperties, advancedVariables, isElevationManage) {
+        super(particleProperties, advancedVariables, isElevationManage);
+        this.target = particleProperties.target;
+        this.particleVelocity = particleProperties.particleVelocity;
+        this.particleAngle = particleProperties.particleAngle;
     }
 
     /**
@@ -212,14 +213,16 @@ export class SprayingParticle extends Particle {
 export class PathParticle extends Particle {
     /**
      * Constructs a PathParticle instance.
-     * @param {Object} options - Computed path particle options object.
-     * @param {Path} options.path - Trajectory path instance.
-     * @param {ParticleInput} options.particleVelocity - Velocity keyframe list.
+     * @param {Object} particleProperties - Computed path particle particleProperties object.
+     * @param {Path} particleProperties.path - Trajectory path instance.
+     * @param {ParticleInput} particleProperties.particleVelocity - Velocity keyframe list.
+     * @param {Record<string, AdvancedVariable>} advancedVariables - Active advanced variables
+     * @param {boolean} isElevationManage - Whether elevation management is enabled.
      */
-    constructor(options) {
-        super(options);
-        this.path = options.path;
-        this.particleVelocity = options.particleVelocity;
+    constructor(particleProperties, advancedVariables, isElevationManage) {
+        super(particleProperties, advancedVariables, isElevationManage);
+        this.path = particleProperties.path;
+        this.particleVelocity = particleProperties.particleVelocity;
         this.lengthPosition = 0;
     }
 
@@ -299,20 +302,22 @@ export class GravitingParticle extends Particle {
 
     /**
      * Constructs a GravitingParticle instance.
-     * @param {Object} options - Computed gravitating particle options object.
-     * @param {Vector3|Object} [options.center] - Source center position.
-     * @param {number} [options.angle] - Current angle on track.
-     * @param {number} [options.axisElevationAngle] - Track elevation angle.
-     * @param {ParticleInput} [options.angularVelocity] - Angular velocity keyframe list.
-     * @param {ParticleInput} [options.particleRadius] - Radius keyframe list.
+     * @param {Object} particleProperties - Computed gravitating particle particleProperties object.
+     * @param {Vector3|Object} [particleProperties.center] - Source center position.
+     * @param {number} [particleProperties.angle] - Current angle on track.
+     * @param {number} [particleProperties.axisElevationAngle] - Track elevation angle.
+     * @param {ParticleInput} [particleProperties.angularVelocity] - Angular velocity keyframe list.
+     * @param {ParticleInput} [particleProperties.particleRadius] - Radius keyframe list.
+     * @param {Record<string, AdvancedVariable>} advancedVariables - Active advanced variables
+     * @param {boolean} isElevationManage - Whether elevation management is enabled.
      */
-    constructor(options) {
-        super(options);
-        this.source = options.center ?? options.source;
-        this.angle = options.angle ?? options.angleStart;
-        this.axisElevationAngle = options.axisElevationAngle;
-        this.particleVelocity = options.angularVelocity ?? options.particleVelocity;
-        this.particleRadius = options.particleRadius;
+    constructor(particleProperties, advancedVariables, isElevationManage) {
+        super(particleProperties, advancedVariables, isElevationManage);
+        this.source = particleProperties.center ?? particleProperties.source;
+        this.angle = particleProperties.angle ?? particleProperties.angleStart;
+        this.axisElevationAngle = particleProperties.axisElevationAngle;
+        this.particleVelocity = particleProperties.angularVelocity ?? particleProperties.particleVelocity;
+        this.particleRadius = particleProperties.particleRadius;
     }
 
     /**

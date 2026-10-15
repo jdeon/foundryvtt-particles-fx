@@ -1,8 +1,6 @@
 import { ParticleInput } from "../object/particleInput.js"
 import { Utils, Vector3 } from "../utils/utils.js"
 
-//TODO remove start and end suffix in this file
-
 /**
  * Generates emission properties for a circular measured template.
  * @param {number} radius - Radius in grid distance units.

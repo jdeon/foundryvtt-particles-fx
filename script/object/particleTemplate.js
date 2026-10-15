@@ -107,7 +107,6 @@ export class ParticleTemplate {
         const sprite = this.initSprite(this.currentSourcePosition, startSizeInput, angleStartInput, colorStartInput);
 
         return new Particle({
-            advancedVariables: advancedVariable,
             sprite,
             particleLifetime: Utils.getRandomValueFrom(this.particleLifetime, advancedVariable),
             elevationStart: this.currentSourcePosition.z,
@@ -117,9 +116,10 @@ export class ParticleTemplate {
             particleColor: particleProperties.particleColor,
             alpha: particleProperties.alpha,
             vibrationAmplitude: particleProperties.vibrationAmplitude,
-            vibrationFrequency: particleProperties.vibrationFrequency,
-            isElevationManage: this.isElevationManage
-        });
+            vibrationFrequency: particleProperties.vibrationFrequency
+        },
+            advancedVariable,
+            this.isElevationManage);
     }
 
     /**
@@ -283,7 +283,6 @@ export class SprayingParticleTemplate extends ParticleTemplate {
         const targetAngleDeg = targetAngleDirection * 180 / Math.PI;
 
         return new SprayingParticle({
-            advancedVariables: advancedVariable,
             sprite,
             target,
             particleLifetime,
@@ -296,9 +295,11 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             particleColor: particleProperties.particleColor,
             alpha: particleProperties.alpha,
             vibrationAmplitude: particleProperties.vibrationAmplitude,
-            vibrationFrequency: particleProperties.vibrationFrequency,
-            isElevationManage: this.isElevationManage
-        })
+            vibrationFrequency: particleProperties.vibrationFrequency
+        },
+            advancedVariable,
+            this.isElevationManage
+        );
     }
 }
 
@@ -444,7 +445,6 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         );
 
         const mainParticle = new PathParticle({
-            advancedVariables: advancedVariable,
             sprite,
             path,
             particleLifetime,
@@ -456,9 +456,11 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
             particleColor: particleProperties.particleColor,
             alpha: particleProperties.alpha,
             vibrationAmplitude: particleProperties.vibrationAmplitude,
-            vibrationFrequency: particleProperties.vibrationFrequency,
-            isElevationManage: this.isElevationManage
-        })
+            vibrationFrequency: particleProperties.vibrationFrequency
+        },
+            advancedVariable,
+            this.isElevationManage
+        );
 
         this.computeVelocity(mainParticle, path.totalLenght)
 
@@ -669,7 +671,6 @@ export class GravitingParticleTemplate extends ParticleTemplate {
         )
 
         return new GravitingParticle({
-            advancedVariables: advancedVariable,
             sprite,
             center: this.onlyEmitterFollow ? this.currentSourcePosition : source,
             particleLifetime: Utils.getRandomValueFrom(this.particleLifetime, advancedVariable),
@@ -684,8 +685,10 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             particleColor: particleProperties.particleColor,
             alpha: particleProperties.alpha,
             vibrationAmplitude: particleProperties.vibrationAmplitude,
-            vibrationFrequency: particleProperties.vibrationFrequency,
-            isElevationManage: this.isElevationManage
-        })
+            vibrationFrequency: particleProperties.vibrationFrequency
+        },
+            advancedVariable,
+            this.isElevationManage
+        );
     }
 }
