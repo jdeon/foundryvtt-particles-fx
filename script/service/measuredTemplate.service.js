@@ -5,7 +5,7 @@ import { Utils, Vector3 } from "../utils/utils.js"
  * Generates emission properties for a circular measured template.
  * @param {number} radius - Radius in grid distance units.
  * @param {number} velocity - Emission velocity.
- * @returns {{positionSpawning: Vector3, particleLifetime:number|undefined, angle: {list:Array<{time:number, value: number|undefined}>}}} Generated position, lifetime, and angle properties.
+ * @returns {{positionSpawning: Vector3, particleLifetime:number|undefined, particleAngle: {list:Array<{time:number, value: number|undefined}>}}} Generated position, lifetime, and angle properties.
  */
 function generateTemplateForCircle(radius, velocity) {
     let result
@@ -15,7 +15,7 @@ function generateTemplateForCircle(radius, velocity) {
         result = {
             positionSpawning: Vector3.build({ x: 0, y: 0 }),
             particleLifetime: radius * Utils.pixelOfDistanceConvertor() * 1000 / velocity,
-            angle: { list: [{ time: 0, value: angle }] }
+            particleAngle: { list: [{ time: 0, value: angle }] }
         }
     } else if (velocity < 0) {
         result = {
@@ -24,7 +24,7 @@ function generateTemplateForCircle(radius, velocity) {
                 y: radius * Utils.pixelOfDistanceConvertor() * Math.sin(angle * Math.PI / 180)
             }),
             particleLifetime: -1 * radius * Utils.pixelOfDistanceConvertor() * 1000 / velocity,
-            angle: { list: [{ time: 0, value: angle }] }
+            particleAngle: { list: [{ time: 0, value: angle }] }
         }
     } else {
         const radiusFinal = Utils.getRandomValueFrom('0_' + radius) * Utils.pixelOfDistanceConvertor()
@@ -46,7 +46,7 @@ function generateTemplateForCircle(radius, velocity) {
  * @param {number} openingAngle - Opening angle of the cone in degrees.
  * @param {number} directionAngle - Center direction angle in degrees.
  * @param {number} velocity - Emission velocity.
- * @returns {{positionSpawning: Vector3, particleLifetime:number|undefined, angle: {list:Array<{time:number, value: number|undefined}>}}} Generated position, lifetime, and angle properties.
+ * @returns {{positionSpawning: Vector3, particleLifetime:number|undefined, particleAngle: {list:Array<{time:number, value: number|undefined}>}}} Generated position, lifetime, and angle properties.
  */
 function generateTemplateForCone(radius, openingAngle, directionAngle, velocity) {
     let result
@@ -60,7 +60,7 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
         result = {
             positionSpawning: Vector3.build({ x: 0, y: 0 }),
             particleLifetime: radius * Utils.pixelOfDistanceConvertor() * 1000 / velocity,
-            angle: { list: [{ time: 0, value: angle }] }
+            particleAngle: { list: [{ time: 0, value: angle }] }
         }
     } else if (velocity < 0) {
         result = {
@@ -69,7 +69,7 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
                 y: radius * Utils.pixelOfDistanceConvertor() * Math.sin(angle * Math.PI / 180)
             }),
             particleLifetime: -1 * radius * Utils.pixelOfDistanceConvertor() * 1000 / velocity,
-            angle: { list: [{ time: 0, value: angle }] }
+            particleAngle: { list: [{ time: 0, value: angle }] }
         }
     } else {
         let radiusFinal = Utils.getRandomValueFrom('0_' + radius)
@@ -91,7 +91,7 @@ function generateTemplateForCone(radius, openingAngle, directionAngle, velocity)
  * @param {number} diagonalAngle - Angle of the diagonal in degrees.
  * @param {number} velocity - Average emission velocity.
  * @param {number} velocityGap - Half difference between start and end velocity.
- * @returns {{positionSpawning: Vector3, particleLifetime:number|undefined, velocity: {list:Array<{time:number, value: number|undefined}>}, angle: {list:Array<{time:number, value: number|undefined}>}}} Generated emission properties.
+ * @returns {{positionSpawning: Vector3, particleLifetime:number|undefined, particleVelocity: {list:Array<{time:number, value: number|undefined}>}, particleAngle: {list:Array<{time:number, value: number|undefined}>}}} Generated emission properties.
  */
 function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, velocityGap) {
     let result
@@ -112,13 +112,13 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, veloci
         result = {
             positionSpawning: Vector3.build({ x: rectX / 2, y: rectY / 2 }),
             particleLifetime: rectDiagonal * 1000 / (2 * velocity),
-            velocity: {
+            particleVelocity: {
                 list: [
                     { time: 0, value: (velocity - velocityGap) * velocityFactor },
                     { time: 1, value: velocity + velocityGap * velocityFactor }
                 ]
             },
-            angle: { list: [{ time: 0, value: angle }] }
+            particleAngle: { list: [{ time: 0, value: angle }] }
         }
     } else if (velocity < 0) {
         const perimeterLength = 2 * rectX + 2 * rectY
@@ -142,12 +142,12 @@ function generateTemplateForRect(diagonalLength, diagonalAngle, velocity, veloci
         result = {
             positionSpawning: Vector3.build(spawnPosition),
             particleLifetime: -1 * rectDiagonal * 1000 / (2 * velocity),
-            velocity: {
+            particleVelocity: {
                 list: [
                     { time: 0, value: (velocity - velocityGap) * velocityFactor },
                     { time: 1, value: (velocity + velocityGap) * velocityFactor }]
             },
-            angle: { list: [{ time: 0, value: angle }] }
+            particleAngle: { list: [{ time: 0, value: angle }] }
         }
     } else {
         result = {
@@ -182,7 +182,7 @@ function generateTemplateForRay(length, width, directionAngle, velocity) {
                 y: widthPosition * Math.cos(directionAngle * Math.PI / 180)
             }),
             particleLifetime: length * Utils.pixelOfDistanceConvertor() * 1000 / velocity,
-            angle: {
+            particleAngle: {
                 list: [{ time: 0, value: directionAngle }]
             }
         }
@@ -196,7 +196,7 @@ function generateTemplateForRay(length, width, directionAngle, velocity) {
                 y: targetY + widthPosition * Math.cos(directionAngle * Math.PI / 180)
             }),
             particleLifetime: -1 * length * Utils.pixelOfDistanceConvertor() * 1000 / velocity,
-            angle: { list: [{ time: 0, value: directionAngle }] }
+            particleAngle: { list: [{ time: 0, value: directionAngle }] }
         }
     } else {
         const lengthPosition = Utils.getRandomValueFrom('0_' + length) * Utils.pixelOfDistanceConvertor()
@@ -220,7 +220,7 @@ function generateTemplateForRay(length, width, directionAngle, velocity) {
  * @param {MeasuredTemplateDocument} measuredTemplate - Target measured template document.
  * @param {number} velocityStart - Starting particle velocity.
  * @param {number} velocityEnd - Ending particle velocity.
- * @returns {{positionSpawning: ParticleInput<Vector3>, particleLifetime:ParticleInput<number>|undefined, velocity: ParticleInput<number>, angle: ParticleInput<number>} Property map converted to ParticleInput instances.
+ * @returns {{positionSpawning: ParticleInput<Vector3>, particleLifetime:ParticleInput<number>|undefined, particleVelocity: ParticleInput<number>, particleAngle: ParticleInput<number>} Property map converted to ParticleInput instances.
  */
 export function generatePrefillTemplateForMeasured(measuredTemplate, velocityStart, velocityEnd) {
     let result
