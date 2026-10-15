@@ -1,6 +1,6 @@
 name: Hyponotize
 type: script
-command: "// Example of advanced variable\n// Link particle angle and sprite rotation to make hypnotizing needle focusing on source\n\nif (canvas.tokens.controlled.length === 0){\n  return ui.notifications.error(\"Please select a token first\");\n}\n\nfor (let source of canvas.tokens.controlled) {\n\n\tlet idEmitter = game.modules.get(\"particule-fx\").api.emit.gravit( \"charm\",{\n    source :source.id, \n    particleVelocityStart : 0,\n    particleRadiusStart : \"100%\",\n    particleRadiusEnd :0,\n    particleSizeStart : {x : \"1%\", y: 5},\n    particleAngleStart : \"{{a}}\",\n    particleRotationStart : \"{{a}}\",\n    advanced: {\n        variables : {\n            a : \"0_360\",\n        }\n    }\n})\n\nawait particlesFx.writeMessageForEmissionById(idEmitter, true)\n\n}"
+command: "// Example of advanced variable\n// Link particle angle and sprite rotation to make hypnotizing needle focusing on source\n\nif (canvas.tokens.controlled.length === 0){\n  return ui.notifications.error(\"Please select a token first\");\n}\n\nfor (let source of canvas.tokens.controlled) {\n\n\tlet idEmitter = game.modules.get(\"particule-fx\").api.emit.gravit( \"charm\",{\n    source :source.id, \n    particleVelocity : 0,\n    particleRadiusStart : \"100%\",\n    particleRadiusEnd :0,\n    particleSize : {x : \"1%\", y: 5},\n    particleAngle : \"{{a}}\",\n    particleRotation : \"{{a}}\",\n    advanced: {\n        variables : {\n            a : \"0_360\",\n        }\n    }\n})\n\nawait particlesFx.writeMessageForEmissionById(idEmitter, true)\n\n}"
 img: icons/magic/control/hypnosis-mesmerism-eye.webp
 author: sLwoTjtfykXvWNpR
 scope: global
@@ -17,7 +17,7 @@ _stats:
   systemId: dnd5e
   systemVersion: 5.2.4
   createdTime: 1775945047003
-  modifiedTime: 1775945047003
+  modifiedTime: 1792099537402
   lastModifiedBy: sLwoTjtfykXvWNpR
 _id: zutcVekFb2csiAXW
 sort: 0
