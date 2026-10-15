@@ -145,8 +145,8 @@ function _missileParticles({ emitterId, inputObject, motionTemplate, colorTempla
         shapeSafeArray.forEach((particleShape) => {
             if (finalInput.subParticles?.particleColor === undefined) {
                 if (colorTemplate) {
-                    const test = Utils.normalizeStartEndProperties(colorTemplate);
-                    finalInput.subParticles.particleColor = test.particleColor;
+                    const { particleColor } = Utils.normalizeStartEndProperties(colorTemplate);
+                    finalInput.subParticles.particleColor = particleColor;
                 } else {
                     finalInput.subParticles.particleColor = finalInput.particleColor;
                 }

@@ -232,7 +232,6 @@ export class SprayingParticleTemplate extends ParticleTemplate {
 
         if (this.currentSourcePosition === undefined) return
 
-        //TODO are thouse inputVariable or not
         let target = particleProperties.target.currentValue
         let particleLifetime = particleProperties.particleLifetime.currentValue
         let positionSpawning = particleProperties.positionSpawning.currentValue

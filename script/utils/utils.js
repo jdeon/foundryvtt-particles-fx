@@ -359,7 +359,6 @@ export class Utils {
             return { list: [{ time: 0, value: input }] }
         }
 
-        //TODO think about
         if (Array.isArray(input)) {
             return input.map(item => Utils.normalizeStartEndProperties(item));
         }
@@ -368,12 +367,15 @@ export class Utils {
         const keys = Object.keys(input);
 
         const startKeys = keys.filter(k => k.endsWith('Start'));
+        const endKeys = keys.filter(k => k.endsWith('End'));
         const unSuffixKeys = keys.filter(k => !k.endsWith('Start') && !k.endsWith('End'));
 
+        //Prioritise the unSuffix keys
         for (const unSuffixKey of unSuffixKeys) {
             result[unSuffixKey] = input[unSuffixKey];
         }
 
+        //Add start keys if base key does not exist
         for (const startKey of startKeys) {
             const baseKey = startKey.slice(0, -5);
             if (result[baseKey] !== undefined) {
@@ -390,7 +392,17 @@ export class Utils {
             }
         }
 
-        //TODO handle end keys if no start key is present ?
+        //Add complete with end key if base key does not exist
+        for (const endKey of endKeys) {
+            const baseKey = endKey.slice(0, -3);
+            if (result[baseKey] !== undefined) {
+                continue;
+            }
+
+            result[baseKey] = {
+                list: [{ time: 1, value: input[endKey] }]
+            };
+        }
 
         for (const key of Object.keys(result)) {
             if (key === 'subParticles' && result.subParticles) {
@@ -448,11 +460,10 @@ export class Utils {
     */
     static getArrayRandomValueFrom(keyProperty, inArray, advancedVariables, inputMode) {
         if (!Array.isArray(inArray)) return
-
-        const containSubArray = inArray.filter((item) => Array.isArray(item));
+        const hasSubArray = inArray.some((item) => Array.isArray(item));
         let arrayToHandle
 
-        if (containSubArray.length) {
+        if (hasSubArray) {
             const randomItem = Utils.retrieveRandomElementFromArray(inArray);
             if (Array.isArray(randomItem)) {
                 arrayToHandle = randomItem;
