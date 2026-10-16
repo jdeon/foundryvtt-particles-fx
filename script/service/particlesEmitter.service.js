@@ -5,7 +5,7 @@ import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTem
 import { ParticleWorkFlowManager } from "../object/particleWorkFlow.js"
 import { defaultMotionTemplate } from "../prefillMotionTemplate.js"
 import { defaultColorTemplate } from "../prefillColorTemplate.js"
-import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
+import { CompatibiltyV2Manager, CompatibiltyV3Manager } from "../utils/compatibilityManager.js"
 import { EmittersPanel } from "../object/emittersPanel.js"
 
 /**
@@ -86,6 +86,7 @@ export function sprayParticles(...args) {
  */
 function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
+    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
@@ -126,6 +127,7 @@ export function missileParticles(...args) {
  */
 function _missileParticles({ emitterId, inputObject, motionTemplate, colorTemplates, particleShapes }) {
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
+    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
 
     const finalInput = _mergeTemplate(
         Utils.retrieveRandomElementFromArray(colorTemplates),
@@ -203,6 +205,7 @@ export function gravitateParticles(...args) {
  */
 function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
+    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
