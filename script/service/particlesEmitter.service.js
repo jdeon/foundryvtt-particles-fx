@@ -1,11 +1,10 @@
-import { s_MODULE_ID, s_EVENT_NAME, Vector3, Utils, SPRITE_TEXTURE_MAPPING } from "../utils/utils.js"
-import { s_MESSAGE_TYPES } from "../utils/socketManager.js"
+import { s_MODULE_ID, Vector3, Utils, SPRITE_TEXTURE_MAPPING } from "../utils/utils.js"
 import ParticlesEmitter from "../object/particlesEmitter.js"
 import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTemplate } from "../object/particleTemplate.js"
 import { ParticleWorkFlowManager } from "../object/particleWorkFlow.js"
 import { defaultMotionTemplate } from "../prefillMotionTemplate.js"
 import { defaultColorTemplate } from "../prefillColorTemplate.js"
-import { CompatibiltyV2Manager, CompatibiltyV3Manager } from "../utils/compatibilityManager.js"
+import { CompatibilityV3Manager } from "../utils/compatibilityManager.js"
 import { EmittersPanel } from "../object/emittersPanel.js"
 
 /**
@@ -85,8 +84,7 @@ export function sprayParticles(...args) {
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
-    CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
-    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
+    CompatibilityV3Manager.warningMissingSuffix(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
@@ -126,8 +124,7 @@ export function missileParticles(...args) {
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _missileParticles({ emitterId, inputObject, motionTemplate, colorTemplates, particleShapes }) {
-    CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
-    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
+    CompatibilityV3Manager.warningMissingSuffix(inputObject);
 
     const finalInput = _mergeTemplate(
         Utils.retrieveRandomElementFromArray(colorTemplates),
@@ -204,8 +201,7 @@ export function gravitateParticles(...args) {
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
-    CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
-    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
+    CompatibilityV3Manager.warningMissingSuffix(inputObject);
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 

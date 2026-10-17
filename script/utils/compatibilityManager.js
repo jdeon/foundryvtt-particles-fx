@@ -1,139 +1,10 @@
-import { s_MODULE_ID, Vector3 } from "./utils.js"
-import emitController from "../api/emitController.js";
-import templateController from "../api/templateController.js";
-
-/**
- * Handles backwards compatibility migration and deprecated API mappings for v2.
- */
-export class CompatibiltyV2Manager {
-
-    /**
-     * Displays a deprecation warning notification for legacy API access.
-     * @returns {void}
-     */
-    static compatibiltyApiMessage() {
-        ui.notifications.warn('Deprecated : use particlesFx.XXX instead of particuleEmitter for api')
-    }
-
-    /**
-     * Displays a deprecation warning notification for misspelled input parameter keys.
-     * @param {string|Array<string>} errorParam - The parameter key(s) with deprecated spelling.
-     * @returns {void}
-     */
-    static compatibiltyParamMessage(errorParam) {
-        ui.notifications.warn(`Deprecated : use input param with 'particule' replace it by 'particle' : ${errorParam}`)
-    }
-
-    /**
-     * Registers legacy getter on `window.particuleEmitter` to support backward compatibility with older API callers.
-     * @returns {void}
-     */
-    static manageDeprecatedWindowCall() {
-        if (foundry.utils.getProperty(window, 'particlesFx.particuleEmitter')) return;
-
-        //On call, we call method localy and share data with other client
-        Object.defineProperty(window, 'particuleEmitter', {
-            get: function () {
-                CompatibiltyV2Manager.compatibiltyApiMessage()
-                return {
-                    sprayParticules: emitController.spray,
-                    gravitateParticules: emitController.gravit,
-                    missileParticules: emitController.missile,
-                    stopEmissionById: emitController.stop,
-                    stopAllEmission: emitController.stopAll,
-                    writeMessageForEmissionById: emitController.writeMessage,
-                    addCustomPrefillMotionTemplate: templateController.motion.add,
-                    removeCustomPrefillMotionTemplate: templateController.motion.remove,
-                    getCustomPrefillMotionTemplate: templateController.motion.get,
-                    addCustomPrefillColorTemplate: templateController.color.add,
-                    removeCustomPrefillColorTemplate: templateController.color.remove,
-                    getCustomPrefillColorTemplate: templateController.color.get,
-                }
-            },
-
-            set: function (val) {
-                console.log('particuleEmitter can t be set');
-            },
-
-            configurable: true,
-        });
-    }
-
-    /**
-     * Scans and auto-corrects legacy parameter names in input objects (replacing 'particule' with 'particle').
-     * @param {Object} input - Input configuration object to correct.
-     * @param {boolean} [preventMessage] - If true, suppresses warning notification.
-     * @returns {Array<string>} List of corrected parameter keys.
-     */
-    static correctDeprecatedParam(input, preventMessage) {
-        const deprecatedParam = []
-
-        const keys = Object.keys(input)
-
-        for (const key of keys) {
-
-            if (input[key] instanceof Object) {
-                const result = CompatibiltyV2Manager.correctDeprecatedParam(input[key], true)
-                deprecatedParam.push(...result)
-            }
-
-            if (key.includes('articule')) {
-                deprecatedParam.push(key)
-                const fixKey = key.replaceAll('articule', 'article')
-                input[fixKey] = input[key]
-                delete input[key]
-            }
-        }
-
-        if (preventMessage !== true && deprecatedParam.length > 0) {
-            CompatibiltyV2Manager.compatibiltyParamMessage(deprecatedParam)
-        }
-
-        return deprecatedParam
-    }
-
-    /**
-     * Registers settings required for migrating legacy v1 settings to v2.
-     * @returns {void}
-     */
-    static addMigrationSettings() {
-        game.settings.register(s_MODULE_ID, "avoidParticule", {
-            name: game.i18n.localize("Old settings renamed avoidParticle"),
-            hint: game.i18n.localize("Keep it here for migration purpose"),
-            scope: "client",
-            config: false,
-            type: Boolean,
-            default: false
-        });
-
-        game.settings.register(s_MODULE_ID, "migrationV2Done", {
-            name: game.i18n.localize("Old settings has been migrate in new one"),
-            hint: game.i18n.localize("Keep it here for migration purpose"),
-            scope: "client",
-            config: false,
-            type: Boolean,
-            default: false
-        });
-    }
-
-    /**
-     * Performs setting value migration from legacy names to new v2 names once.
-     * @returns {void}
-     */
-    static migrateSettings() {
-        if (!game.settings.get(s_MODULE_ID, "migrationV2Done")) {
-            const oldAvoidParticuleSettings = game.settings.get(s_MODULE_ID, "avoidParticule")
-            game.settings.set(s_MODULE_ID, "avoidParticle", oldAvoidParticuleSettings)
-            game.settings.set(s_MODULE_ID, "migrationV2Done", true)
-        }
-    }
-}
+import { s_MODULE_ID } from "./utils.js"
 
 /**
  * Handles backwards compatibility migration and validation for v3.
  * Warns when Start or End property suffixes exist without their matching pair.
  */
-export class CompatibiltyV3Manager {
+export class CompatibilityV3Manager {
 
     /**
      * Displays a deprecation warning notification when a Start suffix exists without a matching End suffix.
@@ -196,7 +67,7 @@ export class CompatibiltyV3Manager {
         }
 
         const newCustomPrefillTemplate = Object.entries(customPrefillTemplate).map(([key, value]) => {
-            const fixedValue = CompatibiltyV3Manager._fixStartEndSuffix(value)
+            const fixedValue = CompatibilityV3Manager._fixStartEndSuffix(value)
             if (fixedValue.startWithoutEnd.length > 0 || fixedValue.endWithoutStart.length > 0) {
                 let displayMessage = `Deprecated: your custom template ${key} has been fixed with the version 3 of Particles Fx migration.`
                 if (fixedValue.startWithoutEnd.length > 0) {
@@ -227,13 +98,13 @@ export class CompatibiltyV3Manager {
      * @returns {{startWithoutEnd: Array<string>, endWithoutStart: Array<string>}} List of flagged parameter keys.
      */
     static warningMissingSuffix(input) {
-        const { startWithoutEnd, endWithoutStart } = CompatibiltyV3Manager.checkStartEndSuffix(input, false);
+        const { startWithoutEnd, endWithoutStart } = CompatibilityV3Manager.checkStartEndSuffix(input, false);
 
         if (startWithoutEnd.length > 0) {
-            CompatibiltyV3Manager.compatibiltyStartMessage(startWithoutEnd);
+            CompatibilityV3Manager.compatibiltyStartMessage(startWithoutEnd);
         }
         if (endWithoutStart.length > 0) {
-            CompatibiltyV3Manager.compatibiltyEndMessage(endWithoutStart);
+            CompatibilityV3Manager.compatibiltyEndMessage(endWithoutStart);
         }
 
         return { startWithoutEnd, endWithoutStart };
@@ -297,7 +168,7 @@ export class CompatibiltyV3Manager {
      * @returns {Object} Fixed configuration object.
      */
     static _fixStartEndSuffix(input) {
-        const { startWithoutEnd, endWithoutStart } = CompatibiltyV3Manager.checkStartEndSuffix(input, true);
+        const { startWithoutEnd, endWithoutStart } = CompatibilityV3Manager.checkStartEndSuffix(input, true);
 
         for (const startKey of startWithoutEnd) {
             const baseKey = startKey.slice(0, -5);
@@ -316,6 +187,3 @@ export class CompatibiltyV3Manager {
         };
     }
 }
-
-export const CompatibilityV3Manager = CompatibiltyV3Manager;
-export const CompatibilityV2Manager = CompatibiltyV2Manager;
