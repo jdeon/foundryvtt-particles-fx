@@ -19,7 +19,7 @@ command: |-
         delay: 1,
         type: "atParticleEnd",
         particleInputs: [
-          ["spray", "explosion", {maxParticles: 20, particleVelocityStart: "50%", particleLifetime:250}]
+          ["spray", "explosion", {maxParticles: 20, particleVelocity: "50%", particleLifetime:250}]
         ]
       }]
   })
@@ -42,7 +42,7 @@ _stats:
   systemId: dnd5e
   systemVersion: 5.2.4
   createdTime: 1775857217610
-  modifiedTime: 1775857217610
+  modifiedTime: 1792099419150
   lastModifiedBy: sLwoTjtfykXvWNpR
 _id: 5ycBoNWO0layDda5
 sort: 0

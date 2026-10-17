@@ -25,8 +25,26 @@ export const SPRITE_TEXTURE_MAPPING = {
 
 }
 
-/** Key constant indicating value should be copied from start property. */
-export const sameStartKey = 'sameStart'
+const FIXED_PARTICLE_PARAMETER = [
+    "type",
+    "target",
+    "source",
+    "emissionDuration",
+    "particleShape",
+    "spawningFrequence",
+    "spawningNumber",
+    "maxParticles",
+    "positionSpawning",
+    "particleLifetime",
+    "particleAxisElevationAngle",
+    "pathType",
+    "onlyEmitterFollow",
+    "freezeOnPause",
+    "subParticles",
+    "advanced",
+    "next",
+    "_nbEmitterSibling"
+]
 
 /**
  * Representation of a 3D vector containing x, y, z coordinates and vector math operations.
@@ -66,26 +84,6 @@ export class Vector3 {
         }
 
         return result
-    }
-
-    /**
-     * Replaces sameStartKey sentinel strings in endVector with corresponding values from startVector.
-     * @param {Vector3} startVector - Reference start vector.
-     * @param {Vector3} endVector - Target end vector.
-     * @returns {Vector3} Updated end vector.
-     */
-    static replaceSameAsStart(startVector, endVector) {
-        if (endVector.x === sameStartKey && endVector.y === sameStartKey && endVector.z === sameStartKey) {
-            return Vector3.build(startVector);
-        }
-
-        for (let coord of ['x', 'y', 'z']) {
-            if (endVector[coord] === sameStartKey) {
-                endVector[coord] = startVector[coord]
-            }
-        }
-
-        return endVector
     }
 
     /**
@@ -285,8 +283,6 @@ export class Utils {
                     return Number(valueBoundary[0]);
                 } else if (valueBoundary[0].endsWith('%')) {
                     return Utils._managePercent(valueBoundary[0])
-                } else if (valueBoundary[0] === sameStartKey) {
-                    return sameStartKey
                 } else {
                     //Placeable onject value
                     return Utils.getPlaceableObjectById(valueBoundary[0]);
@@ -310,18 +306,6 @@ export class Utils {
         } else {
             return inValue
         }
-    }
-
-    /**
-     * Evaluates random input and wraps it in a ParticleInput instance.
-     * @param {number|string|Object|Array} inValue - Raw input property.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined>} advancedVariables - Active advanced variables.
-     * @returns {ParticleInput} Built ParticleInput instance.
-     */
-    static getRandomParticuleInputFrom(inValue, advancedVariables) {
-        const computeValue = Utils.getRandomValueFrom(inValue, advancedVariables)
-
-        return ParticleInput.build(computeValue, inValue, advancedVariables)
     }
 
     /**
@@ -365,8 +349,75 @@ export class Utils {
     }
 
     /**
+     * Normalizes parameter objects by converting keys suffixed with "Start" and "End"
+     * into the unified keyframe list format: XXX: { list: [ { time: 0, value: XXXstart }, { time: 1, value: XXXend } ] }.
+     * @param {Object} input - Configuration object to normalize.
+     * @returns {Record<string, {list: Array<{time: number, value: *}>}>} Normalized object with list format keyframes.
+     */
+    static normalizeStartEndProperties(input) {
+        if (!input || typeof input !== "object" || input instanceof Vector3) {
+            return { list: [{ time: 0, value: input }] }
+        }
+
+        if (Array.isArray(input)) {
+            return input.map(item => Utils.normalizeStartEndProperties(item));
+        }
+
+        const result = {};
+        const keys = Object.keys(input);
+
+        const startKeys = keys.filter(k => k.endsWith('Start'));
+        const endKeys = keys.filter(k => k.endsWith('End'));
+        const unSuffixKeys = keys.filter(k => !k.endsWith('Start') && !k.endsWith('End'));
+
+        //Prioritise the unSuffix keys
+        for (const unSuffixKey of unSuffixKeys) {
+            result[unSuffixKey] = input[unSuffixKey];
+        }
+
+        //Add start keys if base key does not exist
+        for (const startKey of startKeys) {
+            const baseKey = startKey.slice(0, -5);
+            if (result[baseKey] !== undefined) {
+                continue;
+            }
+
+            result[baseKey] = {
+                list: [{ time: 0, value: input[startKey] }]
+            };
+
+            const endKey = baseKey + 'End';
+            if (input[endKey] !== undefined) {
+                result[baseKey].list.push({ time: 1, value: input[endKey] });
+            }
+        }
+
+        //Add complete with end key if base key does not exist
+        for (const endKey of endKeys) {
+            const baseKey = endKey.slice(0, -3);
+            if (result[baseKey] !== undefined) {
+                continue;
+            }
+
+            result[baseKey] = {
+                list: [{ time: 1, value: input[endKey] }]
+            };
+        }
+
+        for (const key of Object.keys(result)) {
+            if (key === 'subParticles' && result.subParticles) {
+                result.subParticles = Utils.normalizeStartEndProperties(result.subParticles);
+            } else if (!result[key]?.list && !FIXED_PARTICLE_PARAMETER.includes(key)) {
+                result[key] = { list: [{ time: 0, value: result[key] }] }
+            }
+        }
+
+        return result;
+    }
+
+    /**
      * Evaluates random property values for all fields in an object.
-     * @param {Object} inValue - Raw configuration object.
+     * @param {{list: Array<{time: number, value: *}>|Record<string, number|string|Vector3|Object|Array|Function>}} inValue - Raw configuration object.
      * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} advancedVariables - Active advanced variables map.
      * @param {boolean} [inputMode] - If true, wraps values into ParticleInput instances.
      * @returns {Record<string, number|string|Vector3|ParticleInput<number|string|Vector3>} Resolved object.
@@ -375,15 +426,24 @@ export class Utils {
         if (!inValue) return
 
         let result = {}
-        let inKey = Object.keys(inValue).filter((key) => key !== 'advanced')
+        let inKey = Object.keys(inValue).filter((key) => !['advanced', 'next'].includes(key))
 
         for (const key of inKey) {
-            result[key] = Utils.getRandomValueFrom(inValue[key], advancedVariables);
+            if (inValue[key] && typeof inValue[key] === 'object' && Array.isArray(inValue[key].list)) {
+                result[key] = {
+                    list: inValue[key].list.map(item => ({
+                        time: item.time,
+                        value: Utils.getRandomValueFrom(item.value, advancedVariables)
+                    }))
+                };
+            } else {
+                result[key] = Utils.getRandomValueFrom(inValue[key], advancedVariables);
+            }
         }
 
         if (inputMode) {
             for (const key of inKey) {
-                result[key] = ParticleInput.build(result[key], inValue[key], advancedVariables);
+                result[key] = ParticleInput.build(key, result[key], inValue[key], advancedVariables);
             }
         }
 
@@ -391,19 +451,19 @@ export class Utils {
     }
 
     /**
-     * Handles nested array selection and resolves random element values.
-     * @param {Array<number|string|Vector3|Object|Array>} inArray - Array of values or sub-arrays.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} advancedVariables - Advanced variables map.
-     * @param {boolean} [inputMode] - If true, wraps values in ParticleInputs.
-     * @returns {Array<number|string|Vector3|Object>} Resolved array of values.
-     */
-    static getArrayRandomValueFrom(inArray, advancedVariables, inputMode) {
+    * Handles nested array selection and resolves random element values.
+    * @param {string} keyProperty - The key of the property.
+    * @param {Array<number|string|Vector3|Object|Array>} inArray - Array of values or sub-arrays.
+    * @param {Record<string, number|string|Vector3|Object|Array|Function>|undefined} advancedVariables - Advanced variables map.
+    * @param {boolean} [inputMode] - If true, wraps values in ParticleInputs.
+    * @returns {Array<number|string|Vector3|Object>} Resolved array of values.
+    */
+    static getArrayRandomValueFrom(keyProperty, inArray, advancedVariables, inputMode) {
         if (!Array.isArray(inArray)) return
-
-        const containSubArray = inArray.filter((item) => Array.isArray(item));
+        const hasSubArray = inArray.some((item) => Array.isArray(item));
         let arrayToHandle
 
-        if (containSubArray.length) {
+        if (hasSubArray) {
             const randomItem = Utils.retrieveRandomElementFromArray(inArray);
             if (Array.isArray(randomItem)) {
                 arrayToHandle = randomItem;
@@ -418,18 +478,19 @@ export class Utils {
 
         if (inputMode) {
             for (let i = 0; i < result.length; i++) {
-                result[i] = ParticleInput.build(result[i], arrayToHandle[i], advancedVariables);
+                result[i] = ParticleInput.build(`${keyProperty}[${i}]`, result[i], arrayToHandle[i], advancedVariables);
             }
         }
 
         return result
     }
 
-
     /**
-     * Generates a random number in range (0, 1] inclusive of 1.
-     * @returns {number} Pseudo-random float between 0 (exclusive) and 1 (inclusive).
-     */
+         * Generates a random number in range (0, 1] inclusive of 1.
+         * @returns {number} Pseudo-random float between 0 (exclusive) and 1 (inclusive).
+    
+    
+         */
     static includingRandom() {
         if (Math.random() == 0) {
             return 1;
@@ -439,12 +500,12 @@ export class Utils {
     }
 
     /**
-     * Deep-merges input property templates with fallback default templates.
-     * @param {Object} prioritizeInput - Primary input object.
-     * @param {Object} defaultInput - Fallback default object.
-     * @returns {Object} Merged result object.
+     * Deep-merges input query objects (using Start and End property suffixes) with fallback defaults.
+     * @param {Object} prioritizeInput - Primary input query object.
+     * @param {Object} defaultInput - Fallback default query object.
+     * @returns {Object} Merged input query object.
      */
-    static mergeInputTemplate(prioritizeInput, defaultInput) {
+    static mergeInputQuery(prioritizeInput, defaultInput) {
 
         if (!defaultInput) {
             return prioritizeInput
@@ -457,17 +518,15 @@ export class Utils {
         let defaultPropertyKey = Object.keys(defaultInput)
 
         for (const key of defaultPropertyKey) {
+            //If the property has a start or end suffix, it means it's a start or end property, so we skip it
+            if (prioritizeInput[`${key}Start`] && prioritizeInput[`${key}End`]) {
+                continue
+            }
+
             let prioritizeProperty = prioritizeInput[key]
 
             if (prioritizeProperty === undefined) {
-                //for end suffix value override by start value before default one
-                if (typeof key === 'string' && key.endsWith('End')) {
-                    //removve end from key and add start
-                    let startSuffixKey = key.substring(0, key.length - 3) + 'Start'
-                    result[key] = prioritizeInput[startSuffixKey] !== undefined ? sameStartKey : defaultInput[key]
-                } else {
-                    result[key] = defaultInput[key]
-                }
+                result[key] = defaultInput[key]
             } else if (Array.isArray(prioritizeProperty) || prioritizeProperty.length > 0) {
                 if (prioritizeProperty.length > 0) {
                     result[key] = prioritizeProperty
@@ -475,11 +534,10 @@ export class Utils {
                     result[key] = defaultInput[key]
                 }
             } else if (prioritizeProperty instanceof Object && !(prioritizeProperty instanceof Vector3)) {
-                result[key] = Utils.mergeInputTemplate(prioritizeProperty, defaultInput[key])
+                result[key] = Utils.mergeInputQuery(prioritizeProperty, defaultInput[key])
             } else {
                 result[key] = prioritizeProperty
             }
-
         }
 
         return result;
@@ -664,15 +722,5 @@ export class Utils {
         }
 
         return SPRITE_TEXTURE_MAPPING.CIRCLE
-    }
-
-    /**
-     * Replaces sameStartKey with start input value clone if present.
-     * @param {ParticleInput} particleInputStart - Reference start input.
-     * @param {ParticleInput} particleInputEnd - End input to check.
-     * @returns {ParticleInput} Final ParticleInput instance.
-     */
-    static computeSameAsStart(particleInputStart, particleInputEnd) {
-        return particleInputEnd.getValue() === sameStartKey ? particleInputStart.clone() : particleInputEnd;
     }
 }

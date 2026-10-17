@@ -3,7 +3,6 @@ import { s_MODULE_ID, Utils, Vector3 } from "../utils/utils.js"
 import { Path } from "../utils/path.js"
 import { generatePrefillTemplateForMeasured } from '../service/measuredTemplate.service.js'
 import { AdvancedVariable } from './advancedVariable.js'
-import { ParticleInput } from './particleInput.js'
 
 /**
  * Base template class responsible for constructing Particle instances based on configuration parameters.
@@ -36,60 +35,58 @@ export class ParticleTemplate {
 
     /**
      * Constructs a base ParticleTemplate instance.
-     * @param {foundry.canvas.placeables.PlaceableObject | string} source - Source object/ID.
-     * @param {foundry.canvas.placeables.PlaceableObject | string} target - Target object/ID.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeStart - Starting size.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeEnd - Ending size.
-     * @param {number | string | Array<number|string>} particleRotationStart - Starting rotation.
-     * @param {number | string | Array<number|string>} particleRotationEnd - Ending rotation.
-     * @param {number | string | Array<number|string>} particleLifetime - Particle lifetime.
-     * @param {string} particleShape - Shape key name.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} colorStart - Starting color.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} colorEnd - Ending color.
-     * @param {number | string | Array<number|string>} alphaStart - Starting alpha.
-     * @param {number | string | Array<number|string>} alphaEnd - Ending alpha.
-     * @param {number | string | Array<number|string>} riseRateStart - Starting rise rate.
-     * @param {number | string | Array<number|string>} riseRateEnd - Ending rise rate.
-     * @param {number | string | Array<number|string>} vibrationAmplitudeStart - Starting vibration amplitude.
-     * @param {number | string | Array<number|string>} vibrationAmplitudeEnd - Ending vibration amplitude.
-     * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
-     * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
-     * @param {boolean} freezeOnPause - Freeze state on game pause.
-     * @param {Array<{type: "atEmissionStart"|"atParticleStart"|"atEmissionEnd"|"atParticleEnd", particleInputs : Array<string|import('../prefillMotionTemplate.js').MotionTemplateQuery|import('../prefillColorTemplate.js').ColorTemplateQuery>, delay: number | undefined}>} next - Array of chained template definitions.
-     * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables configuration object.
+     * @param {Object|foundry.canvas.placeables.PlaceableObject|string} source - Source object/ID or configuration options object.
+     * @param {foundry.canvas.placeables.PlaceableObject|string} [target] - Target object/ID.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleSize] - Size keyframe list configuration.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [particleRotation] - Rotation keyframe list configuration.
+     * @param {number|string|Array<number|string>} [particleLifetime] - Particle lifetime.
+     * @param {string} [particleShape] - Shape key name.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleColor] - Color keyframe list configuration.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [alpha] - Alpha keyframe list configuration.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleRiseRate] - Rise rate keyframe list configuration.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [vibrationAmplitude] - Vibration amplitude keyframe list configuration.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [vibrationFrequency] - Vibration frequency keyframe list configuration.
+     * @param {boolean} [freezeOnPause] - Freeze state on game pause.
+     * @param {Array<Object>} [next] - Array of chained template definitions.
+     * @param {Object} [advanced] - Advanced variables configuration object.
      */
-    constructor(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd,
-        particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause,
-        next, advanced
+    constructor(source, target, particleSize, particleRotation, particleLifetime, particleShape,
+        particleColor, alpha, particleRiseRate, vibrationAmplitude, vibrationFrequency, freezeOnPause, next, advanced
     ) {
         const isElevationManage = game.settings.get(s_MODULE_ID, "activateElevation");
 
         this.source = ParticleTemplate._translatePlaceableObject(source);
         this.target = ParticleTemplate._translatePlaceableObject(target);
-        this.sizeStart = Vector3.build(sizeStart);
-        this.sizeEnd = Vector3.build(sizeEnd);
-        this.particleRotationStart = particleRotationStart;
-        this.particleRotationEnd = particleRotationEnd;
+
+        this.particleSize = particleSize;
+        if (this.particleSize?.list) {
+            this.particleSize.list = this.particleSize.list.map(i => ({ time: i.time, value: Vector3.build(i.value) }));
+        }
+        this.particleRotation = particleRotation;
         this.particleLifetime = particleLifetime;
         this.particleShape = particleShape;
-        this.colorStart = Vector3.build(colorStart);
-        this.colorEnd = Vector3.build(colorEnd);
-        this.alphaStart = alphaStart;
-        this.alphaEnd = alphaEnd;
-        this.riseRateStart = isElevationManage ? riseRateStart : 0;
-        this.riseRateEnd = isElevationManage ? riseRateEnd : 0;
-        this.vibrationAmplitudeStart = vibrationAmplitudeStart;
-        this.vibrationAmplitudeEnd = vibrationAmplitudeEnd;
-        this.vibrationFrequencyStart = vibrationFrequencyStart;
-        this.vibrationFrequencyEnd = vibrationFrequencyEnd;
-        this.isElevationManage = isElevationManage
+
+        this.particleColor = particleColor;
+        if (this.particleColor?.list) {
+            this.particleColor.list = this.particleColor.list.map(i => ({ time: i.time, value: Vector3.build(i.value) }));
+        }
+        this.alpha = alpha;
+
+        if (isElevationManage) {
+            this.particleRiseRate = particleRiseRate;
+        } else {
+            this.particleRiseRate = { list: [{ time: 0, value: 0 }, { time: 1, value: 0 }] };
+        }
+
+        this.vibrationAmplitude = vibrationAmplitude;
+        this.vibrationFrequency = vibrationFrequency;
+        this.isElevationManage = isElevationManage;
         this.freezeOnPause = freezeOnPause;
         this.next = next ?? [];
         this.advanced = advanced;
 
-        const advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
-        this.currentSourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable), this.isElevationManage)
+        const advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables);
+        this.currentSourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable), this.isElevationManage);
     }
 
     /**
@@ -97,43 +94,40 @@ export class ParticleTemplate {
      * @returns {Particle} Newly created Particle instance.
      */
     generateParticles() {
-        let advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
+        let advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables);
 
-        this.currentSourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable), this.isElevationManage)
+        this.currentSourcePosition = Utils.getSourcePosition(Utils.getRandomValueFrom(this.source, advancedVariable), this.isElevationManage);
 
-        const startSizeInput = Utils.getRandomParticuleInputFrom(this.sizeStart, advancedVariable)
-        const angleStartInput = Utils.getRandomParticuleInputFrom(this.particleRotationStart, advancedVariable)
-        const colorStartInput = Utils.getRandomParticuleInputFrom(this.colorStart, advancedVariable)
+        let particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable, true);
+
+        const startSizeInput = particleProperties.particleSize.computeValue(0, advancedVariable);
+        const angleStartInput = particleProperties.particleRotation.computeValue(0, advancedVariable);
+        const colorStartInput = particleProperties.particleColor.computeValue(0, advancedVariable);
+
         const sprite = this.initSprite(this.currentSourcePosition, startSizeInput, angleStartInput, colorStartInput);
 
-        return new Particle(
+        return new Particle({
             sprite,
-            Utils.getRandomValueFrom(this.particleLifetime, advancedVariable),
-            this.currentSourcePosition.z,
-            Utils.getRandomParticuleInputFrom(this.riseRateStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.riseRateEnd, advancedVariable),
-            startSizeInput,
-            Vector3.build(Utils.getRandomParticuleInputFrom(this.sizeEnd, advancedVariable)),
-            angleStartInput,
-            Utils.getRandomParticuleInputFrom(this.particleRotationEnd, advancedVariable).add(this.currentSourcePosition.r),
-            colorStartInput,
-            Utils.getRandomParticuleInputFrom(this.colorEnd, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.alphaStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.alphaEnd, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.vibrationAmplitudeStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.vibrationAmplitudeEnd, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.vibrationFrequencyStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.vibrationFrequencyEnd, advancedVariable),
-            this.isElevationManage
-        )
+            particleLifetime: Utils.getRandomValueFrom(this.particleLifetime, advancedVariable),
+            elevationStart: this.currentSourcePosition.z,
+            particleRiseRate: particleProperties.particleRiseRate,
+            particleSize: particleProperties.particleSize,
+            particleRotation: particleProperties.particleRotation.add(this.currentSourcePosition.r),
+            particleColor: particleProperties.particleColor,
+            alpha: particleProperties.alpha,
+            vibrationAmplitude: particleProperties.vibrationAmplitude,
+            vibrationFrequency: particleProperties.vibrationFrequency
+        },
+            advancedVariable,
+            this.isElevationManage);
     }
 
     /**
      * Initializes the PIXI.Sprite instance for a new particle.
      * @param {Vector3} position - Particle starting position vector.
-     * @param {ParticleInput} startSizeInput - Initial size input.
-     * @param {ParticleInput} angleStartInput - Initial angle input.
-     * @param {ParticleInput} colorStartInput - Initial color input.
+     * @param {Vector3} startSizeInput - Initial size input.
+     * @param {number} angleStartInput - Initial angle input.
+     * @param {Vector3} colorStartInput - Initial color input.
      * @returns {PIXI.Sprite} Created PIXI.Sprite instance.
      */
     initSprite(position, startSizeInput, angleStartInput, colorStartInput) {
@@ -142,16 +136,14 @@ export class ParticleTemplate {
         sprite.y = position.y;
         sprite.anchor.set(0.5);
 
-
         let startSize = Vector3.build(startSizeInput)
         const sizeFactor = Utils.handleElevationFactorForSize(this.isElevationManage ? position.z : undefined)
         sprite.width = startSize.x * sizeFactor
         sprite.height = startSize.y * sizeFactor
 
-        sprite.angle = angleStartInput.add(position.r).getValue()
+        sprite.angle = angleStartInput + position.r;
 
-        let colorStart = colorStartInput.getValue()
-        sprite.tint = Color.fromRGB([Math.floor(colorStart.x) / 255, Math.floor(colorStart.y) / 255, Math.floor(colorStart.z) / 255])
+        sprite.tint = Color.fromRGB([Math.floor(colorStartInput.x) / 255, Math.floor(colorStartInput.y) / 255, Math.floor(colorStartInput.z) / 255])
 
         return sprite;
     }
@@ -180,26 +172,17 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             input.source,
             input.target,
             input.positionSpawning,
-            input.particleVelocityStart,
-            input.particleVelocityEnd,
-            input.particleRiseRateStart,
-            input.particleRiseRateEnd,
-            input.particleAngleStart,
-            input.particleAngleEnd,
-            input.particleSizeStart,
-            input.particleSizeEnd,
-            input.particleRotationStart,
-            input.particleRotationEnd,
+            input.particleVelocity,
+            input.particleRiseRate,
+            input.particleAngle,
+            input.particleSize,
+            input.particleRotation,
             input.particleLifetime,
             input.particleShape,
-            input.particleColorStart,
-            input.particleColorEnd,
-            input.alphaStart,
-            input.alphaEnd,
-            input.vibrationAmplitudeStart,
-            input.vibrationAmplitudeEnd,
-            input.vibrationFrequencyStart,
-            input.vibrationFrequencyEnd,
+            input.particleColor,
+            input.alpha,
+            input.vibrationAmplitude,
+            input.vibrationFrequency,
             input.freezeOnPause,
             input.next,
             input.advanced,
@@ -208,42 +191,32 @@ export class SprayingParticleTemplate extends ParticleTemplate {
 
     /**
      * Constructs a SprayingParticleTemplate.
-     * @param {foundry.canvas.placeables.PlaceableObject | string} source - Source object/ID.
-     * @param {foundry.canvas.placeables.PlaceableObject | string} target - Target object/ID.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} positionSpawning - Spawning position offset.
-     * @param {number | string | Array<number|string>} velocityStart - Starting velocity.
-     * @param {number | string | Array<number|string>} velocityEnd - Ending velocity.
-     * @param {number | string | Array<number|string>} riseRateStart - Starting rise rate.
-     * @param {number | string | Array<number|string>} riseRateEnd - Ending rise rate.
-     * @param {number | string | Array<number|string>} angleStart - Starting angle.
-     * @param {number | string | Array<number|string>} angleEnd - Ending angle.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeStart - Starting size.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeEnd - Ending size.
-     * @param {number | string | Array<number|string>} particleRotationStart - Starting rotation.
-     * @param {number | string | Array<number|string>} particleRotationEnd - Ending rotation.
-     * @param {number | string | Array<number|string>} particleLifetime - Particle lifetime.
-     * @param {string} particleShape - Shape key name.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} colorStart - Starting color.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} colorEnd - Ending color.
-     * @param {number | string | Array<number|string>} alphaStart - Starting alpha.
-     * @param {number | string | Array<number|string>} alphaEnd - Ending alpha.
-     * @param {number | string | Array<number|string>} vibrationAmplitudeStart - Starting vibration amplitude.
-     * @param {number | string | Array<number|string>} vibrationAmplitudeEnd - Ending vibration amplitude.
-     * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
-     * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
-     * @param {boolean} freezeOnPause - Freeze state on game pause.
-     * @param {Array<{type: "atEmissionStart"|"atParticleStart"|"atEmissionEnd"|"atParticleEnd", particleInputs : Array<string|import('../prefillMotionTemplate.js').MotionTemplateQuery|import('../prefillColorTemplate.js').ColorTemplateQuery>, delay: number | undefined}>} next - Array of next template steps.
-     * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables configuration.
+     * @param {Object|foundry.canvas.placeables.PlaceableObject|string} source - Source object/ID or configuration options object.
+     * @param {foundry.canvas.placeables.PlaceableObject|string} [target] - Target object/ID.
+     * @param {Vector3|Object} [positionSpawning] - Spawning position offset.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [particleVelocity] - Velocity keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleRiseRate] - Rise rate keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [particleAngle] - Emission angle keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleSize] - Size keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [particleRotation] - Rotation angle keyframe list.
+     * @param {number|string|Array<number|string>} [particleLifetime] - Particle lifetime.
+     * @param {string} [particleShape] - Shape key name.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleColor] - Color keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [alpha] - Alpha keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [vibrationAmplitude] - Vibration amplitude keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [vibrationFrequency] - Vibration frequency keyframe list.
+     * @param {boolean} [freezeOnPause] - Freeze state on game pause.
+     * @param {Array<Object>} [next] - Array of next template steps.
+     * @param {Object} [advanced] - Advanced variables configuration.
      */
-    constructor(source, target, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
-        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced) {
-        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced)
+    constructor(source, target, positionSpawning, particleVelocity, particleRiseRate, particleAngle, particleSize, particleRotation,
+        particleLifetime, particleShape, particleColor, alpha, vibrationAmplitude, vibrationFrequency, freezeOnPause, next, advanced) {
+
+        super(source, target, particleSize, particleRotation, particleLifetime, particleShape, particleColor, alpha, particleRiseRate, vibrationAmplitude, vibrationFrequency, freezeOnPause, next, advanced);
+
         this.positionSpawning = Vector3.build(positionSpawning);
-        this.velocityStart = velocityStart;         //Array of Number      
-        this.velocityEnd = velocityEnd;             //Array of Number
-        this.angleStart = angleStart;               //Array of Number      
-        this.angleEnd = angleEnd;                   //Array of Number
+        this.particleVelocity = particleVelocity;
+        this.particleAngle = particleAngle;
     }
 
     /**
@@ -255,37 +228,39 @@ export class SprayingParticleTemplate extends ParticleTemplate {
 
         let particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable, true)
 
-        this.currentSourcePosition = Utils.getSourcePosition(particleProperties.source.getValue(), this.isElevationManage)
+        this.currentSourcePosition = Utils.getSourcePosition(particleProperties.source.currentValue, this.isElevationManage)
 
         if (this.currentSourcePosition === undefined) return
 
-        let target = particleProperties.target.getValue()
-        let particleLifetime = particleProperties.particleLifetime.getValue()
-        let positionSpawning = particleProperties.positionSpawning.getValue()
+        let target = particleProperties.target.currentValue
+        let particleLifetime = particleProperties.particleLifetime.currentValue
+        let positionSpawning = particleProperties.positionSpawning.currentValue
 
         let targetAngleDirection
         if (target && (this.currentSourcePosition.x !== target.x || this.currentSourcePosition.y !== target.y)) {
-            //Target exist and is different than source
             let targetPosition = Utils.getSourcePosition(target, this.isElevationManage)
             targetAngleDirection = Math.atan2(targetPosition.y - this.currentSourcePosition.y, targetPosition.x - this.currentSourcePosition.x)
             const oldPositionSpawning = new Vector3(positionSpawning.x, positionSpawning.y, positionSpawning.z);
             positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
 
-            //Upgrade particle lifetime if the target is longer than 5 grid
             const targetDistance = Math.sqrt(Math.pow(targetPosition.x - this.currentSourcePosition.x, 2) + Math.pow(targetPosition.y - this.currentSourcePosition.y, 2) + Math.pow(targetPosition.z - this.currentSourcePosition.z, 2))
             if (targetDistance > 5 * canvas.scene.grid.size) {
                 particleLifetime *= (targetDistance / (5 * canvas.scene.grid.size))
             }
             const targetRiseRate = (targetPosition.z - this.currentSourcePosition.z) / targetDistance
-            particleProperties.riseRateStart.add(targetRiseRate)
-            particleProperties.riseRateEnd.add(targetRiseRate)
+            particleProperties.particleRiseRate.add(targetRiseRate);
 
         } else if (this.source instanceof foundry.canvas.placeables.MeasuredTemplate) {
-            this.currentSourcePosition = Utils.getSourcePosition(this.source, this.isElevationManage)//Don t use width and length
-            let measuredOverride = generatePrefillTemplateForMeasured(this.source.document, particleProperties.velocityStart.getValue(), particleProperties.velocityEnd.getValue())
+            this.currentSourcePosition = Utils.getSourcePosition(this.source, this.isElevationManage)
+            const velocityStart = particleProperties.particleVelocity.computeValue(0, advancedVariable);
+            const velocityEnd = particleProperties.particleVelocity.computeValue(1, advancedVariable);
+            let measuredOverride = generatePrefillTemplateForMeasured(this.source.document, velocityStart, velocityEnd)
+            if (measuredOverride.particleAngleStart || measuredOverride.particleVelocityStart) {
+                measuredOverride = Utils.normalizeStartEndProperties(measuredOverride);
+            }
             particleProperties = { ...particleProperties, ...measuredOverride }
-            particleLifetime = particleProperties.particleLifetime.getValue()
-            positionSpawning = particleProperties.positionSpawning.getValue()
+            particleLifetime = particleProperties.particleLifetime.currentValue
+            positionSpawning = particleProperties.positionSpawning.currentValue
             targetAngleDirection = 0
         } else {
             targetAngleDirection = this.currentSourcePosition.r * Math.PI / 180
@@ -293,39 +268,37 @@ export class SprayingParticleTemplate extends ParticleTemplate {
             positionSpawning = oldPositionSpawning.rotateZVector(targetAngleDirection)
         }
 
+        const startSizeInput = particleProperties.particleSize.computeValue(0, advancedVariable);
+        const startAngleInput = particleProperties.particleRotation.computeValue(0, advancedVariable);
+        const startColorInput = particleProperties.particleColor.computeValue(0, advancedVariable);
+
         let sprite = this.initSprite(
             { ...Vector3.build(this.currentSourcePosition).add(positionSpawning), r: this.currentSourcePosition.r },
-            particleProperties.sizeStart,
-            particleProperties.particleRotationStart,
-            particleProperties.colorStart
+            startSizeInput,
+            startAngleInput,
+            startColorInput
         )
 
-        return new SprayingParticle(
-            advancedVariable,
+        const targetAngleDeg = targetAngleDirection * 180 / Math.PI;
+
+        return new SprayingParticle({
             sprite,
             target,
             particleLifetime,
-            this.currentSourcePosition.z + positionSpawning.z,
-            particleProperties.riseRateStart,
-            particleProperties.riseRateEnd,
-            particleProperties.velocityStart,
-            particleProperties.velocityEnd,
-            particleProperties.angleStart.add(targetAngleDirection * 180 / Math.PI),
-            particleProperties.angleEnd.add(targetAngleDirection * 180 / Math.PI),
-            particleProperties.sizeStart,
-            particleProperties.sizeEnd,
-            particleProperties.particleRotationStart.add(targetAngleDirection * 180 / Math.PI),
-            particleProperties.particleRotationEnd.add(targetAngleDirection * 180 / Math.PI),
-            particleProperties.colorStart,
-            particleProperties.colorEnd,
-            particleProperties.alphaStart,
-            particleProperties.alphaEnd,
-            particleProperties.vibrationAmplitudeStart,
-            particleProperties.vibrationAmplitudeEnd,
-            particleProperties.vibrationFrequencyStart,
-            particleProperties.vibrationFrequencyEnd,
+            elevationStart: this.currentSourcePosition.z + positionSpawning.z,
+            particleRiseRate: particleProperties.particleRiseRate,
+            particleVelocity: particleProperties.particleVelocity,
+            particleAngle: particleProperties.particleAngle.add(targetAngleDeg),
+            particleSize: particleProperties.particleSize,
+            particleRotation: particleProperties.particleRotation.add(targetAngleDeg),
+            particleColor: particleProperties.particleColor,
+            alpha: particleProperties.alpha,
+            vibrationAmplitude: particleProperties.vibrationAmplitude,
+            vibrationFrequency: particleProperties.vibrationFrequency
+        },
+            advancedVariable,
             this.isElevationManage
-        )
+        );
     }
 }
 
@@ -344,47 +317,67 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
     }
 
     /**
-     * Constructs a MissileParticleTemplate.
-     * @param {foundry.canvas.placeables.PlaceableObject | string} source - Source position or object.
-     * @param {Array<foundry.canvas.placeables.PlaceableObject | string>|foundry.canvas.placeables.PlaceableObject | string} targets - Target object(s).
-     * @param {string} pathType - Trajectory path type (LINEAR, CURVE).
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} positionSpawning - Spawning position offset.
-     * @param {number | string | Array<number|string>} velocityStart - Starting velocity.
-     * @param {number | string | Array<number|string>} velocityEnd - Ending velocity.
-     * @param {number | string | Array<number|string>} riseRateStart - Starting rise rate.
-     * @param {number | string | Array<number|string>} riseRateEnd - Ending rise rate.
-     * @param {number | string | Array<number|string>} angleStart - Starting angle.
-     * @param {number | string | Array<number|string>} angleEnd - Ending angle.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeStart - Starting size.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeEnd - Ending size.
-     * @param {number | string | Array<number|string>} particleRotationStart - Starting rotation.
-     * @param {number | string | Array<number|string>} particleRotationEnd - Ending rotation.
-     * @param {number | string | Array<number|string>} particleLifetime - Lifetime in ms.
-     * @param {string} particleShape - Shape key name.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} colorStart - Starting color.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} colorEnd - Ending color.
-     * @param {number | string | Array<number|string>} alphaStart - Starting alpha.
-     * @param {number | string | Array<number|string>} alphaEnd - Ending alpha.
-     * @param {number | string | Array<number|string>} vibrationAmplitudeStart - Starting vibration amplitude.
-     * @param {number | string | Array<number|string>} vibrationAmplitudeEnd - Ending vibration amplitude.
-     * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
-     * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
-     * @param {boolean} freezeOnPause - Freeze state on game pause.
-     * @param {Array<{type: "atEmissionStart"|"atParticleStart"|"atEmissionEnd"|"atParticleEnd", particleInputs : Array<string|import('../prefillMotionTemplate.js').MotionTemplateQuery|import('../prefillColorTemplate.js').ColorTemplateQuery>, delay: number | undefined}>} next - Array of next steps.
-     * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables.
-     * @param {Array<ParticleTemplate>} subParticleTemplates - Templates for sub-particles trailing the missile.
+     * Factory builder for MissileParticleTemplate.
+     * @param {Object} input - Configuration input object.
+     * @param {Array<ParticleTemplate>} subParticleTemplates - Sub particle templates.
+     * @returns {MissileParticleTemplate} Constructed instance.
      */
-    constructor(source, targets, pathType, positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
-        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced, subParticleTemplates) {
-        super(source, targets?.[0], positionSpawning, velocityStart, velocityEnd, riseRateStart, riseRateEnd, angleStart, angleEnd,
-            sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
-            vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced)
+    static build(input, subParticleTemplates) {
+        return new MissileParticleTemplate(
+            input.source,
+            input.target,
+            input.pathType,
+            input.positionSpawning,
+            input.particleVelocity,
+            input.particleRiseRate,
+            input.particleAngle,
+            input.particleSize,
+            input.particleRotation,
+            input.particleLifetime,
+            input.particleShape,
+            input.particleColor,
+            input.alpha,
+            input.vibrationAmplitude,
+            input.vibrationFrequency,
+            input.freezeOnPause,
+            input.next,
+            input.advanced,
+            subParticleTemplates
+        );
+    }
+
+    /**
+     * Constructs a MissileParticleTemplate.
+     * @param {Object|foundry.canvas.placeables.PlaceableObject|string} source - Source position/object or options.
+     * @param {Array<foundry.canvas.placeables.PlaceableObject|string>|foundry.canvas.placeables.PlaceableObject|string} [targets] - Target object(s).
+     * @param {string} [pathType] - Trajectory path type (LINEAR, CURVE).
+     * @param {Vector3|Object} [positionSpawning] - Spawning position offset.
+     * @param {{list: Array<{time: number, value: number | string  | Array<number|string>}>}} [particleVelocity] - Velocity keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleRiseRate] - Rise rate keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [particleAngle] - Angle keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleSize] - Size keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [particleRotation] - Rotation angle keyframe list.
+     * @param {number|string|Array<number|string>} [particleLifetime] - Lifetime in ms.
+     * @param {string} [particleShape] - Shape key name.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleColor] - Color keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [alpha] - Alpha keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [vibrationAmplitude] - Vibration amplitude keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [vibrationFrequency] - Vibration frequency keyframe list.
+     * @param {boolean} [freezeOnPause] - Freeze state on game pause.
+     * @param {Array<Object>} [next] - Array of next steps.
+     * @param {Object} [advanced] - Advanced variables.
+     * @param {Array<ParticleTemplate>} [subParticleTemplates] - Templates for sub-particles trailing the missile.
+     */
+    constructor(source, targets, pathType, positionSpawning, particleVelocity, particleRiseRate, particleAngle, particleSize, particleRotation,
+        particleLifetime, particleShape, particleColor, alpha, vibrationAmplitude, vibrationFrequency, freezeOnPause, next, advanced, subParticleTemplates) {
+
+        super(source, targets?.[0], positionSpawning, particleVelocity, particleRiseRate, particleAngle, particleSize, particleRotation,
+            particleLifetime, particleShape, particleColor, alpha, vibrationAmplitude, vibrationFrequency, freezeOnPause, next, advanced);
 
         if (targets === undefined || Array.isArray(targets)) {
-            this.targets = targets
+            this.targets = targets;
         } else {
-            this.targets = [targets]
+            this.targets = [targets];
         }
 
         this.pathType = pathType;
@@ -406,8 +399,7 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
     generateMainParticles() {
         if (this.targets === undefined) {
             const mainParticle = super.generateParticles();
-            mainParticle.particleRotationStart.add(mainParticle.angleStart.getValue())
-            mainParticle.particleRotationEnd.add(mainParticle.angleEnd.getValue())
+            mainParticle.particleRotation.add(mainParticle.particleAngle.currentValue)
             return mainParticle
         }
 
@@ -415,59 +407,59 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
 
         let particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable, true)
 
-        this.currentSourcePosition = Utils.getSourcePosition(particleProperties.source.getValue(), this.isElevationManage)
+        this.currentSourcePosition = Utils.getSourcePosition(particleProperties.source.currentValue, this.isElevationManage)
 
         if (this.currentSourcePosition === undefined) return
 
-        let targetsPosition = Utils.getArrayRandomValueFrom(this.targets)
+        let targetsPosition = Utils.getArrayRandomValueFrom('targets', this.targets)
             .map((item) => Utils.getSourcePosition(item, this.isElevationManage));
 
         const pathPositions = [this.currentSourcePosition, ...targetsPosition];
+        const angleStartVal = particleProperties.particleAngle.computeValue(0, advancedVariable);
+        const angleEndVal = particleProperties.particleAngle.computeValue(1, advancedVariable);
+
         const path = Path.build(
             this.pathType,
             pathPositions,
-            particleProperties.angleStart,
-            particleProperties.angleEnd
+            angleStartVal,
+            angleEndVal
         );
 
         if (path === undefined || path.totalLenght === 0) {
             return super.generateParticles();
         }
 
-        let particleLifetime = particleProperties.particleLifetime.getValue()
-        let positionSpawning = particleProperties.positionSpawning.getValue()
+        let particleLifetime = particleProperties.particleLifetime.currentValue
+        let positionSpawning = particleProperties.positionSpawning.currentValue
+
+        const startSizeInput = particleProperties.particleSize.computeValue(0, advancedVariable);
+        const startAngleInput = particleProperties.particleRotation.computeValue(0, advancedVariable);
+        const startColorInput = particleProperties.particleColor.computeValue(0, advancedVariable);
 
         const sprite = this.initSprite(
             { ...Vector3.build(this.currentSourcePosition).add(positionSpawning), r: this.currentSourcePosition.r },
-            particleProperties.sizeStart,
-            particleProperties.particleRotationStart,
-            particleProperties.colorStart
+            startSizeInput,
+            startAngleInput,
+            startColorInput
         );
 
-        const mainParticle = new PathParticle(
-            advancedVariable,
+        const mainParticle = new PathParticle({
             sprite,
             path,
             particleLifetime,
-            this.currentSourcePosition.z + positionSpawning.z,
-            particleProperties.riseRateStart,
-            particleProperties.riseRateEnd,
-            particleProperties.velocityStart,
-            particleProperties.velocityEnd,
-            particleProperties.sizeStart,
-            particleProperties.sizeEnd,
-            particleProperties.particleRotationStart,
-            particleProperties.particleRotationEnd,
-            particleProperties.colorStart,
-            particleProperties.colorEnd,
-            particleProperties.alphaStart,
-            particleProperties.alphaEnd,
-            particleProperties.vibrationAmplitudeStart,
-            particleProperties.vibrationAmplitudeEnd,
-            particleProperties.vibrationFrequencyStart,
-            particleProperties.vibrationFrequencyEnd,
+            elevationStart: this.currentSourcePosition.z + positionSpawning.z,
+            particleRiseRate: particleProperties.particleRiseRate,
+            particleVelocity: particleProperties.particleVelocity,
+            particleSize: particleProperties.particleSize,
+            particleRotation: particleProperties.particleRotation,
+            particleColor: particleProperties.particleColor,
+            alpha: particleProperties.alpha,
+            vibrationAmplitude: particleProperties.vibrationAmplitude,
+            vibrationFrequency: particleProperties.vibrationFrequency
+        },
+            advancedVariable,
             this.isElevationManage
-        )
+        );
 
         this.computeVelocity(mainParticle, path.totalLenght)
 
@@ -481,23 +473,20 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
      * @returns {void}
      */
     computeVelocity(mainParticle, distance) {
-        const averageVelocity = mainParticle.velocityEnd?.getValue() !== undefined ? (mainParticle.velocityStart?.getValue() + mainParticle.velocityEnd?.getValue()) / 2 : mainParticle.velocityStart?.getValue();
+        const velStart = mainParticle.particleVelocity.computeValue(0, this.advanced)
+        const velEnd = mainParticle.particleVelocity.computeValue(1, this.advanced)
+        const averageVelocity = (velStart + velEnd) / 2;
         const lifetimeVelocity = 1000 * distance / mainParticle.particleLifetime;
 
         if (lifetimeVelocity > averageVelocity) {
-            //We should move up velocity
             const velocityDifference = lifetimeVelocity - averageVelocity;
-            mainParticle.velocityStart?.add(velocityDifference);
-            mainParticle.velocityEnd?.add(velocityDifference);
-
-        } else if (averageVelocity !== 0) {
-            //We should move down lifeTime
+            mainParticle.particleVelocity.add(velocityDifference);
+        } else if (averageVelocity !== 0 && averageVelocity !== undefined) {
             const updatedLifetime = 1000 * distance / averageVelocity
             mainParticle.particleLifetime = updatedLifetime
             mainParticle.remainingTime = updatedLifetime
         }
     }
-
 
     /**
      * Generates main or trailing sub-particles for missile emission.
@@ -505,18 +494,15 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
      */
     generateParticles() {
         if (!this.initGenerate) {
-            //First init the main particles
             this.initGenerate = true
             return this.mainParticle
         }
 
         if (this.subParticleTemplates.length === 0) {
-            //No template for sub particles
             return
         }
 
         if (this.mainParticle === undefined) {
-            //Stop generating if main particle disapeared
             return
         }
 
@@ -531,7 +517,6 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
         if (usedSubParticleTemplate instanceof SprayingParticleTemplate) {
             generatedParticle = usedSubParticleTemplate.generateParticles()
 
-            //The x axis is the backward direction of the main particle
             const dircetionXFactor = {
                 x: - Math.cos(sourceDirectionRadian),
                 y: - Math.sin(sourceDirectionRadian)
@@ -542,21 +527,17 @@ export class MissileParticleTemplate extends SprayingParticleTemplate {
                 y: Math.cos(sourceDirectionRadian)
             }
 
-            //We change the spawning replacing the one without direction inside to a new one
             const generatedSprite = generatedParticle.sprite
             const oldPositionHorizontalSpawning = { x: generatedSprite.x - sourcePosition.x, y: generatedSprite.y - sourcePosition.y }
             generatedSprite.x = sourcePosition.x + dircetionXFactor.x * oldPositionHorizontalSpawning.x + dircetionYFactor.x * oldPositionHorizontalSpawning.y;
             generatedSprite.y = sourcePosition.y + dircetionXFactor.y * oldPositionHorizontalSpawning.x + dircetionYFactor.y * oldPositionHorizontalSpawning.y;
             generatedParticle.positionVibrationLess = { x: generatedSprite.x, y: generatedSprite.y, z: sourcePosition.z };
 
-            //We change the size with elevation
             const sizeFactor = Utils.handleElevationFactorForSize(generatedParticle.positionVibrationLess.z)
             generatedParticle.sprite.width *= sizeFactor
             generatedParticle.sprite.height *= sizeFactor
 
-            //We change the angle to be the trail of the direction by default
-            generatedParticle.angleStart.add(sourceDirection + 180)
-            generatedParticle.angleEnd.add(sourceDirection + 180)
+            generatedParticle.particleAngle.add(sourceDirection + 180);
         } else if (usedSubParticleTemplate instanceof GravitingParticleTemplate) {
             generatedParticle = usedSubParticleTemplate.generateParticles()
             generatedParticle.angle += sourceDirection + 180
@@ -585,114 +566,47 @@ export class GravitingParticleTemplate extends ParticleTemplate {
      * @returns {GravitingParticleTemplate} Constructed template instance.
      */
     static build(input) {
-        return new GravitingParticleTemplate(
-            input.source,
-            input.target,
-            input.particleAngleStart,
-            input.particleAxisElevationAngle,
-            input.particleVelocityStart,
-            input.particleVelocityEnd,
-            input.particleRiseRateStart,
-            input.particleRiseRateEnd,
-            input.particleRadiusStart,
-            input.particleRadiusEnd,
-            input.particleSizeStart,
-            input.particleSizeEnd,
-            input.particleRotationStart,
-            input.particleRotationEnd,
-            input.particleLifetime,
-            input.particleShape,
-            input.particleColorStart,
-            input.particleColorEnd,
-            input.alphaStart,
-            input.alphaEnd,
-            input.vibrationAmplitudeStart,
-            input.vibrationAmplitudeEnd,
-            input.vibrationFrequencyStart,
-            input.vibrationFrequencyEnd,
-            input.onlyEmitterFollow,
-            input.freezeOnPause,
-            input.next,
-            input.advanced
-        );
+        return new GravitingParticleTemplate(input.source, input.target, input.particleAngle,
+            input.particleAxisElevationAngle, input.particleVelocity, input.particleRiseRate,
+            input.particleRadius, input.particleSize, input.particleRotation, input.particleLifetime,
+            input.particleShape, input.particleColor, input.alpha,
+            input.vibrationAmplitude, input.vibrationFrequency, input.onlyEmitterFollow,
+            input.freezeOnPause, input.next, input.advanced, input.subParticleTemplates);
     }
 
     /**
-         * Constructs a MissileParticleTemplate.
-         * @param {foundry.canvas.placeables.PlaceableObject | string} source - Source position or object.
-         * @param {Array<foundry.canvas.placeables.PlaceableObject | string>|foundry.canvas.placeables.PlaceableObject | string} targets - Target object(s).
-         * @param {string} pathType - Trajectory path type (LINEAR, CURVE).
-         * @param {number | string | Vector3 | Array<number|string|Vector3>} positionSpawning - Spawning position offset.
-         * @param {number | string | Array<number|string>} velocityStart - Starting velocity.
-         * @param {number | string | Array<number|string>} velocityEnd - Ending velocity.
-         * @param {number | string | Array<number|string>} riseRateStart - Starting rise rate.
-         * @param {number | string | Array<number|string>} riseRateEnd - Ending rise rate.
-         * @param {number | string | Array<number|string>} angleStart - Starting angle.
-         * @param {number | string | Array<number|string>} angleEnd - Ending angle.
-         * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeStart - Starting size.
-         * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeEnd - Ending size.
-         * @param {number | string | Array<number|string>} particleRotationStart - Starting rotation.
-         * @param {number | string | Array<number|string>} particleRotationEnd - Ending rotation.
-         * @param {number | string | Array<number|string>} particleLifetime - Lifetime in ms.
-         * @param {string} particleShape - Shape key name.
-         * @param {number | string | Vector3 | Array<number|string|Vector3>} colorStart - Starting color.
-         * @param {number | string | Vector3 | Array<number|string|Vector3>} colorEnd - Ending color.
-         * @param {number | string | Array<number|string>} alphaStart - Starting alpha.
-         * @param {number | string | Array<number|string>} alphaEnd - Ending alpha.
-         * @param {number | string | Array<number|string>} vibrationAmplitudeStart - Starting vibration amplitude.
-         * @param {number | string | Array<number|string>} vibrationAmplitudeEnd - Ending vibration amplitude.
-         * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
-         * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
-         * @param {boolean} freezeOnPause - Freeze state on game pause.
-         * @param {Array<{type: "atEmissionStart"|"atParticleStart"|"atEmissionEnd"|"atParticleEnd", particleInputs : Array<string|import('../prefillMotionTemplate.js').MotionTemplateQuery|import('../prefillColorTemplate.js').ColorTemplateQuery>, delay: number | undefined}>} next - Array of next steps.
-         * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables.
-         * @param {Array<ParticleTemplate>} subParticleTemplates - Templates for sub-particles trailing the missile.
-         */
-
-
-    /**
      * Constructs a GravitingParticleTemplate.
-     * @param {foundry.canvas.placeables.PlaceableObject | string} source - Center source object/position.
-     * @param {foundry.canvas.placeables.PlaceableObject | string} target - Target object/position.
-     * @param {number | string | Array<number|string>} angleStart - Starting angle.
-     * @param {number} axisElevationAngle - Track elevation angle.
-     * @param {number | string | Array<number|string>} angularVelocityStart - Starting angular velocity.
-     * @param {number | string | Array<number|string>} angularVelocityEnd - Ending angular velocity.
-     * @param {number | string | Array<number|string>} riseRateStart - Starting rise rate.
-     * @param {number | string | Array<number|string>} riseRateEnd - Ending rise rate.
-     * @param {number | string | Array<number|string>} radiusStart - Starting radius.
-     * @param {number | string | Array<number|string>} radiusEnd - Ending radius.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeStart - Starting size.
-     * @param {number | string | Vector3 | Array<number|string|Vector3>} sizeEnd - Ending size.
-     * @param {number | string | Array<number|string>} particleRotationStart - Starting rotation.
-     * @param {number | string | Array<number|string>} particleRotationEnd - Ending rotation.
-     * @param {number | string | Array<number|string>} particleLifetime - Particle lifetime.
-     * @param {string} particleShape - Shape key name.
-     * @param {number | string | Array<number|string>} colorStart - Starting color.
-     * @param {number | string | Array<number|string>} colorEnd - Ending color.
-     * @param {number | string | Array<number|string>} alphaStart - Starting alpha.
-     * @param {number | string | Array<number|string>} alphaEnd - Ending alpha.
-     * @param {number | string | Array<number|string>} vibrationAmplitudeStart - Starting vibration amplitude.
-     * @param {number | string | Array<number|string>} vibrationAmplitudeEnd - Ending vibration amplitude.
-     * @param {number | string | Array<number|string>} vibrationFrequencyStart - Starting vibration frequency.
-     * @param {number | string | Array<number|string>} vibrationFrequencyEnd - Ending vibration frequency.
-     * @param {boolean} onlyEmitterFollow - Whether particle only follows emitter.
-     * @param {boolean} freezeOnPause - Freeze state on game pause.
-     * @param {Array<{type: "atEmissionStart"|"atParticleStart"|"atEmissionEnd"|"atParticleEnd", particleInputs : Array<string|import('../prefillMotionTemplate.js').MotionTemplateQuery|import('../prefillColorTemplate.js').ColorTemplateQuery>, delay: number | undefined}>} next - Array of next steps.
-     * @param {{variables:Record<string, number|string|Vector3|Object|Array|Function>|undefined}|undefined} advanced - Advanced variables.
+     * @param {Object|foundry.canvas.placeables.PlaceableObject|string} source - Center source object/position or options.
+     * @param {foundry.canvas.placeables.PlaceableObject|string} [target] - Target object/position.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [particleAngle] - Angle keyframe list.
+     * @param {number} [particleAxisElevationAngle] - Track elevation angle.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [angularVelocity] - Angular velocity keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleRiseRate] - Rise rate keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [particleRadius] - Radius keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleSize] - Size keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [particleRotation] - Rotation keyframe list.
+     * @param {number|string|Array<number|string>} [particleLifetime] - Particle lifetime.
+     * @param {string} [particleShape] - Shape key name.
+     * @param {{list: Array<{time: number, value: number | string | Vector3 | Array<number|string|Vector3>}>}} [particleColor] - Color keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [alpha] - Alpha keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [vibrationAmplitude] - Vibration amplitude keyframe list.
+     * @param {{list: Array<{time: number, value: number | string | Array<number|string>}>}} [vibrationFrequency] - Vibration frequency keyframe list.
+     * @param {boolean} [onlyEmitterFollow] - Whether particle only follows emitter.
+     * @param {boolean} [freezeOnPause] - Freeze state on game pause.
+     * @param {Array<Object>} [next] - Array of next steps.
+     * @param {Object} [advanced] - Advanced variables.
      */
-    constructor(source, target, angleStart, axisElevationAngle, angularVelocityStart, angularVelocityEnd, riseRateStart, riseRateEnd, radiusStart, radiusEnd,
-        sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd,
-        vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, onlyEmitterFollow, freezeOnPause, next, advanced) {
-        super(source, target, sizeStart, sizeEnd, particleRotationStart, particleRotationEnd, particleLifetime, particleShape, colorStart, colorEnd, alphaStart, alphaEnd, riseRateStart, riseRateEnd, vibrationAmplitudeStart, vibrationAmplitudeEnd, vibrationFrequencyStart, vibrationFrequencyEnd, freezeOnPause, next, advanced)
+    constructor(source, target, particleAngle, particleAxisElevationAngle, angularVelocity, particleRiseRate, particleRadius, particleSize, particleRotation,
+        particleLifetime, particleShape, particleColor, alpha, vibrationAmplitude, vibrationFrequency, onlyEmitterFollow, freezeOnPause, next, advanced) {
 
-        this.angleStart = angleStart;                        //Array of Number
-        this.axisElevationAngle = this.isElevationManage ? axisElevationAngle : undefined;
-        this.angularVelocityStart = angularVelocityStart;  //Number      
-        this.angularVelocityEnd = angularVelocityEnd;      //Number
-        this.radiusStart = radiusStart;                     //Number      
-        this.radiusEnd = radiusEnd;                         //Number
-        this.onlyEmitterFollow = onlyEmitterFollow;         //Boolean
+        super(source, target, particleSize, particleRotation, particleLifetime, particleShape, particleColor,
+            alpha, particleRiseRate, vibrationAmplitude, vibrationFrequency, freezeOnPause, next, advanced);
+
+        this.particleAngle = particleAngle;
+        this.axisElevationAngle = this.isElevationManage ? particleAxisElevationAngle : undefined;
+        this.angularVelocity = angularVelocity;
+        this.particleRadius = particleRadius;
+        this.onlyEmitterFollow = onlyEmitterFollow;
     }
 
     /**
@@ -701,37 +615,30 @@ export class GravitingParticleTemplate extends ParticleTemplate {
      */
     generateParticles() {
         const advancedVariable = AdvancedVariable.computeAdvancedVariables(this.advanced?.variables)
+        const particleProperties = Utils.getObjectRandomValueFrom(this, advancedVariable, true)
 
-        const source = Utils.getRandomValueFrom(this.source, advancedVariable)
+        const source = particleProperties.source.computeValue(0, advancedVariable)
         this.currentSourcePosition = Utils.getSourcePosition(source, this.isElevationManage)
 
-        const target = Utils.getRandomValueFrom(this.target, advancedVariable)
+        const target = particleProperties.target.computeValue(0, advancedVariable)
         const targetPosition = Utils.getSourcePosition(target, this.isElevationManage)
 
-        const riseRateStart = Utils.getRandomParticuleInputFrom(this.riseRateStart, advancedVariable)
-        const riseRateEnd = Utils.getRandomParticuleInputFrom(this.riseRateEnd, advancedVariable)
 
         let angleOriginValue
         let axisElevationAngle
-        //Handle target direction
         if (targetPosition) {
-            if (this.currentSourcePosition.x !== this.target.x || this.currentSourcePosition.y !== this.target.y) {
-                //Handle horizontal target direction
+            if (this.currentSourcePosition.x !== targetPosition.x || this.currentSourcePosition.y !== targetPosition.y) {
                 angleOriginValue = Math.atan2(targetPosition.y - this.currentSourcePosition.y, targetPosition.x - this.currentSourcePosition.x) * 180 / Math.PI
 
                 if (this.axisElevationAngle !== undefined) {
-                    //We rotate angleOriginValue and axisElevationAngle to have the particle face the target when it appears
                     axisElevationAngle = this.axisElevationAngle - angleOriginValue + 90
                     angleOriginValue = 90
                 }
             }
 
             if (targetPosition.z !== undefined && targetPosition.z - this.currentSourcePosition.z !== 0) {
-                //Handle vertical target direction
                 const targetDistance = Math.sqrt(Math.pow(targetPosition.x - this.currentSourcePosition.x, 2) + Math.pow(targetPosition.y - this.currentSourcePosition.y, 2) + Math.pow(targetPosition.z - this.currentSourcePosition.z, 2))
-
-                riseRateStart.add((targetPosition.z - this.currentSourcePosition.z) / targetDistance)
-                riseRateEnd.add((targetPosition.z - this.currentSourcePosition.z) / targetDistance)
+                particleProperties.particleRiseRate.add((targetPosition.z - this.currentSourcePosition.z) / targetDistance);
             }
 
         } else {
@@ -739,51 +646,48 @@ export class GravitingParticleTemplate extends ParticleTemplate {
             axisElevationAngle = this.axisElevationAngle
         }
 
-        const angleStart = Utils.getRandomValueFrom(this.angleStart, advancedVariable) + angleOriginValue
-        const radiusStartInput = Utils.getRandomParticuleInputFrom(this.radiusStart, advancedVariable)
-        let radiusStart = radiusStartInput.getValue()
+        const angleStartVal = particleProperties.particleAngle.computeValue(0, advancedVariable)
+        const angleStart = angleStartVal + angleOriginValue;
+        const radiusStart = particleProperties.particleRadius.computeValue(0, advancedVariable)
 
-        const riseRate = Utils.handleFraction(riseRateStart.getValue())
+        const riseRateStartVal = particleProperties.particleRiseRate.computeValue(0, advancedVariable)
+        const riseRate = Utils.handleFraction(riseRateStartVal);
 
         const particlePosition = GravitingParticle.computeParticlePosition(this.currentSourcePosition, radiusStart, angleStart * (Math.PI / 180), riseRate, axisElevationAngle);
-        const startSizeInput = Utils.getRandomParticuleInputFrom(this.sizeStart, advancedVariable)
-        const rotationStartInput = Utils.getRandomParticuleInputFrom(this.particleRotationStart, advancedVariable).add(angleOriginValue)
-        const colorStartInput = Utils.getRandomParticuleInputFrom(this.colorStart, advancedVariable)
+        const startSizeInput = particleProperties.particleSize.computeValue(0, advancedVariable)
+        const rotationStartInput = particleProperties.particleRotation.computeValue(0, advancedVariable)
+        const colorStartInput = particleProperties.particleColor.computeValue(0, advancedVariable)
+
+        if (rotationStartInput && typeof rotationStartInput.add === 'function') {
+            rotationStartInput.add(angleOriginValue);
+        }
 
         const sprite = this.initSprite(
             particlePosition,
             startSizeInput,
-            colorStartInput,
+            rotationStartInput,
             colorStartInput
         )
 
-        return new GravitingParticle(
-            advancedVariable,
+        return new GravitingParticle({
             sprite,
-            this.onlyEmitterFollow ? this.currentSourcePosition : source,
-            Utils.getRandomParticuleInputFrom(this.particleLifetime, advancedVariable).getValue(),
-            particlePosition.z,
+            center: this.onlyEmitterFollow ? this.currentSourcePosition : source,
+            particleLifetime: Utils.getRandomValueFrom(this.particleLifetime, advancedVariable),
+            elevationStart: particlePosition.z,
             axisElevationAngle,
-            riseRateStart,
-            riseRateEnd,
-            angleStart,
-            Utils.getRandomParticuleInputFrom(this.angularVelocityStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.angularVelocityEnd, advancedVariable),
-            radiusStartInput,
-            Utils.getRandomParticuleInputFrom(this.radiusEnd, advancedVariable),
-            startSizeInput,
-            Utils.getRandomParticuleInputFrom(this.sizeEnd, advancedVariable),
-            rotationStartInput,
-            Utils.getRandomParticuleInputFrom(this.particleRotationEnd, advancedVariable).add(angleOriginValue),
-            colorStartInput,
-            Utils.getRandomParticuleInputFrom(this.colorEnd, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.alphaStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.alphaEnd, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.vibrationAmplitudeStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.vibrationAmplitudeEnd, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.vibrationFrequencyStart, advancedVariable),
-            Utils.getRandomParticuleInputFrom(this.vibrationFrequencyEnd, advancedVariable),
+            particleRiseRate: particleProperties.particleRiseRate,
+            angle: angleStart,
+            angularVelocity: particleProperties.angularVelocity ?? particleProperties.particleVelocity,
+            particleRadius: particleProperties.particleRadius,
+            particleSize: particleProperties.particleSize,
+            particleRotation: particleProperties.particleRotation.add(angleOriginValue),
+            particleColor: particleProperties.particleColor,
+            alpha: particleProperties.alpha,
+            vibrationAmplitude: particleProperties.vibrationAmplitude,
+            vibrationFrequency: particleProperties.vibrationFrequency
+        },
+            advancedVariable,
             this.isElevationManage
-        )
+        );
     }
 }

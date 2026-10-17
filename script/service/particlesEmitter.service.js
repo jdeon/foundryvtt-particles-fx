@@ -5,7 +5,7 @@ import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTem
 import { ParticleWorkFlowManager } from "../object/particleWorkFlow.js"
 import { defaultMotionTemplate } from "../prefillMotionTemplate.js"
 import { defaultColorTemplate } from "../prefillColorTemplate.js"
-import { CompatibiltyV2Manager } from "../utils/compatibilityManager.js"
+import { CompatibiltyV2Manager, CompatibiltyV3Manager } from "../utils/compatibilityManager.js"
 import { EmittersPanel } from "../object/emittersPanel.js"
 
 /**
@@ -86,6 +86,7 @@ export function sprayParticles(...args) {
  */
 function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
+    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
@@ -126,6 +127,7 @@ export function missileParticles(...args) {
  */
 function _missileParticles({ emitterId, inputObject, motionTemplate, colorTemplates, particleShapes }) {
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
+    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
 
     const finalInput = _mergeTemplate(
         Utils.retrieveRandomElementFromArray(colorTemplates),
@@ -143,31 +145,29 @@ function _missileParticles({ emitterId, inputObject, motionTemplate, colorTempla
     const subParticleTemplates = [];
     colorNameSafeArray.forEach((colorTemplate) => {
         shapeSafeArray.forEach((particleShape) => {
-            const finalSubParticlesInput = Utils.mergeInputTemplate(finalInput.subParticles, colorTemplate)
-
-            if (colorTemplate === undefined) {
-                if (!finalSubParticlesInput.particleColorStart) {
-                    finalSubParticlesInput.particleColorStart = finalInput.particleColorStart;
-                    finalSubParticlesInput.particleColorEnd = finalInput.particleColorEnd;
-                } else if (!finalSubParticlesInput.particleColorEnd) {
-                    finalSubParticlesInput.particleColorEnd = finalInput.subParticles.particleColorStart;
+            if (finalInput.subParticles?.particleColor === undefined) {
+                if (colorTemplate) {
+                    const { particleColor } = Utils.normalizeStartEndProperties(colorTemplate);
+                    finalInput.subParticles.particleColor = particleColor;
+                } else {
+                    finalInput.subParticles.particleColor = finalInput.particleColor;
                 }
             }
 
             if (particleShape) {
-                finalSubParticlesInput.particleShape = particleShape;
+                finalInput.subParticles.particleShape = particleShape;
             } else if (!finalInput.subParticles.particleShape) {
-                finalSubParticlesInput.particleShape = finalInput.particleShape;
+                finalInput.subParticles.particleShape = finalInput.particleShape;
             }
 
             let subParticleTemplate
-            if (finalSubParticlesInput.type === SprayingParticleTemplate.getType()) {
+            if (finalInput.subParticles.type === SprayingParticleTemplate.getType()) {
                 //this is a spray particle
-                subParticleTemplate = SprayingParticleTemplate.build(finalSubParticlesInput);
+                subParticleTemplate = SprayingParticleTemplate.build(finalInput.subParticles);
                 subParticleTemplate.type = SprayingParticleTemplate.getType();
-            } else if (finalSubParticlesInput.type === GravitingParticleTemplate.getType()) {
+            } else if (finalInput.subParticles.type === GravitingParticleTemplate.getType()) {
                 //this is a graviting particle
-                subParticleTemplate = GravitingParticleTemplate.build(finalSubParticlesInput);
+                subParticleTemplate = GravitingParticleTemplate.build(finalInput.subParticles);
                 subParticleTemplate.type = GravitingParticleTemplate.getType();
             }
 
@@ -177,36 +177,7 @@ function _missileParticles({ emitterId, inputObject, motionTemplate, colorTempla
         })
     })
 
-    const particleTemplate = new MissileParticleTemplate(
-        finalInput.source,
-        finalInput.target,
-        finalInput.pathType,
-        Vector3.build(finalInput.positionSpawning),
-        finalInput.particleVelocityStart,
-        finalInput.particleVelocityEnd,
-        finalInput.particleRiseRateStart,
-        finalInput.particleRiseRateEnd,
-        finalInput.particleAngleStart,
-        finalInput.particleAngleEnd,
-        finalInput.particleSizeStart,
-        finalInput.particleSizeEnd,
-        finalInput.particleRotationStart,
-        finalInput.particleRotationEnd,
-        finalInput.particleLifetime,
-        finalInput.particleShape,
-        Vector3.build(finalInput.particleColorStart),
-        Vector3.build(finalInput.particleColorEnd),
-        finalInput.alphaStart,
-        finalInput.alphaEnd,
-        finalInput.vibrationAmplitudeStart,
-        finalInput.vibrationAmplitudeEnd,
-        finalInput.vibrationFrequencyStart,
-        finalInput.vibrationFrequencyEnd,
-        finalInput.freezeOnPause,
-        finalInput.next,
-        finalInput.advanced,
-        subParticleTemplates,
-    );
+    const particleTemplate = MissileParticleTemplate.build(finalInput, subParticleTemplates);
 
     //finalInput.emissionDuration must be the same as mainParticle.particleLifetime
     finalInput.emissionDuration = particleTemplate.mainParticle.particleLifetime
@@ -234,6 +205,7 @@ export function gravitateParticles(...args) {
  */
 function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
     CompatibiltyV2Manager.correctDeprecatedParam(inputObject)
+    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
@@ -733,10 +705,12 @@ function _handleMultipleEmission({ emitterId, inputObject, motionNameTemplates, 
  * @returns {Object} Merged final input configuration.
  */
 function _mergeTemplate(colorTemplate, motionTemplate, inputObject) {
-    const inputMergeMotionTemplate = Utils.mergeInputTemplate(inputObject, motionTemplate)
-    const inputMergeColorTemplate = Utils.mergeInputTemplate(inputMergeMotionTemplate, colorTemplate)
-    const mergeDefaultValue = Utils.mergeInputTemplate(defaultMotionTemplate(), defaultColorTemplate())
-    const finalInput = Utils.mergeInputTemplate(inputMergeColorTemplate, mergeDefaultValue)
+    const inputMergeMotionQuery = Utils.mergeInputQuery(inputObject, motionTemplate)
+    const inputMergeColorQuery = Utils.mergeInputQuery(inputMergeMotionQuery, colorTemplate)
+    const mergeDefaultQuery = Utils.mergeInputQuery(defaultMotionTemplate(), defaultColorTemplate())
+    const finalQuery = Utils.mergeInputQuery(inputMergeColorQuery, mergeDefaultQuery)
+
+    const finalInput = Utils.normalizeStartEndProperties(finalQuery)
 
     return finalInput;
 }

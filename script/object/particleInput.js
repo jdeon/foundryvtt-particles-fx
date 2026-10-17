@@ -1,120 +1,128 @@
-import { Utils, Vector3, sameStartKey } from "../utils/utils.js"
+import { Utils, Vector3 } from "../utils/utils.js"
 
 /**
- * Wrapper class managing scalar particle configuration input values and operations.
+ * ParticleInput class managing keyframe list particle configuration input values and operations.
  */
 export class ParticleInput {
 
     /**
-     * Factory method creating appropriate ParticleInput subclass based on input command and variables.
-     * @param {number|Vector3} inputValue - Constant initial scalar or vector value.
-     * @param {string|Vector3} inputCmd - Input command string or command vector.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables.
+     * Factory method creating appropriate ParticleInput instance based on input command and variables.
+     * @param {string} propertyKey - The key of the property.
+     * @param {{list:Array<{time:number,value:number|Vector3|string}>}} inputValues - Keyframe list property object { list: [...] }
+     * @param {{list:Array<{time:number,value:Vector3|string}>}} inputQueries - String to extract the value from the input
+     * @param {Record<string, number|string|Vector3|Object|Array|Function>} [advancedVariables] - Active advanced variables.
      * @returns {ParticleInput} Instantiated ParticleInput instance.
      */
-    static build(inputValue, inputCmd, advancedVariables) {
-        let isTimedLinked = false
+    static build(propertyKey, inputValues, inputQueries, advancedVariables) {
+        if (inputValues instanceof ParticleInput) {
+            return inputValues;
+        }
 
-        if (typeof inputCmd === 'string') {
-            isTimedLinked = ParticleInput._checkIsTimedLinked(inputCmd, advancedVariables)
-        } else if (inputCmd instanceof Vector3) {
-            for (let key of Object.keys(inputCmd)) {
-                if (ParticleInput._checkIsTimedLinked(inputCmd[key], advancedVariables)) {
-                    isTimedLinked = true
-                    break
+        if (!inputValues?.list) {
+            return new ParticleInput(propertyKey, inputValues)
+        }
+
+        let isTimedLinked = (inputQueries?.list ?? []).some(item => {
+            if (typeof item.value === 'string') {
+                return ParticleInput._checkIsTimedLinked(item.value, advancedVariables)
+            } else if (item.value instanceof Vector3) {
+                for (let key of Object.keys(item.value)) {
+                    if (ParticleInput._checkIsTimedLinked(item.value[key], advancedVariables)) {
+                        return true;
+                    }
                 }
             }
-        }
+            return false;
+        })
 
 
         if (isTimedLinked) {
-            if (inputValue instanceof Vector3) {
-                return new TimedParticleVectorInput(inputValue, inputCmd)
-            } else {
-                return new TimedParticleInput(inputValue, inputCmd)
+            if (inputValues.list.length > 1) {
+                throw new Error(`Particule FX | ${propertyKey} : Timed input should only have one timed query. Start and End suffix is not allowed.`);
             }
-        } else if (inputValue instanceof Vector3) {
-            return new ParticleVectorInput(inputValue)
+            const initialValue = inputValues.list[0].value;
+            if (initialValue instanceof Vector3) {
+                return new TimedParticleVectorInput(propertyKey, initialValue, inputQueries.list[0].value)
+            }
+            return new TimedParticleInput(propertyKey, initialValue, inputQueries.list[0].value)
         } else {
-            return new ParticleInput(inputValue)
+            return new FrameParticleInput(propertyKey, inputValues.list)
         }
     }
 
     /**
      * Checks if input command string references any time-dependent advanced variable.
-     * @param {string} inputCmd - Command string containing template tags.
+     * @param {string} inputQuery - Command string containing template tags.
      * @param {Record<string, AdvancedVariable>} advancedVariables - Active advanced variables map.
      * @returns {boolean} True if linked to timed variables.
      */
-    static _checkIsTimedLinked(inputCmd, advancedVariables) {
-        if (typeof inputCmd !== "string") return false
+    static _checkIsTimedLinked(inputQuery, advancedVariables) {
+        if (typeof inputQuery !== "string") return false;
 
-
-        let isTimedLinked = false
-
-        const usedVariables = inputCmd.match(/(?<=\{\{).+?(?=\}\})/g) //Get all value inside {{}}
+        let isTimedLinked = false;
+        const usedVariables = inputQuery.match(/(?<=\{\{).+?(?=\}\})/g); //Get all value inside {{}}
 
         if (usedVariables?.length > 0) {
             for (let key of usedVariables) {
                 if (advancedVariables[key]?.isTimedLinked) {
-                    isTimedLinked = true
-                    break
+                    isTimedLinked = true;
+                    break;
                 }
             }
         }
 
-        return isTimedLinked
+        return isTimedLinked;
     }
 
     /**
-     * Constructs a ParticleInput instance.
-     * @param {number|string|symbol} inputValue - Initial scalar input value.
+     * Constructs a ParticleInput instance managing a keyframe list.
+     * @param {string} propertyKey - The key of the property.
+     * @param {number|Vector3|string} value
+    */
+    constructor(propertyKey, value) {
+        this.propertyKey = propertyKey;
+        this.currentValue = value;
+    }
+
+    /**
+     * Interpolates time-value keyframes over lifetime proportion.
+     * @param {number} [lifetimeProportion=0] - Ratio of elapsed lifetime (0 to 1).
+     * @param {Record<string, Object>} [advancedVariables] - Map of active advanced variables.
+     * @returns {number|Vector3} Interpolated frame result.
      */
-    constructor(inputValue) {
-        this.inputValue = inputValue
+    computeValue(_lifetimeProportion = 0, _advancedVariables) {
+        return this.currentValue;
     }
 
     /**
-     * Retrieves current scalar input value.
-     * @returns {number|string|symbol} Current scalar value.
-     */
-    getValue() {
-        return this.inputValue
-    }
-
-    /**
-     * Multiplies scalar value by factor.
-     * @param {number} value - Factor multiplier.
-     * @returns {ParticleInput} Reference to this instance.
-     */
-    multiply(value) {
-        if (this._isInvalidOperation(value)) return this
-
-        this.inputValue = this.inputValue * value
-
-        return this
-    }
-
-    /**
-     * Adds scalar value to input value.
-     * @param {number} value - Term to add.
+     * Adds scalar or vector value to all keyframe values in this list.
+     * @param {number|Vector3} value - Term to add.
      * @returns {ParticleInput} Reference to this instance.
      */
     add(value) {
-        if (this._isInvalidOperation(value)) return this
+        if (this.currentValue && typeof this.currentValue.add === 'function') {
+            this.currentValue.add(value);
+        } else if (typeof this.currentValue === 'number') {
+            this.currentValue += value;
+        }
 
-        this.inputValue = this.inputValue + value
-
-        return this
+        return this;
     }
 
     /**
-     * Checks if operation is invalid (NaN or sameStartKey).
-     * @param {number} value - Operation operand.
-     * @returns {boolean} True if operation is invalid.
+     * Multiplies all keyframe values by factor.
+     * @param {number|Vector3} value - Multiplier factor.
+     * @returns {ParticleInput} Reference to this instance.
      */
-    _isInvalidOperation(value) {
-        return isNaN(value) || this.inputValue === sameStartKey
+    multiply(value) {
+
+        if (this.currentValue && typeof this.currentValue.multiply === 'function') {
+            this.currentValue.multiply(value);
+        } else if (typeof this.currentValue === 'number') {
+            this.currentValue *= value;
+        }
+
+        return this;
     }
 
     /**
@@ -122,89 +130,147 @@ export class ParticleInput {
      * @returns {ParticleInput} Cloned instance.
      */
     clone() {
-        return new ParticleInput(this.inputValue);
+        return new ParticleInput(this.propertyKey, this.currentValue);
     }
 }
 
-/**
- * Subclass handling Vector3 particle input values.
- */
-export class ParticleVectorInput extends ParticleInput {
 
+export class FrameParticleInput extends ParticleInput {
     /**
-     * Constructs a ParticleVectorInput instance.
-     * @param {Vector3} inputValue - Vector3 input value.
-     */
-    constructor(inputValue) {
-        super(inputValue)
+     * Constructs a ParticleInput instance managing a keyframe list.
+     * @param {string} propertyKey - The key of the property.
+     * @param {Array<{time:number,value:number|Vector3|string>}} values - Keyframes list array or object.
+    */
+    constructor(propertyKey, values) {
+        const orderedValues = values.sort((a, b) => a.time - b.time);
+        super(propertyKey, orderedValues[0].value);
+        this.values = orderedValues;
+        this.lifetimeProportion = 0;
     }
 
     /**
-     * Retrieves current Vector3 value.
-     * @returns {Vector3} Current Vector3 value.
+     * Interpolates time-value keyframes over lifetime proportion.
+     * @param {number} [lifetimeProportion=0] - Ratio of elapsed lifetime (0 to 1).
+     * @param {Record<string, Object>} [advancedVariables] - Map of active advanced variables.
+     * @returns {number|Vector3} Interpolated frame result.
      */
-    getValue() {
-        return this.inputValue
+    computeValue(lifetimeProportion = 0, _advancedVariables) {
+        this.lifetimeProportion = lifetimeProportion;
+
+        if (!this.values || this.values.length === 0) return undefined;
+
+        if (this.values.length === 1 || lifetimeProportion <= this.values[0].time) {
+            this.currentValue = this.values[0].value;
+            return this.currentValue;
+        }
+
+        if (lifetimeProportion >= this.values[this.values.length - 1].time) {
+            this.currentValue = this.values[this.values.length - 1].value;
+            return this.currentValue;
+        }
+
+        const nextIndex = this.values.findIndex((item) => item.time > lifetimeProportion); //find the first keyframe time greater than the current lifetime proportion
+        const currentIndex = nextIndex - 1
+
+        const timeDiff = this.values[nextIndex].time - this.values[currentIndex].time;
+        const segmentProportion = timeDiff > 0 ? (lifetimeProportion - this.values[currentIndex].time) / timeDiff : 0;
+
+        const v0 = this.values[currentIndex].value;
+        const v1 = this.values[nextIndex].value;
+
+        if (v0 instanceof Vector3) {
+            if (!v1 instanceof Vector3) {
+                throw new Error(`Particule FX | ${this.propertyKey} : Keyframe only partially composed of Vector3`);
+            }
+            this.currentValue = v0.add(v1.minus(v0).multiply(segmentProportion));
+        } else if (typeof v0 === 'number' && typeof v1 === 'number') {
+            this.currentValue = v0 + (v1 - v0) * segmentProportion;
+        } else {
+            this.currentValue = v0
+        }
+
+        return this.currentValue;
     }
 
     /**
-     * Multiplies Vector3 value by scalar factor.
-     * @param {number} value - Multiplier factor.
-     * @returns {ParticleVectorInput} Reference to this instance.
-     */
-    multiply(value) {
-        this.inputValue = this.inputValue.multiply(value)
-        return this
-    }
-
-    /**
-     * Adds scalar value to Vector3 value components.
-     * @param {number} value - Term to add.
-     * @returns {ParticleVectorInput} Reference to this instance.
+     * Adds scalar or vector value to all keyframe values in this list.
+     * @param {number|Vector3} value - Term to add.
+     * @returns {FrameParticleInput} Reference to this instance.
      */
     add(value) {
-        this.inputValue = this.inputValue.add(value)
-        return this
+        if (!this.values) return this;
+        for (const item of this.values) {
+            if (item.value && typeof item.value.add === 'function') {
+                item.value.add(value);
+            } else if (typeof item.value === 'number') {
+                item.value += value;
+            }
+        }
+        return this;
     }
 
     /**
-     * Clones this ParticleVectorInput instance.
-     * @returns {ParticleVectorInput} Cloned instance.
+     * Multiplies all keyframe values by factor.
+     * @param {number|Vector3} value - Multiplier factor.
+     * @returns {FrameParticleInput} Reference to this instance.
+     */
+    multiply(value) {
+        if (!this.values) return this;
+        for (const item of this.values) {
+            if (item.value && typeof item.value.multiply === 'function') {
+                item.value.multiply(value);
+            } else if (typeof item.value === 'number') {
+                item.value *= value;
+            }
+        }
+        return this;
+    }
+
+    /**
+     * Clones this ParticleInput instance.
+     * @returns {FrameParticleInput} Cloned instance.
      */
     clone() {
-        return new ParticleVectorInput(Vector3.build(this.inputValue));
+        const newValues = this.values.map(item => ({
+            time: item.time,
+            value: item.value && typeof item.value.clone === 'function' ? item.value.clone() : item.value
+        }));
+        return new FrameParticleInput(this.propertyKey, newValues);
     }
 }
 
 
 /**
- * Subclass handling dynamic, time-linked scalar particle input values.
+ * Subclass handling dynamic, time-linked scalar particle value inputs.
  */
 export class TimedParticleInput extends ParticleInput {
 
     /**
-     * Constructs a TimedParticleInput instance.
-     * @param {number|string|symbol} inputValue - Initial default input value.
-     * @param {string} inputCmd - Command template expression string.
+     * Constructs a TimedParticleValueInput instance.
+     * @param {string} propertyKey - The key of the property.
+     * @param {number|string} value - Initial value.
+     * @param {string} inputQuery - Input query string.
      */
-    constructor(inputValue, inputCmd) {
-        super(inputValue)
-        this.inputCmd = inputCmd
+    constructor(propertyKey, value, inputQuery) {
+        super(propertyKey, value);
+        this.initialValue = value
+        this.inputQuery = inputQuery
         this._valueOperations = []
     }
 
     /**
      * Evaluates dynamic timed value using active advanced variables.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>>} [advancedVariables] - Active advanced variables.
+     * @param {number} _lifetimeProportion - Lifetime proportion, unused.
+     * @param {Object} advancedVariables - Active advanced variables.
      * @returns {number|string|symbol} Calculated timed scalar value.
      */
-    getValue(advancedVariables) {
-
+    computeValue(_lifetimeProportion, advancedVariables) {
         if (advancedVariables) {
-            return this._computeTimeValue(advancedVariables)
+            this.currentValue = this._computeTimeValue(advancedVariables);
+        } else {
+            this.currentValue = this.initialValue;
         }
-
-        return this.inputValue
+        return this.currentValue;
     }
 
     /**
@@ -213,11 +279,9 @@ export class TimedParticleInput extends ParticleInput {
      * @returns {TimedParticleInput} Reference to this instance.
      */
     multiply(value) {
-        if (this._isInvalidOperation(value)) return this
-
-        this._valueOperations.push({ value, operation: (a, b) => a * b })
-
-        return this
+        if (isNaN(value)) return this;
+        this._valueOperations.push({ value, operation: (a, b) => a * b });
+        return this;
     }
 
     /**
@@ -226,67 +290,50 @@ export class TimedParticleInput extends ParticleInput {
      * @returns {TimedParticleInput} Reference to this instance.
      */
     add(value) {
-        if (this._isInvalidOperation(value)) return this
-
-        this._valueOperations.push({ value, operation: (a, b) => a + b })
-
-        return this
+        if (isNaN(value)) return this;
+        this._valueOperations.push({ value, operation: (a, b) => a + b });
+        return this;
     }
 
     /**
-     * Clones this TimedParticleInput instance.
+     * Clones this TimedParticleValueInput instance.
      * @returns {TimedParticleInput} Cloned instance.
      */
     clone() {
-        const result = new TimedParticleInput(this.inputValue, this.inputCmd);
-        result._valueOperations.push(...this._valueOperations)
+        const result = new TimedParticleValueInput(this.propertyKey, this.values);
+        result._valueOperations.push(...this._valueOperations);
         return result;
     }
 
     /**
      * Evaluates timed value expression for current frame.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables map.
+     * @param {Record<string, Object>} advancedVariables - Active advanced variables map.
      * @returns {number} Evaluated frame result.
      */
     _computeTimeValue(advancedVariables) {
-        let result = Utils._managePercent(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables));
-
-        if (isNaN(result)) return this.inputValue
+        let result = Utils._managePercent(Utils._replaceWithAdvanceVariable(this.inputQuery, advancedVariables));
+        if (isNaN(result)) return this.currentValue;
 
         for (let valueOperation of this._valueOperations) {
-            result = valueOperation.operation(result, valueOperation.value)
+            result = valueOperation.operation(result, valueOperation.value);
         }
-
-        return result
+        return result;
     }
 }
 
 /**
- * Subclass handling dynamic, time-linked Vector3 particle input values.
+ * Subclass handling dynamic, time-linked Vector3 particle value inputs.
  */
 export class TimedParticleVectorInput extends TimedParticleInput {
 
     /**
      * Constructs a TimedParticleVectorInput instance.
-     * @param {Vector3} inputValue - Default Vector3 input value.
-     * @param {Vector3|string} inputCmd - Vector command expression.
+     * @param {string} propertyKey - The key of the property.
+     * @param {Vector3} value - Initial value.
+     * @param {string|Vector3} inputQuery - Input query string.
      */
-    constructor(inputValue, inputCmd) {
-        super(inputValue, inputCmd)
-    }
-
-    /**
-     * Evaluates dynamic timed Vector3 value using active advanced variables.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>} [advancedVariables] - Active advanced variables.
-     * @returns {Vector3} Calculated Vector3 value.
-     */
-    getValue(advancedVariables) {
-
-        if (advancedVariables) {
-            return this._computeTimeValue(advancedVariables)
-        }
-
-        return this.inputValue
+    constructor(propertyKey, value, inputQuery) {
+        super(propertyKey, value, inputQuery);
     }
 
     /**
@@ -295,11 +342,9 @@ export class TimedParticleVectorInput extends TimedParticleInput {
      * @returns {TimedParticleVectorInput} Reference to this instance.
      */
     multiply(value) {
-        if (isNaN(value) && !value instanceof Vector3) return this
-
-        this._valueOperations.push({ value, operation: (a, b) => a.multiply(b) })
-
-        return this
+        if (isNaN(value) && !(value instanceof Vector3)) return this;
+        this._valueOperations.push({ value, operation: (a, b) => a.multiply(b) });
+        return this;
     }
 
     /**
@@ -308,11 +353,9 @@ export class TimedParticleVectorInput extends TimedParticleInput {
      * @returns {TimedParticleVectorInput} Reference to this instance.
      */
     add(value) {
-        if (isNaN(value) && !value instanceof Vector3) return this
-
-        this._valueOperations.push({ value, operation: (a, b) => a.add(b) })
-
-        return this
+        if (isNaN(value) && !(value instanceof Vector3)) return this;
+        this._valueOperations.push({ value, operation: (a, b) => a.add(b) });
+        return this;
     }
 
     /**
@@ -320,25 +363,23 @@ export class TimedParticleVectorInput extends TimedParticleInput {
      * @returns {TimedParticleVectorInput} Cloned instance.
      */
     clone() {
-        const result = new TimedParticleVectorInput(Vector3.build(this.inputValue), this.inputCmd);
+        const result = new TimedParticleVectorInput(this.propertyKey, Vector3.build(this.inputValue), this.inputQuery);
         result._valueOperations.push(...this._valueOperations)
         return result;
     }
 
     /**
      * Evaluates timed Vector3 expression for current frame.
-     * @param {Record<string, number|string|Vector3|Object|Array|Function>} advancedVariables - Active advanced variables map.
+     * @param {Record<string, Object>} advancedVariables - Active advanced variables map.
      * @returns {Vector3} Computed Vector3 result.
      */
     _computeTimeValue(advancedVariables) {
-        let result = Vector3.build(Utils._replaceWithAdvanceVariable(this.inputCmd, advancedVariables))
-
-        if (!result.computeVariable()) return this.inputValue
+        let result = Vector3.build(Utils._replaceWithAdvanceVariable(this.inputQuery, advancedVariables));
+        if (!result.computeVariable()) return this.inputValue;
 
         for (let valueOperation of this._valueOperations) {
-            result = valueOperation.operation(result, valueOperation.value)
+            result = valueOperation.operation(result, valueOperation.value);
         }
-
-        return result
+        return result;
     }
 }

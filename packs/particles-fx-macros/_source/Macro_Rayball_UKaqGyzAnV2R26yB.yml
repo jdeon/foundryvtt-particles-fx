@@ -30,7 +30,7 @@ command: >-
       particleLifetime: [1000, 1500],
       particleVelocityStart: 150,
       particleVelocityEnd: 50,
-      particleAngleStart: '0_360',
+      particleAngle: '0_360',
       particleRadiusStart: '100%',
       particleRadiusEnd: '25%',
       particleSizeStart: 10,
@@ -39,7 +39,7 @@ command: >-
       alphaEnd: 0,
       next: [{
         delay: 1,
-        type: "atEmissionEnd",
+        type: "atEmissionStart",
         particleInputs: [
           {
             source: source.id,
@@ -50,7 +50,7 @@ command: >-
             subParticles: {
                 type: "Graviting",
                 particleLifetime: 2000,
-                particleAngleStart: '0_360',
+                particleAngle: '0_360',
                 particleRadiusStart: '10%',
                 particleRadiusEnd: '50%',
             },
@@ -62,7 +62,7 @@ command: >-
                 type: "Spraying",
                 emissionDuration: 1000,
                 next:[{
-                  type: "atEmissionStart",
+                  type: "atEmissionEnd",
                   delay: 1,
                   particleInputs: [[
                     { source:targetId, type: "Spraying" },
@@ -99,7 +99,7 @@ _stats:
   systemId: dnd5e
   systemVersion: 5.2.4
   createdTime: 1775857215392
-  modifiedTime: 1775857215442
+  modifiedTime: 1792099566398
   lastModifiedBy: sLwoTjtfykXvWNpR
 _id: UKaqGyzAnV2R26yB
 sort: 200000
