@@ -2,7 +2,7 @@ import { listen } from "./script/utils/socketManager.js"
 import { initEmitters, persistEmitters, stopAllEmission } from "./script/service/particlesEmitter.service.js"
 import { addCustomPrefillMotionTemplate, addCustomPrefillColorTemplate } from "./script/service/prefillTemplate.service.js"
 import { s_MODULE_ID, Utils } from "./script/utils/utils.js"
-import { CompatibiltyV3Manager } from "./script/utils/compatibilityManager.js"
+import { CompatibilityV3Manager } from "./script/utils/compatibilityManager.js"
 import apiController from "./script/api/apiController.js"
 import { subscribeApiToWindow } from "./script/api/windowsController.js"
 import { initChatController } from "./script/api/chatController.js"
@@ -37,7 +37,7 @@ Hooks.on("setup", () => {
         default: false
     });
 
-    CompatibiltyV3Manager.addMigrationSettings()
+    CompatibilityV3Manager.addMigrationSettings();
 
     game.settings.register(s_MODULE_ID, "saveEmitters", {
         name: game.i18n.localize("PARTICULE-FX.Settings.Persist.label"),
@@ -173,7 +173,7 @@ Hooks.on("canvasReady", () => {
 Hooks.once('ready', function () {
     console.log(`main | ready to ${s_MODULE_ID}`);
 
-    CompatibiltyV3Manager.migrate()
+    CompatibilityV3Manager.migrate();
 
     if (firstSceneEmittersQueries) {
         initEmitters(firstSceneEmittersQueries)

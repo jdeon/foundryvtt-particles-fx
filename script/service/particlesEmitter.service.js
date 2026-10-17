@@ -4,7 +4,7 @@ import { SprayingParticleTemplate, GravitingParticleTemplate, MissileParticleTem
 import { ParticleWorkFlowManager } from "../object/particleWorkFlow.js"
 import { defaultMotionTemplate } from "../prefillMotionTemplate.js"
 import { defaultColorTemplate } from "../prefillColorTemplate.js"
-import { CompatibiltyV3Manager } from "../utils/compatibilityManager.js"
+import { CompatibilityV3Manager } from "../utils/compatibilityManager.js"
 import { EmittersPanel } from "../object/emittersPanel.js"
 
 /**
@@ -84,7 +84,7 @@ export function sprayParticles(...args) {
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _sprayParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
-    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
+    CompatibilityV3Manager.warningMissingSuffix(inputObject)
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 
@@ -124,7 +124,7 @@ export function missileParticles(...args) {
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _missileParticles({ emitterId, inputObject, motionTemplate, colorTemplates, particleShapes }) {
-    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
+    CompatibilityV3Manager.warningMissingSuffix(inputObject);
 
     const finalInput = _mergeTemplate(
         Utils.retrieveRandomElementFromArray(colorTemplates),
@@ -201,7 +201,7 @@ export function gravitateParticles(...args) {
  * @returns {ParticlesEmitter} Instantiated ParticlesEmitter.
  */
 function _gravitateParticles(colorTemplate, motionTemplate, inputObject, emitterId) {
-    CompatibiltyV3Manager.warningMissingSuffix(inputObject)
+    CompatibilityV3Manager.warningMissingSuffix(inputObject);
 
     const finalInput = _mergeTemplate(colorTemplate, motionTemplate, inputObject)
 

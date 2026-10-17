@@ -4,7 +4,7 @@ import { s_MODULE_ID } from "./utils.js"
  * Handles backwards compatibility migration and validation for v3.
  * Warns when Start or End property suffixes exist without their matching pair.
  */
-export class CompatibiltyV3Manager {
+export class CompatibilityV3Manager {
 
     /**
      * Displays a deprecation warning notification when a Start suffix exists without a matching End suffix.
@@ -67,7 +67,7 @@ export class CompatibiltyV3Manager {
         }
 
         const newCustomPrefillTemplate = Object.entries(customPrefillTemplate).map(([key, value]) => {
-            const fixedValue = CompatibiltyV3Manager._fixStartEndSuffix(value)
+            const fixedValue = CompatibilityV3Manager._fixStartEndSuffix(value)
             if (fixedValue.startWithoutEnd.length > 0 || fixedValue.endWithoutStart.length > 0) {
                 let displayMessage = `Deprecated: your custom template ${key} has been fixed with the version 3 of Particles Fx migration.`
                 if (fixedValue.startWithoutEnd.length > 0) {
@@ -98,13 +98,13 @@ export class CompatibiltyV3Manager {
      * @returns {{startWithoutEnd: Array<string>, endWithoutStart: Array<string>}} List of flagged parameter keys.
      */
     static warningMissingSuffix(input) {
-        const { startWithoutEnd, endWithoutStart } = CompatibiltyV3Manager.checkStartEndSuffix(input, false);
+        const { startWithoutEnd, endWithoutStart } = CompatibilityV3Manager.checkStartEndSuffix(input, false);
 
         if (startWithoutEnd.length > 0) {
-            CompatibiltyV3Manager.compatibiltyStartMessage(startWithoutEnd);
+            CompatibilityV3Manager.compatibiltyStartMessage(startWithoutEnd);
         }
         if (endWithoutStart.length > 0) {
-            CompatibiltyV3Manager.compatibiltyEndMessage(endWithoutStart);
+            CompatibilityV3Manager.compatibiltyEndMessage(endWithoutStart);
         }
 
         return { startWithoutEnd, endWithoutStart };
@@ -168,7 +168,7 @@ export class CompatibiltyV3Manager {
      * @returns {Object} Fixed configuration object.
      */
     static _fixStartEndSuffix(input) {
-        const { startWithoutEnd, endWithoutStart } = CompatibiltyV3Manager.checkStartEndSuffix(input, true);
+        const { startWithoutEnd, endWithoutStart } = CompatibilityV3Manager.checkStartEndSuffix(input, true);
 
         for (const startKey of startWithoutEnd) {
             const baseKey = startKey.slice(0, -5);
@@ -187,5 +187,3 @@ export class CompatibiltyV3Manager {
         };
     }
 }
-
-export const CompatibilityV3Manager = CompatibiltyV3Manager;
