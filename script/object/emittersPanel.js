@@ -130,7 +130,7 @@ export class EmittersPanel extends foundry.applications.api.HandlebarsApplicatio
         context.emitters = emitters.map(emitter => ({
             id: String(emitter.id),
             isPaused: !!emitter.isPaused,
-            particleCount: emitter.particles?.length || 0
+            particleCount: emitter.particleCount ?? emitter.particles?.length ?? 0
         }));
         context.hasEmitters = context.emitters.length > 0;
         return context;

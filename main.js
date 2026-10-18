@@ -9,6 +9,7 @@ import { initChatController } from "./script/api/chatController.js"
 import ParticlesEmitter from "./script/object/particlesEmitter.js"
 import { setupAutomation, automationInitialisation } from "./script/autoGeneration/automaticGeneration.service.js"
 import { EmittersPanel } from "./script/object/emittersPanel.js"
+import { registerCustomBehaviors } from "./script/behaviors/behaviorRegistry.js"
 
 //The first scene emitters is load before the game is ready, we need to wait until the ready hooks
 /**
@@ -18,10 +19,11 @@ import { EmittersPanel } from "./script/object/emittersPanel.js"
 let firstSceneEmittersQueries
 
 /**
- * Handles the 'init' hook to initialize module chat controller.
+ * Handles the 'init' hook to initialize module chat controller and custom behaviors.
  */
 Hooks.on("init", () => {
     initChatController();
+    registerCustomBehaviors();
 });
 
 /**
@@ -145,6 +147,7 @@ Hooks.on("setup", () => {
  * Handles the 'canvasReady' hook to initialize emission canvas and load saved emitters.
  */
 Hooks.on("canvasReady", () => {
+    registerCustomBehaviors();
     ParticlesEmitter.INIT_EMISSION_CANVAS()
 
     Utils.doubleSizeElevation = game.settings.get(s_MODULE_ID, "doubleSizeElevation")

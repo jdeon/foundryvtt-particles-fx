@@ -6,6 +6,7 @@ import { defaultMotionTemplate } from "../prefillMotionTemplate.js"
 import { defaultColorTemplate } from "../prefillColorTemplate.js"
 import { CompatibilityV3Manager } from "../utils/compatibilityManager.js"
 import { EmittersPanel } from "../object/emittersPanel.js"
+import { EmitterRouter } from "./emitterRouter.service.js"
 
 /**
  * Generates a unique 10-character random string emitter ID using Foundry's randomID utility.
@@ -247,7 +248,7 @@ export function persistEmitters() {
                 const query = foundry.utils.deepClone(emitter.finalQuery)
                 query.isPaused = emitter.isPaused
                 query.emissionDuration = emitter.remainingTime
-                query.type = emitter.particleTemplate.constructor.getType()
+                query.type = emitter.particleTemplate?.constructor?.getType?.() || emitter.finalQuery?.type || "Spraying"
                 acc[emitter.id] = query
                 return acc
             }, {})
@@ -590,38 +591,48 @@ export async function writeMessageForEmissionById(emitterId, verbal) {
  * @returns {ParticlesEmitter} Created emitter instance.
  */
 function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitterIds) {
-    const particlesEmitter = new ParticlesEmitter(
-        emitterIds?.emitterId || nextEmitterId(),
-        particleTemplate,
-        {
-            spawningFrequence: finalInput.spawningFrequence,
-            spawningNumber: finalInput.spawningNumber,
-            maxParticles: finalInput.maxParticles,
-            emissionDuration: finalInput.emissionDuration,
-        },
-        emitterIds?.parentWorkflowId,
-        finalInput._nbEmitterSibling
+    const type = particleTemplate?.constructor?.getType?.() || finalInput.type || "Spraying";
+
+    return EmitterRouter.spawnEmitter(
+        inputQuery,
+        finalInput,
+        type,
+        emitterIds,
+        (id) => {
+            const particlesEmitter = new ParticlesEmitter(
+                id,
+                particleTemplate,
+                {
+                    spawningFrequence: finalInput.spawningFrequence,
+                    spawningNumber: finalInput.spawningNumber,
+                    maxParticles: finalInput.maxParticles,
+                    emissionDuration: finalInput.emissionDuration,
+                },
+                emitterIds?.parentWorkflowId,
+                finalInput._nbEmitterSibling
+            );
+
+            if (finalInput.isPaused) {
+                particlesEmitter.isPaused = true;
+            }
+
+            // Listen for animate update
+            particlesEmitter.callback = particlesEmitter.manageParticles.bind(particlesEmitter);
+            particlesEmitter.originalQuery = inputQuery;
+            particlesEmitter.finalQuery = finalInput;
+
+            canvas.app.ticker.add(particlesEmitter.callback);
+
+            ParticlesEmitter.emitters.push(particlesEmitter);
+            EmittersPanel.refresh();
+
+            if (!particlesEmitter.parentWorkflowId) {
+                persistEmitters();
+            }
+
+            return particlesEmitter;
+        }
     );
-
-    if (finalInput.isPaused) {
-        particlesEmitter.isPaused = true;
-    }
-
-    // Listen for animate update
-    particlesEmitter.callback = particlesEmitter.manageParticles.bind(particlesEmitter)
-    particlesEmitter.originalQuery = inputQuery
-    particlesEmitter.finalQuery = finalInput
-
-    canvas.app.ticker.add(particlesEmitter.callback)
-
-    ParticlesEmitter.emitters.push(particlesEmitter)
-    EmittersPanel.refresh()
-
-    if (!particlesEmitter.parentWorkflowId) {
-        persistEmitters();
-    }
-
-    return particlesEmitter
 }
 
 /**
