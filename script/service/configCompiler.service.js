@@ -1,199 +1,113 @@
-import { Utils, SPRITE_TEXTURE_MAPPING, Vector3 } from "../utils/utils.js";
+import { Utils, s_MODULE_ID } from "../utils/utils.js";
+import { onParticleSpawn, onParticleUpdate, onParticleDeath } from "./particleGeneratorStrategies.js";
+
+export const SPRITE_TEXTURE_PATHS = {
+    CIRCLE: `modules/${s_MODULE_ID}/sprite/circle-sprite-particle.png`,
+    TOR: `modules/${s_MODULE_ID}/sprite/tor-sprite-particle.png`,
+    STAR: `modules/${s_MODULE_ID}/sprite/star-sprite-particle.png`,
+    DIAMOND: `modules/${s_MODULE_ID}/sprite/diamond-sprite-particle.png`
+};
 
 /**
- * Converts color representation (Vector3, RGB array, or object) to a hex color string (#RRGGBB).
- * @param {Vector3|Array<number>|Object|string} val - Source color representation.
- * @returns {string} Hexadecimal color string.
- */
-function toColorHex(val) {
-    if (typeof val === "string") {
-        if (val.startsWith("#")) return val;
-        if (val.startsWith("0x")) return `#${val.slice(2)}`;
-    }
-    if (val instanceof Vector3 || (typeof val === "object" && val !== null && val.x !== undefined)) {
-        const r = Math.min(255, Math.max(0, Math.floor(val.x)));
-        const g = Math.min(255, Math.max(0, Math.floor(val.y)));
-        const b = Math.min(255, Math.max(0, Math.floor(val.z)));
-        return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-    }
-    if (Array.isArray(val) && val.length >= 3) {
-        const r = Math.min(255, Math.max(0, Math.floor(val[0])));
-        const g = Math.min(255, Math.max(0, Math.floor(val[1])));
-        const b = Math.min(255, Math.max(0, Math.floor(val[2])));
-        return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
-    }
-    return "#ffffff";
-}
-
-/**
- * Compiles a normalized Particles FX finalInput configuration into an EmitterConfigV3 object
- * suitable for @pixi/particle-emitter and foundry.canvas.ParticleEffect.
+ * Compiles a normalized Particles FX finalInput configuration into a configuration object
+ * suitable for Foundry VTT v14's native foundry.canvas.animation.ParticleGenerator.
  */
 export class ConfigCompiler {
 
     /**
-     * Translates normalized finalInput and emission type into an EmitterConfigV3 JSON object.
-     * @param {Object} finalInput - Normalized query configuration from Utils.normalizeStartEndProperties.
-     * @param {string} [emissionType="Spraying"] - Emission archetype: "Spraying", "Graviting", or "Missile".
-     * @returns {Object} Complete EmitterConfigV3 object.
+     * Translates normalized finalInput into a ParticleGenerator configuration object.
+     * @param {Object} finalInput - Normalized query configuration.
+     * @param {string} [emissionType="Spraying"] - Archetype: "Spraying", "Graviting", or "Missile".
+     * @param {Object} [context={}] - Context metadata (emitterId, particleTemplate).
+     * @returns {Object} Complete ParticleGenerator options object.
      */
-    static compile(finalInput, emissionType = "Spraying") {
-        const isElevationManage = Boolean(finalInput.isElevationManage ?? game.settings.get("particule-fx", "activateElevation"));
-        const sourcePos = Utils.getSourcePosition(finalInput.source, isElevationManage) || { x: 0, y: 0, z: 0 };
-
-        // 1. Particle Lifetime
-        let lifetime;
-        if (Array.isArray(finalInput.particleLifetime)) {
-            lifetime = {
-                min: Number(finalInput.particleLifetime[0]) / 1000,
-                max: Number(finalInput.particleLifetime[1]) / 1000
-            };
-        } else {
-            const ltSec = Math.max(0.05, Number(finalInput.particleLifetime || 3500) / 1000);
-            lifetime = { min: ltSec, max: ltSec };
-        }
-
-        // 2. Frequency & Spawn Rate
-        const frequency = Math.max(0.001, (Number(finalInput.spawningFrequence) || 16) / 1000);
-        const particlesPerWave = Math.max(1, Number(finalInput.spawningNumber) || 1);
-        const maxParticles = Math.max(1, Number(finalInput.maxParticles) || 1000);
-
-        // 3. Emitter Lifetime (duration)
-        const emitterLifetime = (finalInput.emissionDuration && !isNaN(finalInput.emissionDuration))
-            ? Math.max(0.01, Number(finalInput.emissionDuration) / 1000)
-            : -1;
-
-        // 4. Texture resolution
-        const texture = Utils.getSpriteTextureFromId(finalInput.particleShape) || SPRITE_TEXTURE_MAPPING.CIRCLE;
-        const baseWidth = (texture?.orig?.width || texture?.width || 32);
-
-        // 5. Build behaviors array
-        const behaviors = [];
-
-        // Single Texture Behavior
-        behaviors.push({
-            type: "textureSingle",
-            config: { texture }
-        });
-
-        // Alpha Behavior
-        if (finalInput.alpha?.list?.length) {
-            behaviors.push({
-                type: "alpha",
-                config: {
-                    list: finalInput.alpha.list.map(kf => ({
-                        time: kf.time,
-                        value: Math.min(1, Math.max(0, Number(kf.value ?? 1)))
-                    }))
-                }
-            });
-        }
-
-        // Color Behavior
-        if (finalInput.particleColor?.list?.length) {
-            behaviors.push({
-                type: "color",
-                config: {
-                    list: finalInput.particleColor.list.map(kf => ({
-                        time: kf.time,
-                        value: toColorHex(kf.value)
-                    }))
-                }
-            });
-        }
-
-        // Scale Behavior
-        if (finalInput.particleSize?.list?.length) {
-            behaviors.push({
-                type: "scale",
-                config: {
-                    list: finalInput.particleSize.list.map(kf => {
-                        const px = (typeof kf.value === "object" && kf.value !== null && kf.value.x !== undefined)
-                            ? kf.value.x
-                            : Number(kf.value || 10);
-                        return {
-                            time: kf.time,
-                            value: Math.max(0.01, px / baseWidth)
-                        };
-                    }),
-                    minMult: 1
-                }
-            });
-        }
-
-        // 6. Motion Behaviors according to archetype
+    static compile(finalInput, emissionType = "Spraying", context = {}) {
+        const isElevationManage = Boolean(finalInput.isElevationManage ?? game.settings?.get(s_MODULE_ID, "activateElevation"));
         const effectiveType = finalInput.type || emissionType;
-        if (effectiveType === "Graviting" || effectiveType === "Gravitating") {
-            behaviors.push({
-                type: "orbit",
-                config: {
-                    source: finalInput.source ?? finalInput.center,
-                    angularVelocity: finalInput.angularVelocity ?? finalInput.particleVelocity,
-                    radius: finalInput.particleRadius,
-                    riseRate: finalInput.particleRiseRate,
-                    axisElevationAngle: finalInput.axisElevationAngle ?? 0,
-                    angleStart: finalInput.angleStart ?? finalInput.angle,
-                    isElevationManage
-                }
-            });
-        } else if (effectiveType === "Missile" && finalInput.path) {
-            behaviors.push({
-                type: "pathFollower",
-                config: {
-                    path: finalInput.path,
-                    velocity: finalInput.particleVelocity,
-                    isElevationManage
-                }
-            });
+
+        // 1. Lifetime in milliseconds
+        let lifetime;
+        let avgLifetimeMs = 3000;
+        if (Array.isArray(finalInput.particleLifetime)) {
+            const min = Math.max(50, Number(finalInput.particleLifetime[0]) || 1000);
+            const max = Math.max(min, Number(finalInput.particleLifetime[1]) || 3000);
+            lifetime = { min, max };
+            avgLifetimeMs = (min + max) / 2;
         } else {
-            // Default Spraying motion
-            behaviors.push({
-                type: "spraying",
-                config: {
-                    velocity: finalInput.particleVelocity,
-                    angle: finalInput.particleAngle,
-                    riseRate: finalInput.particleRiseRate,
-                    source: finalInput.source,
-                    target: finalInput.target,
-                    isElevationManage
-                }
-            });
+            const val = Math.max(50, Number(finalInput.particleLifetime || 3000));
+            lifetime = { min: val, max: val };
+            avgLifetimeMs = val;
         }
 
-        // Elevation Behavior
-        if (isElevationManage) {
-            behaviors.push({
-                type: "elevation",
-                config: {
-                    elevationStart: sourcePos.z ?? 0,
-                    particleRiseRate: finalInput.particleRiseRate,
-                    velocity: finalInput.particleVelocity,
-                    isElevationManage: true
-                }
-            });
+        // 2. Textures path array
+        const shapeKey = (typeof finalInput.particleShape === "string" ? finalInput.particleShape.toUpperCase() : "CIRCLE");
+        const texturePath = SPRITE_TEXTURE_PATHS[shapeKey] || SPRITE_TEXTURE_PATHS.CIRCLE;
+
+        // 3. Target particle count and emission duration
+        const maxParticles = Math.max(1, Number(finalInput.maxParticles) || 1000);
+        const emissionDuration = (finalInput.emissionDuration && !isNaN(finalInput.emissionDuration))
+            ? Number(finalInput.emissionDuration)
+            : undefined;
+
+        // 4. Fade envelope calculation
+        const fadeInMs = Math.min(avgLifetimeMs * 0.15, 300);
+        const fadeOutMs = Math.min(avgLifetimeMs * 0.25, 500);
+
+        // 5. Pre-calculate target offset if aimed spray
+        let targetAngleOffset;
+        if (finalInput.target && finalInput.source) {
+            const srcPos = Utils.getSourcePosition(finalInput.source, isElevationManage);
+            const tgtPos = Utils.getSourcePosition(finalInput.target, isElevationManage);
+            if (srcPos && tgtPos && (srcPos.x !== tgtPos.x || srcPos.y !== tgtPos.y)) {
+                targetAngleOffset = Math.atan2(tgtPos.y - srcPos.y, tgtPos.x - srcPos.x) * (180 / Math.PI);
+            }
         }
 
-        // Lateral Sinusoidal Vibration Behavior
-        if (finalInput.vibrationAmplitude) {
-            behaviors.push({
-                type: "vibration",
-                config: {
-                    amplitude: finalInput.vibrationAmplitude,
-                    frequency: finalInput.vibrationFrequency
-                }
-            });
-        }
+        // 6. Strategy Options bundle passed to lifecycle hooks
+        const strategyOptions = {
+            type: effectiveType,
+            source: finalInput.source ?? finalInput.center,
+            target: finalInput.target,
+            _targetAngleOffset: targetAngleOffset,
+            isElevationManage,
+            lifetimeMs: avgLifetimeMs,
+            velocity: finalInput.particleVelocity,
+            angle: finalInput.particleAngle,
+            angleStart: finalInput.angleStart ?? finalInput.angle,
+            angularVelocity: finalInput.angularVelocity ?? finalInput.particleVelocity,
+            radius: finalInput.particleRadius,
+            riseRate: finalInput.particleRiseRate,
+            axisElevationAngle: finalInput.axisElevationAngle ?? 0,
+            path: finalInput.path,
+            positionSpawning: finalInput.positionSpawning,
+            particleRotation: finalInput.particleRotation,
+            vibrationAmplitude: finalInput.vibrationAmplitude,
+            vibrationFrequency: finalInput.vibrationFrequency,
+            particleSize: finalInput.particleSize,
+            particleColor: finalInput.particleColor,
+            alpha: finalInput.alpha,
+            baseTextureWidth: 32,
+            emitterId: context.emitterId,
+            particleTemplate: context.particleTemplate,
+            freezeOnPause: Boolean(finalInput.freezeOnPause)
+        };
 
         return {
+            mode: "effect",
+            manual: true, // Manual mode: spawning is controlled directly by NativeParticlesEmitter based on spawn rate
+            count: maxParticles,
             lifetime,
-            frequency,
-            particlesPerWave,
+            textures: [texturePath],
+            fade: { in: fadeInMs, out: fadeOutMs },
+            emissionDuration,
+            spawningFrequence: Number(finalInput.spawningFrequence) || 16,
+            spawningNumber: Number(finalInput.spawningNumber) || 1,
             maxParticles,
-            emitterLifetime,
-            pos: { x: sourcePos.x, y: sourcePos.y },
-            addAtBack: false,
-            autoUpdate: true,
-            behaviors
+            freezeOnPause: Boolean(finalInput.freezeOnPause),
+            strategyOptions,
+            onSpawn: (particle) => onParticleSpawn(particle, strategyOptions),
+            onUpdate: (particle, context) => onParticleUpdate(particle, context, strategyOptions),
+            onDeath: (particle) => onParticleDeath(particle, strategyOptions)
         };
     }
 }

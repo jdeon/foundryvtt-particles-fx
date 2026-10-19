@@ -598,6 +598,7 @@ function _abstractInitParticles(inputQuery, finalInput, particleTemplate, emitte
         finalInput,
         type,
         emitterIds,
+        particleTemplate,
         (id) => {
             const particlesEmitter = new ParticlesEmitter(
                 id,

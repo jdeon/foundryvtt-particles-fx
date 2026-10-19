@@ -56,10 +56,11 @@ export class EmitterRouter {
      * @param {Object} finalInput - Merged normalized query.
      * @param {string} type - Emission type ("Spraying", "Graviting", "Missile").
      * @param {{emitterId?: string, parentWorkflowId?: string}} [emitterIds] - Identifier object.
+     * @param {Object} [particleTemplate] - ParticleTemplate instance.
      * @param {Function} fallbackCustomSpawner - Callback to spawn custom engine if required.
      * @returns {NativeParticlesEmitter|import("../object/particlesEmitter.js").default} Created emitter instance.
      */
-    static spawnEmitter(inputQuery, finalInput, type, emitterIds, fallbackCustomSpawner) {
+    static spawnEmitter(inputQuery, finalInput, type, emitterIds, particleTemplate, fallbackCustomSpawner) {
         const id = emitterIds?.emitterId || nextEmitterId();
 
         if (EmitterRouter.requiresCustomEngine(finalInput, type, emitterIds?.parentWorkflowId)) {
@@ -67,11 +68,11 @@ export class EmitterRouter {
         }
 
         try {
-            // Compile to EmitterConfigV3 and spawn with Native Core Engine
-            const emitterConfig = ConfigCompiler.compile(finalInput, type);
-            return new NativeParticlesEmitter(id, emitterConfig, null, inputQuery, finalInput);
+            // Compile to ParticleGenerator configuration
+            const generatorConfig = ConfigCompiler.compile(finalInput, type, { emitterId: id, particleTemplate });
+            return new NativeParticlesEmitter(id, generatorConfig, inputQuery, finalInput, particleTemplate);
         } catch (err) {
-            console.warn("Particule FX | Failed to compile or spawn native emitter, falling back to custom engine:", err);
+            console.warn("Particule FX | Failed to compile or spawn native ParticleGenerator, falling back to custom engine:", err);
             return fallbackCustomSpawner(id);
         }
     }
