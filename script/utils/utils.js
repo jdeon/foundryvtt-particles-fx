@@ -567,10 +567,27 @@ export class Utils {
     /**
      * Calculates 3D center position vector `{x, y, z, r}` for a placeable object or coordinate point.
      * @param {foundry.canvas.placeables.PlaceableObject|Vector3} source - Placeable token/template object or position object.
+    /**
+     * Determines whether an object is a Token or TokenDocument.
+     * @param {*} source - Object to test.
+     * @returns {boolean} True if source is a Token or TokenDocument.
+     */
+    static isToken(source) {
+        if (!source || typeof source !== "object") return false;
+        return (typeof Token !== "undefined" && source instanceof Token)
+            || (foundry?.canvas?.placeables?.Token && source instanceof foundry.canvas.placeables.Token)
+            || source.documentName === "Token"
+            || source.document?.documentName === "Token";
+    }
+
+    /**
+     * Extracts 3D coordinates, dimensions, and rotation from placeable object or coordinate data.
+     * @param {foundry.canvas.placeables.PlaceableObject|Vector3|{x: number, y: number, z?: number}} source - Source object.
      * @param {boolean} [isElevationManage=true] - Whether to incorporate elevation into Z coordinate.
+     * @param {boolean} [forParticles=false] - Whether this position is for PIXI particles (subtracts scene padding for Tokens).
      * @returns {{x: number, y: number, z: number, r: number}|undefined} Center position object.
      */
-    static getSourcePosition(source, isElevationManage = true) {
+    static getSourcePosition(source, isElevationManage = true, forParticles = false) {
         if (source === undefined || source === null || source.destroyed || source.x === undefined || source.y === undefined) {
             return
         }
@@ -600,6 +617,11 @@ export class Utils {
         let rotation = source?.document?.rotation
         if (rotation) {
             result.r = rotation
+        }
+
+        if (forParticles && Utils.isToken(source)) {
+            result.x -= (canvas?.dimensions?.sceneX ?? 0);
+            result.y -= (canvas?.dimensions?.sceneY ?? 0);
         }
 
         return result

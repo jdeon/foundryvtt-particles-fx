@@ -56,8 +56,8 @@ export class ConfigCompiler {
         // 5. Pre-calculate target offset if aimed spray
         let targetAngleOffset;
         if (finalInput.target && finalInput.source) {
-            const srcPos = Utils.getSourcePosition(finalInput.source, isElevationManage);
-            const tgtPos = Utils.getSourcePosition(finalInput.target, isElevationManage);
+            const srcPos = Utils.getSourcePosition(finalInput.source, isElevationManage, true);
+            const tgtPos = Utils.getSourcePosition(finalInput.target, isElevationManage, true);
             if (srcPos && tgtPos && (srcPos.x !== tgtPos.x || srcPos.y !== tgtPos.y)) {
                 targetAngleOffset = Math.atan2(tgtPos.y - srcPos.y, tgtPos.x - srcPos.x) * (180 / Math.PI);
             }

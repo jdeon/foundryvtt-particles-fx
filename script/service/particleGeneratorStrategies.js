@@ -234,7 +234,7 @@ export function onParticleSpawn(particle, options) {
 
     // 1. Resolve source position
     const source = Utils.getRandomValueFrom(options.source, {})
-    const sourcePos = Utils.getSourcePosition(source, isElevationManage) || { x: 0, y: 0, z: 0 };
+    const sourcePos = Utils.getSourcePosition(source, isElevationManage, true) || { x: 0, y: 0, z: 0 };
 
     // 2. Resolve spawn position offset (e.g. positionSpawning: { x: '-10%_10%', y: '-10%_10%', z: 0 })
     let spawnOffset = resolveVector3(options.positionSpawning, { x: 0, y: 0, z: 0 });
@@ -245,7 +245,7 @@ export function onParticleSpawn(particle, options) {
 
     const target = Utils.getRandomValueFrom(options.target, {})
     if (target) {
-        const targetPos = Utils.getSourcePosition(target, isElevationManage);
+        const targetPos = Utils.getSourcePosition(target, isElevationManage, true);
         if (targetPos && (sourcePos.x !== targetPos.x || sourcePos.y !== targetPos.y)) {
             targetAngleDirection = Math.atan2(targetPos.y - sourcePos.y, targetPos.x - sourcePos.x);
 
@@ -437,7 +437,7 @@ export function onParticleUpdate(particle, context, options) {
 
     // 1. Motion Strategy using exclusively computedProperties
     if (cp.type === "Graviting" || cp.type === "Gravitating") {
-        const sourcePos = Utils.getSourcePosition(cp.source, cp.isElevationManage);
+        const sourcePos = Utils.getSourcePosition(cp.source, cp.isElevationManage, true);
         if (!sourcePos) {
             particle.life = 0;
             return;
