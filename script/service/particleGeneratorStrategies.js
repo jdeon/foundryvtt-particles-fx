@@ -1,230 +1,51 @@
 import { Utils, Vector3 } from "../utils/utils.js";
 import { GravitingParticle } from "../object/particle.js";
+import { ParticleInput } from "../object/particleInput.js";
+import { AdvancedVariable } from "../object/advancedVariable.js";
 import { ParticleWorkFlowManager } from "../object/particleWorkFlow.js";
 
 /**
- * Resolves a single numeric value from a number, range string ("min_max"), percentage ("50%"),
- * array of choices, or advanced variables.
- * @param {number|string|Array|Vector3} val - Raw input value or range expression.
- * @param {number} [defaultValue=0] - Fallback default value.
- * @param {Object} [advancedVariables] - Optional advanced variables.
- * @returns {number} Resolved concrete numeric value.
+ * Builds a ParticleInput instance (constant ParticleInput or keyframed FrameParticleInput)
+ * for a given property key and raw input value or list.
+ * Evaluates random expressions at spawn time so the particule holds concrete numeric or Vector3 values.
+ * @param {string} key - Property name.
+ * @param {*} rawProp - Input value (scalar, range string, Vector3, or { list: [{ time, value }] }).
+ * @param {Object} [advancedVariables] - Optional advanced variables map.
+ * @param {number|Vector3} [defaultValue=0] - Fallback default value.
+ * @param {boolean} [isColor=false] - Whether this property represents an RGB color.
+ * @returns {ParticleInput} Instantiated ParticleInput.
  */
-export function resolveNumericValue(val, defaultValue = 0, advancedVariables) {
-    if (val === undefined || val === null) return defaultValue;
-    if (typeof val === "number" && !isNaN(val)) return val;
-
-    if (val instanceof Vector3 || (typeof val === "object" && val !== null && "x" in val)) {
-        return resolveNumericValue(val.x, defaultValue, advancedVariables);
+export function buildParticleInput(key, rawProp, advancedVariables, defaultValue = 0, isColor = false) {
+    if (rawProp === undefined || rawProp === null) {
+        return new ParticleInput(key, isColor ? new Vector3(255, 255, 255) : defaultValue);
+    }
+    if (rawProp instanceof ParticleInput) {
+        return rawProp.clone();
     }
 
-    const resolved = Utils.getRandomValueFrom(val, advancedVariables);
-    if (typeof resolved === "number" && !isNaN(resolved)) {
-        return resolved;
-    }
-    const num = Number(resolved);
-    return isNaN(num) ? defaultValue : num;
-}
-
-/**
- * Resolves a property that can be a scalar (number, range, array) or a keyframe list.
- * Evaluates all random expressions at spawn time so all resulting keyframes/scalars are pure numbers.
- * @param {number|string|Array|{list: Array<{time: number, value: *}>}} prop - Property value or keyframe list.
- * @param {number} [defaultValue=0] - Fallback default value.
- * @param {Object} [advancedVariables] - Optional advanced variables.
- * @returns {number|{list: Array<{time: number, value: number}>}} Resolved number or keyframe list of numbers.
- */
-export function resolveScalarOrKeyframes(prop, defaultValue = 0, advancedVariables) {
-    if (prop === undefined || prop === null) return defaultValue;
-
-    const list = prop.list ?? (Array.isArray(prop) && prop.length > 0 && typeof prop[0] === "object" && prop[0] !== null && "time" in prop[0] ? prop : null);
+    const list = rawProp.list ?? (Array.isArray(rawProp) && rawProp.length > 0 && typeof rawProp[0] === "object" && rawProp[0] !== null && "time" in rawProp[0] ? rawProp : null);
 
     if (list) {
-        return {
-            list: list.map(item => ({
+        const resolvedList = list.map(item => {
+            const resolved = Utils.getRandomValueFrom(item.value, advancedVariables);
+            return {
                 time: Number(item.time) || 0,
-                value: resolveNumericValue(item.value, defaultValue, advancedVariables)
-            }))
-        };
+                value: resolved
+            };
+        });
+        return ParticleInput.build(key, { list: resolvedList }, rawProp, advancedVariables);
     }
 
-    return resolveNumericValue(prop, defaultValue, advancedVariables);
+    let resolved = Utils.getRandomValueFrom(rawProp, advancedVariables);
+    return ParticleInput.build(key, resolved, rawProp, advancedVariables);
 }
 
-/**
- * Resolves an RGB color triplet [r, g, b] (integers 0-255) from various formats:
- * Vector3, {x,y,z}, [r,g,b], hex string "#RRGGBB", or integer.
- * @param {*} val - Input color value.
- * @param {Object} [advancedVariables] - Optional advanced variables.
- * @returns {[number, number, number]} RGB triplet array.
- */
-export function resolveRgbColor(val, advancedVariables) {
-    if (val === undefined || val === null) return [255, 255, 255];
 
-    if (Array.isArray(val) && val.length > 0 && (typeof val[0] === "string" || val[0] instanceof Vector3 || (typeof val[0] === "object" && val[0] !== null && "x" in val[0]))) {
-        const item = Utils.retrieveRandomElementFromArray(val);
-        return resolveRgbColor(item, advancedVariables);
-    }
-
-    if (val instanceof Vector3 || (typeof val === "object" && val !== null && "x" in val)) {
-        const r = Math.min(255, Math.max(0, resolveNumericValue(val.x, 255, advancedVariables)));
-        const g = Math.min(255, Math.max(0, resolveNumericValue(val.y, 255, advancedVariables)));
-        const b = Math.min(255, Math.max(0, resolveNumericValue(val.z, 255, advancedVariables)));
-        return [Math.floor(r), Math.floor(g), Math.floor(b)];
-    }
-
-    if (Array.isArray(val) && val.length >= 3 && typeof val[0] === "number") {
-        return [
-            Math.min(255, Math.max(0, Math.floor(val[0]))),
-            Math.min(255, Math.max(0, Math.floor(val[1]))),
-            Math.min(255, Math.max(0, Math.floor(val[2])))
-        ];
-    }
-
-    if (typeof val === "string") {
-        const clean = val.startsWith("#") ? val.slice(1) : val;
-        if (/^[0-9a-fA-F]{6}$/.test(clean)) {
-            const intVal = parseInt(clean, 16);
-            return [(intVal >> 16) & 255, (intVal >> 8) & 255, intVal & 255];
-        }
-        if (/^[0-9a-fA-F]{3}$/.test(clean)) {
-            const r = parseInt(clean[0] + clean[0], 16);
-            const g = parseInt(clean[1] + clean[1], 16);
-            const b = parseInt(clean[2] + clean[2], 16);
-            return [r, g, b];
-        }
-    }
-
-    if (typeof val === "number") {
-        return [(val >> 16) & 255, (val >> 8) & 255, val & 255];
-    }
-
-    return [255, 255, 255];
-}
-
-/**
- * Resolves color property into concrete RGB keyframes or a single RGB triplet.
- * @param {*} colorProp - Input color configuration.
- * @param {Object} [advancedVariables] - Optional advanced variables.
- * @returns {{rgb: [number, number, number]}|{list: Array<{time: number, rgb: [number, number, number]}>}|null}
- */
-export function resolveColorProperty(colorProp, advancedVariables) {
-    if (!colorProp) return null;
-
-    const list = colorProp.list ?? (Array.isArray(colorProp) && colorProp.length > 0 && typeof colorProp[0] === "object" && colorProp[0] !== null && "time" in colorProp[0] ? colorProp : null);
-
-    if (list) {
-        return {
-            list: list.map(item => ({
-                time: Number(item.time) || 0,
-                rgb: resolveRgbColor(item.value, advancedVariables)
-            }))
-        };
-    }
-
-    return {
-        rgb: resolveRgbColor(colorProp, advancedVariables)
-    };
-}
-
-/**
- * Resolves a 3D position vector from Vector3, array, or object with range/percentage strings.
- * @param {*} vec - Input coordinate representation.
- * @param {{x: number, y: number, z: number}} [defaultValue={x: 0, y: 0, z: 0}] - Fallback coordinates.
- * @param {Object} [advancedVariables] - Optional advanced variables.
- * @returns {Vector3} Resolved Vector3 instance.
- */
-export function resolveVector3(vec, defaultValue = { x: 0, y: 0, z: 0 }, advancedVariables) {
-    if (!vec) return new Vector3(defaultValue.x ?? 0, defaultValue.y ?? 0, defaultValue.z ?? 0);
-
-    if (Array.isArray(vec) && vec.length > 0 && typeof vec[0] !== "number") {
-        const item = Utils.retrieveRandomElementFromArray(vec);
-        return resolveVector3(item, defaultValue, advancedVariables);
-    }
-
-    const list = vec.list ?? (Array.isArray(vec) && typeof vec[0] === "object" && vec[0] !== null && "time" in vec[0] ? vec : null);
-    if (list && list.length > 0) {
-        return resolveVector3(list[0].value, defaultValue, advancedVariables);
-    }
-
-    const x = resolveNumericValue(vec.x ?? (Array.isArray(vec) ? vec[0] : defaultValue.x), 0, advancedVariables);
-    const y = resolveNumericValue(vec.y ?? (Array.isArray(vec) ? vec[1] : defaultValue.y), 0, advancedVariables);
-    const z = resolveNumericValue(vec.z ?? (Array.isArray(vec) ? vec[2] : defaultValue.z), 0, advancedVariables);
-
-    return new Vector3(x, y, z);
-}
-
-/**
- * Helper to interpolate scalar or keyframed properties across particle lifetime progress [0..1].
- * @param {number|{list: Array<{time: number, value: number}>}} prop - Numeric property value or keyframe list.
- * @param {number} progress - Lifetime progress from 0 to 1.
- * @param {number} [defaultValue=0] - Default value if property is missing.
- * @returns {number} Interpolated scalar value.
- */
-export function interpolateScalar(prop, progress, defaultValue = 0) {
-    if (prop === undefined || prop === null) return defaultValue;
-    if (typeof prop === "number") return prop;
-    const list = prop.list ?? (Array.isArray(prop) ? prop : null);
-    if (!list || list.length === 0) return defaultValue;
-    if (list.length === 1 || progress <= list[0].time) return list[0].value;
-    if (progress >= list[list.length - 1].time) return list[list.length - 1].value;
-
-    const nextIndex = list.findIndex(item => item.time > progress);
-    if (nextIndex <= 0) return list[0].value;
-    const prevIndex = nextIndex - 1;
-    const timeDiff = list[nextIndex].time - list[prevIndex].time;
-    const segmentProportion = timeDiff > 0 ? (progress - list[prevIndex].time) / timeDiff : 0;
-    const v0 = list[prevIndex].value;
-    const v1 = list[nextIndex].value;
-    return v0 + (v1 - v0) * segmentProportion;
-}
-
-/**
- * Helper to interpolate pre-resolved color keyframes into an integer tint value.
- * @param {{rgb?: [number, number, number], list?: Array<{time: number, rgb: [number, number, number]}>}} colorProp - Pre-resolved color structure.
- * @param {number} progress - Lifetime progress from 0 to 1.
- * @returns {number} Integer color tint (0xRRGGBB).
- */
-export function interpolateColor(colorProp, progress) {
-    if (!colorProp) return 0xffffff;
-    if (colorProp.rgb) {
-        const [r, g, b] = colorProp.rgb;
-        return (r << 16) + (g << 8) + b;
-    }
-    const list = colorProp.list;
-    if (!list || list.length === 0) return 0xffffff;
-    if (list.length === 1 || progress <= list[0].time) {
-        const [r, g, b] = list[0].rgb;
-        return (r << 16) + (g << 8) + b;
-    }
-    if (progress >= list[list.length - 1].time) {
-        const [r, g, b] = list[list.length - 1].rgb;
-        return (r << 16) + (g << 8) + b;
-    }
-
-    const nextIndex = list.findIndex(item => item.time > progress);
-    if (nextIndex <= 0) {
-        const [r, g, b] = list[0].rgb;
-        return (r << 16) + (g << 8) + b;
-    }
-    const prevIndex = nextIndex - 1;
-    const timeDiff = list[nextIndex].time - list[prevIndex].time;
-    const seg = timeDiff > 0 ? (progress - list[prevIndex].time) / timeDiff : 0;
-
-    const [r0, g0, b0] = list[prevIndex].rgb;
-    const [r1, g1, b1] = list[nextIndex].rgb;
-
-    const r = Math.round(r0 + (r1 - r0) * seg);
-    const g = Math.round(g0 + (g1 - g0) * seg);
-    const b = Math.round(b0 + (b1 - b0) * seg);
-
-    return (r << 16) + (g << 8) + b;
-}
 
 /**
  * Configures particle state upon spawn within ParticleGenerator.
  * Fully computes all random ranges, percentages, string expressions, and keyframes,
- * placing them onto `particle.computedProperties` so `onParticleUpdate` never does raw string parsing.
+ * storing them as ParticleInput instances on `particle.computedProperties` to match legacy emitters.
  * @param {Object} particle - Spawned particle sprite instance.
  * @param {Object} options - Compiled generator strategy options.
  * @returns {void}
@@ -232,18 +53,29 @@ export function interpolateColor(colorProp, progress) {
 export function onParticleSpawn(particle, options) {
     const isElevationManage = Boolean(options.isElevationManage);
 
-    // 1. Resolve source position
-    const source = Utils.getRandomValueFrom(options.source, {})
+    // 1. Extract or compute advanced variables
+    const advancedVariables = AdvancedVariable.computeAdvancedVariables(
+        options.particleTemplate?.advanced?.variables ?? options.advanced?.variables
+    );
+
+    // 2. Resolve template properties if template is present
+    const template = options.particleTemplate;
+    const templateProps = template ? Utils.getObjectRandomValueFrom(template, advancedVariables, true) : null;
+
+    // 3. Resolve source position
+    const rawSource = templateProps?.source?.currentValue ?? options.source;
+    const source = Utils.getRandomValueFrom(rawSource, advancedVariables);
     const sourcePos = Utils.getSourcePosition(source, isElevationManage, true) || { x: 0, y: 0, z: 0 };
 
-    // 2. Resolve spawn position offset (e.g. positionSpawning: { x: '-10%_10%', y: '-10%_10%', z: 0 })
-    let spawnOffset = resolveVector3(options.positionSpawning, { x: 0, y: 0, z: 0 });
+    // 4. Resolve spawn position offset (e.g. positionSpawning: { x: '-10%_10%', y: '-10%_10%', z: 0 })
+    let spawnOffset = Utils.getObjectRandomValueFrom(templateProps?.positionSpawning?.currentValue ?? options.positionSpawning, advancedVariables);
 
-    // 3. Compute target angle offset and aim if target exists
+    // 5. Compute target angle offset and aim if target exists
     let targetAngleDirection = 0;
     let targetRiseRate = 0;
 
-    const target = Utils.getRandomValueFrom(options.target, {})
+    const rawTarget = templateProps?.target?.currentValue ?? options.target;
+    const target = Utils.getRandomValueFrom(rawTarget, advancedVariables);
     if (target) {
         const targetPos = Utils.getSourcePosition(target, isElevationManage, true);
         if (targetPos && (sourcePos.x !== targetPos.x || sourcePos.y !== targetPos.y)) {
@@ -272,66 +104,93 @@ export function onParticleSpawn(particle, options) {
     const startX = sourcePos.x + spawnOffset.x;
     const startY = sourcePos.y + spawnOffset.y;
     const startZ = (sourcePos.z ?? 0) + (spawnOffset.z ?? 0);
-
     const targetAngleDeg = targetAngleDirection * (180 / Math.PI);
 
-    // 4. Resolve riseRate and incorporate targetRiseRate if aimed
-    let riseRate = resolveScalarOrKeyframes(options.riseRate, 0);
+    // 6. Build ParticleInput instances for all animatable properties
+    const particleVelocity = templateProps?.particleVelocity ?? buildParticleInput("particleVelocity", options.velocity ?? options.particleVelocity, advancedVariables, 100);
+    const particleAngle = templateProps?.particleAngle ?? buildParticleInput("particleAngle", options.angle ?? options.particleAngle, advancedVariables, 0);
+    const particleRiseRate = templateProps?.particleRiseRate ?? buildParticleInput("particleRiseRate", options.riseRate ?? options.particleRiseRate, advancedVariables, 0);
+    const particleRotation = templateProps?.particleRotation ?? buildParticleInput("particleRotation", options.particleRotation, advancedVariables, 0);
+    const particleSize = templateProps?.particleSize ?? buildParticleInput("particleSize", options.particleSize, advancedVariables, 10);
+    const particleColor = templateProps?.particleColor ?? buildParticleInput("particleColor", options.particleColor, advancedVariables, new Vector3(255, 255, 255), true);
+    const alpha = templateProps?.alpha ?? buildParticleInput("alpha", options.alpha, advancedVariables, 1);
+    const angularVelocity = templateProps?.angularVelocity ?? buildParticleInput("angularVelocity", options.angularVelocity ?? options.velocity, advancedVariables, 90);
+    const particleRadius = templateProps?.particleRadius ?? buildParticleInput("particleRadius", options.radius ?? options.particleRadius, advancedVariables, 50);
+
+    const vibrationAmplitude = (templateProps?.vibrationAmplitude || options.vibrationAmplitude)
+        ? (templateProps?.vibrationAmplitude ?? buildParticleInput("vibrationAmplitude", options.vibrationAmplitude, advancedVariables, 0))
+        : null;
+    const vibrationFrequency = (templateProps?.vibrationFrequency || options.vibrationFrequency)
+        ? (templateProps?.vibrationFrequency ?? buildParticleInput("vibrationFrequency", options.vibrationFrequency, advancedVariables, 1000))
+        : null;
+
+    // 7. Apply target offsets directly to ParticleInput instances
     if (targetRiseRate !== 0) {
-        if (typeof riseRate === "number") {
-            riseRate += targetRiseRate;
-        } else if (riseRate?.list) {
-            riseRate.list.forEach(item => { item.value += targetRiseRate; });
+        particleRiseRate.add(targetRiseRate);
+    }
+
+    if (options.type === "Spraying" || !options.type) {
+        if (targetAngleDeg !== 0) {
+            particleAngle.add(targetAngleDeg);
+            particleRotation.add(targetAngleDeg);
         }
     }
 
-    // 5. Build computedProperties containing all evaluated per-particle values
+    let orbitAngle = 0;
+    if (options.type === "Graviting" || options.type === "Gravitating") {
+        orbitAngle = (options.angleStart !== undefined)
+            ? Number(Utils.getRandomValueFrom(options.angleStart, advancedVariables)) || (Math.random() * 360)
+            : (Number(Utils.getRandomValueFrom(options.angle, advancedVariables)) || (Math.random() * 360));
+    }
+
+    // 8. Build computedProperties storing ParticleInput instances
     const cp = {
         type: options.type,
         emitter: options.emitter,
         freezeOnPause: options.freezeOnPause,
         isElevationManage,
-        baseTextureWidth: options.baseTextureWidth || 32,
-        source: source,
-        target: target,
+        source,
+        target,
         sourcePos,
         elevationZ: startZ,
+        positionVibrationLess: { x: startX, y: startY, z: startZ },
 
-        // Motion parameters (all resolved: either number or { list: [{time: number, value: number}] })
-        velocity: resolveScalarOrKeyframes(options.velocity, 100),
-        angle: resolveScalarOrKeyframes(options.angle, 0),
+        // Motion ParticleInput instances & backwards-compatible aliases
+        particleVelocity,
+        velocity: particleVelocity,
+        particleAngle,
+        angle: particleAngle,
         targetAngleOffset: targetAngleDeg,
 
-        // Orbit parameters (Graviting)
-        orbitAngle: (options.angleStart !== undefined)
-            ? resolveNumericValue(options.angleStart, Math.random() * 360)
-            : (options.angle !== undefined ? resolveNumericValue(options.angle, Math.random() * 360) : Math.random() * 360),
-        angularVelocity: resolveScalarOrKeyframes(options.angularVelocity ?? options.velocity, 90),
-        radius: resolveScalarOrKeyframes(options.radius, 50),
-        riseRate,
-        axisElevationAngle: resolveNumericValue(options.axisElevationAngle, 0),
+        // Orbit ParticleInput instances & aliases
+        orbitAngle,
+        angularVelocity,
+        particleRadius,
+        radius: particleRadius,
+        particleRiseRate,
+        riseRate: particleRiseRate,
+        axisElevationAngle: Number(Utils.getRandomValueFrom(options.axisElevationAngle ?? 0, advancedVariables)) || 0,
 
         // Path parameters (Missile)
         path: options.path,
         pathDistance: 0,
 
-        // Vibration
-        vibrationAmplitude: options.vibrationAmplitude ? resolveScalarOrKeyframes(options.vibrationAmplitude, 0) : null,
-        vibrationFrequency: options.vibrationFrequency ? resolveScalarOrKeyframes(options.vibrationFrequency, 1000) : null,
+        // Lateral Sinusoidal Vibration
+        vibrationAmplitude,
+        vibrationFrequency,
         vibrationElapsed: 0,
 
-        // Aesthetics
-        particleSize: options.particleSize ? resolveScalarOrKeyframes(options.particleSize, 10) : null,
-        particleRotation: options.particleRotation ? resolveScalarOrKeyframes(options.particleRotation, 0) : null,
-        particleColor: resolveColorProperty(options.particleColor),
-        alpha: options.alpha ? resolveScalarOrKeyframes(options.alpha, 1) : null,
+        // Aesthetics ParticleInput instances
+        particleSize,
+        particleRotation,
+        particleColor,
+        alpha,
 
-        // Lifetime
+        // Lifetime & Workflows
         lifetimeMs: options.lifetimeMs || 3000,
-
-        // Workflows
         emitterId: options.emitterId,
-        particleTemplate: options.particleTemplate
+        particleTemplate: options.particleTemplate,
+        advancedVariables
     };
 
     particle.computedProperties = cp;
@@ -352,25 +211,32 @@ export function onParticleSpawn(particle, options) {
 
     // Initial scale at progress = 0
     if (cp.particleSize) {
-        const px0 = interpolateScalar(cp.particleSize, 0, 10);
-        const baseScale0 = px0 / cp.baseTextureWidth;
-        const sizeFactor0 = cp.isElevationManage ? Utils.handleElevationFactorForSize(cp.elevationZ) : 1;
-        const finalScale0 = (sizeFactor0 > 0 && isFinite(sizeFactor0)) ? baseScale0 * sizeFactor0 : baseScale0;
+        const baseTextureSize = { x: particle.texture.orig.width, y: particle.texture.orig.height };
+        const size0 = cp.particleSize.computeValue(0, advancedVariables);
+        const px0 = (typeof size0 === "number") ? size0 : (size0?.x ?? 10);
+        const py0 = (typeof size0 === "number") ? size0 : (size0?.y ?? px0);
+        const baseScaleX0 = px0 / baseTextureSize.x;
+        const baseScaleY0 = py0 / baseTextureSize.y;
+        const sizeFactor0 = cp.isElevationManage ? Utils.handleElevationFactorForSize(startZ) : 1;
+        const finalScaleX0 = (sizeFactor0 > 0 && isFinite(sizeFactor0)) ? baseScaleX0 * sizeFactor0 : baseScaleX0;
+        const finalScaleY0 = (sizeFactor0 > 0 && isFinite(sizeFactor0)) ? baseScaleY0 * sizeFactor0 : baseScaleY0;
         if (particle.scale?.set) {
-            particle.scale.set(finalScale0);
+            particle.scale.set(finalScaleX0, finalScaleY0);
         } else {
-            particle.scale = finalScale0;
+            particle.scale = finalScaleX0;
         }
     }
 
     // Initial tint at progress = 0
     if (cp.particleColor) {
-        particle.tint = interpolateColor(cp.particleColor, 0);
+        const currentColor = cp.particleColor.computeValue(0, advancedVariables);
+        particle.tint = Utils.fromRGB(currentColor)
     }
 
     // Initial alpha at progress = 0
     if (cp.alpha) {
-        particle.alpha = interpolateScalar(cp.alpha, 0, 1);
+        const a0 = cp.alpha.computeValue(0, advancedVariables);
+        particle.alpha = Math.min(1, Math.max(0, typeof a0 === "number" ? a0 : 1));
     }
 
     // Initial rotation at progress = 0
@@ -380,12 +246,8 @@ export function onParticleSpawn(particle, options) {
             particle.rotation = headingDeg * (Math.PI / 180);
         }
     } else {
-        const angleDeg0 = interpolateScalar(cp.angle, 0, 0) + (cp.targetAngleOffset ?? 0);
-        let rot0 = angleDeg0 * (Math.PI / 180);
-        if (cp.particleRotation) {
-            rot0 += interpolateScalar(cp.particleRotation, 0, 0) * (Math.PI / 180);
-        }
-        particle.rotation = rot0;
+        const rot0 = cp.particleRotation.computeValue(0, advancedVariables);
+        particle.rotation = rot0 * (Math.PI / 180);
     }
 
     // Trigger AT_PARTICLE_START chained workflows
@@ -401,7 +263,7 @@ export function onParticleSpawn(particle, options) {
 
 /**
  * Updates particle position, rotation, scale, tint, and elevation per frame tick within ParticleGenerator.
- * Consumes strictly from `particle.computedProperties` without using uncomputed options or strings.
+ * Consumes strictly from `ParticleInput` instances in `particle.computedProperties`.
  * @param {Object} particle - Active particle instance.
  * @param {number|Object} context - Frame delta time in seconds, milliseconds, or ticker context.
  * @param {Object} [options] - Compiled generator strategy options (fallback only).
@@ -428,14 +290,13 @@ export function onParticleUpdate(particle, context, options) {
     } else {
         deltaSec = 0.016;
     }
-    const deltaMs = deltaSec * 1000;
 
     particle._elapsedSec = (particle._elapsedSec ?? 0) + deltaSec;
     const totalLifetime = particle.lifetime || (cp.lifetimeMs ? cp.lifetimeMs / 1000 : 3);
     const elapsed = (typeof particle.time === "number") ? particle.time : particle._elapsedSec;
     const progress = totalLifetime > 0 ? Math.min(1, Math.max(0, elapsed / totalLifetime)) : 0;
 
-    // 1. Motion Strategy using exclusively computedProperties
+    // 1. Motion Strategy using ParticleInput instances
     if (cp.type === "Graviting" || cp.type === "Gravitating") {
         const sourcePos = Utils.getSourcePosition(cp.source, cp.isElevationManage, true);
         if (!sourcePos) {
@@ -443,11 +304,11 @@ export function onParticleUpdate(particle, context, options) {
             return;
         }
 
-        const currentAngularVel = interpolateScalar(cp.angularVelocity, progress, 90);
+        const currentAngularVel = cp.angularVelocity.computeValue(progress, cp.advancedVariables);
         cp.orbitAngle = (cp.orbitAngle ?? 0) + currentAngularVel * deltaSec;
 
-        const currentRadius = interpolateScalar(cp.radius, progress, 50);
-        const currentRiseRate = Utils.handleFraction(interpolateScalar(cp.riseRate, progress, 0));
+        const currentRadius = cp.particleRadius.computeValue(progress, cp.advancedVariables);
+        const currentRiseRate = Utils.handleFraction(cp.particleRiseRate.computeValue(progress, cp.advancedVariables));
 
         const pos = GravitingParticle.computeParticlePosition(
             sourcePos,
@@ -457,20 +318,24 @@ export function onParticleUpdate(particle, context, options) {
             cp.axisElevationAngle ?? 0
         );
 
-        particle.x = pos.x;
-        particle.y = pos.y;
+        cp.positionVibrationLess.x = pos.x;
+        cp.positionVibrationLess.y = pos.y;
+        cp.positionVibrationLess.z = pos.z;
         cp.elevationZ = pos.z;
 
     } else if (cp.type === "Missile" && cp.path) {
-        const currentVel = interpolateScalar(cp.velocity, progress, 200);
+        const currentVel = cp.particleVelocity.computeValue(progress, cp.advancedVariables);
         cp.pathDistance = (cp.pathDistance ?? 0) + currentVel * deltaSec;
 
         const prop = cp.path.totalLenght > 0 ? Math.min(1, cp.pathDistance / cp.path.totalLenght) : 0;
         const pt = cp.path.getPointAtProportion(prop);
         if (pt) {
-            particle.x = pt.x;
-            particle.y = pt.y;
-            if (pt.z !== undefined) cp.elevationZ = pt.z;
+            cp.positionVibrationLess.x = pt.x;
+            cp.positionVibrationLess.y = pt.y;
+            if (pt.z !== undefined) {
+                cp.positionVibrationLess.z = pt.z;
+                cp.elevationZ = pt.z;
+            }
         }
 
         const headingDeg = cp.path.getDirection();
@@ -480,11 +345,10 @@ export function onParticleUpdate(particle, context, options) {
 
     } else {
         // Spraying Motion
-        const currentVel = interpolateScalar(cp.velocity, progress, 100);
-        let angleDeg = interpolateScalar(cp.angle, progress, 0) + (cp.targetAngleOffset ?? 0);
-
+        const currentVel = cp.particleVelocity.computeValue(progress, cp.advancedVariables);
+        const angleDeg = cp.particleAngle.computeValue(progress, cp.advancedVariables);
         const angleRad = angleDeg * (Math.PI / 180);
-        const currentRiseRate = Utils.handleFraction(interpolateScalar(cp.riseRate, progress, 0));
+        const currentRiseRate = Utils.handleFraction(cp.particleRiseRate.computeValue(progress, cp.advancedVariables));
 
         let horizontalMove;
         let verticalMove = 0;
@@ -497,29 +361,37 @@ export function onParticleUpdate(particle, context, options) {
             horizontalMove = currentVel * deltaSec;
         }
 
-        particle.x += Math.cos(angleRad) * horizontalMove;
-        particle.y += Math.sin(angleRad) * horizontalMove;
-        cp.elevationZ = (cp.elevationZ ?? 0) + verticalMove;
+        cp.positionVibrationLess.x += Math.cos(angleRad) * horizontalMove;
+        cp.positionVibrationLess.y += Math.sin(angleRad) * horizontalMove;
+        cp.positionVibrationLess.z = (cp.positionVibrationLess.z ?? 0) + verticalMove;
+        cp.elevationZ = cp.positionVibrationLess.z;
 
-        let finalRotation = angleRad;
+        let rotDeg = angleDeg;
         if (cp.particleRotation) {
-            finalRotation += interpolateScalar(cp.particleRotation, progress, 0) * (Math.PI / 180);
+            rotDeg += cp.particleRotation.computeValue(progress, cp.advancedVariables);
         }
-        particle.rotation = finalRotation;
+        particle.rotation = rotDeg * (Math.PI / 180);
     }
 
     // 2. Lateral Sinusoidal Vibration
+    let vib = 0;
     if (cp.vibrationAmplitude && cp.vibrationFrequency) {
-        cp.vibrationElapsed = (cp.vibrationElapsed ?? 0) + deltaMs;
-        const amp = interpolateScalar(cp.vibrationAmplitude, progress, 0);
-        const freq = interpolateScalar(cp.vibrationFrequency, progress, 1000);
+        cp.vibrationElapsed = (cp.vibrationElapsed ?? 0) + (deltaSec * 1000);
+        const amp = cp.vibrationAmplitude.computeValue(progress, cp.advancedVariables);
+        const freq = cp.vibrationFrequency.computeValue(progress, cp.advancedVariables);
 
         if (amp > 0 && freq > 0) {
-            const vib = amp * Math.sin(2 * Math.PI * (cp.vibrationElapsed / freq));
-            const heading = particle.rotation ?? 0;
-            particle.x += vib * Math.cos(heading - (Math.PI / 2));
-            particle.y += vib * Math.sin(heading - (Math.PI / 2));
+            vib = amp * Math.sin(2 * Math.PI * (cp.vibrationElapsed / freq));
         }
+    }
+
+    if (vib !== 0) {
+        const heading = particle.rotation ?? 0;
+        particle.x = cp.positionVibrationLess.x + vib * Math.cos(heading - (Math.PI / 2));
+        particle.y = cp.positionVibrationLess.y + vib * Math.sin(heading - (Math.PI / 2));
+    } else {
+        particle.x = cp.positionVibrationLess.x;
+        particle.y = cp.positionVibrationLess.y;
     }
 
     // 3. Elevation & Depth Sorting
@@ -530,29 +402,36 @@ export function onParticleUpdate(particle, context, options) {
 
     // 4. Scale & Perspective Factor
     if (cp.particleSize) {
-        const px = interpolateScalar(cp.particleSize, progress, 10);
-        const baseScale = px / cp.baseTextureWidth;
+        const baseTextureSize = { x: particle.texture.orig.width, y: particle.texture.orig.height };
+        const size = cp.particleSize.computeValue(progress, cp.advancedVariables);
+        const px = (typeof size === "number") ? size : (size?.x ?? 10);
+        const py = (typeof size === "number") ? size : (size?.y ?? px);
+        const baseScaleX = px / baseTextureSize.x;
+        const baseScaleY = py / baseTextureSize.y;
 
         const sizeFactor = cp.isElevationManage
             ? Utils.handleElevationFactorForSize(cp.elevationZ)
             : 1;
 
-        const finalScale = (sizeFactor > 0 && isFinite(sizeFactor)) ? baseScale * sizeFactor : baseScale;
+        const finalScaleX = (sizeFactor > 0 && isFinite(sizeFactor)) ? baseScaleX * sizeFactor : baseScaleX;
+        const finalScaleY = (sizeFactor > 0 && isFinite(sizeFactor)) ? baseScaleY * sizeFactor : baseScaleY;
         if (particle.scale?.set) {
-            particle.scale.set(finalScale);
+            particle.scale.set(finalScaleX, finalScaleY);
         } else {
-            particle.scale = finalScale;
+            particle.scale = finalScaleX;
         }
     }
 
     // 5. Color Tint Keyframes
     if (cp.particleColor) {
-        particle.tint = interpolateColor(cp.particleColor, progress);
+        const currentColor = cp.particleColor.computeValue(progress, cp.advancedVariables);
+        particle.tint = Utils.fromRGB(currentColor)
     }
 
     // 6. Alpha Keyframes
     if (cp.alpha) {
-        particle.alpha = interpolateScalar(cp.alpha, progress, 1);
+        const a = cp.alpha.computeValue(progress, cp.advancedVariables);
+        particle.alpha = Math.min(1, Math.max(0, typeof a === "number" ? a : 1));
     }
 
     // Keep particle._elevationZ synced for external callers
@@ -580,4 +459,3 @@ export function onParticleDeath(particle, options) {
         );
     }
 }
-

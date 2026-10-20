@@ -86,9 +86,9 @@ export class ConfigCompiler {
             particleSize: finalInput.particleSize,
             particleColor: finalInput.particleColor,
             alpha: finalInput.alpha,
-            baseTextureWidth: 32,
             emitterId: context.emitterId,
             particleTemplate: context.particleTemplate,
+            advanced: finalInput.advanced,
             freezeOnPause: Boolean(finalInput.freezeOnPause)
         };
 

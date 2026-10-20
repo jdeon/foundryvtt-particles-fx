@@ -628,6 +628,16 @@ export class Utils {
     }
 
     /**
+     * Convert RGB color to PIXI Color.
+     * @param {Vector3|number} rgbColor - RGB color.
+     * @returns {Color} PIXI Color.
+     */
+    static fromRGB(rgbColor) {
+        const colorVector = Vector3.build(rgbColor)
+        return Color.fromRGB([Math.floor(colorVector.x) / 255, Math.floor(colorVector.y) / 255, Math.floor(colorVector.z) / 255])
+    }
+
+    /**
      * Computes sprite size multiplier based on elevation height.
      * @param {number} elevation - Elevation height in pixels.
      * @returns {number} Scale factor for width and height.
