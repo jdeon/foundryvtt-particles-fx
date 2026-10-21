@@ -63,10 +63,6 @@ export class EmitterRouter {
     static spawnEmitter(inputQuery, finalInput, type, emitterIds, particleTemplate, fallbackCustomSpawner) {
         const id = emitterIds?.emitterId || nextEmitterId();
 
-        if (EmitterRouter.requiresCustomEngine(finalInput, type, emitterIds?.parentWorkflowId)) {
-            return fallbackCustomSpawner(id);
-        }
-
         try {
             // Compile to ParticleGenerator configuration
             const generatorConfig = ConfigCompiler.compile(finalInput, type, { emitterId: id, particleTemplate });

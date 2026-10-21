@@ -63,34 +63,36 @@ export function onParticleSpawn(particle, options) {
     const templateProps = template ? Utils.getObjectRandomValueFrom(template, advancedVariables, true) : null;
 
     // 3. Resolve source position
-    const rawSource = templateProps?.source?.currentValue ?? options.source;
+    const rawSource = templateProps.source?.currentValue ?? options.source;
     const source = Utils.getRandomValueFrom(rawSource, advancedVariables);
-    const sourcePos = Utils.getSourcePosition(source, isElevationManage, true) || { x: 0, y: 0, z: 0 };
+    const sourcePos = Utils.getSourcePosition(source, isElevationManage, true) || { x: 0, y: 0, z: 0, r: 0 };
+    const sourceRotation = sourcePos.r;
+    const sourceVector = Vector3.build(sourcePos);
 
     // 4. Resolve spawn position offset (e.g. positionSpawning: { x: '-10%_10%', y: '-10%_10%', z: 0 })
-    let spawnOffset = Utils.getObjectRandomValueFrom(templateProps?.positionSpawning?.currentValue ?? options.positionSpawning, advancedVariables);
+    const spawnOffset = templateProps?.positionSpawning?.currentValue ?? options.positionSpawning;
 
     // 5. Compute target angle offset and aim if target exists
     let targetAngleDirection = 0;
     let targetRiseRate = 0;
 
-    const rawTarget = templateProps?.target?.currentValue ?? options.target;
+    const rawTarget = templateProps.target?.currentValue ?? options.target;
     const target = Utils.getRandomValueFrom(rawTarget, advancedVariables);
     if (target) {
         const targetPos = Utils.getSourcePosition(target, isElevationManage, true);
-        if (targetPos && (sourcePos.x !== targetPos.x || sourcePos.y !== targetPos.y)) {
-            targetAngleDirection = Math.atan2(targetPos.y - sourcePos.y, targetPos.x - sourcePos.x);
+        if (targetPos && (sourceVector.x !== targetPos.x || sourceVector.y !== targetPos.y)) {
+            const targetPosVector = Vector3.build(targetPos);
+            const direction = targetPosVector.minus(sourceVector);
 
-            const dx = targetPos.x - sourcePos.x;
-            const dy = targetPos.y - sourcePos.y;
-            const dz = (targetPos.z ?? 0) - (sourcePos.z ?? 0);
-            const targetDistance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+            targetAngleDirection = Math.atan2(direction.y, direction.x);
+
+            const targetDistance = direction.magnitude();
             if (targetDistance > 0 && isElevationManage) {
-                targetRiseRate = dz / targetDistance;
+                targetRiseRate = direction.z / targetDistance;
             }
         }
-    } else if (sourcePos.r !== undefined && sourcePos.r !== 0) {
-        targetAngleDirection = sourcePos.r * (Math.PI / 180);
+    } else if (sourceRotation !== undefined && sourceRotation !== 0) {
+        targetAngleDirection = sourceRotation * (Math.PI / 180);
     } else if (options._targetAngleOffset !== undefined) {
         targetAngleDirection = options._targetAngleOffset * (Math.PI / 180);
     }
@@ -101,31 +103,24 @@ export function onParticleSpawn(particle, options) {
         spawnOffset = new Vector3(rotated.x, rotated.y, rotated.z);
     }
 
-    const startX = sourcePos.x + spawnOffset.x;
-    const startY = sourcePos.y + spawnOffset.y;
-    const startZ = (sourcePos.z ?? 0) + (spawnOffset.z ?? 0);
+    const positionVibrationLess = sourceVector.add(spawnOffset);
     const targetAngleDeg = targetAngleDirection * (180 / Math.PI);
 
     // 6. Build ParticleInput instances for all animatable properties
-    const particleVelocity = templateProps?.particleVelocity ?? buildParticleInput("particleVelocity", options.velocity ?? options.particleVelocity, advancedVariables, 100);
-    const particleAngle = templateProps?.particleAngle ?? buildParticleInput("particleAngle", options.angle ?? options.particleAngle, advancedVariables, 0);
-    const particleRiseRate = templateProps?.particleRiseRate ?? buildParticleInput("particleRiseRate", options.riseRate ?? options.particleRiseRate, advancedVariables, 0);
-    const particleRotation = templateProps?.particleRotation ?? buildParticleInput("particleRotation", options.particleRotation, advancedVariables, 0);
-    const particleSize = templateProps?.particleSize ?? buildParticleInput("particleSize", options.particleSize, advancedVariables, 10);
-    const particleColor = templateProps?.particleColor ?? buildParticleInput("particleColor", options.particleColor, advancedVariables, new Vector3(255, 255, 255), true);
-    const alpha = templateProps?.alpha ?? buildParticleInput("alpha", options.alpha, advancedVariables, 1);
-    const angularVelocity = templateProps?.angularVelocity ?? buildParticleInput("angularVelocity", options.angularVelocity ?? options.velocity, advancedVariables, 90);
-    const particleRadius = templateProps?.particleRadius ?? buildParticleInput("particleRadius", options.radius ?? options.particleRadius, advancedVariables, 50);
-
-    const vibrationAmplitude = (templateProps?.vibrationAmplitude || options.vibrationAmplitude)
-        ? (templateProps?.vibrationAmplitude ?? buildParticleInput("vibrationAmplitude", options.vibrationAmplitude, advancedVariables, 0))
-        : null;
-    const vibrationFrequency = (templateProps?.vibrationFrequency || options.vibrationFrequency)
-        ? (templateProps?.vibrationFrequency ?? buildParticleInput("vibrationFrequency", options.vibrationFrequency, advancedVariables, 1000))
-        : null;
+    const particleVelocity = templateProps.particleVelocity;
+    const particleAngle = templateProps.particleAngle;
+    const particleRiseRate = templateProps.particleRiseRate;
+    const particleRotation = templateProps.particleRotation;
+    const particleSize = templateProps.particleSize;
+    const particleColor = templateProps.particleColor;
+    const alpha = templateProps.alpha;
+    const angularVelocity = templateProps.angularVelocity;
+    const particleRadius = templateProps.particleRadius;
+    const vibrationAmplitude = templateProps.vibrationAmplitude
+    const vibrationFrequency = templateProps.vibrationFrequency
 
     // 7. Apply target offsets directly to ParticleInput instances
-    if (targetRiseRate !== 0) {
+    if (targetRiseRate !== 0 && particleRiseRate) {
         particleRiseRate.add(targetRiseRate);
     }
 
@@ -152,85 +147,60 @@ export function onParticleSpawn(particle, options) {
         source,
         target,
         sourcePos,
-        elevationZ: startZ,
-        positionVibrationLess: { x: startX, y: startY, z: startZ },
-
-        // Motion ParticleInput instances & backwards-compatible aliases
+        positionVibrationLess,
         particleVelocity,
-        velocity: particleVelocity,
         particleAngle,
-        angle: particleAngle,
         targetAngleOffset: targetAngleDeg,
-
-        // Orbit ParticleInput instances & aliases
         orbitAngle,
         angularVelocity,
         particleRadius,
-        radius: particleRadius,
         particleRiseRate,
-        riseRate: particleRiseRate,
         axisElevationAngle: Number(Utils.getRandomValueFrom(options.axisElevationAngle ?? 0, advancedVariables)) || 0,
-
-        // Path parameters (Missile)
         path: options.path,
         pathDistance: 0,
-
-        // Lateral Sinusoidal Vibration
         vibrationAmplitude,
         vibrationFrequency,
         vibrationElapsed: 0,
-
-        // Aesthetics ParticleInput instances
         particleSize,
         particleRotation,
         particleColor,
         alpha,
-
-        // Lifetime & Workflows
-        lifetimeMs: options.lifetimeMs || 3000,
         emitterId: options.emitterId,
         particleTemplate: options.particleTemplate,
         advancedVariables
     };
 
+    particle.lifetime = templateProps.particleLifetime?.currentValue ?? 3000;
     particle.computedProperties = cp;
+    particle.elapsedTime = 0;
+    particle.lastElapsedTime = 0;
 
     // Apply initial coordinates and sprite state
-    particle.x = startX;
-    particle.y = startY;
-    particle._elevationZ = startZ;
-    particle._elapsedSec = 0;
+    particle.x = cp.positionVibrationLess.x;
+    particle.y = cp.positionVibrationLess.y;
 
     if (cp.isElevationManage) {
-        particle.elevation = startZ / Utils.pixelOfDistanceConvertor();
+        particle.elevation = cp.positionVibrationLess.z / Utils.pixelOfDistanceConvertor();
         particle.sortLayer = 950;
     }
 
     // Helper for workflows to query particle position
-    particle.getPosition = () => new Vector3(particle.x, particle.y, particle.computedProperties.elevationZ);
+    particle.getPosition = () => new Vector3(particle.x, particle.y, particle.computedProperties.positionVibrationLess.z);
 
     // Initial scale at progress = 0
     if (cp.particleSize) {
-        const baseTextureSize = { x: particle.texture.orig.width, y: particle.texture.orig.height };
+        const baseTextureSize = Vector3.build({ x: particle.texture.orig.width, y: particle.texture.orig.height });
         const size0 = cp.particleSize.computeValue(0, advancedVariables);
-        const px0 = (typeof size0 === "number") ? size0 : (size0?.x ?? 10);
-        const py0 = (typeof size0 === "number") ? size0 : (size0?.y ?? px0);
-        const baseScaleX0 = px0 / baseTextureSize.x;
-        const baseScaleY0 = py0 / baseTextureSize.y;
-        const sizeFactor0 = cp.isElevationManage ? Utils.handleElevationFactorForSize(startZ) : 1;
-        const finalScaleX0 = (sizeFactor0 > 0 && isFinite(sizeFactor0)) ? baseScaleX0 * sizeFactor0 : baseScaleX0;
-        const finalScaleY0 = (sizeFactor0 > 0 && isFinite(sizeFactor0)) ? baseScaleY0 * sizeFactor0 : baseScaleY0;
-        if (particle.scale?.set) {
-            particle.scale.set(finalScaleX0, finalScaleY0);
-        } else {
-            particle.scale = finalScaleX0;
-        }
+        const baseScale = Vector3.build(size0).divide(baseTextureSize);
+        const sizeFactor0 = cp.isElevationManage ? Utils.handleElevationFactorForSize(cp.positionVibrationLess.z) : 1;
+        const finalScale = baseScale.multiply(sizeFactor0);
+        particle.scale.set(finalScale.x, finalScale.y);
     }
 
     // Initial tint at progress = 0
     if (cp.particleColor) {
         const currentColor = cp.particleColor.computeValue(0, advancedVariables);
-        particle.tint = Utils.fromRGB(currentColor)
+        particle.tint = Utils.fromRGB(currentColor);
     }
 
     // Initial alpha at progress = 0
@@ -269,38 +239,26 @@ export function onParticleSpawn(particle, options) {
  * @param {Object} [options] - Compiled generator strategy options (fallback only).
  * @returns {void}
  */
-export function onParticleUpdate(particle, context, options) {
+export function onParticleUpdate(particle, context) {
     let cp = particle.computedProperties;
     if (!cp) return;
 
     if (cp.emitter?.isPaused || (cp.freezeOnPause && game?.paused)) {
+        particle.elapsedTime = particle.lastElapsedTime;
         return;
     }
 
     // Frame delta time calculation
-    let deltaSec;
-    if (typeof context === "number") {
-        deltaSec = context > 1 ? context / 1000 : context;
-    } else if (context && typeof context.delta === "number") {
-        deltaSec = context.delta > 1 ? context.delta / 1000 : context.delta;
-    } else if (context && typeof context.deltaTime === "number") {
-        deltaSec = context.deltaTime / 60;
-    } else if (canvas.app?.ticker?.deltaMS) {
-        deltaSec = canvas.app.ticker.deltaMS / 1000;
-    } else {
-        deltaSec = 0.016;
-    }
-
-    particle._elapsedSec = (particle._elapsedSec ?? 0) + deltaSec;
-    const totalLifetime = particle.lifetime || (cp.lifetimeMs ? cp.lifetimeMs / 1000 : 3);
-    const elapsed = (typeof particle.time === "number") ? particle.time : particle._elapsedSec;
-    const progress = totalLifetime > 0 ? Math.min(1, Math.max(0, elapsed / totalLifetime)) : 0;
+    const deltaSec = (particle.elapsedTime - particle.lastElapsedTime) / 1000;
+    particle.lastElapsedTime = particle.elapsedTime;
+    const progress = (particle.elapsedTime / particle.lifetime);
 
     // 1. Motion Strategy using ParticleInput instances
     if (cp.type === "Graviting" || cp.type === "Gravitating") {
         const sourcePos = Utils.getSourcePosition(cp.source, cp.isElevationManage, true);
         if (!sourcePos) {
-            particle.life = 0;
+            particle.elapsedTime = particle.lifetime;
+            particle.time = 1;
             return;
         }
 
@@ -321,7 +279,6 @@ export function onParticleUpdate(particle, context, options) {
         cp.positionVibrationLess.x = pos.x;
         cp.positionVibrationLess.y = pos.y;
         cp.positionVibrationLess.z = pos.z;
-        cp.elevationZ = pos.z;
 
     } else if (cp.type === "Missile" && cp.path) {
         const currentVel = cp.particleVelocity.computeValue(progress, cp.advancedVariables);
@@ -334,7 +291,6 @@ export function onParticleUpdate(particle, context, options) {
             cp.positionVibrationLess.y = pt.y;
             if (pt.z !== undefined) {
                 cp.positionVibrationLess.z = pt.z;
-                cp.elevationZ = pt.z;
             }
         }
 
@@ -364,7 +320,6 @@ export function onParticleUpdate(particle, context, options) {
         cp.positionVibrationLess.x += Math.cos(angleRad) * horizontalMove;
         cp.positionVibrationLess.y += Math.sin(angleRad) * horizontalMove;
         cp.positionVibrationLess.z = (cp.positionVibrationLess.z ?? 0) + verticalMove;
-        cp.elevationZ = cp.positionVibrationLess.z;
 
         let rotDeg = angleDeg;
         if (cp.particleRotation) {
@@ -396,30 +351,21 @@ export function onParticleUpdate(particle, context, options) {
 
     // 3. Elevation & Depth Sorting
     if (cp.isElevationManage) {
-        particle.elevation = cp.elevationZ / Utils.pixelOfDistanceConvertor();
+        particle.elevation = cp.positionVibrationLess.z / Utils.pixelOfDistanceConvertor();
         particle.sortLayer = 950;
     }
 
     // 4. Scale & Perspective Factor
     if (cp.particleSize) {
-        const baseTextureSize = { x: particle.texture.orig.width, y: particle.texture.orig.height };
+        const baseTextureSize = Vector3.build({ x: particle.texture.orig.width, y: particle.texture.orig.height });
         const size = cp.particleSize.computeValue(progress, cp.advancedVariables);
-        const px = (typeof size === "number") ? size : (size?.x ?? 10);
-        const py = (typeof size === "number") ? size : (size?.y ?? px);
-        const baseScaleX = px / baseTextureSize.x;
-        const baseScaleY = py / baseTextureSize.y;
-
+        const baseScale = Vector3.build(size).divide(baseTextureSize);
         const sizeFactor = cp.isElevationManage
-            ? Utils.handleElevationFactorForSize(cp.elevationZ)
+            ? Utils.handleElevationFactorForSize(cp.positionVibrationLess.z)
             : 1;
 
-        const finalScaleX = (sizeFactor > 0 && isFinite(sizeFactor)) ? baseScaleX * sizeFactor : baseScaleX;
-        const finalScaleY = (sizeFactor > 0 && isFinite(sizeFactor)) ? baseScaleY * sizeFactor : baseScaleY;
-        if (particle.scale?.set) {
-            particle.scale.set(finalScaleX, finalScaleY);
-        } else {
-            particle.scale = finalScaleX;
-        }
+        const finalScale = baseScale.multiply(sizeFactor);
+        particle.scale.set(finalScale.x, finalScale.y);
     }
 
     // 5. Color Tint Keyframes
@@ -433,9 +379,6 @@ export function onParticleUpdate(particle, context, options) {
         const a = cp.alpha.computeValue(progress, cp.advancedVariables);
         particle.alpha = Math.min(1, Math.max(0, typeof a === "number" ? a : 1));
     }
-
-    // Keep particle._elevationZ synced for external callers
-    particle._elevationZ = cp.elevationZ;
 }
 
 /**

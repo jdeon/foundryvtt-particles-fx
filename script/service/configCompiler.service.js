@@ -25,20 +25,6 @@ export class ConfigCompiler {
         const isElevationManage = Boolean(finalInput.isElevationManage ?? game.settings?.get(s_MODULE_ID, "activateElevation"));
         const effectiveType = finalInput.type || emissionType;
 
-        // 1. Lifetime in milliseconds
-        let lifetime;
-        let avgLifetimeMs = 3000;
-        if (Array.isArray(finalInput.particleLifetime)) {
-            const min = Math.max(50, Number(finalInput.particleLifetime[0]) || 1000);
-            const max = Math.max(min, Number(finalInput.particleLifetime[1]) || 3000);
-            lifetime = { min, max };
-            avgLifetimeMs = (min + max) / 2;
-        } else {
-            const val = Math.max(50, Number(finalInput.particleLifetime || 3000));
-            lifetime = { min: val, max: val };
-            avgLifetimeMs = val;
-        }
-
         // 2. Textures path array
         const shapeKey = (typeof finalInput.particleShape === "string" ? finalInput.particleShape.toUpperCase() : "CIRCLE");
         const texturePath = SPRITE_TEXTURE_PATHS[shapeKey] || SPRITE_TEXTURE_PATHS.CIRCLE;
@@ -48,10 +34,6 @@ export class ConfigCompiler {
         const emissionDuration = (finalInput.emissionDuration && !isNaN(finalInput.emissionDuration))
             ? Number(finalInput.emissionDuration)
             : undefined;
-
-        // 4. Fade envelope calculation
-        const fadeInMs = Math.min(avgLifetimeMs * 0.15, 300);
-        const fadeOutMs = Math.min(avgLifetimeMs * 0.25, 500);
 
         // 5. Pre-calculate target offset if aimed spray
         let targetAngleOffset;
@@ -70,7 +52,6 @@ export class ConfigCompiler {
             target: finalInput.target,
             _targetAngleOffset: targetAngleOffset,
             isElevationManage,
-            lifetimeMs: avgLifetimeMs,
             velocity: finalInput.particleVelocity,
             angle: finalInput.particleAngle,
             angleStart: finalInput.angleStart ?? finalInput.angle,
@@ -93,16 +74,14 @@ export class ConfigCompiler {
         };
 
         return {
-            mode: "effect",
+            mode: "ambiant",
             manual: true, // Manual mode: spawning is controlled directly by NativeParticlesEmitter based on spawn rate
             count: maxParticles,
-            lifetime,
+            lifetime: 3000,
             textures: [texturePath],
-            fade: { in: fadeInMs, out: fadeOutMs },
             emissionDuration,
             spawningFrequence: Number(finalInput.spawningFrequence) || 16,
             spawningNumber: Number(finalInput.spawningNumber) || 1,
-            maxParticles,
             freezeOnPause: Boolean(finalInput.freezeOnPause),
             strategyOptions,
             onSpawn: (particle) => onParticleSpawn(particle, strategyOptions),

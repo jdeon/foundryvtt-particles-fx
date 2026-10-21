@@ -85,13 +85,7 @@ export class NativeParticlesEmitter {
                     }
 
                     if (toSpawn > 0 && this.generator) {
-                        if (typeof this.generator.spawnParticles === "function") {
-                            this.generator.spawnParticles(toSpawn);
-                        } else {
-                            for (let i = 0; i < toSpawn; i++) {
-                                this.generator.spawnParticle();
-                            }
-                        }
+                        this.generator.spawnParticles(toSpawn);
                     }
                 }
             }
