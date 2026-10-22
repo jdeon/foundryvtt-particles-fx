@@ -73,6 +73,12 @@ export class ConfigCompiler {
             freezeOnPause: Boolean(finalInput.freezeOnPause)
         };
 
+        // 7. Emission mode and default area configuration
+        const isGravitate = (effectiveType === "Graviting" || effectiveType === "Gravitating" || effectiveType === "gravitate"); //TODO good wording
+        const defaultArea = isGravitate
+            ? { x: 0, y: 0, radius: Number.isNaN(finalInput.particleRadius) ? finalInput.particleRadius : 50 }
+            : { x: 0, y: 0, width: 0, height: 0 };
+
         return {
             mode: "ambiant",
             manual: true, // Manual mode: spawning is controlled directly by NativeParticlesEmitter based on spawn rate

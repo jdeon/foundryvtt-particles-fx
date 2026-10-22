@@ -173,7 +173,7 @@ export class ParticleHighlightManager {
                 halo.texture = p.sprite.texture;
             }
 
-            halo.x = p.sprite.x;
+            halo.x = p.sprite.x;//TODO be careful of scene offset
             halo.y = p.sprite.y;
             halo.rotation = p.sprite.rotation;
 

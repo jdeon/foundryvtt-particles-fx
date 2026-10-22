@@ -98,12 +98,18 @@ export function onParticleSpawn(particle, options) {
     }
 
     // Rotate spawn offset if an orientation direction exists
-    if (targetAngleDirection !== 0 && (spawnOffset.x !== 0 || spawnOffset.y !== 0)) {
-        const rotated = spawnOffset.rotateZVector(targetAngleDirection);
-        spawnOffset = new Vector3(rotated.x, rotated.y, rotated.z);
+    let effectiveSpawnOffset = spawnOffset;
+    if (targetAngleDirection !== 0 && spawnOffset && (spawnOffset.x !== 0 || spawnOffset.y !== 0)) {
+        const rotated = spawnOffset.rotateZVector ? spawnOffset.rotateZVector(targetAngleDirection) : spawnOffset;
+        effectiveSpawnOffset = new Vector3(rotated.x, rotated.y, rotated.z ?? 0);
     }
 
-    const positionVibrationLess = sourceVector.add(spawnOffset);
+    // Check if ParticleGenerator in mode: "effect" has already placed the particle
+    const hasGeneratorPosition = (typeof particle.x === "number" && typeof particle.y === "number" && !isNaN(particle.x) && !isNaN(particle.y) && (particle.x !== 0 || particle.y !== 0 || (sourceVector.x === 0 && sourceVector.y === 0)));
+    const initX = hasGeneratorPosition ? particle.x : (sourceVector.x + (effectiveSpawnOffset?.x ?? 0));
+    const initY = hasGeneratorPosition ? particle.y : (sourceVector.y + (effectiveSpawnOffset?.y ?? 0));
+    const initZ = sourceVector.z + (effectiveSpawnOffset?.z ?? 0); //TODO stop using 3 line instead of one vector
+    const positionVibrationLess = new Vector3(initX, initY, initZ);
     const targetAngleDeg = targetAngleDirection * (180 / Math.PI);
 
     // 6. Build ParticleInput instances for all animatable properties
@@ -124,7 +130,8 @@ export function onParticleSpawn(particle, options) {
         particleRiseRate.add(targetRiseRate);
     }
 
-    if (options.type === "Spraying" || !options.type) {
+    const isSprayType = (options.type === "Spraying" || options.type === "spray" || !options.type); //TODO use good wording
+    if (isSprayType) {
         if (targetAngleDeg !== 0) {
             particleAngle.add(targetAngleDeg);
             particleRotation.add(targetAngleDeg);
@@ -254,7 +261,7 @@ export function onParticleUpdate(particle, context) {
     const progress = (particle.elapsedTime / particle.lifetime);
 
     // 1. Motion Strategy using ParticleInput instances
-    if (cp.type === "Graviting" || cp.type === "Gravitating") {
+    if (cp.type === "Graviting" || cp.type === "Gravitating" || cp.type === "gravitate") {//TODO use good worfing
         const sourcePos = Utils.getSourcePosition(cp.source, cp.isElevationManage, true);
         if (!sourcePos) {
             particle.elapsedTime = particle.lifetime;

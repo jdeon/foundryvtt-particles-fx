@@ -1,6 +1,9 @@
 import ParticlesEmitter from "./particlesEmitter.js";
 import { EmittersPanel } from "./emittersPanel.js";
 import { persistEmitters } from "../service/particlesEmitter.service.js";
+import { Utils, Vector3 } from "../utils/utils.js";
+import { AdvancedVariable } from "./advancedVariable.js";
+import { ParticleInput } from "./particleInput.js";
 
 /**
  * Controller class wrapping Foundry VTT v14's native foundry.canvas.animation.ParticleGenerator
@@ -22,6 +25,7 @@ export class NativeParticlesEmitter {
         this.originalQuery = originalQuery;
         this.finalQuery = finalQuery;
         this.particleTemplate = particleTemplate;
+        this.generatorConfig = generatorConfig;
         this.destroyHooks = [];
         this.isNative = true;
 
@@ -85,7 +89,11 @@ export class NativeParticlesEmitter {
                     }
 
                     if (toSpawn > 0 && this.generator) {
-                        this.generator.spawnParticles(toSpawn);
+                        for (let i = 0; i < toSpawn; i++) {
+                            if (!this.generator) break;
+                            const spawnOptions = this._getParticleSpawnOptions();
+                            this.generator.spawnParticle(spawnOptions);
+                        }
                     }
                 }
             }
@@ -212,5 +220,91 @@ export class NativeParticlesEmitter {
         }
 
         EmittersPanel.refresh();
+    }
+
+    /**
+     * Computes spawn options (anchor and area) for an individual particle spawn.
+     * @returns {{anchor: Object|foundry.canvas.placeables.PlaceableObject, area: PIXI.Rectangle|PIXI.Circle|Object}} Particle spawn options.
+     * @private
+     */
+    _getParticleSpawnOptions() {
+        const advancedVariables = AdvancedVariable.computeAdvancedVariables(
+            this.particleTemplate?.advanced?.variables ?? this.finalQuery?.advanced?.variables
+        );
+
+        const anchor = this._resolveAnchor(advancedVariables);
+
+        const type = this.finalQuery.type;
+
+        const isGravitate = (type === "Graviting" || type === "Gravitating" || type === "gravitate"); //TODO use good wording
+
+        const area = isGravitate
+            ? this._resolveCircleArea(advancedVariables)
+            : this._resolveRectArea(advancedVariables);
+
+        return { position: { x: anchor.x + (anchor.w || anchor.width || 0) / 2, y: anchor.y + (anchor.h || anchor.height || 0) / 2 }, area };
+    }
+
+    /**
+     * Resolves the anchor object or point for an individual particle spawn.
+     * @param {Object} [advancedVariables] - Evaluated advanced variables.
+     * @returns {foundry.canvas.placeables.PlaceableObject|{x: number, y: number}} Resolved anchor.
+     * @private
+     */
+    _resolveAnchor(advancedVariables) {
+        let rawSource = Utils.getRandomValueFrom(this.finalQuery.source, advancedVariables);
+
+        if (rawSource && (rawSource instanceof foundry.canvas.placeables?.PlaceableObject || (canvas?.tokens && rawSource instanceof canvas.tokens.constructor.placeableClass))) {
+            return rawSource;
+        }
+
+        if (typeof rawSource === "string") {
+            const placeable = Utils.getPlaceableObjectById(rawSource);
+            if (placeable) return placeable;
+        }
+
+        if (rawSource && typeof rawSource.x === "number" && typeof rawSource.y === "number") {
+            return Vector3.build(rawSource);
+        }
+
+        //TODO What used ?
+        const pos = Utils.getSourcePosition(rawSource, false, false);
+        if (pos && typeof pos.x === "number" && typeof pos.y === "number") {
+            return Vector3.build(pos);
+        }
+
+        return { x: 0, y: 0 };
+    }
+
+    /**
+     * Resolves circular area for gravitate emission.
+     * @param {Object} [advancedVariables] - Evaluated advanced variables.
+     * @returns {PIXI.Circle|{x: number, y: number, radius: number}} Circular area object.
+     * @private
+     */
+    _resolveCircleArea(advancedVariables) {
+        const rawRadius = Utils.getRandomValueFrom(this.particleTemplate?.particleRadius, advancedVariables);
+        const radius = Math.max(0, Number(rawRadius) || 50);
+
+        return (typeof PIXI !== "undefined" && PIXI.Circle)
+            ? new PIXI.Circle(0, 0, radius)
+            : { x: 0, y: 0, radius };
+    }
+
+    /**
+     * Resolves rectangular area for spray emission.
+     * @param {Object} [advancedVariables] - Evaluated advanced variables.
+     * @returns {PIXI.Rectangle|{x: number, y: number, width: number, height: number}} Rectangular area object.
+     * @private
+     */
+    _resolveRectArea(advancedVariables) {
+        const explicitArea = Utils.getRandomValueFrom(this.particleTemplate?.positionSpawning, advancedVariables);
+        if (explicitArea) {
+            const width = Math.max(0, Number(explicitArea.x) || 0);
+            const height = Math.max(0, Number(explicitArea.y) || 0);
+            return new PIXI.Rectangle(0, 0, width, height)
+        }
+
+        return new PIXI.Rectangle(0, 0, 0, 0)
     }
 }
