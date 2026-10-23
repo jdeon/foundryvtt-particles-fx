@@ -77,6 +77,7 @@ export function onParticleSpawn(particle, options) {
     let targetRiseRate = 0;
 
     const rawTarget = templateProps.target?.currentValue ?? options.target;
+    const rawTarget = templateProps?.target?.currentValue ?? options.target;
     const target = Utils.getRandomValueFrom(rawTarget, advancedVariables);
     if (target) {
         const targetPos = Utils.getSourcePosition(target, isElevationManage, true);
@@ -112,18 +113,18 @@ export function onParticleSpawn(particle, options) {
     const positionVibrationLess = new Vector3(initX, initY, initZ);
     const targetAngleDeg = targetAngleDirection * (180 / Math.PI);
 
-    // 6. Build ParticleInput instances for all animatable properties
-    const particleVelocity = templateProps.particleVelocity;
-    const particleAngle = templateProps.particleAngle;
     const particleRiseRate = templateProps.particleRiseRate;
-    const particleRotation = templateProps.particleRotation;
-    const particleSize = templateProps.particleSize;
-    const particleColor = templateProps.particleColor;
-    const alpha = templateProps.alpha;
     const angularVelocity = templateProps.angularVelocity;
     const particleRadius = templateProps.particleRadius;
     const vibrationAmplitude = templateProps.vibrationAmplitude
     const vibrationFrequency = templateProps.vibrationFrequency
+    // 6. Build ParticleInput instances for non-native animatable properties
+    const particleVelocity = (options.velocity !== undefined) ? (templateProps?.particleVelocity ?? (options.velocity ? buildParticleInput("particleVelocity", options.velocity, advancedVariables) : undefined)) : undefined;
+    const particleAngle = (options.angle !== undefined) ? (templateProps?.particleAngle ?? (options.angle ? buildParticleInput("particleAngle", options.angle, advancedVariables) : undefined)) : undefined;
+    const particleRotation = (options.particleRotation !== undefined) ? (templateProps?.particleRotation ?? (options.particleRotation ? buildParticleInput("particleRotation", options.particleRotation, advancedVariables) : undefined)) : undefined;
+    const particleSize = (options.particleSize !== undefined) ? (templateProps?.particleSize ?? (options.particleSize ? buildParticleInput("particleSize", options.particleSize, advancedVariables) : undefined)) : undefined;
+    const particleColor = (options.particleColor !== undefined) ? (templateProps?.particleColor ?? (options.particleColor ? buildParticleInput("particleColor", options.particleColor, advancedVariables, 0, true) : undefined)) : undefined;
+    const alpha = (options.alpha !== undefined) ? (templateProps?.alpha ?? (options.alpha ? buildParticleInput("alpha", options.alpha, advancedVariables) : undefined)) : undefined;
 
     // 7. Apply target offsets directly to ParticleInput instances
     if (targetRiseRate !== 0 && particleRiseRate) {
@@ -222,7 +223,7 @@ export function onParticleSpawn(particle, options) {
         if (!isNaN(headingDeg)) {
             particle.rotation = headingDeg * (Math.PI / 180);
         }
-    } else {
+    } else if (cp.particleRotation) {
         const rot0 = cp.particleRotation.computeValue(0, advancedVariables);
         particle.rotation = rot0 * (Math.PI / 180);
     }
