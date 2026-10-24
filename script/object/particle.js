@@ -83,7 +83,7 @@ export class Particle {
         this.sprite.alpha = this.alpha.computeValue(lifetimeProportion, this.advancedVariables);
 
         const actualColorVector = this.particleColor.computeValue(lifetimeProportion, this.advancedVariables)
-        this.sprite.tint = Color.fromRGB([Math.floor(actualColorVector.x) / 255, Math.floor(actualColorVector.y) / 255, Math.floor(actualColorVector.z) / 255])
+        this.sprite.tint = Utils.fromRGB(actualColorVector)
 
         let vibrationAmplitudeCurrent = this.vibrationAmplitude.computeValue(lifetimeProportion, this.advancedVariables);
         let vibrationFrequencyCurrent = this.vibrationFrequency.computeValue(lifetimeProportion, this.advancedVariables);

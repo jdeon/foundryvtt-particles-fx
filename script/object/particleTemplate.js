@@ -143,7 +143,7 @@ export class ParticleTemplate {
 
         sprite.angle = angleStartInput + position.r;
 
-        sprite.tint = Color.fromRGB([Math.floor(colorStartInput.x) / 255, Math.floor(colorStartInput.y) / 255, Math.floor(colorStartInput.z) / 255])
+        sprite.tint = Utils.fromRGB(colorStartInput)
 
         return sprite;
     }

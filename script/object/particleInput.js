@@ -101,7 +101,7 @@ export class ParticleInput {
      */
     add(value) {
         if (this.currentValue && typeof this.currentValue.add === 'function') {
-            this.currentValue.add(value);
+            this.currentValue = this.currentValue.add(value);
         } else if (typeof this.currentValue === 'number') {
             this.currentValue += value;
         }
@@ -117,7 +117,7 @@ export class ParticleInput {
     multiply(value) {
 
         if (this.currentValue && typeof this.currentValue.multiply === 'function') {
-            this.currentValue.multiply(value);
+            this.currentValue = this.currentValue.multiply(value);
         } else if (typeof this.currentValue === 'number') {
             this.currentValue *= value;
         }
@@ -179,7 +179,7 @@ export class FrameParticleInput extends ParticleInput {
         const v1 = this.values[nextIndex].value;
 
         if (v0 instanceof Vector3) {
-            if (!v1 instanceof Vector3) {
+            if (!(v1 instanceof Vector3)) {
                 throw new Error(`Particule FX | ${this.propertyKey} : Keyframe only partially composed of Vector3`);
             }
             this.currentValue = v0.add(v1.minus(v0).multiply(segmentProportion));
@@ -201,7 +201,7 @@ export class FrameParticleInput extends ParticleInput {
         if (!this.values) return this;
         for (const item of this.values) {
             if (item.value && typeof item.value.add === 'function') {
-                item.value.add(value);
+                item.value = item.value.add(value);
             } else if (typeof item.value === 'number') {
                 item.value += value;
             }
@@ -218,7 +218,7 @@ export class FrameParticleInput extends ParticleInput {
         if (!this.values) return this;
         for (const item of this.values) {
             if (item.value && typeof item.value.multiply === 'function') {
-                item.value.multiply(value);
+                item.value = item.value.multiply(value);
             } else if (typeof item.value === 'number') {
                 item.value *= value;
             }
